@@ -35,6 +35,13 @@ type txQuerySimContextImpl struct {
 	blockVersion     uint32
 }
 
+func (s *txQuerySimContextImpl) GetBlockTimestamp() int64 {
+	if lastBlock, err := s.blockchainStore.GetLastBlock(); err == nil {
+		return lastBlock.Header.BlockTimestamp
+	}
+	return 0
+}
+
 type callContractResult struct {
 	contractName string
 	method       string

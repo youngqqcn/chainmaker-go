@@ -225,9 +225,14 @@ func (s *SnapshotImpl) IsSealed() bool {
 	return s.sealed
 }
 
-// get block height for current snapshot
+// GetBlockHeight returns current block height
 func (s *SnapshotImpl) GetBlockHeight() uint64 {
 	return s.blockHeight
+}
+
+// GetBlockTimestamp returns current block timestamp
+func (s *SnapshotImpl) GetBlockTimestamp() int64 {
+	return s.blockTimestamp
 }
 
 // Get Block Proposer for current snapshot

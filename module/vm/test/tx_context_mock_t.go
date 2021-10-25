@@ -151,6 +151,10 @@ type TxContextMockTest struct {
 	kvRowCache map[int32]protocol.StateIterator
 }
 
+func (s *TxContextMockTest) GetBlockTimestamp() int64 {
+	panic("implement me")
+}
+
 func (s *TxContextMockTest) GetContractByName(name string) (*commonPb.Contract, error) {
 	return utils.GetContractByName(s.Get, name)
 }

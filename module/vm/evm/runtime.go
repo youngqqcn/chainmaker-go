@@ -132,9 +132,11 @@ func (r *RuntimeInstance) Invoke(contract *commonPb.Contract, method string, byt
 	r.Contract = contract
 	r.Log.Debugf("evm runtime begin to new evm instance, tx id:%s", txId)
 	// new evm instance
-	lastBlock, _ := txSimContext.GetBlockchainStore().GetLastBlock()
+	//lastBlock, _ := txSimContext.GetBlockchainStore().GetLastBlock()
+	blockTimestamp := txSimContext.GetBlockTimestamp()
+	blockHeight := txSimContext.GetBlockHeight()
 	r.Log.Debugf("evm runtime get last block timestamp:%v, height:%d, tx id:%s",
-		lastBlock.Header.BlockTimestamp, lastBlock.Header.BlockHeight, txId)
+		blockTimestamp, blockHeight, txId)
 	externalStore := &storage.ContractStorage{Ctx: txSimContext}
 	evm := evm_go.New(evm_go.EVMParam{
 		MaxStackDepth:  protocol.EvmMaxStackDepth,
@@ -143,8 +145,8 @@ func (r *RuntimeInstance) Invoke(contract *commonPb.Contract, method string, byt
 		Context: &environment.Context{
 			Block: environment.Block{
 				Coinbase:   creatorAddress, //proposer ski
-				Timestamp:  evmutils.New(lastBlock.Header.BlockTimestamp),
-				Number:     evmutils.New(int64(lastBlock.Header.BlockHeight)), // height
+				Timestamp:  evmutils.New(blockTimestamp),
+				Number:     evmutils.New(int64(blockHeight)), // height
 				Difficulty: evmutils.New(0),
 				GasLimit:   evmutils.New(protocol.GasLimit),
 			},

@@ -206,9 +206,14 @@ func (s *txSimContextImpl) GetTxRWSet(runVmSuccess bool) *commonpb.TxRWSet {
 	return s.txRWSet
 }
 
-// Get the height of the corresponding block
+// GetBlockHeight returns current block height
 func (s *txSimContextImpl) GetBlockHeight() uint64 {
 	return s.snapshot.GetBlockHeight()
+}
+
+// GetBlockTimestamp returns current block timestamp
+func (s *txSimContextImpl) GetBlockTimestamp() int64 {
+	return s.snapshot.GetBlockTimestamp()
 }
 
 func (s *txSimContextImpl) GetBlockProposer() *acpb.Member {

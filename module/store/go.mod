@@ -4,10 +4,10 @@ go 1.15
 
 require (
 	chainmaker.org/chainmaker-go/localconf v0.0.0
-	chainmaker.org/chainmaker-go/utils v0.0.0
+	chainmaker.org/chainmaker-go/utils v0.0.0-00010101000000-000000000000 // indirect
 	chainmaker.org/chainmaker/common/v2 v2.0.0
 	chainmaker.org/chainmaker/pb-go/v2 v2.0.0
-	chainmaker.org/chainmaker/protocol/v2 v2.0.0
+	chainmaker.org/chainmaker/protocol/v2 v2.0.1-0.20211025124118-75638aac6fb5
 	github.com/emirpasic/gods v1.12.0
 	github.com/facebookgo/ensure v0.0.0-20200202191622-63f1cf65ac4c // indirect
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
@@ -18,6 +18,7 @@ require (
 	github.com/pingcap/errors v0.11.5-0.20201029093017-5a7df2af2ac7 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
+	github.com/studyzy/sqlparse v0.0.0-20210520090832-d40c792e1576 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20200815110645-5c35d600f0ca
 	github.com/tecbot/gorocksdb v0.0.0-20191217155057-f0fad39f321c
 	go.uber.org/atomic v1.7.0 // indirect

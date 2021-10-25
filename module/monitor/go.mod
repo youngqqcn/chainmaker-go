@@ -9,7 +9,6 @@ require (
 )
 
 replace (
-
 	chainmaker.org/chainmaker-go/localconf => ../conf/localconf
 	chainmaker.org/chainmaker-go/logger => ../logger
 
