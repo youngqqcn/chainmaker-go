@@ -157,6 +157,7 @@ func (r *RuntimeInstance) Invoke(contract *commonPb.Contract, method string, byt
 	contractResult.GasUsed = gasLeft - result.GasLeft
 	contractResult.Result = result.ResultData
 	contractResult.ContractEvent = r.ContractEvent
+
 	return contractResult
 }
 func contractNameDecimalToAddress(cname string) (*evmutils.Int, error) {

@@ -291,8 +291,9 @@ func (m *VmManagerImpl) invokeUserContractByRuntime(contract *commonPb.Contract,
 	txType := txContext.GetTx().Payload.TxType
 	runtimeType := contract.RuntimeType
 	m.Log.InfoDynamic(func() string {
-		return fmt.Sprintf("invoke user contract[%s], runtime:%s,method:%s, at time:%02d:%02d:%02d.%v",
-		            contract.Name, contract.RuntimeType.String(), method, time.Now().Hour(), time.Now().Minute(), time.Now().Second(), time.Now().Nanosecond()/1000)
+		return fmt.Sprintf("invoke user contract[%s], tx id:%s, runtime:%s,method:%s, at time:%02d:%02d:%02d.%v",
+		            contract.Name, txId, contract.RuntimeType.String(), method, time.Now().Hour(), time.Now().Minute(),
+					time.Now().Second(), time.Now().Nanosecond()/1000)
 	})
 	var runtimeInstance RuntimeInstance
 	var err error
@@ -373,8 +374,8 @@ func (m *VmManagerImpl) invokeUserContractByRuntime(contract *commonPb.Contract,
 	// calc the gas used by byte code
 	// gasUsed := uint64(GasPerByte * len(byteCode))
 
-	m.Log.Debugf("invoke vm, tx id:%s, tx type:%+v, contractId:%+v, method:%+v, runtime type:%+v, byte code len:%+v, params:%+v",
-		txId, txType, contract, method, runtimeType, len(byteCode), len(parameters))
+	m.Log.Debugf("invoke vm, tx id:%s, tx type:%+v, contractId:%+v, method:%+v, runtime type:%+v, " +
+		"byte code len:%+v, params:%+v", txId, txType, contract, method, runtimeType, len(byteCode), len(parameters))
 
 	// begin save point for sql
 	var dbTransaction protocol.SqlDBTransaction
