@@ -66,6 +66,7 @@ func (r *RuntimeInstance) Invoke(contract *commonPb.Contract, method string, byt
 		}
 	}()
 
+	r.Log.Debugf("evm runtime begin to process params, tx id:%s", txId)
 	// merge evm param
 	//todo sdk常量
 	params := string(parameters[protocol.ContractEvmParamKey])
@@ -95,7 +96,7 @@ func (r *RuntimeInstance) Invoke(contract *commonPb.Contract, method string, byt
 		messageData = append(byteCode, messageData...)
 		byteCode = messageData
 	}
-
+	r.Log.Debugf("evm runtime begin to get creator, sender and contract addresses, tx id:%s", txId)
 	// evmTransaction
 	creatorAddress, err := evmutils.MakeAddressFromHex(string(parameters[protocol.ContractCreatorPkParam]))
 	if err != nil {
@@ -120,6 +121,7 @@ func (r *RuntimeInstance) Invoke(contract *commonPb.Contract, method string, byt
 	if err != nil {
 		return r.errorResult(contractResult, err, "make address fail")
 	}
+	r.Log.Debugf("evm runtime begin to get code hash, tx id:%s", txId)
 	codeHash := evmutils.BytesDataToEVMIntHash(byteCode)
 	eContract := environment.Contract{
 		Address: address,
@@ -128,6 +130,7 @@ func (r *RuntimeInstance) Invoke(contract *commonPb.Contract, method string, byt
 	}
 	r.Address = address
 	r.Contract = contract
+	r.Log.Debugf("evm runtime begin to new evm instance, tx id:%s", txId)
 	// new evm instance
 	lastBlock, _ := txSimContext.GetBlockchainStore().GetLastBlock()
 	externalStore := &storage.ContractStorage{Ctx: txSimContext}
