@@ -89,13 +89,17 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 		for {
 			select {
 			case tx := <-runningTxC:
+				ts.log.Debugf("prepare to submit running task for tx id:%s", tx.Payload.GetTxId())
 				err := goRoutinePool.Submit(func() {
 					// If snapshot is sealed, no more transaction will be added into snapshot
 					if snapshot.IsSealed() {
 						return
 					}
-					ts.log.Debugf("run vm for tx id:%s", tx.Payload.GetTxId())
+
+					ts.log.Debugf("run vm start for tx id:%s", tx.Payload.GetTxId())
 					txSimContext := NewTxSimContext(ts.VmManager, snapshot, tx, block.Header.BlockVersion)
+					ts.log.Debugf("new tx simulate context finished, tx id:%s", tx.Payload.GetTxId())
+
 					runVmSuccess := true
 					var txResult *commonpb.Result
 					var err error
@@ -108,20 +112,26 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 						runVmSuccess = false
 						tx.Result = txResult
 						txSimContext.SetTxResult(txResult)
-						ts.log.Errorf("failed to run vm for tx id:%s during schedule, tx result:%+v, error:%+v", tx.Payload.GetTxId(), txResult, err)
+						ts.log.Errorf("failed to run vm for tx id:%s during schedule, tx result:%+v, error:%+v",
+							tx.Payload.GetTxId(), txResult, err)
 					} else {
 						tx.Result = txResult
 						txSimContext.SetTxResult(txResult)
 					}
+
+					ts.log.Debugf("run vm finished, tx:%s, runVmSuccess:%v", tx.Payload.TxId, runVmSuccess)
 					applyResult, applySize := snapshot.ApplyTxSimContext(txSimContext, runVmSuccess)
 					if !applyResult {
 						runningTxC <- tx
+						ts.log.Debugf("apply to snapshot failed, tx id:%s, result:%+v, apply count:%d",
+							tx.Payload.GetTxId(), txResult, applySize)
 					} else {
 						if localconf.ChainMakerConfig.MonitorConfig.Enabled {
 							elapsed := time.Since(start)
 							ts.metricVMRunTime.WithLabelValues(tx.Payload.ChainId).Observe(elapsed.Seconds())
 						}
-						ts.log.Debugf("apply to snapshot tx id:%s, result:%+v, apply count:%d", tx.Payload.GetTxId(), txResult, applySize)
+						ts.log.Debugf("apply to snapshot success, tx id:%s, result:%+v, apply count:%d",
+							tx.Payload.GetTxId(), txResult, applySize)
 					}
 					// If all transactions have been successfully added to dag
 					if applySize >= txBatchSize {
@@ -129,7 +139,8 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 					}
 				})
 				if err != nil {
-					ts.log.Warnf("failed to submit tx id %s during schedule, %+v", tx.Payload.GetTxId(), err)
+					ts.log.Warnf("failed to submit running task, tx id:%s during schedule, %+v",
+						tx.Payload.GetTxId(), err)
 				}
 			case <-timeoutC:
 				ts.scheduleFinishC <- true
@@ -160,7 +171,7 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 	block.Dag = snapshot.BuildDAG(ts.chainConf.ChainConfig().Contract.EnableSqlSupport)
 	block.Txs = snapshot.GetTxTable()
 	timeCostB := time.Since(startTime)
-	ts.log.Infof("schedule tx batch end, success %d, time used %v, time used (dag include) %v ",
+	ts.log.Infof("schedule tx batch end, success %d, time used(without dag) %v, time used (dag include) %v ",
 		len(block.Dag.Vertexes), timeCostA, timeCostB)
 	txRWSetTable := snapshot.GetTxRWSetTable()
 	for _, txRWSet := range txRWSetTable {
@@ -230,10 +241,15 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 			select {
 			case txIndex := <-runningTxC:
 				tx := txMapping[txIndex]
+				ts.log.Debugf("simulate with dag, prepare to submit running task for tx id:%s",
+					tx.Payload.GetTxId())
 				err := goRoutinePool.Submit(func() {
-					timeStr1 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(), time.Now().Second(), time.Now().Nanosecond()/1000)
-					ts.log.Debugf("run vm with dag for tx id %s at time: %s", tx.Payload.GetTxId(), timeStr1)
+					timeStr1 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(),
+						time.Now().Second(), time.Now().Nanosecond()/1000)
+					ts.log.Debugf("run vm with dag start for tx id %s at time: %s", tx.Payload.GetTxId(),
+						timeStr1)
 					txSimContext := NewTxSimContext(ts.VmManager, snapshot, tx, block.Header.BlockVersion)
+					ts.log.Debugf("new tx simulate context finished, tx id:%s", tx.Payload.GetTxId())
 					runVmSuccess := true
 					var txResult *commonpb.Result
 					var err error
@@ -241,19 +257,21 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 					if txResult, err = ts.runVM(tx, txSimContext); err != nil {
 						runVmSuccess = false
 						txSimContext.SetTxResult(txResult)
-						ts.log.Errorf("failed to run vm for tx id:%s during simulate with dag, tx result:%+v, error:%+v", tx.Payload.GetTxId(), txResult, err)
+						ts.log.Errorf("failed to run vm for tx id:%s during simulate with dag, " +
+							"tx result:%+v, error:%+v", tx.Payload.GetTxId(), txResult, err)
 					} else {
-						//ts.log.Debugf("success to run vm for tx id:%s during simulate with dag, tx result:%+v", tx.Payload.GetTxId(), txResult)
 						txSimContext.SetTxResult(txResult)
 					}
-
+					ts.log.Debugf("run vm finished, tx:%s, runVmSuccess:%v", tx.Payload.TxId, runVmSuccess)
 					applyResult, applySize := snapshot.ApplyTxSimContext(txSimContext, runVmSuccess)
 					if !applyResult {
-						ts.log.Debugf("failed to apply according to dag with tx %s ", tx.Payload.TxId)
+						ts.log.Debugf("failed to apply snapshot for tx id:%s ", tx.Payload.TxId)
 						runningTxC <- txIndex
 					} else {
-						timeStr2 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(), time.Now().Second(), time.Now().Nanosecond()/1000)
-						ts.log.Debugf("apply to snapshot tx id:%s, result:%+v, apply count:%d, at time:%s", tx.Payload.GetTxId(), txResult, applySize, timeStr2)
+						timeStr2 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(),
+							time.Now().Second(), time.Now().Nanosecond()/1000)
+						ts.log.Debugf("apply to snapshot tx id:%s, result:%+v, apply count:%d, at time:%s",
+							tx.Payload.GetTxId(), txResult, applySize, timeStr2)
 						doneTxC <- txIndex
 					}
 					// If all transactions in current batch have been successfully added to dag
@@ -262,14 +280,17 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 					}
 				})
 				if err != nil {
-					ts.log.Warnf("failed to submit tx id %s during simulate with dag, %+v", tx.Payload.GetTxId(), err)
+					ts.log.Warnf("failed to submit tx id %s during simulate with dag, %+v",
+						tx.Payload.GetTxId(), err)
 				}
 			case doneTxIndex := <-doneTxC:
 				ts.shrinkDag(doneTxIndex, dagRemain)
 
 				txIndexBatch := ts.popNextTxBatchFromDag(dagRemain)
-				timeStr3 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(), time.Now().Second(), time.Now().Nanosecond()/1000)
-				ts.log.Debugf("block [%d] schedule with dag, pop next tx index batch size:%d, at time: %s", block.Header.BlockHeight, len(txIndexBatch), timeStr3)
+				timeStr3 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(),
+					time.Now().Second(), time.Now().Nanosecond()/1000)
+				ts.log.Debugf("block [%d] schedule with dag, pop next tx index batch size:%d, at time: %s",
+					block.Header.BlockHeight, len(txIndexBatch), timeStr3)
 				for _, tx := range txIndexBatch {
 					runningTxC <- tx
 				}
@@ -286,7 +307,8 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 	}()
 
 	txIndexBatch := ts.popNextTxBatchFromDag(dagRemain)
-	timeStr4 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(), time.Now().Second(), time.Now().Nanosecond()/1000)
+	timeStr4 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(), time.Now().Second(),
+		time.Now().Nanosecond()/1000)
 	ts.log.Debugf("block [%d] schedule with dag first batch size:%d, total batch size:%d, at time:%s",
 	      block.Header.BlockHeight, len(txIndexBatch), txBatchSize, timeStr4)
 
@@ -302,7 +324,6 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 	ts.log.Infof("simulate with dag end, size %d, time used %+v", len(block.Txs), time.Since(startTime))
 
 	// Return the read and write set after the scheduled execution
-
 	for _, txRWSet := range snapshot.GetTxRWSetTable() {
 		if txRWSet != nil {
 			txRWSetMap[txRWSet.TxId] = txRWSet

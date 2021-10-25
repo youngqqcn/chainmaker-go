@@ -177,7 +177,7 @@ func (s *SnapshotImpl) ApplyTxSimContext(cache protocol.TxSimContext, runVmSucce
 		finalKey := constructKey(txRead.ContractName, txRead.Key)
 		if sv, ok := s.writeTable[finalKey]; ok {
 			if sv.seq >= txExecSeq {
-				//log.Debugf("Key Conflicted %+v-%+v", sv.seq, txExecSeq)
+				log.Debugf("Key Conflicted %+v-%+v", sv.seq, txExecSeq)
 				return false, len(s.txTable)
 			}
 		}
