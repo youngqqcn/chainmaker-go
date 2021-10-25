@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
+	"time"
 
 	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
 
@@ -290,8 +291,8 @@ func (m *VmManagerImpl) invokeUserContractByRuntime(contract *commonPb.Contract,
 	txType := txContext.GetTx().Payload.TxType
 	runtimeType := contract.RuntimeType
 	m.Log.InfoDynamic(func() string {
-		return fmt.Sprintf("invoke user contract[%s], runtime:%s,method:%s",
-			contract.Name, contract.RuntimeType.String(), method)
+		return fmt.Sprintf("invoke user contract[%s], runtime:%s,method:%s, at time:%02d:%02d:%02d.%v",
+		            contract.Name, contract.RuntimeType.String(), method, time.Now().Hour(), time.Now().Minute(), time.Now().Second(), time.Now().Nanosecond()/1000)
 	})
 	var runtimeInstance RuntimeInstance
 	var err error

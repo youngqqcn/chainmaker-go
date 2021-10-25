@@ -231,7 +231,8 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 			case txIndex := <-runningTxC:
 				tx := txMapping[txIndex]
 				err := goRoutinePool.Submit(func() {
-					ts.log.Debugf("run vm with dag for tx id %s", tx.Payload.GetTxId())
+					timeStr1 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(), time.Now().Second(), time.Now().Nanosecond()/1000)
+					ts.log.Debugf("run vm with dag for tx id %s at time: %s", tx.Payload.GetTxId(), timeStr1)
 					txSimContext := NewTxSimContext(ts.VmManager, snapshot, tx, block.Header.BlockVersion)
 					runVmSuccess := true
 					var txResult *commonpb.Result
@@ -251,7 +252,8 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 						ts.log.Debugf("failed to apply according to dag with tx %s ", tx.Payload.TxId)
 						runningTxC <- txIndex
 					} else {
-						ts.log.Debugf("apply to snapshot tx id:%s, result:%+v, apply count:%d", tx.Payload.GetTxId(), txResult, applySize)
+						timeStr2 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(), time.Now().Second(), time.Now().Nanosecond()/1000)
+						ts.log.Debugf("apply to snapshot tx id:%s, result:%+v, apply count:%d, at time:%s", tx.Payload.GetTxId(), txResult, applySize, timeStr2)
 						doneTxC <- txIndex
 					}
 					// If all transactions in current batch have been successfully added to dag
@@ -266,7 +268,8 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 				ts.shrinkDag(doneTxIndex, dagRemain)
 
 				txIndexBatch := ts.popNextTxBatchFromDag(dagRemain)
-				//ts.log.Debugf("pop next tx index batch %v", txIndexBatch)
+				timeStr3 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(), time.Now().Second(), time.Now().Nanosecond()/1000)
+				ts.log.Debugf("block [%d] schedule with dag, pop next tx index batch size:%d, at time: %s", block.Header.BlockHeight, len(txIndexBatch), timeStr3)
 				for _, tx := range txIndexBatch {
 					runningTxC <- tx
 				}
@@ -283,6 +286,9 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 	}()
 
 	txIndexBatch := ts.popNextTxBatchFromDag(dagRemain)
+	timeStr4 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(), time.Now().Second(), time.Now().Nanosecond()/1000)
+	ts.log.Debugf("block [%d] schedule with dag first batch size:%d, total batch size:%d, at time:%s",
+	      block.Header.BlockHeight, len(txIndexBatch), txBatchSize, timeStr4)
 
 	go func() {
 		for _, tx := range txIndexBatch {
