@@ -33,9 +33,18 @@ type RuntimeInstance struct {
 	ContractEvent []*commonPb.ContractEvent
 }
 
+// init just load instructions once
+func init() {
+	// init memory and env
+	evm_go.Load()
+	// execute method
+}
+
 // Invoke contract by call vm, implement protocol.RuntimeInstance
 func (r *RuntimeInstance) Invoke(contract *commonPb.Contract, method string, byteCode []byte, parameters map[string][]byte,
 	txSimContext protocol.TxSimContext, gasUsed uint64) (contractResult *commonPb.ContractResult) {
+
+	r.Log.Debugf("evm runtime start to run contract, tx id:%s", contract.Name)
 	txId := txSimContext.GetTx().Payload.TxId
 
 	// contract response
@@ -146,13 +155,15 @@ func (r *RuntimeInstance) Invoke(contract *commonPb.Contract, method string, byt
 		},
 	})
 	// init memory and env
-	evm_go.Load()
+	//evm_go.Load()
 	// execute method
+	r.Log.Debugf("evm runtime start to execute contract, tx id:%s, isDeploy:%v", contract.Name, isDeploy)
 	result, err := evm.ExecuteContract(isDeploy)
 	if err != nil {
+		r.Log.Errorf("evm runtime execute contract failed, tx id:%s, error:%v", contract.Name, err)
 		return r.errorResult(contractResult, err, "failed to execute evm contract")
 	}
-
+	r.Log.Debugf("evm runtime execute contract finished, tx id:%s, isDeploy:%v", contract.Name, isDeploy)
 	contractResult.Code = 0
 	contractResult.GasUsed = gasLeft - result.GasLeft
 	contractResult.Result = result.ResultData
