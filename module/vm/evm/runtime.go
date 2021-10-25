@@ -133,6 +133,8 @@ func (r *RuntimeInstance) Invoke(contract *commonPb.Contract, method string, byt
 	r.Log.Debugf("evm runtime begin to new evm instance, tx id:%s", txId)
 	// new evm instance
 	lastBlock, _ := txSimContext.GetBlockchainStore().GetLastBlock()
+	r.Log.Debugf("evm runtime get last block timestamp:%v, height:%d, tx id:%s",
+		lastBlock.Header.BlockTimestamp, lastBlock.Header.BlockHeight, txId)
 	externalStore := &storage.ContractStorage{Ctx: txSimContext}
 	evm := evm_go.New(evm_go.EVMParam{
 		MaxStackDepth:  protocol.EvmMaxStackDepth,
