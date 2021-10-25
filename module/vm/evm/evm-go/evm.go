@@ -166,6 +166,10 @@ func (e *EVM) ExecuteContract(isCreate bool) (ExecuteResult, error) {
 	return result, err
 }
 
+func (e *EVM) GetPcCountAndTimeUsed() (uint64, int64) {
+	return e.instructions.GetPcCountAndTimeUsed()
+}
+
 func (e *EVM) getClosureDefaultEVM(param instructions.ClosureParam) *EVM {
 	newEVM := New(EVMParam{
 		MaxStackDepth:  1024,

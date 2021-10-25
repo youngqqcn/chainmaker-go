@@ -44,9 +44,8 @@ func init() {
 func (r *RuntimeInstance) Invoke(contract *commonPb.Contract, method string, byteCode []byte, parameters map[string][]byte,
 	txSimContext protocol.TxSimContext, gasUsed uint64) (contractResult *commonPb.ContractResult) {
 
-	r.Log.Debugf("evm runtime start to run contract, tx id:%s", contract.Name)
 	txId := txSimContext.GetTx().Payload.TxId
-
+	r.Log.Debugf("evm runtime start to run contract, tx id:%s", txId)
 	// contract response
 	contractResult = &commonPb.ContractResult{
 		Code:    uint32(1),
@@ -157,13 +156,16 @@ func (r *RuntimeInstance) Invoke(contract *commonPb.Contract, method string, byt
 	// init memory and env
 	//evm_go.Load()
 	// execute method
-	r.Log.Debugf("evm runtime start to execute contract, tx id:%s, isDeploy:%v", contract.Name, isDeploy)
+	r.Log.Debugf("evm runtime start to execute contract, tx id:%s, isDeploy:%v", txId, isDeploy)
 	result, err := evm.ExecuteContract(isDeploy)
+	pcCount, timeUsed := evm.GetPcCountAndTimeUsed()
 	if err != nil {
-		r.Log.Errorf("evm runtime execute contract failed, tx id:%s, error:%v", contract.Name, err)
+		r.Log.Errorf("evm runtime execute contract failed, tx id:%s, pc count:%v, time used:%v, error:%v",
+			txId, pcCount, timeUsed, err)
 		return r.errorResult(contractResult, err, "failed to execute evm contract")
 	}
-	r.Log.Debugf("evm runtime execute contract finished, tx id:%s, isDeploy:%v", contract.Name, isDeploy)
+	r.Log.Debugf("evm runtime execute contract finished, tx id:%s, pc count:%v, time used:%v, isDeploy:%v",
+		txId, pcCount, timeUsed, isDeploy)
 	contractResult.Code = 0
 	contractResult.GasUsed = gasLeft - result.GasLeft
 	contractResult.Result = result.ResultData

@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"reflect"
 	"runtime"
+	"time"
 
 	"chainmaker.org/chainmaker-go/evm/evm-go/environment"
 	"chainmaker.org/chainmaker-go/evm/evm-go/memory"
@@ -85,6 +86,8 @@ type instructionsContext struct {
 	vm interface{}
 
 	pc           uint64
+	pcCount      uint64
+	timeUsed     int64
 	readOnly     bool
 	gasSetting   *GasSetting
 	lastReturn   []byte
@@ -109,6 +112,7 @@ type opCodeInstruction struct {
 
 type IInstructions interface {
 	ExecuteContract(isCreate bool) ([]byte, uint64, []byte, []byte, error)
+	GetPcCountAndTimeUsed() (uint64, int64)
 	SetGasLimit(uint64)
 	GetGasLeft() uint64
 	SetReadOnly()
@@ -138,6 +142,10 @@ func (i *instructionsContext) memoryGasCostAndMalloc(offset *evmutils.Int, size 
 	return o, s, gasLeft, err
 }
 
+func (i *instructionsContext) GetPcCountAndTimeUsed() (uint64, int64) {
+	return i.pcCount, i.timeUsed
+}
+
 func (i *instructionsContext) SetGasLimit(gasLimit uint64) {
 	i.gasRemaining.SetUint64(gasLimit)
 }
@@ -158,8 +166,10 @@ func (i *instructionsContext) ExitOpCode() opcodes.OpCode {
 	return i.exitOpCode
 }
 
-// ExecuteContract return execresult, gas, byteCodeHead, byteCodeBody, err
+// ExecuteContract return execresult, gas, byteCodeHead, byteCodeBody, instruction count, err
 func (i *instructionsContext) ExecuteContract(isCreate bool) ([]byte, uint64, []byte, []byte, error) {
+	i.timeUsed = 0
+	i.pcCount = 0
 	i.pc = 0
 	contract := i.environment.Contract
 
@@ -171,8 +181,9 @@ func (i *instructionsContext) ExecuteContract(isCreate bool) ([]byte, uint64, []
 	var err error = nil
 	var byteCodeHead []byte
 	var byteCodeBody []byte
-
+	startTime := time.Now()
 	for {
+		i.pcCount++
 		opCode := contract.Code[i.pc]
 
 		instruction := instructionTable[opCode]
@@ -227,7 +238,7 @@ func (i *instructionsContext) ExecuteContract(isCreate bool) ([]byte, uint64, []
 			break
 		}
 	}
-
+	i.timeUsed = time.Since(startTime).Microseconds()
 	return ret, i.gasRemaining.Uint64(), byteCodeHead, byteCodeBody, err
 }
 
