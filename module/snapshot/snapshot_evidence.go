@@ -81,64 +81,11 @@ func (s *SnapshotEvidence) GetKey(txExecSeq int, contractName string, key []byte
 
 // After the read-write set is generated, add TxSimContext to the snapshot
 // return if apply successfully or not, and current applied tx num
-func (s *SnapshotEvidence) ApplyTxSimContext(cache protocol.TxSimContext, runVmSuccess bool) (bool, int) {
+func (s *SnapshotEvidence) ApplyTxSimContext(txSimContext protocol.TxSimContext, runVmSuccess bool) (bool, int) {
 	if s.delegate == nil {
 		return false, -1
 	}
-	if s.delegate.IsSealed() {
-		return false, s.delegate.GetSnapshotSize()
-	}
-
-	s.delegate.lock.Lock()
-	defer s.delegate.lock.Unlock()
-
-	tx := cache.GetTx()
-	txExecSeq := cache.GetTxExecSeq()
-	var txRWSet *commonPb.TxRWSet
-	var txResult *commonPb.Result
-
-	// Only when the virtual machine is running normally can the read-write set be saved
-	txRWSet = cache.GetTxRWSet(runVmSuccess)
-	txResult = cache.GetTxResult()
-
-	if txExecSeq >= len(s.delegate.txTable) {
-		s.apply(tx, txRWSet, txResult)
-		return true, len(s.delegate.txTable)
-	}
-
-	s.apply(tx, txRWSet, txResult)
-	return true, len(s.delegate.txTable)
-}
-
-// After the read-write set is generated, add TxSimContext to the snapshot
-func (s *SnapshotEvidence) apply(tx *commonPb.Transaction, txRWSet *commonPb.TxRWSet, txResult *commonPb.Result) {
-	// Append to read table
-	applySeq := len(s.delegate.txTable)
-	for _, txRead := range txRWSet.TxReads {
-		finalKey := constructKey(txRead.ContractName, txRead.Key)
-		s.delegate.readTable[finalKey] = &sv{
-			seq:   applySeq,
-			value: txRead.Value,
-		}
-	}
-
-	// Append to write table
-	for _, txWrite := range txRWSet.TxWrites {
-		finalKey := constructKey(txWrite.ContractName, txWrite.Key)
-		s.delegate.writeTable[finalKey] = &sv{
-			seq:   applySeq,
-			value: txWrite.Value,
-		}
-	}
-
-	// Append to read-write-set table
-	s.delegate.txRWSetTable = append(s.delegate.txRWSetTable, txRWSet)
-
-	// Add to tx result map
-	s.delegate.txResultMap[tx.Payload.TxId] = txResult
-
-	// Add to transaction table
-	s.delegate.txTable = append(s.delegate.txTable, tx)
+	return s.delegate.ApplyTxSimContext(txSimContext, runVmSuccess)
 }
 
 // check if snapshot is sealed

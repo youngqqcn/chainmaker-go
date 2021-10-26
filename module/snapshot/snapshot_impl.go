@@ -122,19 +122,16 @@ func (s *SnapshotImpl) GetKey(txExecSeq int, contractName string, key []byte) ([
 
 	s.lock.RLock()
 	defer s.lock.RUnlock()
+	if txExecSeq > snapshotSize || txExecSeq < 0 {
+		txExecSeq = snapshotSize
+	}
+	finalKey := constructKey(contractName, key)
+	if sv, ok := s.writeTable[finalKey]; ok {
+		return sv.value, nil
+	}
 
-	{
-		if txExecSeq > snapshotSize || txExecSeq < 0 {
-			txExecSeq = snapshotSize
-		}
-		finalKey := constructKey(contractName, key)
-		if sv, ok := s.writeTable[finalKey]; ok {
-			return sv.value, nil
-		}
-
-		if sv, ok := s.readTable[finalKey]; ok {
-			return sv.value, nil
-		}
+	if sv, ok := s.readTable[finalKey]; ok {
+		return sv.value, nil
 	}
 
 	iter := s.preSnapshot
@@ -167,17 +164,13 @@ func (s *SnapshotImpl) ApplyTxSimContext(txSimContext protocol.TxSimContext, run
 	txRWSet = txSimContext.GetTxRWSet(runVmSuccess)
 	txResult = txSimContext.GetTxResult()
 
-	if txExecSeq >= len(s.txTable) {
-		s.apply(tx, txRWSet, txResult)
-		return true, len(s.txTable)
-	}
-
-	// Check whether the dependent state has been modified during the run
-	for _, txRead := range txRWSet.TxReads {
-		finalKey := constructKey(txRead.ContractName, txRead.Key)
-		if sv, ok := s.writeTable[finalKey]; ok {
-			if sv.seq >= txExecSeq {
-				log.Debugf("Key Conflicted %+v-%+v", sv.seq, txExecSeq)
+	if txExecSeq < len(s.txTable) {
+		// Check whether the dependent state has been modified during the running it
+		for _, txRead := range txRWSet.TxReads {
+			finalKey := constructKey(txRead.ContractName, txRead.Key)
+			sv, ok := s.writeTable[finalKey]
+			if ok && sv.seq >= txExecSeq {
+				log.Debugf("Key Conflicted %+v-%+v, tx id:%s", sv.seq, txExecSeq, tx.Payload.TxId)
 				return false, len(s.txTable)
 			}
 		}
