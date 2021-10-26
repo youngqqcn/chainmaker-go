@@ -45,6 +45,7 @@ type SnapshotImpl struct {
 
 	preSnapshot protocol.Snapshot
 
+	// applied data, please lock it before using
 	txRWSetTable []*commonPb.TxRWSet
 	txTable      []*commonPb.Transaction
 	txResultMap  map[string]*commonPb.Result
@@ -148,9 +149,8 @@ func (s *SnapshotImpl) GetKey(txExecSeq int, contractName string, key []byte) ([
 	return s.blockchainStore.ReadObject(contractName, key)
 }
 
-// After the read-write set is generated, add TxSimContext to the snapshot
-// return if apply successfully or not, and current applied tx num
-func (s *SnapshotImpl) ApplyTxSimContext(cache protocol.TxSimContext, runVmSuccess bool) (bool, int) {
+// ApplyTxSimContext add TxSimContext to the snapshot, return current applied tx num whether success of not
+func (s *SnapshotImpl) ApplyTxSimContext(txSimContext protocol.TxSimContext, runVmSuccess bool) (bool, int) {
 	if s.IsSealed() {
 		return false, s.GetSnapshotSize()
 	}
@@ -158,14 +158,14 @@ func (s *SnapshotImpl) ApplyTxSimContext(cache protocol.TxSimContext, runVmSucce
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
-	tx := cache.GetTx()
-	txExecSeq := cache.GetTxExecSeq()
+	tx := txSimContext.GetTx()
+	txExecSeq := txSimContext.GetTxExecSeq()
 	var txRWSet *commonPb.TxRWSet
 	var txResult *commonPb.Result
 
 	// Only when the virtual machine is running normally can the read-write set be saved, or write fake conflicted key
-	txRWSet = cache.GetTxRWSet(runVmSuccess)
-	txResult = cache.GetTxResult()
+	txRWSet = txSimContext.GetTxRWSet(runVmSuccess)
+	txResult = txSimContext.GetTxResult()
 
 	if txExecSeq >= len(s.txTable) {
 		s.apply(tx, txRWSet, txResult)
