@@ -31,7 +31,7 @@ type sv struct {
 }
 
 type SnapshotImpl struct {
-	lock            sync.Mutex
+	lock            sync.RWMutex
 	blockchainStore protocol.BlockchainStore
 
 	// If the snapshot has been sealed, the results of subsequent vm execution will not be added to the snapshot
@@ -66,8 +66,8 @@ func (s *SnapshotImpl) GetBlockchainStore() protocol.BlockchainStore {
 }
 
 func (s *SnapshotImpl) GetSnapshotSize() int {
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 	return len(s.txTable)
 }
 
@@ -120,8 +120,8 @@ func (s *SnapshotImpl) GetKey(txExecSeq int, contractName string, key []byte) ([
 	// get key before txExecSeq
 	snapshotSize := s.GetSnapshotSize()
 
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 
 	{
 		if txExecSeq > snapshotSize || txExecSeq < 0 {
@@ -220,8 +220,8 @@ func (s *SnapshotImpl) apply(tx *commonPb.Transaction, txRWSet *commonPb.TxRWSet
 
 // check if snapshot is sealed
 func (s *SnapshotImpl) IsSealed() bool {
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 	return s.sealed
 }
 
@@ -318,8 +318,8 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 	if !s.IsSealed() {
 		log.Warnf("you need to execute Seal before you can build DAG of snapshot with height %d", s.blockHeight)
 	}
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 
 	txCount := len(s.txTable)
 	log.Debugf("start building DAG for block %d with %d txs", s.blockHeight, txCount)
