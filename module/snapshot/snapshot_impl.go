@@ -11,9 +11,8 @@ import (
 	"fmt"
 	"sync"
 
-	"chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
-
 	"chainmaker.org/chainmaker/localconf/v2"
+	"chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 
 	"chainmaker.org/chainmaker/common/v2/bitmap"
@@ -50,6 +49,7 @@ type SnapshotImpl struct {
 	txResultMap  map[string]*commonPb.Result
 	readTable    map[string]*sv
 	writeTable   map[string]*sv
+	log          protocol.Logger
 }
 
 func (s *SnapshotImpl) GetPreSnapshot() protocol.Snapshot {
@@ -81,7 +81,7 @@ func (s *SnapshotImpl) GetTxResultMap() map[string]*commonPb.Result {
 
 func (s *SnapshotImpl) GetTxRWSetTable() []*commonPb.TxRWSet {
 	if localconf.ChainMakerConfig.SchedulerConfig.RWSetLog {
-		log.DebugDynamic(func() string {
+		s.log.DebugDynamic(func() string {
 
 			info := "rwset: "
 			for i, txRWSet := range s.txRWSetTable {
@@ -312,13 +312,13 @@ func (s *SnapshotImpl) buildCumulativeBitmap(readBitmap []*bitmap.Bitmap,
 // transactions will affect the dependence of the current transaction
 func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 	if !s.IsSealed() {
-		log.Warnf("you need to execute Seal before you can build DAG of snapshot with height %d", s.blockHeight)
+		s.log.Warnf("you need to execute Seal before you can build DAG of snapshot with height %d", s.blockHeight)
 	}
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
 	txCount := len(s.txTable)
-	log.Debugf("start building DAG for block %d with %d txs", s.blockHeight, txCount)
+	s.log.Debugf("start building DAG for block %d with %d txs", s.blockHeight, txCount)
 
 	// build read-write bitmap for all transactions
 	readBitmaps, writeBitmaps := s.buildRWBitmaps()
@@ -376,7 +376,7 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 			}
 		}
 	}
-	log.Debugf("build DAG for block %d finished", s.blockHeight)
+	s.log.Debugf("build DAG for block %d finished", s.blockHeight)
 	return dag
 }
 

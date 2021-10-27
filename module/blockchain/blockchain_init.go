@@ -556,12 +556,13 @@ func (bc *Blockchain) initCore() (err error) {
 		bc.log.Infof("core engine module existed, ignore.")
 		return
 	}
+	var log = logger.GetLogger(logger.MODULE_SNAPSHOT)
 	// create snapshot manager
 	var snapshotFactory snapshot.Factory
 	if bc.chainConf.ChainConfig().Snapshot != nil && bc.chainConf.ChainConfig().Snapshot.EnableEvidence {
-		bc.snapshotManager = snapshotFactory.NewSnapshotEvidenceMgr(bc.store)
+		bc.snapshotManager = snapshotFactory.NewSnapshotEvidenceMgr(bc.store, log)
 	} else {
-		bc.snapshotManager = snapshotFactory.NewSnapshotManager(bc.store)
+		bc.snapshotManager = snapshotFactory.NewSnapshotManager(bc.store, log)
 	}
 
 	// init coreEngine module
