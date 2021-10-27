@@ -72,6 +72,10 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 	defer ts.lock.Unlock()
 	txRWSetMap := make(map[string]*commonpb.TxRWSet)
 	txBatchSize := len(txBatch)
+	if txBatchSize == 0 {
+		ts.log.Error("there are no txs to schedule")
+		return nil, nil, fmt.Errorf("there are no txs to schedule")
+	}
 	runningTxC := make(chan *commonpb.Transaction, txBatchSize)
 	timeoutC := time.After(ScheduleTimeout * time.Second)
 	finishC := make(chan bool)
@@ -85,6 +89,14 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 	}
 	defer goRoutinePool.Release()
 	startTime := time.Now()
+
+	// Put the pending transaction into the running queue
+	go func() {
+		for _, tx := range txBatch {
+			runningTxC <- tx
+		}
+	}()
+
 	go func() {
 		for {
 			select {
@@ -153,16 +165,7 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 			}
 		}
 	}()
-	// Put the pending transaction into the running queue
-	go func() {
-		if len(txBatch) > 0 {
-			for _, tx := range txBatch {
-				runningTxC <- tx
-			}
-		} else {
-			finishC <- true
-		}
-	}()
+
 	// Wait for schedule finish signal
 	<-ts.scheduleFinishC
 	// Build DAG from read-write table
@@ -222,6 +225,10 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 	}
 
 	txBatchSize := len(block.Dag.Vertexes)
+	if txBatchSize == 0 {
+		ts.log.Error("found empty block when simulating txs")
+		return nil, nil, fmt.Errorf("found empty block when simulating txs")
+	}
 	runningTxC := make(chan int, txBatchSize)
 	doneTxC := make(chan int, txBatchSize)
 
@@ -235,6 +242,18 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 		return nil, nil, err
 	}
 	defer goRoutinePool.Release()
+
+	txIndexBatch := ts.popNextTxBatchFromDag(dagRemain)
+	timeStr4 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(), time.Now().Second(),
+		time.Now().Nanosecond()/1000)
+	ts.log.Debugf("block [%d] schedule with dag first batch size:%d, total batch size:%d, at time:%s",
+		block.Header.BlockHeight, len(txIndexBatch), txBatchSize, timeStr4)
+
+	go func() {
+		for _, tx := range txIndexBatch {
+			runningTxC <- tx
+		}
+	}()
 
 	go func() {
 		for {
@@ -257,7 +276,7 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 					if txResult, err = ts.runVM(tx, txSimContext); err != nil {
 						runVmSuccess = false
 						txSimContext.SetTxResult(txResult)
-						ts.log.Errorf("failed to run vm for tx id:%s during simulate with dag, " +
+						ts.log.Errorf("failed to run vm for tx id:%s during simulate with dag, "+
 							"tx result:%+v, error:%+v", tx.Payload.GetTxId(), txResult, err)
 					} else {
 						txSimContext.SetTxResult(txResult)
@@ -286,12 +305,12 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 			case doneTxIndex := <-doneTxC:
 				ts.shrinkDag(doneTxIndex, dagRemain)
 
-				txIndexBatch := ts.popNextTxBatchFromDag(dagRemain)
+				txIndexBatchAfterShrink := ts.popNextTxBatchFromDag(dagRemain)
 				timeStr3 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(),
 					time.Now().Second(), time.Now().Nanosecond()/1000)
 				ts.log.Debugf("block [%d] schedule with dag, pop next tx index batch size:%d, at time: %s",
-					block.Header.BlockHeight, len(txIndexBatch), timeStr3)
-				for _, tx := range txIndexBatch {
+					block.Header.BlockHeight, len(txIndexBatchAfterShrink), timeStr3)
+				for _, tx := range txIndexBatchAfterShrink {
 					runningTxC <- tx
 				}
 			case <-finishC:
@@ -303,18 +322,6 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 				ts.scheduleFinishC <- true
 				return
 			}
-		}
-	}()
-
-	txIndexBatch := ts.popNextTxBatchFromDag(dagRemain)
-	timeStr4 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(), time.Now().Second(),
-		time.Now().Nanosecond()/1000)
-	ts.log.Debugf("block [%d] schedule with dag first batch size:%d, total batch size:%d, at time:%s",
-	      block.Header.BlockHeight, len(txIndexBatch), txBatchSize, timeStr4)
-
-	go func() {
-		for _, tx := range txIndexBatch {
-			runningTxC <- tx
 		}
 	}()
 
