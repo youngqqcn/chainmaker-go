@@ -8,11 +8,11 @@ import (
 	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/protocol/v2/mock"
+	"chainmaker.org/chainmaker/protocol/v2/test"
 	"github.com/golang/mock/gomock"
 
 	"chainmaker.org/chainmaker/common/v2/crypto/asym"
 	"chainmaker.org/chainmaker/common/v2/helper"
-	logger2 "chainmaker.org/chainmaker/logger/v2"
 	pbac "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	"github.com/stretchr/testify/require"
 )
@@ -56,7 +56,7 @@ func TestPermissionedPKGetMemberStatus(t *testing.T) {
 	store := mock.NewMockBlockchainStore(ctl)
 	store.EXPECT().ReadObject(syscontract.SystemContract_PUBKEY_MANAGE.String(),
 		gomock.Any()).Return(nil, nil)
-	logger := logger2.GetLogger(logger2.MODULE_ACCESS)
+	logger := &test.GoLogger{}
 	ppkProvider, err := newPermissionedPkACProvider(testPermissionedPKChainConfig, testOrg1, store, logger)
 	require.Nil(t, err)
 	require.NotNil(t, ppkProvider)

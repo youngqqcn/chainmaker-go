@@ -12,7 +12,7 @@ import (
 	"sync/atomic"
 
 	commonErrors "chainmaker.org/chainmaker/common/v2/errors"
-	"chainmaker.org/chainmaker/logger/v2"
+	"chainmaker.org/chainmaker/protocol/v2"
 	"github.com/Workiva/go-datastructures/queue"
 )
 
@@ -28,7 +28,7 @@ type Routine struct {
 	name       string          // The name of the hosted service
 	handle     handleFunc      // Processing of the hosted service
 	queryState getServiceState // get state in the service
-	log        *logger.CMLogger
+	log        protocol.Logger
 
 	start int32                // The flag which detects whether the service is started
 	queue *queue.PriorityQueue // A queue to store tasks
@@ -36,7 +36,7 @@ type Routine struct {
 	stop  chan struct{}        // Notify whether the service has stopped
 }
 
-func NewRoutine(name string, handle handleFunc, queryState getServiceState, log *logger.CMLogger) *Routine {
+func NewRoutine(name string, handle handleFunc, queryState getServiceState, log protocol.Logger) *Routine {
 	return &Routine{
 		name:       name,
 		handle:     handle,

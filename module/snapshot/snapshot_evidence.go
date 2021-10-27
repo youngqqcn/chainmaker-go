@@ -18,6 +18,7 @@ import (
 
 type SnapshotEvidence struct {
 	delegate *SnapshotImpl
+	log      protocol.Logger
 }
 
 func (s *SnapshotEvidence) GetPreSnapshot() protocol.Snapshot {
@@ -176,13 +177,13 @@ func (s *SnapshotEvidence) BuildDAG(isSql bool) *commonPb.DAG {
 		return nil
 	}
 	if !s.IsSealed() {
-		log.Warnf("you need to execute Seal before you can build DAG of snapshot with height %d", s.delegate.blockHeight)
+		s.log.Warnf("you need to execute Seal before you can build DAG of snapshot with height %d", s.delegate.blockHeight)
 	}
 	s.delegate.lock.Lock()
 	defer s.delegate.lock.Unlock()
 
 	txCount := len(s.delegate.txTable)
-	log.Debugf("start building DAG(all vertexes are nil) for block %d with %d txs", s.delegate.blockHeight, txCount)
+	s.log.Debugf("start building DAG(all vertexes are nil) for block %d with %d txs", s.delegate.blockHeight, txCount)
 
 	dag := &commonPb.DAG{}
 	if txCount == 0 {
@@ -208,7 +209,7 @@ func (s *SnapshotEvidence) BuildDAG(isSql bool) *commonPb.DAG {
 			}
 		}
 	}
-	log.Debugf("build DAG for block %d finished", s.delegate.blockHeight)
+	s.log.Debugf("build DAG for block %d finished", s.delegate.blockHeight)
 	return dag
 }
 

@@ -19,6 +19,7 @@ import (
 	acPb "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/protocol/v2"
+	"chainmaker.org/chainmaker/protocol/v2/test"
 )
 
 var _ protocol.TxSimContext = (*MockSimContextImpl)(nil)
@@ -186,6 +187,7 @@ func testSnapshot(t *testing.T, i int) {
 		txResultMap:     make(map[string]*commonPb.Result, 256),
 		readTable:       make(map[string]*sv, 256),
 		writeTable:      make(map[string]*sv, 256),
+		log:             &test.GoLogger{},
 	}
 
 	txSimContext := &MockSimContextImpl{
