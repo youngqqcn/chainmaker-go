@@ -43,9 +43,9 @@ go get chainmaker.org/chainmaker/protocol/v2@${BRANCH}
 go get chainmaker.org/chainmaker/pb-go/v2@${BRANCH}
 go get chainmaker.org/chainmaker/common/v2@${BRANCH}
 go get chainmaker.org/chainmaker/logger/v2@${BRANCH}
-go get chainmaker.org/chainmaker/chainmaker-net-common@${BRANCH}
-go get chainmaker.org/chainmaker/chainmaker-net-liquid@${BRANCH}
-go get chainmaker.org/chainmaker/chainmaker-net-libp2p@${BRANCH}
+go get chainmaker.org/chainmaker/net-common@${BRANCH}
+go get chainmaker.org/chainmaker/net-liquid@${BRANCH}
+go get chainmaker.org/chainmaker/net-libp2p@${BRANCH}
 go mod tidy
 
 cd ../rpcserver

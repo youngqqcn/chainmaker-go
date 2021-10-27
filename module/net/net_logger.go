@@ -1,8 +1,8 @@
 package net
 
 import (
-	liquid "chainmaker.org/chainmaker/chainmaker-net-liquid/liquidnet"
-	//liquid "chainmaker.org/chainmaker/chainmaker-net-liquid/liquidnet"
+	liquid "chainmaker.org/chainmaker/net-liquid/liquidnet"
+	//liquid "chainmaker.org/chainmaker/net-liquid/liquidnet"
 	"chainmaker.org/chainmaker/logger/v2"
 	"chainmaker.org/chainmaker/protocol/v2"
 )
