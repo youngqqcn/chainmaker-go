@@ -663,6 +663,7 @@ func (bc *Blockchain) initSync() (err error) {
 		bc.log.Infof("sync module existed, ignore.")
 		return
 	}
+
 	// init sync service module
 	bc.syncServer = blockSync.NewBlockChainSyncServer(
 		bc.chainId,
@@ -672,6 +673,7 @@ func (bc *Blockchain) initSync() (err error) {
 		bc.ledgerCache,
 		bc.coreEngine.GetBlockVerifier(),
 		bc.coreEngine.GetBlockCommitter(),
+		logger.GetLoggerByChain(logger.MODULE_SYNC, bc.chainId),
 	)
 	bc.initModules[moduleNameSync] = struct{}{}
 	return

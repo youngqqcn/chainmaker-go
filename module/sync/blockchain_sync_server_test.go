@@ -14,6 +14,7 @@ import (
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	netPb "chainmaker.org/chainmaker/pb-go/v2/net"
 	syncPb "chainmaker.org/chainmaker/pb-go/v2/sync"
+	"chainmaker.org/chainmaker/protocol/v2/test"
 
 	"chainmaker.org/chainmaker/protocol/v2"
 	"github.com/golang/mock/gomock"
@@ -69,7 +70,8 @@ func initTestSync(t *testing.T) (protocol.SyncService, func()) {
 	mockStore := newMockBlockChainStore(ctrl)
 	mockLedger := newMockLedgerCache(ctrl, &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 10}})
 	mockCommit := newMockCommitter(ctrl, mockLedger)
-	sync := NewBlockChainSyncServer("chain1", mockNet, mockMsgBus, mockStore, mockLedger, mockVerify, mockCommit)
+	log := &test.GoLogger{}
+	sync := NewBlockChainSyncServer("chain1", mockNet, mockMsgBus, mockStore, mockLedger, mockVerify, mockCommit, log)
 	require.NoError(t, sync.Start())
 	return sync, func() {
 		sync.Stop()

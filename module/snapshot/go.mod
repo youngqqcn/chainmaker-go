@@ -11,5 +11,3 @@ require (
 	chainmaker.org/chainmaker/utils/v2 v2.0.0-20210907033606-84c6c841cbdb
 	github.com/stretchr/testify v1.7.0
 )
-
-replace chainmaker.org/chainmaker-go/localconf => ../conf/localconf

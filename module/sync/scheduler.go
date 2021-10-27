@@ -13,7 +13,6 @@ import (
 	"sort"
 	"time"
 
-	"chainmaker.org/chainmaker/logger/v2"
 	syncPb "chainmaker.org/chainmaker/pb-go/v2/sync"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"github.com/Workiva/go-datastructures/queue"
@@ -42,13 +41,13 @@ type scheduler struct {
 	reqTimeThreshold    time.Duration // When the difference between the height of the node and
 	// the latest height of peers is 1, the time interval for requesting
 
-	log    *logger.CMLogger
+	log    protocol.Logger
 	sender syncSender
 	ledger protocol.LedgerCache
 }
 
 func newScheduler(sender syncSender, ledger protocol.LedgerCache,
-	maxNum uint64, timeOut, reqTimeThreshold time.Duration, batchesize uint64, log *logger.CMLogger) *scheduler {
+	maxNum uint64, timeOut, reqTimeThreshold time.Duration, batchesize uint64, log protocol.Logger) *scheduler {
 
 	currHeight, err := ledger.CurrentHeight()
 	if err != nil {
