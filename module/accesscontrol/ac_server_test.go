@@ -13,17 +13,18 @@ import (
 	"path/filepath"
 	"testing"
 
+	logger2 "chainmaker.org/chainmaker/logger/v2"
 	pbac "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/config"
 	"chainmaker.org/chainmaker/protocol/v2"
-	"chainmaker.org/chainmaker/protocol/v2/test"
 	"github.com/stretchr/testify/require"
 )
 
 func TestInitAccessControlService(t *testing.T) {
-	logger := &test.GoLogger{}
-	acServices := initAccessControlService(testHashType, testOrg1, protocol.Identity, testChainConfig, nil, logger)
+	logger := logger2.GetLogger(logger2.MODULE_ACCESS)
+	acServices := initAccessControlService(testHashType, protocol.Identity, nil, logger)
+	acServices.initResourcePolicy(testChainConfig.ResourcePolicies, testOrg1)
 	require.NotNil(t, acServices)
 }
 
@@ -32,8 +33,9 @@ func TestValidateResourcePolicy(t *testing.T) {
 	require.Nil(t, err)
 	defer cleanFunc()
 
-	logger := &test.GoLogger{}
-	acServices := initAccessControlService(testHashType, testOrg1, protocol.Identity, testChainConfig, nil, logger)
+	logger := logger2.GetLogger(logger2.MODULE_ACCESS)
+	acServices := initAccessControlService(testHashType, protocol.Identity, nil, logger)
+	acServices.initResourcePolicy(testChainConfig.ResourcePolicies, testOrg1)
 	require.NotNil(t, acServices)
 
 	resourcePolicy := &config.ResourcePolicy{
@@ -56,8 +58,9 @@ func TestCertMemberInfo(t *testing.T) {
 	require.Nil(t, err)
 	defer cleanFunc()
 
-	logger := &test.GoLogger{}
-	acServices := initAccessControlService(testHashType, testOrg1, protocol.Identity, testChainConfig, nil, logger)
+	logger := logger2.GetLogger(logger2.MODULE_ACCESS)
+	acServices := initAccessControlService(testHashType, protocol.Identity, nil, logger)
+	acServices.initResourcePolicy(testChainConfig.ResourcePolicies, testOrg1)
 	require.NotNil(t, acServices)
 
 	pbMember := &pbac.Member{
@@ -103,8 +106,9 @@ func TestVerifyPrincipalPolicy(t *testing.T) {
 	require.Nil(t, err)
 	defer cleanFunc()
 	hashType := testHashType
-	logger := &test.GoLogger{}
-	acServices := initAccessControlService(testHashType, testOrg1, protocol.Identity, testChainConfig, nil, logger)
+	logger := logger2.GetLogger(logger2.MODULE_ACCESS)
+	acServices := initAccessControlService(testHashType, protocol.Identity, nil, logger)
+	acServices.initResourcePolicy(testChainConfig.ResourcePolicies, testOrg1)
 	require.NotNil(t, acServices)
 
 	var orgMemberMap = make(map[string]*orgMember, len(orgMemberInfoMap))
