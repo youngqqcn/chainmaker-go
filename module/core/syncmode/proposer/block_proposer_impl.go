@@ -314,9 +314,8 @@ func (bp *BlockProposerImpl) proposing(height uint64, preHash []byte) *commonpb.
 	bp.msgBus.Publish(msgbus.ProposedBlock, &consensuspb.ProposalBlock{Block: block, TxsRwSet: rwSetMap})
 	//bp.log.Debugf("finalized block \n%s", utils.FormatBlock(block))
 	elapsed := utils.CurrentTimeMillisSeconds() - startTick
-	bp.log.Infof("proposer success [%d](txs:%d), time used(fetch:%d,dup:%d,vm:%v,total:%d)",
-		block.Header.BlockHeight, block.Header.TxCount,
-		fetchLasts, dupLasts, timeLasts, elapsed)
+	bp.log.Infof("proposer success [%d](txs:%d), time used(fetch:%d,dup:%d, begin DB transaction:%v, new snapshort:%v, vm:%v, finalize block:%v,total:%d)",
+		block.Header.BlockHeight, block.Header.TxCount, fetchLasts, dupLasts, timeLasts[0], timeLasts[1], timeLasts[2], timeLasts[3], elapsed)
 	if localconf.ChainMakerConfig.MonitorConfig.Enabled {
 		bp.metricBlockPackageTime.WithLabelValues(bp.chainId).Observe(float64(elapsed) / 1000)
 	}

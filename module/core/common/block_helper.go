@@ -107,14 +107,19 @@ func (bb *BlockBuilder) GenerateNewBlock(proposingHeight uint64, preHash []byte,
 	// 2. calculate dag and fill into block
 	// 3. fill txs into block
 	// If only part of the txBatch is filled into the Block, consider executing it again
-	ssStartTick := utils.CurrentTimeMillisSeconds()
-	snapshot := bb.snapshotManager.NewSnapshot(lastBlock, block)
-	vmStartTick := utils.CurrentTimeMillisSeconds()
-	ssLasts := vmStartTick - ssStartTick
-	bb.storeHelper.BeginDbTransaction(snapshot.GetBlockchainStore(), block.GetTxKey())
-	txRWSetMap, contractEventMap, err := bb.txScheduler.Schedule(block, validatedTxs, snapshot)
-	vmLasts := utils.CurrentTimeMillisSeconds() - vmStartTick
-	timeLasts = append(timeLasts, ssLasts, vmLasts)
+    ssStartTick := utils.CurrentTimeMillisSeconds()
+    snapshot := bb.snapshotManager.NewSnapshot(lastBlock, block)
+
+    beginDbTick := utils.CurrentTimeMillisSeconds()
+    bb.storeHelper.BeginDbTransaction(snapshot.GetBlockchainStore(), block.GetTxKey())
+
+    vmStartTick := utils.CurrentTimeMillisSeconds()
+    txRWSetMap, contractEventMap, err := bb.txScheduler.Schedule(block, validatedTxs, snapshot)
+
+    ssLasts := beginDbTick - ssStartTick
+    dbLasts := vmStartTick - beginDbTick
+    vmLasts := utils.CurrentTimeMillisSeconds() - vmStartTick
+    timeLasts = append(timeLasts, ssLasts, dbLasts, vmLasts)
 
 	if err != nil {
 		return nil, timeLasts, fmt.Errorf("schedule block(%d,%x) error %s",
@@ -515,6 +520,7 @@ func (vb *VerifierBlock) ValidateBlock(
 	}
 	// we must new a snapshot for the vacant block,
 	// otherwise the subsequent snapshot can not link to the previous snapshot.
+    snapshotTick := utils.CurrentTimeMillisSeconds()
 	snapshot := vb.snapshotManager.NewSnapshot(lastBlock, block)
 	if len(block.Txs) == 0 {
 		return nil, nil, timeLasts, nil
@@ -525,10 +531,16 @@ func (vb *VerifierBlock) ValidateBlock(
 	}
 
 	// simulate with DAG, and verify read write set
-	startVMTick := utils.CurrentTimeMillisSeconds()
-	vb.storeHelper.BeginDbTransaction(snapshot.GetBlockchainStore(), block.GetTxKey())
-	txRWSetMap, txResultMap, err := vb.txScheduler.SimulateWithDag(block, snapshot)
-	vmLasts := utils.CurrentTimeMillisSeconds() - startVMTick
+    startDbTxTick := utils.CurrentTimeMillisSeconds()
+    vb.storeHelper.BeginDbTransaction(snapshot.GetBlockchainStore(), block.GetTxKey())
+
+    startVMTick := utils.CurrentTimeMillisSeconds()
+    txRWSetMap, txResultMap, err := vb.txScheduler.SimulateWithDag(block, snapshot)
+    vmLasts := utils.CurrentTimeMillisSeconds() - startVMTick
+    vb.log.Infof("Validate block[%v](txs:%v), time used(new snapshot:%v, start DB transaction:%v, vm:%v)",
+        block.Header.BlockHeight, block.Header.TxCount, startDbTxTick - snapshotTick, startVMTick - startDbTxTick, vmLasts)
+
+
 	timeLasts = append(timeLasts, vmLasts)
 	if err != nil {
 		return nil, nil, timeLasts, fmt.Errorf("simulate %s", err)
