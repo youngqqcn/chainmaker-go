@@ -10,8 +10,8 @@ package sync
 import (
 	"testing"
 
-	"chainmaker.org/chainmaker/logger/v2"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
+	"chainmaker.org/chainmaker/protocol/v2/test"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
@@ -22,7 +22,7 @@ func TestProcessorReceivedBlocks(t *testing.T) {
 	defer ctrl.Finish()
 	ledger := newMockLedgerCache(ctrl, &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 100}})
 	mockVerifier := NewMockVerifyAndCommit(ledger)
-	processor := newProcessor(mockVerifier, ledger, logger.GetLogger(logger.MODULE_SYNC))
+	processor := newProcessor(mockVerifier, ledger, &test.GoLogger{})
 
 	// 1. Receive the blocks which has been confirmed
 	result, err := processor.handler(&ReceivedBlocks{
@@ -83,7 +83,7 @@ func TestProcessorProcessBlockMsg(t *testing.T) {
 	defer ctrl.Finish()
 	ledger := newMockLedgerCache(ctrl, &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 100}})
 	mockVerifier := NewMockVerifyAndCommit(ledger)
-	processor := newProcessor(mockVerifier, ledger, logger.GetLogger(logger.MODULE_SYNC))
+	processor := newProcessor(mockVerifier, ledger, &test.GoLogger{})
 
 	// 1. Receive the blocks which has not been confirmed
 	processor.handler(&ReceivedBlocks{
@@ -133,7 +133,7 @@ func TestDataDetection(t *testing.T) {
 	defer ctrl.Finish()
 	ledger := newMockLedgerCache(ctrl, &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 100}})
 	mockVerifier := NewMockVerifyAndCommit(ledger)
-	processor := newProcessor(mockVerifier, ledger, logger.GetLogger(logger.MODULE_SYNC))
+	processor := newProcessor(mockVerifier, ledger, &test.GoLogger{})
 
 	// 1. Receive the blocks which has not been confirmed
 	processor.handler(&ReceivedBlocks{

@@ -16,6 +16,7 @@ import (
 type ManagerEvidence struct {
 	delegate  *ManagerDelegate
 	snapshots map[utils.BlockFingerPrint]*SnapshotEvidence
+	log       protocol.Logger
 }
 
 // When generating blocks, generate a Snapshot for each block, which is used as read-write set cache
@@ -26,6 +27,7 @@ func (m *ManagerEvidence) NewSnapshot(prevBlock *commonPb.Block, block *commonPb
 	snapshotImpl := m.delegate.makeSnapshotImpl(block, blockHeight)
 	evidenceSnapshot := &SnapshotEvidence{
 		delegate: snapshotImpl,
+		log:      m.log,
 	}
 
 	// 计算前序指纹, 和当前指纹
@@ -40,7 +42,7 @@ func (m *ManagerEvidence) NewSnapshot(prevBlock *commonPb.Block, block *commonPb
 		evidenceSnapshot.SetPreSnapshot(prevSnapshot)
 	}
 
-	log.Infof(
+	m.log.Infof(
 		"create snapshot at height %d, fingerPrint[%v] -> prevFingerPrint[%v]",
 		blockHeight,
 		fingerPrint,
@@ -53,7 +55,7 @@ func (m *ManagerEvidence) NotifyBlockCommitted(block *commonPb.Block) error {
 	m.delegate.lock.Lock()
 	defer m.delegate.lock.Unlock()
 
-	log.Infof("commit snapshot at height %d", block.Header.BlockHeight)
+	m.log.Infof("commit snapshot at height %d", block.Header.BlockHeight)
 
 	// 计算刚落块的区块指纹
 	deleteFp := utils.CalcBlockFingerPrint(block)
@@ -68,7 +70,7 @@ func (m *ManagerEvidence) NotifyBlockCommitted(block *commonPb.Block) error {
 		}
 	}
 
-	log.Infof("delete snapshot %v at height %d", deleteFp, block.Header.BlockHeight)
+	m.log.Infof("delete snapshot %v at height %d", deleteFp, block.Header.BlockHeight)
 	delete(m.snapshots, deleteFp)
 
 	// in case of switch-fork, gc too old snapshot
@@ -80,7 +82,7 @@ func (m *ManagerEvidence) NotifyBlockCommitted(block *commonPb.Block) error {
 		if block.Header.BlockHeight-preSnapshot.GetBlockHeight() > 8 {
 			deleteOldFp := m.delegate.calcSnapshotFingerPrint(preSnapshot.delegate)
 			delete(m.snapshots, deleteOldFp)
-			log.Infof("delete snapshot %v at height %d while gc", deleteFp, preSnapshot.GetBlockHeight())
+			m.log.Infof("delete snapshot %v at height %d while gc", deleteFp, preSnapshot.GetBlockHeight())
 			snapshot.SetPreSnapshot(nil)
 		}
 	}

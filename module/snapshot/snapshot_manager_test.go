@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
+	"chainmaker.org/chainmaker/protocol/v2/test"
 
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/utils/v2"
@@ -24,6 +25,7 @@ func TestChainedSnapshot(t *testing.T) {
 		delegate: &ManagerDelegate{
 			blockchainStore: nil,
 		},
+		log: &test.GoLogger{},
 	}
 
 	genesis := createNewBlock(0, 0)

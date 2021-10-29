@@ -10,10 +10,10 @@ package accesscontrol
 import (
 	"testing"
 
-	logger2 "chainmaker.org/chainmaker/logger/v2"
 	pbac "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/protocol/v2"
+	"chainmaker.org/chainmaker/protocol/v2/test"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,7 +23,7 @@ var (
 )
 
 func TestGetMemberStatus(t *testing.T) {
-	logger := logger2.GetLogger(logger2.MODULE_ACCESS)
+	logger := &test.GoLogger{}
 	certProvider, err := newCertACProvider(testChainConfig, testOrg1, nil, logger)
 	require.Nil(t, err)
 	require.NotNil(t, certProvider)
@@ -344,7 +344,7 @@ func testGetValidEndorsements(provider protocol.AccessControlProvider,
 }
 
 func TestVerifyRelatedMaterial(t *testing.T) {
-	logger := logger2.GetLogger(logger2.MODULE_ACCESS)
+	logger := &test.GoLogger{}
 	certProvider, err := newCertACProvider(testChainConfig, testOrg1, nil, logger)
 	require.Nil(t, err)
 	require.NotNil(t, certProvider)
