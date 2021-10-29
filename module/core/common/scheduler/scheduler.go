@@ -101,7 +101,7 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 		for {
 			select {
 			case tx := <-runningTxC:
-				//ts.log.Debugf("prepare to submit running task for tx id:%s", tx.Payload.GetTxId())
+				ts.log.Debugf("prepare to submit running task for tx id:%s", tx.Payload.GetTxId())
 				err := goRoutinePool.Submit(func() {
 					// If snapshot is sealed, no more transaction will be added into snapshot
 					if snapshot.IsSealed() {
@@ -258,12 +258,9 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 			select {
 			case txIndex := <-runningTxC:
 				tx := txMapping[txIndex]
-				//ts.log.Debugf("simulate with dag, prepare to submit running task for tx id:%s", tx.Payload.GetTxId())
+				ts.log.Debugf("simulate with dag, prepare to submit running task for tx id:%s", tx.Payload.GetTxId())
 				err := goRoutinePool.Submit(func() {
-					timeStr1 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(),
-						time.Now().Second(), time.Now().Nanosecond()/1000)
-					ts.log.Debugf("run vm with dag start for tx id %s at time: %s", tx.Payload.GetTxId(),
-						timeStr1)
+					ts.log.Debugf("run vm with dag start for tx id %s", tx.Payload.GetTxId())
 					txSimContext := NewTxSimContext(ts.VmManager, snapshot, tx, block.Header.BlockVersion)
 					ts.log.Debugf("new tx simulate context finished, tx id:%s", tx.Payload.GetTxId())
 					runVmSuccess := true
