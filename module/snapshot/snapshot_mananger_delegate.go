@@ -18,6 +18,7 @@ import (
 type ManagerDelegate struct {
 	lock            sync.Mutex
 	blockchainStore protocol.BlockchainStore
+	log             protocol.Logger
 }
 
 func (m *ManagerDelegate) calcSnapshotFingerPrint(snapshot *SnapshotImpl) utils.BlockFingerPrint {
@@ -41,8 +42,8 @@ func (m *ManagerDelegate) makeSnapshotImpl(block *commonPb.Block, blockHeight ui
 		blockchainStore: m.blockchainStore,
 		sealed:          false,
 		preSnapshot:     nil,
-
-		txResultMap: make(map[string]*commonPb.Result, txCount),
+		log:             m.log,
+		txResultMap:     make(map[string]*commonPb.Result, txCount),
 
 		chainId:        block.Header.ChainId,
 		blockHeight:    block.Header.BlockHeight,
