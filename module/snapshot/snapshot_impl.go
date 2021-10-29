@@ -357,10 +357,12 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 
 			if i > 0 && s.fastConflicted(readBitmapForI, writeBitmapForI, cumulativeReadBitmap[i-1], cumulativeWriteBitmap[i-1]) {
 				// check reachability one by one, then build table
+				log.Debugf("start to build 1 reach maps")
 				s.buildReach(i, reachFromI, readBitmaps, writeBitmaps, readBitmapForI, writeBitmapForI, directReachFromI, reachMap)
+				log.Debugf("finished to build 1 reach maps")
 			}
 			reachMap[i] = reachFromI
-
+			log.Debugf("start to build 1 dag vertexes")
 			// build DAG based on directReach bitmap
 			dag.Vertexes[i] = &commonPb.DAG_Neighbor{
 				Neighbors: make([]uint32, 0, 16),
@@ -368,6 +370,7 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 			for _, j := range directReachFromI.Pos1() {
 				dag.Vertexes[i].Neighbors = append(dag.Vertexes[i].Neighbors, uint32(j))
 			}
+			log.Debugf("finished to build 1 dag vertexes")
 		}
 	}
 	log.Debugf("build DAG for block %d finished", s.blockHeight)
