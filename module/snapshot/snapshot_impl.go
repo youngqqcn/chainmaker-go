@@ -308,19 +308,17 @@ func (s *SnapshotImpl) buildCumulativeBitmap(readBitmap []*bitmap.Bitmap, writeB
 // We need to ensure that when validating the DAG, there is no possibility that the execution of other
 // transactions will affect the dependence of the current transaction
 func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
-	//if !s.IsSealed() {
-	//	log.Warnf("you need to execute Seal before you can build DAG of snapshot with height %d", s.blockHeight)
-	//}
-	//s.lock.RLock()
-	//defer s.lock.RUnlock()
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 
 	txCount := len(s.txTable)
 	log.Debugf("start building DAG for block %d with %d txs", s.blockHeight, txCount)
 
 	// build read-write bitmap for all transactions
 	readBitmaps, writeBitmaps := s.buildRWBitmaps()
+	log.Debugf("finished to build readBitMaps and writeMaps")
 	cumulativeReadBitmap, cumulativeWriteBitmap := s.buildCumulativeBitmap(readBitmaps, writeBitmaps)
-
+	log.Debugf("finished to build cumulative bitmaps")
 	dag := &commonPb.DAG{}
 	if txCount == 0 {
 		return dag
