@@ -24,6 +24,7 @@ func (f *Factory) NewSnapshotManager(blockchainStore protocol.BlockchainStore,
 		snapshots: make(map[utils.BlockFingerPrint]*SnapshotImpl, 1024),
 		delegate: &ManagerDelegate{
 			blockchainStore: blockchainStore,
+			log:             log,
 		},
 		log: log,
 	}
@@ -36,6 +37,7 @@ func (f *Factory) NewSnapshotEvidenceMgr(blockchainStore protocol.BlockchainStor
 		snapshots: make(map[utils.BlockFingerPrint]*SnapshotEvidence, 1024),
 		delegate: &ManagerDelegate{
 			blockchainStore: blockchainStore,
+			log:             log,
 		},
 		log: log,
 	}

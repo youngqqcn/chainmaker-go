@@ -830,7 +830,7 @@ func proposalRequest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, txType 
 	rawTxBytes, err := utils.CalcUnsignedTxRequestBytes(req)
 	if err != nil {
 		log.Fatalf("CalcUnsignedTxRequest failed, %s", err.Error())
-		os.Exit(0)
+		os.Exit(1)
 	}
 
 	fmt.Errorf("################ %s", string(sender.MemberInfo))
@@ -840,7 +840,7 @@ func proposalRequest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, txType 
 	//signBytes, err := signer.Sign("SM3", rawTxBytes)
 	if err != nil {
 		log.Fatalf("sign failed, %s", err.Error())
-		os.Exit(0)
+		os.Exit(1)
 	}
 
 	req.Sender.Signature = signBytes
@@ -851,10 +851,10 @@ func proposalRequest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, txType 
 		statusErr, ok := status.FromError(err)
 		if ok && statusErr.Code() == codes.DeadlineExceeded {
 			fmt.Println("WARN: client.call err: deadline")
-			os.Exit(0)
+			os.Exit(1)
 		}
 		fmt.Printf("ERROR: client.call err: %v\n", err)
-		os.Exit(0)
+		os.Exit(1)
 	}
 	return result
 }
