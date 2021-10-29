@@ -244,10 +244,8 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 	defer goRoutinePool.Release()
 
 	txIndexBatch := ts.popNextTxBatchFromDag(dagRemain)
-	timeStr4 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(), time.Now().Second(),
-		time.Now().Nanosecond()/1000)
-	ts.log.Debugf("block [%d] schedule with dag first batch size:%d, total batch size:%d, at time:%s",
-		block.Header.BlockHeight, len(txIndexBatch), txBatchSize, timeStr4)
+	ts.log.Debugf("block [%d] schedule with dag first batch size:%d, total batch size:%d",
+		block.Header.BlockHeight, len(txIndexBatch), txBatchSize)
 
 	go func() {
 		for _, tx := range txIndexBatch {
@@ -305,10 +303,8 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 				ts.shrinkDag(doneTxIndex, dagRemain)
 
 				txIndexBatchAfterShrink := ts.popNextTxBatchFromDag(dagRemain)
-				timeStr3 := fmt.Sprintf("%02d:%02d:%02d.%v", time.Now().Hour(), time.Now().Minute(),
-					time.Now().Second(), time.Now().Nanosecond()/1000)
-				ts.log.Debugf("block [%d] schedule with dag, pop next tx index batch size:%d, at time: %s",
-					block.Header.BlockHeight, len(txIndexBatchAfterShrink), timeStr3)
+				ts.log.Debugf("block [%d] schedule with dag, pop next tx index batch size:%d",
+					block.Header.BlockHeight, len(txIndexBatchAfterShrink))
 				for _, tx := range txIndexBatchAfterShrink {
 					runningTxC <- tx
 				}
