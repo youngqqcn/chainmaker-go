@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	evm_go "chainmaker.org/chainmaker-go/evm/evm-go"
+	evmGo "chainmaker.org/chainmaker-go/evm/evm-go"
 	"chainmaker.org/chainmaker-go/evm/evm-go/environment"
 	"chainmaker.org/chainmaker-go/evm/evm-go/opcodes"
 	"chainmaker.org/chainmaker-go/evm/evm-go/storage"
@@ -36,7 +36,7 @@ type RuntimeInstance struct {
 // init just load instructions once
 func init() {
 	// init memory and env
-	evm_go.Load()
+	evmGo.Load()
 	// execute method
 }
 
@@ -138,7 +138,7 @@ func (r *RuntimeInstance) Invoke(contract *commonPb.Contract, method string, byt
 	r.Log.Debugf("evm runtime get last block timestamp:%v, height:%d, tx id:%s",
 		blockTimestamp, blockHeight, txId)
 	externalStore := &storage.ContractStorage{Ctx: txSimContext}
-	evm := evm_go.New(evm_go.EVMParam{
+	evm := evmGo.New(evmGo.EVMParam{
 		MaxStackDepth:  protocol.EvmMaxStackDepth,
 		ExternalStore:  externalStore,
 		ResultCallback: r.callback,
@@ -161,7 +161,7 @@ func (r *RuntimeInstance) Invoke(contract *commonPb.Contract, method string, byt
 		},
 	})
 	// init memory and env
-	//evm_go.Load()
+	//evmGo.Load()
 	// execute method
 	r.Log.Debugf("evm runtime start to execute contract, tx id:%s, isDeploy:%v", txId, isDeploy)
 	result, err := evm.ExecuteContract(isDeploy)
@@ -198,7 +198,7 @@ func contractNameHexToAddress(cname string) (*evmutils.Int, error) {
 	}
 	return evmAddr, nil
 }
-func (r *RuntimeInstance) callback(result evm_go.ExecuteResult, err error) {
+func (r *RuntimeInstance) callback(result evmGo.ExecuteResult, err error) {
 	if result.ExitOpCode == opcodes.REVERT {
 		err = fmt.Errorf("revert instruction was encountered during execution")
 		r.Log.Errorf("revert instruction encountered in contract [%s] execution，tx: [%s], error: [%s]",
@@ -273,7 +273,7 @@ func (r *RuntimeInstance) errorResult(contractResult *commonPb.ContractResult, e
 	r.Log.Error(errMsg)
 	return contractResult
 }
-func (r *RuntimeInstance) emitContractEvent(result evm_go.ExecuteResult) error {
+func (r *RuntimeInstance) emitContractEvent(result evmGo.ExecuteResult) error {
 	//parse log
 	var contractEvents []*commonPb.ContractEvent
 	logsMap := result.StorageCache.Logs
