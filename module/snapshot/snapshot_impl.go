@@ -10,6 +10,7 @@ package snapshot
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 
@@ -312,7 +313,7 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 	defer s.lock.RUnlock()
 
 	txCount := len(s.txTable)
-	log.Debugf("start building DAG for block %d with %d txs", s.blockHeight, txCount)
+	log.Debugf("start to build DAG for block %d with %d txs", s.blockHeight, txCount)
 
 	// build read-write bitmap for all transactions
 	readBitmaps, writeBitmaps := s.buildRWBitmaps()
@@ -344,6 +345,7 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 			}
 		}
 	} else {
+		var startTime time.Time
 		for i := 0; i < txCount; i++ {
 			// 1、get read and write bitmap for tx i
 			readBitmapForI := readBitmaps[i]
@@ -362,7 +364,10 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 				log.Debugf("finished to build 1 reach maps")
 			}
 			reachMap[i] = reachFromI
-			log.Debugf("start to build 1 dag vertexes")
+			if i == 0 || i == 100 || i == txCount - 1 {
+				startTime = time.Now()
+				log.Debugf("start to build dag vertexes for tx:%d", i)
+			}
 			// build DAG based on directReach bitmap
 			dag.Vertexes[i] = &commonPb.DAG_Neighbor{
 				Neighbors: make([]uint32, 0, 16),
@@ -370,7 +375,9 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 			for _, j := range directReachFromI.Pos1() {
 				dag.Vertexes[i].Neighbors = append(dag.Vertexes[i].Neighbors, uint32(j))
 			}
-			log.Debugf("finished to build 1 dag vertexes")
+			if i == 0 || i == 100 || i == txCount - 1 {
+				log.Debug("finished to build dag vertexes for tx:%d", time.Since(startTime), i)
+			}
 		}
 	}
 	log.Debugf("build DAG for block %d finished", s.blockHeight)
