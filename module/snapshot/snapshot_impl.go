@@ -257,8 +257,8 @@ func (s *SnapshotImpl) buildRWBitmaps() ([]*bitmap.Bitmap, []*bitmap.Bitmap) {
 		readTableItemForI := s.txRWSetTable[i].TxReads
 		writeTableItemForI := s.txRWSetTable[i].TxWrites
 
-		//readBitmap[i] = &bitmap.Bitmap{}
-		readBitmap[i] = bitmap.NewBitmap(157)
+		readBitmap[i] = &bitmap.Bitmap{}
+		//readBitmap[i] = bitmap.NewBitmap(157)
 		for _, keyForI := range readTableItemForI {
 			if existIndex, ok := keyDict[string(keyForI.Key)]; !ok {
 				keyDict[string(keyForI.Key)] = dictIndex
@@ -269,8 +269,8 @@ func (s *SnapshotImpl) buildRWBitmaps() ([]*bitmap.Bitmap, []*bitmap.Bitmap) {
 			}
 		}
 
-		//writeBitmap[i] = &bitmap.Bitmap{}
-		writeBitmap[i] = bitmap.NewBitmap(157)
+		writeBitmap[i] = &bitmap.Bitmap{}
+		//writeBitmap[i] = bitmap.NewBitmap(157)
 		for _, keyForI := range writeTableItemForI {
 			if existIndex, ok := keyDict[string(keyForI.Key)]; !ok {
 				keyDict[string(keyForI.Key)] = dictIndex
@@ -359,10 +359,12 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 			reachFromI := &bitmap.Bitmap{}
 			reachFromI.Set(i)
 
-			if i > 0 && s.fastConflicted(readBitmapForI, writeBitmapForI, cumulativeReadBitmap[i-1], cumulativeWriteBitmap[i-1]) {
+			if i > 0 && s.conflicted(readBitmapForI, writeBitmapForI, cumulativeReadBitmap[i-1],
+				cumulativeWriteBitmap[i-1]) {
 				// check reachability one by one, then build table
 				log.Debugf("start to build 1 reach maps")
-				s.buildReach(i, reachFromI, readBitmaps, writeBitmaps, readBitmapForI, writeBitmapForI, directReachFromI, reachMap)
+				s.buildReach(i, reachFromI, readBitmaps, writeBitmaps, readBitmapForI, writeBitmapForI,
+					directReachFromI, reachMap)
 				log.Debugf("finished to build 1 reach maps")
 			}
 			reachMap[i] = reachFromI
@@ -378,7 +380,7 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 				dag.Vertexes[i].Neighbors = append(dag.Vertexes[i].Neighbors, uint32(j))
 			}
 			if i == 0 || i == 100 || i == txCount - 1 {
-				log.Debugf("finished to build dag vertexes for tx:%d", time.Since(startTime), i)
+				log.Debugf("finished to build dag vertexes for tx:%d, used time:%v", i, time.Since(startTime))
 			}
 		}
 	}
@@ -407,16 +409,10 @@ func (s *SnapshotImpl) buildReach(i int, reachFromI *bitmap.Bitmap,
 }
 
 // Conflict cases: I read & J write; I write & J read; I write & J write
-func (s *SnapshotImpl) conflicted(readBitmapForI, writeBitmapForI, readBitmapForJ, writeBitmapForJ *bitmap.Bitmap) bool {
-	if readBitmapForI.InterExist(writeBitmapForJ) || writeBitmapForI.InterExist(writeBitmapForJ) || writeBitmapForI.InterExist(readBitmapForJ) {
-		return true
-	}
-	return false
-}
-
-// fast conflict cases: I read & J write; I write & J read; I write & J write
-func (s *SnapshotImpl) fastConflicted(readBitmapForI, writeBitmapForI, cumulativeReadBitmap, cumulativeWriteBitmap *bitmap.Bitmap) bool {
-	if readBitmapForI.InterExist(cumulativeWriteBitmap) || writeBitmapForI.InterExist(cumulativeWriteBitmap) || writeBitmapForI.InterExist(cumulativeReadBitmap) {
+func (s *SnapshotImpl) conflicted(readBitmapForI, writeBitmapForI, readBitmapForJ,
+	writeBitmapForJ *bitmap.Bitmap) bool {
+	if readBitmapForI.InterExist(writeBitmapForJ) || writeBitmapForI.InterExist(writeBitmapForJ) ||
+		writeBitmapForI.InterExist(readBitmapForJ) {
 		return true
 	}
 	return false
