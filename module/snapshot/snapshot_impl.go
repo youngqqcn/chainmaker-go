@@ -258,7 +258,7 @@ func (s *SnapshotImpl) buildRWBitmaps() ([]*bitmap.Bitmap, []*bitmap.Bitmap) {
 		writeTableItemForI := s.txRWSetTable[i].TxWrites
 
 		//readBitmap[i] = &bitmap.Bitmap{}
-		readBitmap[i] = bitmap.NewBitmap(10240)
+		readBitmap[i] = bitmap.NewBitmap(157)
 		for _, keyForI := range readTableItemForI {
 			if existIndex, ok := keyDict[string(keyForI.Key)]; !ok {
 				keyDict[string(keyForI.Key)] = dictIndex
@@ -270,7 +270,7 @@ func (s *SnapshotImpl) buildRWBitmaps() ([]*bitmap.Bitmap, []*bitmap.Bitmap) {
 		}
 
 		//writeBitmap[i] = &bitmap.Bitmap{}
-		writeBitmap[i] = bitmap.NewBitmap(10240)
+		writeBitmap[i] = bitmap.NewBitmap(157)
 		for _, keyForI := range writeTableItemForI {
 			if existIndex, ok := keyDict[string(keyForI.Key)]; !ok {
 				keyDict[string(keyForI.Key)] = dictIndex
@@ -378,7 +378,7 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 				dag.Vertexes[i].Neighbors = append(dag.Vertexes[i].Neighbors, uint32(j))
 			}
 			if i == 0 || i == 100 || i == txCount - 1 {
-				log.Debug("finished to build dag vertexes for tx:%d", time.Since(startTime), i)
+				log.Debugf("finished to build dag vertexes for tx:%d", time.Since(startTime), i)
 			}
 		}
 	}
