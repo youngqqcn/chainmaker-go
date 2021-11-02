@@ -252,12 +252,13 @@ func (s *SnapshotImpl) buildRWBitmaps() ([]*bitmap.Bitmap, []*bitmap.Bitmap) {
 	txCount := len(s.txTable)
 	readBitmap := make([]*bitmap.Bitmap, txCount)
 	writeBitmap := make([]*bitmap.Bitmap, txCount)
-	keyDict := make(map[string]int, 1024)
+	keyDict := make(map[string]int, 10240)
 	for i := 0; i < txCount; i++ {
 		readTableItemForI := s.txRWSetTable[i].TxReads
 		writeTableItemForI := s.txRWSetTable[i].TxWrites
 
-		readBitmap[i] = &bitmap.Bitmap{}
+		//readBitmap[i] = &bitmap.Bitmap{}
+		readBitmap[i] = bitmap.NewBitmap(10240)
 		for _, keyForI := range readTableItemForI {
 			if existIndex, ok := keyDict[string(keyForI.Key)]; !ok {
 				keyDict[string(keyForI.Key)] = dictIndex
@@ -268,7 +269,8 @@ func (s *SnapshotImpl) buildRWBitmaps() ([]*bitmap.Bitmap, []*bitmap.Bitmap) {
 			}
 		}
 
-		writeBitmap[i] = &bitmap.Bitmap{}
+		//writeBitmap[i] = &bitmap.Bitmap{}
+		writeBitmap[i] = bitmap.NewBitmap(10240)
 		for _, keyForI := range writeTableItemForI {
 			if existIndex, ok := keyDict[string(keyForI.Key)]; !ok {
 				keyDict[string(keyForI.Key)] = dictIndex
