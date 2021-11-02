@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"chainmaker.org/chainmaker/logger/v2"
 	"chainmaker.org/chainmaker/protocol/v2"
+	"chainmaker.org/chainmaker/protocol/v2/test"
 
 	"chainmaker.org/chainmaker/common/v2/crypto/asym"
 	"chainmaker.org/chainmaker/common/v2/helper"
@@ -540,7 +540,7 @@ func initPKOrgMember(t *testing.T, info *testPkOrgMemberInfo) *testPkOrgMember {
 	td, cleanFunc, err := createTempDirWithCleanFunc()
 	require.Nil(t, err)
 	defer cleanFunc()
-	logger := logger.GetLogger(logger.MODULE_ACCESS)
+	logger := &test.GoLogger{}
 
 	ppkProvider, err := newPermissionedPkACProvider(testPermissionedPKChainConfig,
 		info.orgId, nil, logger)
@@ -679,7 +679,7 @@ func initPKMember(t *testing.T, info *testPkMemberInfo) *testPkMember {
 	td, cleanFunc, err := createTempDirWithCleanFunc()
 	require.Nil(t, err)
 	defer cleanFunc()
-	logger := logger.GetLogger(logger.MODULE_ACCESS)
+	logger := &test.GoLogger{}
 
 	pkProvider, err := newPkACProvider(testPublicPKChainConfig, nil, logger)
 	require.Nil(t, err)

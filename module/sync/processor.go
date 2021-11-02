@@ -13,7 +13,6 @@ import (
 
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 
-	"chainmaker.org/chainmaker/logger/v2"
 	"chainmaker.org/chainmaker/protocol/v2"
 
 	"github.com/Workiva/go-datastructures/queue"
@@ -32,12 +31,12 @@ type processor struct {
 	queue          map[uint64]blockWithPeerInfo // Information about the blocks will be processed
 	hasCommitBlock uint64                       // Number of blocks that have been commit
 
-	log         *logger.CMLogger
+	log         protocol.Logger
 	ledgerCache protocol.LedgerCache // Provides the latest chain state for the node
 	verifyAndAddBlock
 }
 
-func newProcessor(verify verifyAndAddBlock, ledgerCache protocol.LedgerCache, log *logger.CMLogger) *processor {
+func newProcessor(verify verifyAndAddBlock, ledgerCache protocol.LedgerCache, log protocol.Logger) *processor {
 	return &processor{
 		ledgerCache:       ledgerCache,
 		verifyAndAddBlock: verify,
