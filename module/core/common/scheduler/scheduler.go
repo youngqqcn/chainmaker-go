@@ -244,7 +244,7 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 	defer goRoutinePool.Release()
 
 	txIndexBatch := ts.popNextTxBatchFromDag(dagRemain)
-	ts.log.Debugf("block [%d] schedule with dag first batch size:%d, total batch size:%d",
+	ts.log.Debugf("block [%d] simulate with dag first batch size:%d, total batch size:%d",
 		block.Header.BlockHeight, len(txIndexBatch), txBatchSize)
 
 	go func() {
