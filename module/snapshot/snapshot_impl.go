@@ -253,10 +253,14 @@ func (s *SnapshotImpl) buildRWBitmaps() ([]*bitmap.Bitmap, []*bitmap.Bitmap) {
 	readBitmap := make([]*bitmap.Bitmap, txCount)
 	writeBitmap := make([]*bitmap.Bitmap, txCount)
 	keyDict := make(map[string]int, 10240)
+	var startTime time.Time
 	for i := 0; i < txCount; i++ {
 		readTableItemForI := s.txRWSetTable[i].TxReads
 		writeTableItemForI := s.txRWSetTable[i].TxWrites
-
+		if i == 0 || i == 1000 || i == txCount - 1 {
+			startTime = time.Now()
+			log.Debugf("start to build readmap:%d and writemap:%d", len(readTableItemForI), len(writeTableItemForI))
+		}
 		readBitmap[i] = &bitmap.Bitmap{}
 		//readBitmap[i] = bitmap.NewBitmap(157)
 		for _, keyForI := range readTableItemForI {
@@ -268,7 +272,9 @@ func (s *SnapshotImpl) buildRWBitmaps() ([]*bitmap.Bitmap, []*bitmap.Bitmap) {
 				readBitmap[i].Set(existIndex)
 			}
 		}
-
+		if i == 0 || i == 1000 || i == txCount - 1 {
+			log.Debugf("finish to build readmap, used time:%v", time.Since(startTime))
+		}
 		writeBitmap[i] = &bitmap.Bitmap{}
 		//writeBitmap[i] = bitmap.NewBitmap(157)
 		for _, keyForI := range writeTableItemForI {
@@ -279,6 +285,9 @@ func (s *SnapshotImpl) buildRWBitmaps() ([]*bitmap.Bitmap, []*bitmap.Bitmap) {
 			} else {
 				writeBitmap[i].Set(existIndex)
 			}
+		}
+		if i == 0 || i == 1000 || i == txCount - 1 {
+			log.Debugf("finish to build writemap, used time:%v", time.Since(startTime))
 		}
 	}
 	return readBitmap, writeBitmap
