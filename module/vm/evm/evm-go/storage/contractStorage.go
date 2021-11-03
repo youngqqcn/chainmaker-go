@@ -38,7 +38,7 @@ type ContractStorage struct {
 func NewStorage(extStorage IExternalStorage) *ContractStorage {
 	s := &ContractStorage{
 		ResultCache: ResultCache{
-			OriginalData: CacheUnderAddress{},
+			//OriginalData: CacheUnderAddress{},
 			CachedData:   CacheUnderAddress{},
 			Balance:      BalanceCache{},
 			Logs:         LogCache{},

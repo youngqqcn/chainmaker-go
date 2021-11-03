@@ -56,7 +56,7 @@ type Log struct {
 type LogCache map[string][]Log
 
 type ResultCache struct {
-	OriginalData CacheUnderAddress
+	//OriginalData CacheUnderAddress
 	CachedData   CacheUnderAddress
 
 	Balance   BalanceCache
@@ -74,9 +74,9 @@ type readOnlyCache struct {
 }
 
 func MergeResultCache(src *ResultCache, to *ResultCache) {
-	for k, v := range src.OriginalData {
-		to.OriginalData[k] = v
-	}
+	//for k, v := range src.OriginalData {
+	//	to.OriginalData[k] = v
+	//}
 
 	for k, v := range src.CachedData {
 		to.CachedData[k] = v

@@ -33,7 +33,7 @@ type Storage struct {
 func New(extStorage IExternalStorage) *Storage {
 	s := &Storage{
 		ResultCache: ResultCache{
-			OriginalData: CacheUnderAddress{},
+			//OriginalData: CacheUnderAddress{},
 			CachedData:   CacheUnderAddress{},
 			Balance:      BalanceCache{},
 			Logs:         LogCache{},
@@ -53,7 +53,8 @@ func New(extStorage IExternalStorage) *Storage {
 
 func (s *Storage) SLoad(n *evmutils.Int, k *evmutils.Int) (*evmutils.Int, error) {
 	//fmt.Println("SLoad", n.String(), "k", k.String())
-	if s.ResultCache.OriginalData == nil || s.ResultCache.CachedData == nil || s.ExternalStorage == nil {
+	//if s.ResultCache.OriginalData == nil || s.ResultCache.CachedData == nil || s.ExternalStorage == nil {
+	if s.ResultCache.CachedData == nil || s.ExternalStorage == nil {
 		return nil, utils.ErrStorageNotInitialized
 	}
 
@@ -70,8 +71,8 @@ func (s *Storage) SLoad(n *evmutils.Int, k *evmutils.Int) (*evmutils.Int, error)
 			return nil, utils.NoSuchDataInTheStorage(err)
 		}
 
-		s.ResultCache.OriginalData.Set(nsStr, keyStr, i)
-		s.ResultCache.CachedData.Set(nsStr, keyStr, i)
+	//	s.ResultCache.OriginalData.Set(nsStr, keyStr, i)
+	//	s.ResultCache.CachedData.Set(nsStr, keyStr, i)
 	}
 
 	return i, nil
