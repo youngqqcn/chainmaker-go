@@ -10,6 +10,7 @@ package snapshot
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 
@@ -251,12 +252,13 @@ func (s *SnapshotImpl) buildRWBitmaps() ([]*bitmap.Bitmap, []*bitmap.Bitmap) {
 	txCount := len(s.txTable)
 	readBitmap := make([]*bitmap.Bitmap, txCount)
 	writeBitmap := make([]*bitmap.Bitmap, txCount)
-	keyDict := make(map[string]int, 1024)
+	keyDict := make(map[string]int, 10240)
 	for i := 0; i < txCount; i++ {
 		readTableItemForI := s.txRWSetTable[i].TxReads
 		writeTableItemForI := s.txRWSetTable[i].TxWrites
 
 		readBitmap[i] = &bitmap.Bitmap{}
+		//readBitmap[i] = bitmap.NewBitmap(157)
 		for _, keyForI := range readTableItemForI {
 			if existIndex, ok := keyDict[string(keyForI.Key)]; !ok {
 				keyDict[string(keyForI.Key)] = dictIndex
@@ -268,6 +270,7 @@ func (s *SnapshotImpl) buildRWBitmaps() ([]*bitmap.Bitmap, []*bitmap.Bitmap) {
 		}
 
 		writeBitmap[i] = &bitmap.Bitmap{}
+		//writeBitmap[i] = bitmap.NewBitmap(157)
 		for _, keyForI := range writeTableItemForI {
 			if existIndex, ok := keyDict[string(keyForI.Key)]; !ok {
 				keyDict[string(keyForI.Key)] = dictIndex
@@ -312,7 +315,7 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 	defer s.lock.RUnlock()
 
 	txCount := len(s.txTable)
-	log.Debugf("start building DAG for block %d with %d txs", s.blockHeight, txCount)
+	log.Debugf("start to build DAG for block %d with %d txs", s.blockHeight, txCount)
 
 	// build read-write bitmap for all transactions
 	readBitmaps, writeBitmaps := s.buildRWBitmaps()
@@ -344,6 +347,7 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 			}
 		}
 	} else {
+		var startTime time.Time
 		for i := 0; i < txCount; i++ {
 			// 1、get read and write bitmap for tx i
 			readBitmapForI := readBitmaps[i]
@@ -355,14 +359,19 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 			reachFromI := &bitmap.Bitmap{}
 			reachFromI.Set(i)
 
-			if i > 0 && s.fastConflicted(readBitmapForI, writeBitmapForI, cumulativeReadBitmap[i-1], cumulativeWriteBitmap[i-1]) {
+			if i > 0 && s.conflicted(readBitmapForI, writeBitmapForI, cumulativeReadBitmap[i-1],
+				cumulativeWriteBitmap[i-1]) {
 				// check reachability one by one, then build table
 				log.Debugf("start to build 1 reach maps")
-				s.buildReach(i, reachFromI, readBitmaps, writeBitmaps, readBitmapForI, writeBitmapForI, directReachFromI, reachMap)
+				s.buildReach(i, reachFromI, readBitmaps, writeBitmaps, readBitmapForI, writeBitmapForI,
+					directReachFromI, reachMap)
 				log.Debugf("finished to build 1 reach maps")
 			}
 			reachMap[i] = reachFromI
-			log.Debugf("start to build 1 dag vertexes")
+			if i == 0 || i == 100 || i == txCount - 1 {
+				startTime = time.Now()
+				log.Debugf("start to build dag vertexes for tx:%d", i)
+			}
 			// build DAG based on directReach bitmap
 			dag.Vertexes[i] = &commonPb.DAG_Neighbor{
 				Neighbors: make([]uint32, 0, 16),
@@ -370,7 +379,9 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 			for _, j := range directReachFromI.Pos1() {
 				dag.Vertexes[i].Neighbors = append(dag.Vertexes[i].Neighbors, uint32(j))
 			}
-			log.Debugf("finished to build 1 dag vertexes")
+			if i == 0 || i == 100 || i == txCount - 1 {
+				log.Debugf("finished to build dag vertexes for tx:%d, used time:%v", i, time.Since(startTime))
+			}
 		}
 	}
 	log.Debugf("build DAG for block %d finished", s.blockHeight)
@@ -398,16 +409,10 @@ func (s *SnapshotImpl) buildReach(i int, reachFromI *bitmap.Bitmap,
 }
 
 // Conflict cases: I read & J write; I write & J read; I write & J write
-func (s *SnapshotImpl) conflicted(readBitmapForI, writeBitmapForI, readBitmapForJ, writeBitmapForJ *bitmap.Bitmap) bool {
-	if readBitmapForI.InterExist(writeBitmapForJ) || writeBitmapForI.InterExist(writeBitmapForJ) || writeBitmapForI.InterExist(readBitmapForJ) {
-		return true
-	}
-	return false
-}
-
-// fast conflict cases: I read & J write; I write & J read; I write & J write
-func (s *SnapshotImpl) fastConflicted(readBitmapForI, writeBitmapForI, cumulativeReadBitmap, cumulativeWriteBitmap *bitmap.Bitmap) bool {
-	if readBitmapForI.InterExist(cumulativeWriteBitmap) || writeBitmapForI.InterExist(cumulativeWriteBitmap) || writeBitmapForI.InterExist(cumulativeReadBitmap) {
+func (s *SnapshotImpl) conflicted(readBitmapForI, writeBitmapForI, readBitmapForJ,
+	writeBitmapForJ *bitmap.Bitmap) bool {
+	if readBitmapForI.InterExist(writeBitmapForJ) || writeBitmapForI.InterExist(writeBitmapForJ) ||
+		writeBitmapForI.InterExist(readBitmapForJ) {
 		return true
 	}
 	return false
