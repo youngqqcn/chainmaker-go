@@ -10,7 +10,7 @@ require (
 	chainmaker.org/chainmaker/logger/v2 v2.0.1-0.20211015125919-8e5199930ac9
 	chainmaker.org/chainmaker/pb-go/v2 v2.0.1-0.20211021024710-9329804d1c21
 	chainmaker.org/chainmaker/protocol/v2 v2.0.1-0.20211014144951-97323532a236
-	chainmaker.org/chainmaker/store/v2 v2.0.1-0.20211101060552-ab2318ad9c6e
+	chainmaker.org/chainmaker/store/v2 v2.0.1-0.20211104065448-86cab932b46b
 	chainmaker.org/chainmaker/utils/v2 v2.0.0-20211027124954-09b710bd9ce8
 	chainmaker.org/chainmaker/vm-native v0.0.0-20211029075817-046b5f1bbc31
 	github.com/gogo/protobuf v1.3.2
