@@ -19,13 +19,14 @@ import (
 	"chainmaker.org/chainmaker-go/consensus/chainedbft/types"
 	"chainmaker.org/chainmaker-go/consensus/chainedbft/utils"
 	"chainmaker.org/chainmaker-go/consensus/governance"
+	"chainmaker.org/chainmaker-go/consensus/implconfig"
 	"chainmaker.org/chainmaker/chainconf/v2"
 	"chainmaker.org/chainmaker/common/v2/msgbus"
 	"chainmaker.org/chainmaker/common/v2/wal"
 	"chainmaker.org/chainmaker/localconf/v2"
 	"chainmaker.org/chainmaker/logger/v2"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
-	"chainmaker.org/chainmaker/pb-go/v2/consensus"
+	consensusPb "chainmaker.org/chainmaker/pb-go/v2/consensus"
 	chainedbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/chainedbft"
 	"chainmaker.org/chainmaker/pb-go/v2/net"
 	"chainmaker.org/chainmaker/protocol/v2"
@@ -79,7 +80,6 @@ type ConsensusChainedBftImpl struct {
 	helper                protocol.HotStuffHelper
 	store                 protocol.BlockchainStore
 	chainConf             protocol.ChainConf
-	netService            protocol.NetService
 	ledgerCache           protocol.LedgerCache
 	blockVerifier         protocol.BlockVerifier
 	blockCommitter        protocol.BlockCommitter
@@ -93,20 +93,16 @@ type ConsensusChainedBftImpl struct {
 }
 
 //New returns an instance of chainedbft consensus
-func New(chainID string, id string, singer protocol.SigningMember, ac protocol.AccessControlProvider,
-	ledgerCache protocol.LedgerCache, proposalCache protocol.ProposalCache, blockVerifier protocol.BlockVerifier,
-	blockCommitter protocol.BlockCommitter, netService protocol.NetService, store protocol.BlockchainStore,
-	msgBus msgbus.MessageBus, chainConf protocol.ChainConf,
-	helper protocol.HotStuffHelper) (*ConsensusChainedBftImpl, error) {
+func New(config *implconfig.ConsensusImplConfig) (*ConsensusChainedBftImpl, error) {
 
-	slog := logger.GetLoggerByChain(logger.MODULE_CONSENSUS, chainConf.ChainConfig().ChainId)
-	if chainConf.ChainConfig().Contract.EnableSqlSupport {
+	slog := logger.GetLoggerByChain(logger.MODULE_CONSENSUS, config.ChainConf.ChainConfig().ChainId)
+	if config.ChainConf.ChainConfig().Contract.EnableSqlSupport {
 		slog.Error("hotstuff consensus doesn't support sql contract")
 		return nil, fmt.Errorf("hotstuff consensus doesn't support sql contract")
 	}
 	service := &ConsensusChainedBftImpl{
-		id:                 id,
-		chainID:            chainID,
+		id:                 config.NodeId,
+		chainID:            config.ChainId,
 		msgCh:              make(chan *net.NetMsg, CONSENSUSCAPABILITY),
 		syncMsgCh:          make(chan *chainedbftpb.ConsensusMsg, INTERNALCAPABILITY),
 		internalMsgCh:      make(chan *chainedbftpb.ConsensusMsg, INTERNALCAPABILITY),
@@ -116,19 +112,18 @@ func New(chainID string, id string, singer protocol.SigningMember, ac protocol.A
 		proposalWalIndex:   sync.Map{},
 		lastCommitWalIndex: 1,
 
-		store:                 store,
-		singer:                singer,
-		helper:                helper,
-		msgbus:                msgBus,
-		chainConf:             chainConf,
-		netService:            netService,
-		ledgerCache:           ledgerCache,
-		proposalCache:         proposalCache,
-		blockVerifier:         blockVerifier,
-		blockCommitter:        blockCommitter,
-		accessControlProvider: ac,
+		store:                 config.Store,
+		singer:                config.Signer,
+		helper:                config.Core.GetHotStuffHelper(),
+		msgbus:                config.MsgBus,
+		chainConf:             config.ChainConf,
+		ledgerCache:           config.LedgerCache,
+		proposalCache:         config.ProposalCache,
+		blockVerifier:         config.Core.GetBlockVerifier(),
+		blockCommitter:        config.Core.GetBlockCommitter(),
+		accessControlProvider: config.Ac,
 		logger:                slog,
-		governanceContract:    governance.NewGovernanceContract(store, ledgerCache),
+		governanceContract:    governance.NewGovernanceContract(config.Store, config.LedgerCache),
 
 		quitCh:         make(chan struct{}),
 		quitSyncCh:     make(chan struct{}),
@@ -147,16 +142,16 @@ func New(chainID string, id string, singer protocol.SigningMember, ac protocol.A
 	service.createEpoch(service.commitHeight)
 	service.msgPool = service.nextEpoch.msgPool
 	service.selfIndexInEpoch = service.nextEpoch.index
-	service.smr = newChainedBftSMR(chainID, service.nextEpoch, chainStore, service.timerService, service)
+	service.smr = newChainedBftSMR(config.ChainId, service.nextEpoch, chainStore, service.timerService, service)
 	epoch := service.nextEpoch
 	service.nextEpoch = nil
-	walDirPath := path.Join(localconf.ChainMakerConfig.GetStorePath(), chainID, WalDirSuffix)
+	walDirPath := path.Join(localconf.ChainMakerConfig.GetStorePath(), config.ChainId, WalDirSuffix)
 	if service.wal, err = wal.Open(walDirPath, nil); err != nil {
 		return nil, err
 	}
 	service.logger.Debugf("init epoch, epochID: %d, index: %d, createHeight: %d",
 		epoch.epochId, epoch.index, epoch.createHeight)
-	_ = chainconf.RegisterVerifier(chainID, consensus.ConsensusType_HOTSTUFF,
+	_ = chainconf.RegisterVerifier(config.ChainId, consensusPb.ConsensusType_HOTSTUFF,
 		service.governanceContract)
 	service.logger.Debugf("register config success")
 	service.initTimeOutConfig(service.governanceContract)
@@ -231,7 +226,7 @@ func (cbi *ConsensusChainedBftImpl) OnMessage(message *msgbus.Message) {
 	cbi.logger.Debugf("id [%s] OnMessage receive topic: %s", cbi.id, message.Topic)
 	switch message.Topic {
 	case msgbus.ProposedBlock:
-		if proposedBlock, ok := message.Payload.(*consensus.ProposalBlock); ok {
+		if proposedBlock, ok := message.Payload.(*consensusPb.ProposalBlock); ok {
 			cbi.proposedBlockCh <- proposedBlock.Block
 		}
 	case msgbus.RecvConsensusMsg:
@@ -562,7 +557,7 @@ func VerifyBlockSignatures(chainConf protocol.ChainConf, ac protocol.AccessContr
 	if validatorsMembersInterface == nil {
 		return fmt.Errorf("current validators is nil")
 	}
-	if validatorsMembers, ok := validatorsMembersInterface.([]*consensus.GovernanceMember); ok {
+	if validatorsMembers, ok := validatorsMembersInterface.([]*consensusPb.GovernanceMember); ok {
 		for _, v := range validatorsMembers {
 			validator := &types.Validator{
 				Index:  uint64(v.Index),

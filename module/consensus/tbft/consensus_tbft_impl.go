@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"chainmaker.org/chainmaker-go/consensus/implconfig"
 	"chainmaker.org/chainmaker/chainconf/v2"
 	"chainmaker.org/chainmaker/common/v2/crypto/asym"
 	"chainmaker.org/chainmaker/common/v2/helper"
@@ -80,10 +81,8 @@ type ConsensusTBFTImpl struct {
 	dpos               protocol.DPoS
 	singer             protocol.SigningMember
 	ac                 protocol.AccessControlProvider
-	dbHandle           protocol.DBHandle
 	ledgerCache        protocol.LedgerCache
 	chainConf          protocol.ChainConf
-	netService         protocol.NetService
 	msgbus             msgbus.MessageBus
 	closeC             chan struct{}
 	internalMsgCCloseC chan struct{}
@@ -119,33 +118,29 @@ type ConsensusTBFTImplConfig struct {
 	Dpos        protocol.DPoS
 	Signer      protocol.SigningMember
 	Ac          protocol.AccessControlProvider
-	DbHandle    protocol.DBHandle
 	LedgerCache protocol.LedgerCache
 	ChainConf   protocol.ChainConf
-	NetService  protocol.NetService
 	MsgBus      msgbus.MessageBus
 }
 
 // New creates a tbft consensus instance
-func New(config ConsensusTBFTImplConfig) (*ConsensusTBFTImpl, error) {
+func New(config *implconfig.ConsensusImplConfig, dpos protocol.DPoS) (*ConsensusTBFTImpl, error) {
 	var err error
 	consensus := &ConsensusTBFTImpl{}
-	consensus.logger = logger.GetLoggerByChain(logger.MODULE_CONSENSUS, config.ChainID)
-	consensus.logger.Infof("New ConsensusTBFTImpl[%s]", config.Id)
-	consensus.chainID = config.ChainID
-	consensus.Id = config.Id
+	consensus.logger = logger.GetLoggerByChain(logger.MODULE_CONSENSUS, config.ChainId)
+	consensus.logger.Infof("New ConsensusTBFTImpl[%s]", config.NodeId)
+	consensus.chainID = config.ChainId
+	consensus.Id = config.NodeId
 	consensus.singer = config.Signer
 	consensus.ac = config.Ac
-	consensus.dbHandle = config.DbHandle
 	consensus.ledgerCache = config.LedgerCache
 	consensus.chainConf = config.ChainConf
-	consensus.netService = config.NetService
 	consensus.msgbus = config.MsgBus
 	consensus.closeC = make(chan struct{})
 	consensus.internalMsgCCloseC = make(chan struct{})
 
 	if config.ChainConf.ChainConfig().Consensus.Type == consensuspb.ConsensusType_DPOS {
-		consensus.dpos = config.Dpos
+		consensus.dpos = dpos
 	}
 	consensus.waldir = path.Join(localconf.ChainMakerConfig.GetStorePath(), consensus.chainID, walDir)
 	consensus.wal, err = wal.Open(consensus.waldir, nil)
@@ -167,7 +162,7 @@ func New(config ConsensusTBFTImplConfig) (*ConsensusTBFTImpl, error) {
 	consensus.validatorSet = newValidatorSet(consensus.logger, validators, DefaultBlocksPerProposer)
 	consensus.ConsensusState = NewConsensusState(consensus.logger, consensus.Id)
 	consensus.consensusStateCache = newConsensusStateCache(defaultConsensusStateCacheSize)
-	consensus.timeScheduler = newTimeSheduler(consensus.logger, config.Id)
+	consensus.timeScheduler = newTimeSheduler(consensus.logger, config.NodeId)
 	consensus.gossip = newGossipService(consensus.logger, consensus)
 
 	return consensus, nil
@@ -1383,29 +1378,12 @@ func (consensus *ConsensusTBFTImpl) verifyVote(voteProto *tbftpb.Vote) error {
 		return fmt.Errorf("verifyVote result: %v", result)
 	}
 
-	member, err := consensus.ac.NewMember(voteProto.Endorsement.Signer)
-	if err != nil {
-		consensus.logger.Errorf("[%s](%d/%d/%s) verifyVote new member failed %v",
-			consensus.Id, consensus.Height, consensus.Round, consensus.Step, err)
-		return err
-	}
-
 	var uid string
 	chainConf := consensus.chainConf.ChainConfig()
 	for _, v := range chainConf.TrustMembers {
 		if v.MemberInfo == string(voteProto.Endorsement.Signer.MemberInfo) {
 			uid = v.NodeId
 			break
-		}
-	}
-
-	if uid == "" {
-		certId := member.GetMemberId()
-		uid, err = consensus.netService.GetNodeUidByCertId(certId)
-		if err != nil {
-			consensus.logger.Errorf("[%s](%d/%d/%s) verifyVote certId: %v, GetNodeUidByCertId failed %v",
-				consensus.Id, consensus.Height, consensus.Round, consensus.Step, certId, err)
-			return err
 		}
 	}
 

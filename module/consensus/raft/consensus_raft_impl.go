@@ -24,6 +24,7 @@ import (
 	"github.com/thoas/go-funk"
 	"go.uber.org/zap"
 
+	"chainmaker.org/chainmaker-go/consensus/implconfig"
 	"chainmaker.org/chainmaker/chainconf/v2"
 	commonErrors "chainmaker.org/chainmaker/common/v2/errors"
 	"chainmaker.org/chainmaker/common/v2/msgbus"
@@ -31,7 +32,6 @@ import (
 	"chainmaker.org/chainmaker/logger/v2"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/config"
-	"chainmaker.org/chainmaker/pb-go/v2/consensus"
 	consensuspb "chainmaker.org/chainmaker/pb-go/v2/consensus"
 	netpb "chainmaker.org/chainmaker/pb-go/v2/net"
 	"chainmaker.org/chainmaker/protocol/v2"
@@ -101,7 +101,7 @@ type ConsensusRaftImpl struct {
 	idToNodeId    sync.Map
 
 	proposedBlockC chan *common.Block
-	verifyResultC  chan *consensus.VerifyResult
+	verifyResultC  chan *consensuspb.VerifyResult
 	blockInfoC     chan *common.BlockInfo
 	confChangeC    chan raftpb.ConfChange
 	walSaveC       chan interface{}
@@ -124,9 +124,10 @@ type ConsensusRaftImplConfig struct {
 }
 
 // New creates a raft consensus instance
-func New(config ConsensusRaftImplConfig) (*ConsensusRaftImpl, error) {
+func New(config *implconfig.ConsensusImplConfig) (*ConsensusRaftImpl, error) {
 	consensus := &ConsensusRaftImpl{}
-	lg := logger.GetLoggerByChain(logger.MODULE_CONSENSUS, config.ChainID)
+	consensus.Id = computeRaftIdFromNodeId(config.NodeId)
+	lg := logger.GetLoggerByChain(logger.MODULE_CONSENSUS, config.ChainId)
 	if started, ok := isStarted.Load(consensus.Id); ok && started.(bool) {
 		if ins, ok := instances.Load(consensus.Id); ok && ins.(*ConsensusRaftImpl) != nil {
 			lg.Infof("ConsensusRaftImpl[%x] is already exist, need to do nothing", consensus.Id)
@@ -135,14 +136,13 @@ func New(config ConsensusRaftImplConfig) (*ConsensusRaftImpl, error) {
 		isStarted.Delete(consensus.Id)
 	}
 	consensus.logger = lg
-	consensus.chainID = config.ChainID
-	consensus.singer = config.Singer
+	consensus.chainID = config.ChainId
+	consensus.singer = config.Signer
 	consensus.ac = config.Ac
 	consensus.ledgerCache = config.LedgerCache
 	consensus.chainConf = config.ChainConf
 	consensus.msgbus = config.MsgBus
 	consensus.closeC = make(chan struct{})
-	consensus.Id = computeRaftIdFromNodeId(config.NodeId)
 
 	consensus.snapCount = localconf.ChainMakerConfig.ConsensusConfig.RaftConfig.SnapCount
 	if consensus.snapCount == 0 {
@@ -157,8 +157,8 @@ func New(config ConsensusRaftImplConfig) (*ConsensusRaftImpl, error) {
 	consensus.blockInfoC = make(chan *common.BlockInfo, DefaultChanCap)
 	consensus.confChangeC = make(chan raftpb.ConfChange, DefaultChanCap)
 	consensus.walSaveC = make(chan interface{}, DefaultChanCap)
-	consensus.blockVerifier = config.BlockVerifier
-	consensus.blockCommitter = config.BlockCommitter
+	consensus.blockVerifier = config.Core.GetBlockVerifier()
+	consensus.blockCommitter = config.Core.GetBlockCommitter()
 
 	consensus.logger.Infof("New ConsensusRaftImpl[%x]", consensus.Id)
 	instances.Store(consensus.Id, consensus)

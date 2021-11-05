@@ -12,14 +12,13 @@ import (
 	"sync"
 	"time"
 
+	"chainmaker.org/chainmaker-go/consensus/implconfig"
+	"chainmaker.org/chainmaker/common/v2/msgbus"
+	"chainmaker.org/chainmaker/logger/v2"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	consensuspb "chainmaker.org/chainmaker/pb-go/v2/consensus"
-
-	"chainmaker.org/chainmaker/common/v2/msgbus"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/utils/v2"
-
-	"chainmaker.org/chainmaker/logger/v2"
 )
 
 var clog *logger.CMLogger
@@ -27,30 +26,28 @@ var clog *logger.CMLogger
 // ConsensusSoloImpl is the implementation of solo algorithm
 // and it implements the ConsensusEngine interface.
 type ConsensusSoloImpl struct {
-	chainID string
-	id      string
-	singer  protocol.SigningMember
-	msgbus  msgbus.MessageBus
-
+	chainID        string
+	id             string
+	singer         protocol.SigningMember
+	msgbus         msgbus.MessageBus
 	verifyingBlock *common.Block
-
-	mtx       sync.Mutex
-	chainConf protocol.ChainConf
+	mtx            sync.Mutex
+	chainConf      protocol.ChainConf
 }
 
 //New ...
-func New(chainID string, uid string, singer protocol.SigningMember,
-	msgBus msgbus.MessageBus, chainConf protocol.ChainConf) (*ConsensusSoloImpl, error) {
-	clog = logger.GetLoggerByChain(logger.MODULE_CONSENSUS, chainID)
+func New(config *implconfig.ConsensusImplConfig) (*ConsensusSoloImpl, error) {
+	//implConfig := bc.GetConsensusImplConfig()
+	clog = logger.GetLoggerByChain(logger.MODULE_CONSENSUS, config.ChainId)
 
-	clog.Infof("New ConsensusSoloImpl with uid: %s", uid)
+	clog.Infof("New ConsensusSoloImpl with uid: %s", config.NodeId)
 
 	consensus := &ConsensusSoloImpl{}
-	consensus.chainID = chainID
-	consensus.id = uid
-	consensus.singer = singer
-	consensus.msgbus = msgBus
-	consensus.chainConf = chainConf
+	consensus.chainID = config.ChainId
+	consensus.id = config.NodeId
+	consensus.singer = config.Signer
+	consensus.msgbus = config.MsgBus
+	consensus.chainConf = config.ChainConf
 
 	return consensus, nil
 }

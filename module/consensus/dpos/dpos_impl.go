@@ -15,26 +15,48 @@ import (
 
 	"chainmaker.org/chainmaker/logger/v2"
 
+	"chainmaker.org/chainmaker-go/consensus/implconfig"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
-	"chainmaker.org/chainmaker/pb-go/v2/consensus"
+	consensusPb "chainmaker.org/chainmaker/pb-go/v2/consensus"
 	"chainmaker.org/chainmaker/pb-go/v2/consensus/dpos"
 	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"github.com/gogo/protobuf/proto"
 )
 
+var (
+	//_ protocol.ConsensusState  = (*DPoSImpl)(nil)
+	_ protocol.ConsensusEngine = (*DPoSImpl)(nil)
+)
+
 type DPoSImpl struct {
 	log       protocol.Logger
+
+	protocol.ConsensusEngine
 	chainConf protocol.ChainConf
 	stateDB   protocol.BlockchainStore
 }
 
-func NewDPoSImpl(chainConf protocol.ChainConf, blockChainStore protocol.BlockchainStore) *DPoSImpl {
-	log := logger.GetLoggerByChain(logger.MODULE_DPOS, chainConf.ChainConfig().ChainId)
-	return &DPoSImpl{stateDB: blockChainStore, log: log, chainConf: chainConf}
+func (impl *DPoSImpl) Start() error {
+	// Do nothing, only to implement the protocol.ConsensusEngine interface
+	return nil
 }
 
-func (impl *DPoSImpl) CreateDPoSRWSet(preBlkHash []byte, proposedBlock *consensus.ProposalBlock) error {
+func (impl *DPoSImpl) Stop() error {
+	// Do nothing, only to implement the protocol.ConsensusEngine interface
+	return nil
+}
+
+func NewDPoSImpl(config *implconfig.ConsensusImplConfig) *DPoSImpl {
+	log := logger.GetLoggerByChain(logger.MODULE_DPOS, config.ChainConf.ChainConfig().ChainId)
+	return &DPoSImpl{stateDB: config.Store, log: log, chainConf: config.ChainConf}
+}
+
+func (impl *DPoSImpl) SetConsensusEngine(engine protocol.ConsensusEngine) {
+	impl.ConsensusEngine = engine
+}
+
+func (impl *DPoSImpl) CreateDPoSRWSet(preBlkHash []byte, proposedBlock *consensusPb.ProposalBlock) error {
 	consensusRwSets, err := impl.createDPoSRWSet(preBlkHash, proposedBlock)
 	if err != nil {
 		return err
@@ -46,7 +68,7 @@ func (impl *DPoSImpl) CreateDPoSRWSet(preBlkHash []byte, proposedBlock *consensu
 }
 
 func (impl *DPoSImpl) createDPoSRWSet(
-	preBlkHash []byte, proposedBlock *consensus.ProposalBlock) (*common.TxRWSet, error) {
+	preBlkHash []byte, proposedBlock *consensusPb.ProposalBlock) (*common.TxRWSet, error) {
 	impl.log.Debugf("begin createDPoS rwSet, blockInfo: %d:%x ",
 		proposedBlock.Block.Header.BlockHeight, proposedBlock.Block.Header.BlockHash)
 	// 1. judge consensus: DPoS
@@ -97,7 +119,7 @@ func (impl *DPoSImpl) createDPoSRWSet(
 }
 
 func (impl *DPoSImpl) isDPoSConsensus() bool {
-	return impl.chainConf.ChainConfig().Consensus.Type == consensus.ConsensusType_DPOS
+	return impl.chainConf.ChainConfig().Consensus.Type == consensusPb.ConsensusType_DPOS
 }
 
 func (impl *DPoSImpl) createNewEpoch(
@@ -165,8 +187,8 @@ func (impl *DPoSImpl) addConsensusArgsToBlock(rwSet *common.TxRWSet, block *comm
 	if !impl.isDPoSConsensus() {
 		return nil
 	}
-	consensusArgs := &consensus.BlockHeaderConsensusArgs{
-		ConsensusType: int64(consensus.ConsensusType_DPOS),
+	consensusArgs := &consensusPb.BlockHeaderConsensusArgs{
+		ConsensusType: int64(consensusPb.ConsensusType_DPOS),
 		ConsensusData: rwSet,
 	}
 	argBytes, err := proto.Marshal(consensusArgs)
@@ -188,7 +210,7 @@ func (impl *DPoSImpl) VerifyConsensusArgs(block *common.Block, blockTxRwSet map[
 	}
 
 	localConsensus, err := impl.createDPoSRWSet(
-		block.Header.PreBlockHash, &consensus.ProposalBlock{Block: block, TxsRwSet: blockTxRwSet})
+		block.Header.PreBlockHash, &consensusPb.ProposalBlock{Block: block, TxsRwSet: blockTxRwSet})
 	if err != nil {
 		impl.log.Errorf("get DPoS txRwSets failed, reason: %s", err)
 		return err
@@ -196,8 +218,8 @@ func (impl *DPoSImpl) VerifyConsensusArgs(block *common.Block, blockTxRwSet map[
 
 	var localBz []byte
 	if localConsensus != nil {
-		localBz, err = proto.Marshal(&consensus.BlockHeaderConsensusArgs{
-			ConsensusType: int64(consensus.ConsensusType_DPOS),
+		localBz, err = proto.Marshal(&consensusPb.BlockHeaderConsensusArgs{
+			ConsensusType: int64(consensusPb.ConsensusType_DPOS),
 			ConsensusData: localConsensus,
 		})
 		if err != nil {
@@ -209,7 +231,7 @@ func (impl *DPoSImpl) VerifyConsensusArgs(block *common.Block, blockTxRwSet map[
 		impl.log.Debugf("end VerifyConsensusArgs")
 		return nil
 	}
-	consensusArgs := &consensus.BlockHeaderConsensusArgs{}
+	consensusArgs := &consensusPb.BlockHeaderConsensusArgs{}
 	if err = proto.Unmarshal(block.Header.ConsensusArgs, consensusArgs); err != nil {
 		return fmt.Errorf("unmarshal dpos consensusArgs from blockHeader failed,reason: %s ", err)
 	}

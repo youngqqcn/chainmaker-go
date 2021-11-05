@@ -19,6 +19,7 @@ import (
 
 	"chainmaker.org/chainmaker-go/accesscontrol"
 	"chainmaker.org/chainmaker-go/consensus"
+	"chainmaker.org/chainmaker-go/consensus/implconfig"
 	"chainmaker.org/chainmaker-go/core"
 	"chainmaker.org/chainmaker-go/core/cache"
 	providerConf "chainmaker.org/chainmaker-go/core/provider/conf"
@@ -594,7 +595,7 @@ func (bc *Blockchain) initCore() (err error) {
 
 func (bc *Blockchain) initConsensus() (err error) {
 	// init consensus module
-	var consensusFactory consensus.Factory
+	//var consensusFactory consensus.Factory
 	id := localconf.ChainMakerConfig.NodeConfig.NodeId
 	nodes := bc.chainConf.ChainConfig().Consensus.Nodes
 	nodeIds := make([]string, len(nodes))
@@ -617,25 +618,21 @@ func (bc *Blockchain) initConsensus() (err error) {
 		bc.log.Infof("consensus module existed, ignore.")
 		return
 	}
-	dbHandle := bc.store.GetDBHandle(protocol.ConsensusDBName)
-	bc.consensus, err = consensusFactory.NewConsensusEngine(
-		bc.getConsensusType(),
-		bc.chainId,
-		id,
-		nodeIds,
-		bc.identity,
-		bc.ac,
-		dbHandle,
-		bc.ledgerCache,
-		bc.proposalCache,
-		bc.coreEngine.GetBlockVerifier(),
-		bc.coreEngine.GetBlockCommitter(),
-		bc.netService,
-		bc.msgBus,
-		bc.chainConf,
-		bc.store,
-		bc.coreEngine.GetHotStuffHelper(),
-	)
+
+	config := &implconfig.ConsensusImplConfig{
+		ChainId: bc.chainId,
+		NodeId: id,
+		Ac: bc.ac,
+		Core: bc.coreEngine,
+		ChainConf: bc.chainConf,
+		Signer: bc.identity,
+		Store: bc.store,
+		LedgerCache: bc.ledgerCache,
+		ProposalCache: bc.proposalCache,
+		MsgBus: bc.msgBus,
+	}
+	provider := consensus.GetConsensusProvider(bc.chainConf.ChainConfig().Consensus.Type)
+	bc.consensus, err = provider(config)
 	if err != nil {
 		bc.log.Errorf("new consensus engine failed, %s", err)
 		return err

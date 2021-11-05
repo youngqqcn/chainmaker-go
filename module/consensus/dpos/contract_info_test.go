@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package dpos
 
 import (
+	"chainmaker.org/chainmaker-go/consensus/implconfig"
 	"fmt"
 	"math/big"
 	"testing"
@@ -23,7 +24,12 @@ func initTestImpl(t *testing.T) (*DPoSImpl, func()) {
 	ctrl := gomock.NewController(t)
 	mockStore := newMockBlockChainStore(ctrl)
 	mockConf := newMockChainConf(ctrl)
-	impl := NewDPoSImpl(mockConf, mockStore)
+	config := &implconfig.ConsensusImplConfig{
+		Store:     mockStore,
+		ChainConf: mockConf,
+	}
+	impl := NewDPoSImpl(config)
+
 	return impl, func() { ctrl.Finish() }
 }
 
