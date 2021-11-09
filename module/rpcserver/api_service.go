@@ -23,7 +23,7 @@ import (
 	configPb "chainmaker.org/chainmaker/pb-go/v2/config"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/store/v2/archive"
-	"chainmaker.org/chainmaker/utils/v2"
+	utils "chainmaker.org/chainmaker/utils/v2"
 	native "chainmaker.org/chainmaker/vm-native"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/time/rate"

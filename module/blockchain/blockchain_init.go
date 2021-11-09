@@ -13,13 +13,13 @@ import (
 	"fmt"
 	"strings"
 
-	"chainmaker.org/chainmaker/store/v2"
+	store "chainmaker.org/chainmaker/store/v2"
 
 	componentVm "chainmaker.org/chainmaker-go/vm"
 
 	"chainmaker.org/chainmaker-go/accesscontrol"
-	"chainmaker.org/chainmaker-go/consensus"
-	"chainmaker.org/chainmaker-go/consensus/implconfig"
+	consensus "chainmaker.org/chainmaker/consensus/v2"
+	consensusUtils "chainmaker.org/chainmaker/consensus-utils/v2"
 	"chainmaker.org/chainmaker-go/core"
 	"chainmaker.org/chainmaker-go/core/cache"
 	providerConf "chainmaker.org/chainmaker-go/core/provider/conf"
@@ -28,16 +28,16 @@ import (
 	"chainmaker.org/chainmaker-go/subscriber"
 	blockSync "chainmaker.org/chainmaker-go/sync"
 	"chainmaker.org/chainmaker-go/txpool"
-	"chainmaker.org/chainmaker/chainconf/v2"
+	chainconf "chainmaker.org/chainmaker/chainconf/v2"
 	"chainmaker.org/chainmaker/common/v2/container"
-	"chainmaker.org/chainmaker/localconf/v2"
-	"chainmaker.org/chainmaker/logger/v2"
+	localconf "chainmaker.org/chainmaker/localconf/v2"
+	logger "chainmaker.org/chainmaker/logger/v2"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	consensusPb "chainmaker.org/chainmaker/pb-go/v2/consensus"
 	storePb "chainmaker.org/chainmaker/pb-go/v2/store"
-	"chainmaker.org/chainmaker/protocol/v2"
+	protocol "chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/store/v2/conf"
-	"chainmaker.org/chainmaker/utils/v2"
+	utils "chainmaker.org/chainmaker/utils/v2"
 	"chainmaker.org/chainmaker/vm"
 	"github.com/mitchellh/mapstructure"
 )
@@ -619,7 +619,7 @@ func (bc *Blockchain) initConsensus() (err error) {
 		return
 	}
 
-	config := &implconfig.ConsensusImplConfig{
+	config := &consensusUtils.ConsensusImplConfig{
 		ChainId: bc.chainId,
 		NodeId: id,
 		Ac: bc.ac,

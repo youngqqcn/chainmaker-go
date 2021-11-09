@@ -40,11 +40,11 @@ else
 #  ut_cover "module/blockchain" 2
 #  ut_cover "module/conf/chainconf" 26
 #  ut_cover "module/conf/localconf" 11
-  ut_cover "module/consensus/chainedbft" 1
-  ut_cover "module/consensus/dpos" 50
-  ut_cover "module/consensus/raft" 0
+  #ut_cover "module/consensus/chainedbft" 1
+  #ut_cover "module/consensus/dpos" 50
+  #ut_cover "module/consensus/raft" 0
 #  ut_cover "module/consensus/solo" 0
-  ut_cover "module/consensus/tbft" 10
+  #ut_cover "module/consensus/tbft" 10
   ut_cover "module/core" 2.3
   ut_cover "module/net" 29
 #  ut_cover "module/rpcserver" 0

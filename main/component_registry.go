@@ -1,15 +1,15 @@
 package main
 
 import (
-	"chainmaker.org/chainmaker-go/consensus"
-	"chainmaker.org/chainmaker-go/consensus/chainedbft"
-	"chainmaker.org/chainmaker-go/consensus/dpos"
-	"chainmaker.org/chainmaker-go/consensus/implconfig"
-	"chainmaker.org/chainmaker-go/consensus/raft"
-	"chainmaker.org/chainmaker-go/consensus/solo"
-	"chainmaker.org/chainmaker-go/consensus/tbft"
 	"chainmaker.org/chainmaker-go/txpool"
 	"chainmaker.org/chainmaker-go/vm"
+	chainedbft "chainmaker.org/chainmaker/consensus-chainedbft/v2"
+	dpos "chainmaker.org/chainmaker/consensus-dpos/v2"
+	raft "chainmaker.org/chainmaker/consensus-raft/v2"
+	solo "chainmaker.org/chainmaker/consensus-solo/v2"
+	tbft "chainmaker.org/chainmaker/consensus-tbft/v2"
+	utils "chainmaker.org/chainmaker/consensus-utils/v2"
+	consensus "chainmaker.org/chainmaker/consensus/v2"
 	consensusPb "chainmaker.org/chainmaker/pb-go/v2/consensus"
 	"chainmaker.org/chainmaker/protocol/v2"
 	batch "chainmaker.org/chainmaker/txpool-batch/v2"
@@ -57,15 +57,15 @@ func init() {
 	// consensus
 	consensus.RegisterConsensusProvider(
 		consensusPb.ConsensusType_SOLO,
-		func(config *implconfig.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
+		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
 			return solo.New(config)
 		},
 	)
 
 	consensus.RegisterConsensusProvider(
 		consensusPb.ConsensusType_DPOS,
-		func(config *implconfig.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
-			dposEngine:= dpos.NewDPoSImpl(config)
+		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
+			dposEngine := dpos.NewDPoSImpl(config)
 			tbftEngine, err := tbft.New(config, dposEngine)
 			if err != nil {
 				return nil, err
@@ -77,14 +77,14 @@ func init() {
 
 	consensus.RegisterConsensusProvider(
 		consensusPb.ConsensusType_RAFT,
-		func(config *implconfig.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
+		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
 			return raft.New(config)
 		},
 	)
 
 	consensus.RegisterConsensusProvider(
 		consensusPb.ConsensusType_TBFT,
-		func(config *implconfig.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
+		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
 			dp := dpos.NewNilDPoSImpl()
 			return tbft.New(config, dp)
 		},
@@ -92,7 +92,7 @@ func init() {
 
 	consensus.RegisterConsensusProvider(
 		consensusPb.ConsensusType_HOTSTUFF,
-		func(config *implconfig.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
+		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
 			return chainedbft.New(config)
 		},
 	)

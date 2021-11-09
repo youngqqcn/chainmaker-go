@@ -14,7 +14,7 @@ import (
 
 	"chainmaker.org/chainmaker/common/v2/bytehelper"
 	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
-	"chainmaker.org/chainmaker/utils/v2"
+	utils "chainmaker.org/chainmaker/utils/v2"
 
 	"chainmaker.org/chainmaker-go/subscriber"
 	"chainmaker.org/chainmaker-go/subscriber/model"
