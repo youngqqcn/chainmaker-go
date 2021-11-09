@@ -104,8 +104,8 @@ func (s *ApiService) doSendContractEvent(tx *commonPb.Transaction, db protocol.B
 	)
 
 	// just send realtime contract event
-	// check <= 0 for compatibility
-	if startBlock <= 0 && endBlock <= 0 {
+	// == 0 for compatibility
+	if (startBlock == -1 && endBlock == -1) ||  (startBlock == 0 && endBlock == 0) {
 		return s.sendNewContractEvent(db, tx, server, startBlock, endBlock, contractName, topic, -1)
 	}
 
