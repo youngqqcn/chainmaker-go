@@ -103,6 +103,10 @@ func (s *ApiService) doSendContractEvent(tx *commonPb.Transaction, db protocol.B
 		err                           error
 	)
 
+	if startBlock == -1 && endBlock == 0 {
+		return status.Error(codes.OK, "OK")
+	}
+
 	// just send realtime contract event
 	// == 0 for compatibility
 	if (startBlock == -1 && endBlock == -1) ||  (startBlock == 0 && endBlock == 0) {
