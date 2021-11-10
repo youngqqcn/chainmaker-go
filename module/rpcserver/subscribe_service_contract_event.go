@@ -7,6 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 package rpcserver
 
 import (
+	"errors"
+	"fmt"
+
 	"chainmaker.org/chainmaker-go/subscriber"
 	"chainmaker.org/chainmaker-go/subscriber/model"
 	"chainmaker.org/chainmaker/common/v2/bytehelper"
@@ -15,8 +18,6 @@ import (
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
 	"chainmaker.org/chainmaker/protocol/v2"
-	"errors"
-	"fmt"
 	"github.com/gogo/protobuf/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -35,7 +36,7 @@ func (s *ApiService) dealContractEventSubscription(tx *commonPb.Transaction,
 		startBlock   int64
 		endBlock     int64
 		contractName string
-		topic       string
+		topic        string
 	)
 
 	for _, kv := range payload.Parameters {
@@ -109,7 +110,7 @@ func (s *ApiService) doSendContractEvent(tx *commonPb.Transaction, db protocol.B
 
 	// just send realtime contract event
 	// == 0 for compatibility
-	if (startBlock == -1 && endBlock == -1) ||  (startBlock == 0 && endBlock == 0) {
+	if (startBlock == -1 && endBlock == -1) || (startBlock == 0 && endBlock == 0) {
 		return s.sendNewContractEvent(db, tx, server, startBlock, endBlock, contractName, topic, -1)
 	}
 
@@ -240,14 +241,14 @@ func (s *ApiService) sendSubscribeContractEvent(server apiPb.RpcNode_SubscribeSe
 				}
 
 				eventInfo := commonPb.ContractEventInfo{
-					BlockHeight: block.Header.BlockHeight,
-					ChainId: block.Header.ChainId,
-					Topic: event.Topic,
-					TxId: tx.Payload.TxId,
-					EventIndex: uint32(idx),
-					ContractName: event.ContractName,
+					BlockHeight:     block.Header.BlockHeight,
+					ChainId:         block.Header.ChainId,
+					Topic:           event.Topic,
+					TxId:            tx.Payload.TxId,
+					EventIndex:      uint32(idx),
+					ContractName:    event.ContractName,
 					ContractVersion: event.ContractVersion,
-					EventData: event.EventData,
+					EventData:       event.EventData,
 				}
 
 				eventInfos.ContractEvents = append(eventInfos.ContractEvents, &eventInfo)

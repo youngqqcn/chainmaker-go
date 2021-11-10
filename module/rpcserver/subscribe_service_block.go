@@ -7,6 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 package rpcserver
 
 import (
+	"errors"
+	"fmt"
+
 	"chainmaker.org/chainmaker-go/subscriber"
 	"chainmaker.org/chainmaker-go/subscriber/model"
 	"chainmaker.org/chainmaker/common/v2/bytehelper"
@@ -17,8 +20,6 @@ import (
 	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/utils/v2"
-	"errors"
-	"fmt"
 	"github.com/gogo/protobuf/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -392,4 +393,3 @@ func (s *ApiService) getBlockInfoFromStore(store protocol.BlockchainStore, curbl
 //	}
 //	fmt.Println()
 //}
-

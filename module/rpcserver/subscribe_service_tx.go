@@ -7,6 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 package rpcserver
 
 import (
+	"errors"
+	"fmt"
+	"strings"
+
 	"chainmaker.org/chainmaker-go/subscriber"
 	"chainmaker.org/chainmaker-go/subscriber/model"
 	"chainmaker.org/chainmaker/common/v2/bytehelper"
@@ -15,12 +19,9 @@ import (
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
 	"chainmaker.org/chainmaker/protocol/v2"
-	"errors"
-	"fmt"
 	"github.com/gogo/protobuf/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"strings"
 )
 
 // dealTxSubscription - deal tx subscribe request
@@ -333,7 +334,6 @@ func (s *ApiService) sendSubscribeTx(server apiPb.RpcNode_SubscribeServer,
 	return nil
 }
 
-
 func (s *ApiService) doSendSubscribeTx(server apiPb.RpcNode_SubscribeServer, tx *commonPb.Transaction,
 	reqSender protocol.Role, reqSenderOrgId string) error {
 
@@ -404,4 +404,3 @@ func (s *ApiService) checkIsContinue(tx *commonPb.Transaction, contractName stri
 
 	return false
 }
-
