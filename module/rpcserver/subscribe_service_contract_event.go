@@ -81,7 +81,9 @@ func (s *ApiService) dealContractEventSubscription(tx *commonPb.Transaction,
 	return s.doSendContractEvent(tx, db, server, startBlock, endBlock, contractName, topic)
 }
 
-func (s *ApiService) checkSubscribeContractEventPayload(startBlockHeight, endBlockHeight int64, contractName string) error {
+func (s *ApiService) checkSubscribeContractEventPayload(startBlockHeight, endBlockHeight int64,
+	contractName string) error {
+
 	if startBlockHeight < -1 || endBlockHeight < -1 ||
 		(endBlockHeight != -1 && startBlockHeight > endBlockHeight) {
 
@@ -114,9 +116,15 @@ func (s *ApiService) doSendContractEvent(tx *commonPb.Transaction, db protocol.B
 		return s.sendNewContractEvent(db, tx, server, startBlock, endBlock, contractName, topic, -1)
 	}
 
-	if alreadySendHistoryBlockHeight, err = s.doSendHistoryContractEvent(db, server, startBlock, endBlock,
-		contractName, topic); err != nil {
-		return err
+	if startBlock != -1 {
+		if alreadySendHistoryBlockHeight, err = s.doSendHistoryContractEvent(db, server, startBlock, endBlock,
+			contractName, topic); err != nil {
+			return err
+		}
+	}
+
+	if startBlock == -1 {
+		alreadySendHistoryBlockHeight = -1
 	}
 
 	if alreadySendHistoryBlockHeight == 0 {
@@ -255,7 +263,7 @@ func (s *ApiService) sendSubscribeContractEvent(server apiPb.RpcNode_SubscribeSe
 			}
 		}
 
-		if err = s.doSendSubscribeContractEvent(server, &eventInfos); err != nil {
+		if err = s.doSendSubscribeContractEvent(server, eventInfos.ContractEvents, contractName, topic); err != nil {
 			return err
 		}
 	}
@@ -264,7 +272,7 @@ func (s *ApiService) sendSubscribeContractEvent(server apiPb.RpcNode_SubscribeSe
 }
 
 func (s *ApiService) doSendSubscribeContractEvent(server apiPb.RpcNode_SubscribeServer,
-	eventInfos *commonPb.ContractEventInfoList) error {
+	contractEvents []*commonPb.ContractEventInfo, contractName, topic string) error {
 
 	var (
 		err    error
@@ -272,14 +280,26 @@ func (s *ApiService) doSendSubscribeContractEvent(server apiPb.RpcNode_Subscribe
 		result *commonPb.SubscribeResult
 	)
 
-	if result, err = s.getContractEventSubscribeResult(eventInfos); err != nil {
-		errMsg = fmt.Sprintf("get tx subscribe result failed, %s", err)
+	sendContractEvents := []*commonPb.ContractEventInfo{}
+	for _, EventInfo := range contractEvents {
+		if EventInfo.ContractName != contractName || (topic != "" && EventInfo.Topic != topic) {
+			continue
+		}
+		sendContractEvents = append(sendContractEvents, EventInfo)
+	}
+
+	if len(sendContractEvents) == 0 {
+		return nil
+	}
+
+	if result, err = s.getContractEventSubscribeResult(sendContractEvents); err != nil {
+		errMsg = fmt.Sprintf("get contract event subscribe result failed, %s", err)
 		s.log.Error(errMsg)
 		return errors.New(errMsg)
 	}
 
 	if err := server.Send(result); err != nil {
-		errMsg = fmt.Sprintf("send subscribe tx result failed, %s", err)
+		errMsg = fmt.Sprintf("send subscribe contract event result failed, %s", err)
 		s.log.Error(errMsg)
 		return errors.New(errMsg)
 	}
@@ -292,11 +312,11 @@ func (s *ApiService) sendNewContractEvent(store protocol.BlockchainStore, tx *co
 	contractName string, topic string, alreadySendHistoryBlockHeight int64) error {
 
 	var (
-		errCode         commonErr.ErrCode
-		err             error
-		errMsg          string
-		eventSubscriber *subscriber.EventSubscriber
-		result          *commonPb.SubscribeResult
+		errCode            commonErr.ErrCode
+		err                error
+		errMsg             string
+		eventSubscriber    *subscriber.EventSubscriber
+		historyBlockHeight int64
 	)
 
 	eventCh := make(chan model.NewContractEvent)
@@ -323,7 +343,7 @@ func (s *ApiService) sendNewContractEvent(store protocol.BlockchainStore, tx *co
 
 			if alreadySendHistoryBlockHeight != -1 &&
 				blockHeight > alreadySendHistoryBlockHeight {
-				historyBlockHeight, err := s.sendHistoryContractEvent(store, server, alreadySendHistoryBlockHeight+1,
+				historyBlockHeight, err = s.sendHistoryContractEvent(store, server, alreadySendHistoryBlockHeight+1,
 					blockHeight, contractName, topic)
 				if err != nil {
 					s.log.Errorf("send history contract event failed, %s", err)
@@ -338,25 +358,8 @@ func (s *ApiService) sendNewContractEvent(store protocol.BlockchainStore, tx *co
 				continue
 			}
 
-			sendEventInfoList := &commonPb.ContractEventInfoList{}
-			for _, EventInfo := range contractEventInfoList {
-				if EventInfo.ContractName != contractName || (topic != "" && EventInfo.Topic != topic) {
-					continue
-				}
-				sendEventInfoList.ContractEvents = append(sendEventInfoList.ContractEvents, EventInfo)
-			}
-
-			if len(sendEventInfoList.ContractEvents) > 0 {
-				if result, err = s.getContractEventSubscribeResult(sendEventInfoList); err != nil {
-					s.log.Error(err.Error())
-					return status.Error(codes.Internal, err.Error())
-				}
-
-				if err := server.Send(result); err != nil {
-					err = fmt.Errorf("send block info by realtime failed, %s", err)
-					s.log.Error(err.Error())
-					return status.Error(codes.Internal, err.Error())
-				}
+			if err = s.doSendSubscribeContractEvent(server, contractEventInfoList, contractName, topic); err != nil {
+				return status.Error(codes.Internal, errMsg)
 			}
 
 			if endBlock > 0 && blockHeight >= endBlock {
@@ -371,10 +374,14 @@ func (s *ApiService) sendNewContractEvent(store protocol.BlockchainStore, tx *co
 	}
 }
 
-func (s *ApiService) getContractEventSubscribeResult(contractEventsInfoList *commonPb.ContractEventInfoList) (
+//func (s *ApiService) getContractEventSubscribeResult(contractEventsInfoList *commonPb.ContractEventInfoList) (
+func (s *ApiService) getContractEventSubscribeResult(contractEvents []*commonPb.ContractEventInfo) (
 	*commonPb.SubscribeResult, error) {
 
-	eventBytes, err := proto.Marshal(contractEventsInfoList)
+	eventBytes, err := proto.Marshal(&commonPb.ContractEventInfoList{
+		ContractEvents: contractEvents,
+	})
+
 	if err != nil {
 		errMsg := fmt.Sprintf("marshal contract event info failed, %s", err)
 		s.log.Error(errMsg)
