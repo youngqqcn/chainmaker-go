@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 package snapshot
 
 import (
+	"chainmaker.org/chainmaker/common/v2/bitmap"
 	"chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	"fmt"
 	"sync"
@@ -321,19 +322,6 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 		return dag
 	}
 	dag.Vertexes = make([]*commonPb.DAG_Neighbor, txCount)
-	//dictIndex := 0
-	readKeyDict := make(map[string][]uint32, 1024)
-	writeKeyDict := make(map[string][]uint32, 1024)
-	for i := uint32(0); i < txCount; i++ {
-		readTableItemForI := s.txRWSetTable[i].TxReads
-		writeTableItemForI := s.txRWSetTable[i].TxWrites
-		for _, keyForI := range readTableItemForI {
-			readKeyDict[string(keyForI.Key)] = append(readKeyDict[string(keyForI.Key)], i)
-		}
-		for _, keyForI := range writeTableItemForI {
-			writeKeyDict[string(keyForI.Key)] = append(readKeyDict[string(keyForI.Key)], i)
-		}
-	}
 
 	if isSql {
 		for i := uint32(0); i < txCount; i++ {
@@ -346,48 +334,125 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 		}
 		return dag
 	}
-
+	readKeyDict, writeKeyDict, readPos, writePos := s.buildDictAndPos(txCount)
+	reachMap := make([]*bitmap.Bitmap, txCount)
+	// build vertexes
 	for i := uint32(0); i < txCount; i++ {
-		readTableItemForI := s.txRWSetTable[i].TxReads
-		writeTableItemForI := s.txRWSetTable[i].TxWrites
+		directReachMap := s.buildReachMap(i, readKeyDict, writeKeyDict, readPos, writePos, reachMap)
 		dag.Vertexes[i] = &commonPb.DAG_Neighbor{
 			Neighbors: make([]uint32, 0, 16),
 		}
-
-		for _, keyForI := range readTableItemForI {
-			for j := 0; j < len(writeKeyDict[string(keyForI.Key)]); j++ {
-				if writeKeyDict[string(keyForI.Key)][j] >= i {
-					break
-				}
-				dag.Vertexes[i].Neighbors = append(dag.Vertexes[i].Neighbors, writeKeyDict[string(keyForI.Key)][j])
-			}
-		}
-		for _, keyForI := range writeTableItemForI {
-			for j := 0; j < len(readKeyDict[string(keyForI.Key)]); j++ {
-				if readKeyDict[string(keyForI.Key)][j] >= i {
-					break
-				}
-				dag.Vertexes[i].Neighbors = append(dag.Vertexes[i].Neighbors, readKeyDict[string(keyForI.Key)][j])
-			}
-			for j := 0; j < len(writeKeyDict[string(keyForI.Key)]); j++ {
-				if writeKeyDict[string(keyForI.Key)][j] >= i {
-					break
-				}
-				dag.Vertexes[i].Neighbors = append(dag.Vertexes[i].Neighbors, writeKeyDict[string(keyForI.Key)][j])
-			}
+		for _, j := range directReachMap.Pos1() {
+			dag.Vertexes[i].Neighbors = append(dag.Vertexes[i].Neighbors, uint32(j))
 		}
 	}
 	log.Infof("build DAG for block %d finished", s.blockHeight)
 	return dag
 }
 
-//// According to the read-write table, the read-write dependency is checked from back to front to determine whether
-//// the transaction can be executed concurrently.
-//// From the process of building the read-write table, we have known that every transaction is based on a known
-//// world state, or cache state. As long as the world state or cache state that the tx depends on does not
-//// change during the execution, then the execution result of the transaction is determined.
-//// We need to ensure that when validating the DAG, there is no possibility that the execution of other
-//// transactions will affect the dependence of the current transaction
+func (s *SnapshotImpl) buildDictAndPos(txCount uint32) (map[string][]uint32, map[string][]uint32,
+	map[uint32]map[string]uint32, map[uint32]map[string]uint32) {
+	readKeyDict := make(map[string][]uint32, 1024)
+	writeKeyDict := make(map[string][]uint32, 1024)
+	readPos := make(map[uint32]map[string]uint32)
+	writePos := make(map[uint32]map[string]uint32)
+	for i := uint32(0); i < txCount; i++ {
+		readTableItemForI := s.txRWSetTable[i].TxReads
+		writeTableItemForI := s.txRWSetTable[i].TxWrites
+		readPos[i] = make(map[string]uint32)
+		writePos[i] = make(map[string]uint32)
+		for _, keyForI := range readTableItemForI {
+			key := string(keyForI.Key)
+			readKeyDict[key] = append(readKeyDict[key], i)
+			readPos[i][key] = uint32(len(readKeyDict[key]))
+			writePos[i][key] = uint32(len(writeKeyDict[key]))
+		}
+		for _, keyForI := range writeTableItemForI {
+			key := string(keyForI.Key)
+			writeKeyDict[key] = append(writeKeyDict[key], i)
+			writePos[i][key] = uint32(len(writeKeyDict[key]))
+			_, ok := readPos[i][key]
+			if !ok {
+				readPos[i][key] = uint32(len(readKeyDict[key]))
+			}
+		}
+	}
+	return readKeyDict, writeKeyDict, readPos, writePos
+}
+
+func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[string][]uint32,
+	readPos, writePos map[uint32]map[string]uint32, reachMap []*bitmap.Bitmap) *bitmap.Bitmap {
+	readTableItemForI := s.txRWSetTable[i].TxReads
+	writeTableItemForI := s.txRWSetTable[i].TxWrites
+	allReachForI := &bitmap.Bitmap{}
+	allReachForI.Set(int(i))
+	directReachForI := &bitmap.Bitmap{}
+	//ReadSet && WriteSet conflict
+	for _, keyForI := range readTableItemForI {
+		readKey := string(keyForI.Key)
+		writeKeyTxs := writeKeyDict[readKey]
+		if len(writeKeyTxs) == 0 {
+			continue
+		}
+		j := int(writePos[i][readKey])
+		if j == 0 {
+			continue
+		}
+		j--
+		for ; j >= 0; j-- {
+			if allReachForI.Has(int(writeKeyTxs[j])) {
+				continue
+			}
+			directReachForI.Set(int(writeKeyTxs[j]))
+			allReachForI.Or(reachMap[j])
+		}
+	}
+	//WriteSet and (ReadSet, WriteSet) conflict
+	for _, keyForI := range writeTableItemForI {
+		writeKey := string(keyForI.Key)
+		readKeyTxs := readKeyDict[writeKey]
+		if len(readKeyTxs) == 0 {
+			continue
+		}
+		j := int(readPos[i][writeKey])
+		if j == 0 {
+			continue
+		}
+		j--
+		for ; j >= 0; j-- {
+			if allReachForI.Has(int(readKeyTxs[j])) {
+				continue
+			}
+			directReachForI.Set(int(readKeyTxs[j]))
+			allReachForI.Or(reachMap[j])
+		}
+		writeKeyTxs := writeKeyDict[writeKey]
+		if len(writeKeyTxs) == 0 {
+			continue
+		}
+		j = int(writePos[i][writeKey])
+		if j == 0 {
+			continue
+		}
+		j--
+		for ; j >= 0; j-- {
+			if allReachForI.Has(int(writeKeyTxs[j])) {
+				continue
+			}
+			directReachForI.Set(int(writeKeyTxs[j]))
+			allReachForI.Or(reachMap[j])
+		}
+	}
+	reachMap[i] = allReachForI
+	return directReachForI
+}
+// According to the read-write table, the read-write dependency is checked from back to front to determine whether
+// the transaction can be executed concurrently.
+// From the process of building the read-write table, we have known that every transaction is based on a known
+// world state, or cache state. As long as the world state or cache state that the tx depends on does not
+// change during the execution, then the execution result of the transaction is determined.
+// We need to ensure that when validating the DAG, there is no possibility that the execution of other
+// transactions will affect the dependence of the current transaction
 //func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 //	s.lock.RLock()
 //	defer s.lock.RUnlock()
@@ -465,7 +530,7 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 //	log.Infof("build DAG for block %d finished", s.blockHeight)
 //	return dag
 //}
-//
+////
 //// check reachability one by one, then build table
 //func (s *SnapshotImpl) buildReach(i int, reachFromI *bitmap.Bitmap,
 //	readBitmaps []*bitmap.Bitmap, writeBitmaps []*bitmap.Bitmap,
