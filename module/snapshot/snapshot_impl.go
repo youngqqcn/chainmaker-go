@@ -320,7 +320,7 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 	if txCount == 0 {
 		return dag
 	}
-
+	dag.Vertexes = make([]*commonPb.DAG_Neighbor, txCount)
 	//dictIndex := 0
 	readKeyDict := make(map[string][]uint32, 1024)
 	writeKeyDict := make(map[string][]uint32, 1024)
