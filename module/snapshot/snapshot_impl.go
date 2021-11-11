@@ -311,8 +311,8 @@ func (s *SnapshotImpl) Seal() {
 
 // BuildDAG build the block dag according to the read-write table
 func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 
 	txCount := uint32(len(s.txTable))
 	log.Infof("start to build DAG for block %d with %d txs", s.blockHeight, txCount)
@@ -367,7 +367,7 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 				if readKeyDict[string(keyForI.Key)][j] >= i {
 					break
 				}
-				dag.Vertexes[i].Neighbors = append(dag.Vertexes[i].Neighbors, writeKeyDict[string(keyForI.Key)][j])
+				dag.Vertexes[i].Neighbors = append(dag.Vertexes[i].Neighbors, readKeyDict[string(keyForI.Key)][j])
 			}
 			for j := 0; j < len(writeKeyDict[string(keyForI.Key)]); j++ {
 				if writeKeyDict[string(keyForI.Key)][j] >= i {
