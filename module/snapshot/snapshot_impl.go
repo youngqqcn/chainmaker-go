@@ -363,18 +363,18 @@ func (s *SnapshotImpl) buildDictAndPos(txCount uint32) (map[string][]uint32, map
 		writePos[i] = make(map[string]uint32)
 		for _, keyForI := range readTableItemForI {
 			key := string(keyForI.Key)
-			readKeyDict[key] = append(readKeyDict[key], i)
 			readPos[i][key] = uint32(len(readKeyDict[key]))
 			writePos[i][key] = uint32(len(writeKeyDict[key]))
+			readKeyDict[key] = append(readKeyDict[key], i)
 		}
 		for _, keyForI := range writeTableItemForI {
 			key := string(keyForI.Key)
-			writeKeyDict[key] = append(writeKeyDict[key], i)
 			writePos[i][key] = uint32(len(writeKeyDict[key]))
 			_, ok := readPos[i][key]
 			if !ok {
 				readPos[i][key] = uint32(len(readKeyDict[key]))
 			}
+			writeKeyDict[key] = append(writeKeyDict[key], i)
 		}
 	}
 	return readKeyDict, writeKeyDict, readPos, writePos
@@ -394,17 +394,13 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 		if len(writeKeyTxs) == 0 {
 			continue
 		}
-		j := int(writePos[i][readKey])
-		if j == 0 {
-			continue
-		}
-		j--
+		j := int(writePos[i][readKey]) - 1
 		for ; j >= 0; j-- {
 			if allReachForI.Has(int(writeKeyTxs[j])) {
 				continue
 			}
 			directReachForI.Set(int(writeKeyTxs[j]))
-			allReachForI.Or(reachMap[j])
+			allReachForI.Or(reachMap[writeKeyTxs[j]])
 		}
 	}
 	//WriteSet and (ReadSet, WriteSet) conflict
@@ -414,33 +410,25 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 		if len(readKeyTxs) == 0 {
 			continue
 		}
-		j := int(readPos[i][writeKey])
-		if j == 0 {
-			continue
-		}
-		j--
+		j := int(readPos[i][writeKey]) - 1
 		for ; j >= 0; j-- {
 			if allReachForI.Has(int(readKeyTxs[j])) {
 				continue
 			}
 			directReachForI.Set(int(readKeyTxs[j]))
-			allReachForI.Or(reachMap[j])
+			allReachForI.Or(reachMap[readKeyTxs[j]])
 		}
 		writeKeyTxs := writeKeyDict[writeKey]
 		if len(writeKeyTxs) == 0 {
 			continue
 		}
-		j = int(writePos[i][writeKey])
-		if j == 0 {
-			continue
-		}
-		j--
+		j = int(writePos[i][writeKey]) - 1
 		for ; j >= 0; j-- {
 			if allReachForI.Has(int(writeKeyTxs[j])) {
 				continue
 			}
 			directReachForI.Set(int(writeKeyTxs[j]))
-			allReachForI.Or(reachMap[j])
+			allReachForI.Or(reachMap[writeKeyTxs[j]])
 		}
 	}
 	reachMap[i] = allReachForI
