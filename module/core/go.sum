@@ -4,9 +4,9 @@ chainmaker.org/chainmaker/chainconf/v2 v2.0.0-20211025081513-28594b541181/go.mod
 chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211014122130-4ba9d85a64f8/go.mod h1:jedib7j/RzHzLk0Z4axQ8jZX5gRCdtnRf1WYAMGzYL0=
 chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211015124616-4d3c85fa0a79/go.mod h1:jedib7j/RzHzLk0Z4axQ8jZX5gRCdtnRf1WYAMGzYL0=
 chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211020133403-66958ba788b8/go.mod h1:moutWpXQGfyrFcXozw60ZXjpwj1Jfg6N5kkJdtwOxFM=
-chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211025091405-b52d2356a39e/go.mod h1:moutWpXQGfyrFcXozw60ZXjpwj1Jfg6N5kkJdtwOxFM=
-chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211101030932-bf3bcb20eb52 h1:tZWkDjNoQHj2i+ZHbWnzwaBHs77DyA3GgZL08eJsaiU=
 chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211101030932-bf3bcb20eb52/go.mod h1:moutWpXQGfyrFcXozw60ZXjpwj1Jfg6N5kkJdtwOxFM=
+chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211111105523-441fed4a8603 h1:h3oXapl0DjrIe6lpL0j9mQp+RXhAYjYIOMNqNDieCyY=
+chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211111105523-441fed4a8603/go.mod h1:moutWpXQGfyrFcXozw60ZXjpwj1Jfg6N5kkJdtwOxFM=
 chainmaker.org/chainmaker/localconf/v2 v2.0.0-20211014134424-9431ffcc5bbc/go.mod h1:p3YhnL3L/axKerYbJ0OdYiMCyyGMprbKwTGtupNlA0U=
 chainmaker.org/chainmaker/localconf/v2 v2.0.0-20211101111610-0d268248b5c8 h1:rNkqwgUBXEgIBBiHBDJ7QY1898dWVjLVWuDWEtcRHGs=
 chainmaker.org/chainmaker/localconf/v2 v2.0.0-20211101111610-0d268248b5c8/go.mod h1:p3YhnL3L/axKerYbJ0OdYiMCyyGMprbKwTGtupNlA0U=
