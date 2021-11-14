@@ -11,12 +11,12 @@ require (
 	chainmaker.org/chainmaker-go/txpool v0.0.0
 	chainmaker.org/chainmaker-go/vm v0.0.0
 	chainmaker.org/chainmaker/common/v2 v2.1.0
-	chainmaker.org/chainmaker/consensus-chainedbft/v2 v2.0.0-20211112163433-f0dab0eb58b8
+	chainmaker.org/chainmaker/consensus-chainedbft/v2 v2.0.0-20211114125204-a103fd7d5095
 	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211112092735-d15ea84c5f44
 	chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20211112163240-bd1b63cc16bb
 	chainmaker.org/chainmaker/consensus-solo/v2 v2.0.0-20211112091638-d0d658ddbdfa
 	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20211112163347-05006087b5d8
-	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211112075449-b2b8e6366203
+	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211114123151-70b5da68f448
 	chainmaker.org/chainmaker/consensus/v2 v2.0.0-20211112163732-66772d402b44
 	chainmaker.org/chainmaker/localconf/v2 v2.0.0-20211101111610-0d268248b5c8
 	chainmaker.org/chainmaker/logger/v2 v2.1.0
