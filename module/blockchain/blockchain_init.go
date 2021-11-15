@@ -625,6 +625,7 @@ func (bc *Blockchain) initConsensus() (err error) {
 		Ac: bc.ac,
 		Core: bc.coreEngine,
 		ChainConf: bc.chainConf,
+		NetService: bc.netService,
 		Signer: bc.identity,
 		Store: bc.store,
 		LedgerCache: bc.ledgerCache,
