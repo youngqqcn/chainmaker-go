@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package scheduler
 
 import (
-	"chainmaker.org/chainmaker/vm"
+	"chainmaker.org/chainmaker/vm/v2"
 	//	"encoding/hex"
 	"errors"
 	"fmt"
