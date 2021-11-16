@@ -20,7 +20,7 @@ require (
 	chainmaker.org/chainmaker/protocol/v2 v2.0.1-0.20211109074216-fc2674ef6e22
 	chainmaker.org/chainmaker/store/v2 v2.0.1-0.20211104065448-86cab932b46b
 	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211109074701-81d58330e787
-	chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211116035000-afce90d77990
+	chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211116120002-c392a1cc6f0d
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect

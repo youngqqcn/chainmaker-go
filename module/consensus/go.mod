@@ -8,11 +8,11 @@ require (
 	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211108032042-88ed7467a15c
 	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211109075212-1129a47532af
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211109074349-f79af5e1892d
-	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211110061812-59066acb69f1
+	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211116085655-9eaa716db1d7
 	chainmaker.org/chainmaker/protocol/v2 v2.0.1-0.20211109074216-fc2674ef6e22
 	chainmaker.org/chainmaker/raftwal/v2 v2.0.3
 	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211109074701-81d58330e787
-	chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211110080324-c2bd9d2fb97b
+	chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211116115002-4c909f09e953
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/mock v1.6.0
