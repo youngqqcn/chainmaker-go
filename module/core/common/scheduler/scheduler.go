@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package scheduler
 
 import (
-	"chainmaker.org/chainmaker/vm/v2"
+	"strconv"
 	//	"encoding/hex"
 	"errors"
 	"fmt"
@@ -18,7 +18,9 @@ import (
 	"chainmaker.org/chainmaker-go/core/provider/conf"
 	"chainmaker.org/chainmaker/localconf/v2"
 	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
+	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
 	"chainmaker.org/chainmaker/protocol/v2"
+	"chainmaker.org/chainmaker/vm/v2"
 	"github.com/panjf2000/ants/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	//	acpb "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
@@ -486,11 +488,46 @@ func (ts *TxScheduler) runVM(tx *commonpb.Transaction, txSimContext protocol.TxS
 	//	RuntimeType:     runtimeType,
 	//}
 
+	// charge gas limit
+    if ts.chainConf.ChainConfig().Scheduler.GetEnableGas() {
+		gasLimit, err := strconv.Atoi(string(tx.Payload.Limit))
+		if err != nil {
+			return nil, err
+		}
+		getBalanceContract, err := txSimContext.GetContractByName(syscontract.SystemContract_ACCOUNT_MANAGER.String())
+		runContract, _ := ts.VmManager.RunContract(getBalanceContract, syscontract.GasAccountFunction_CHARGE_GAS.String(), nil, parameters, txSimContext, 0, commonpb.TxType_QUERY_CONTRACT)
+
+		banlance, err := strconv.Atoi(string(runContract.Result))
+		if err != nil {
+			return nil, err
+		}
+		if banlance > gasLimit {
+		}
+	}
+
+
 	contractResultPayload, txStatusCode := ts.VmManager.RunContract(
 		contract, method, byteCode, parameters, txSimContext, 0, tx.Payload.TxType)
 
 	result.Code = txStatusCode
 	result.ContractResult = contractResultPayload
+
+	// refund gas
+	if ts.chainConf.ChainConfig().Scheduler.GetEnableGas()  {
+		gasLimit, err := strconv.Atoi(string(tx.Payload.Limit))
+		if err != nil {
+			return nil, err
+		}
+		getBalanceContract, err := txSimContext.GetContractByName(syscontract.SystemContract_ACCOUNT_MANAGER.String())
+		runContract, _ := ts.VmManager.RunContract(getBalanceContract, syscontract.GasAccountFunction_CHARGE_GAS.String(), nil, parameters, txSimContext, 0, commonpb.TxType_QUERY_CONTRACT)
+
+		banlance, err := strconv.Atoi(string(runContract.Result))
+		if err != nil {
+			return nil, err
+		}
+		if banlance > gasLimit {
+		}
+	}
 
 	if txStatusCode == commonpb.TxStatusCode_SUCCESS {
 		return result, nil
