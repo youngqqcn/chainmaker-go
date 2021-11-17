@@ -168,3 +168,5 @@ core:
   evidence: false
 scheduler:
   rwset_log: false #whether log the txRWSet map in the debug mode
+
+crypto_engine: tjfoc #密码算法库底层引擎，目前支持gmssl、tencentsm以及tjfoc，默认为tjfoc

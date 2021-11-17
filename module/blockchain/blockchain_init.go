@@ -13,6 +13,8 @@ import (
 	"fmt"
 	"strings"
 
+	"chainmaker.org/chainmaker/common/v2/crypto/asym"
+
 	"chainmaker.org/chainmaker/store/v2"
 
 	componentVm "chainmaker.org/chainmaker-go/vm"
@@ -361,6 +363,8 @@ func (bc *Blockchain) initAC() (err error) {
 		bc.log.Errorf("new ac provider failed, %s", err.Error())
 		return
 	}
+	//init crypto engine for ac
+	asym.InitCryptoEngine(localconf.ChainMakerConfig.CryptoEngine, false)
 
 	switch bc.chainConf.ChainConfig().AuthType {
 	case protocol.PermissionedWithCert, protocol.Identity:
