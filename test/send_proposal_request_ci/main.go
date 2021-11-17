@@ -80,6 +80,7 @@ var caPaths = []string{certPathPrefix + "/crypto-config/wx-org1.chainmaker.org/c
 // vm wasmer 整体功能测试，合约创建、升级、执行、查询、冻结、解冻、吊销、交易区块的查询、链配置信息的查询
 func main() {
 	common.SetCertPathPrefix(certPathPrefix)
+	nativeTest()
 	evmtest()
 	initWasmerTest()
 	runTest()
@@ -1092,4 +1093,123 @@ func checkErr(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func nativeTest() {
+	runtimeType = commonPb.RuntimeType_NATIVE
+	contractName = syscontract.SystemContract_T.String()
+	fmt.Println("contractName:", contractName)
+
+	flag.Parse()
+	common.SetCertPathPrefix(certPathPrefix)
+
+	conn, err := initGRPCConnect(true)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer conn.Close()
+	c := apiPb.NewRpcNodeClient(conn)
+	client := &c
+
+	file, err := ioutil.ReadFile(userKeyPath)
+	if err != nil {
+		panic(err)
+	}
+
+	sk3, err := asym.PrivateKeyFromPEM(file, nil)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("---------------调用T合约的P方法-------------")
+	txId := testNativePut(sk3, client, CHAIN1)
+	testWaitTx(sk3, client, CHAIN1, txId)
+	testGetTxByTxId(sk3, client, txId, CHAIN1)
+	fmt.Println("---------------调用T合约的G方法查询-------------")
+	getResult := testNativeGet(sk3, client, CHAIN1, userCrtPath)
+	if getResult != "长安链chainmaker" {
+		panic("T.G query fail")
+	}
+	fmt.Println("---------------调用T合约的N方法-------------")
+	txId = testNativeNothing(sk3, client, CHAIN1)
+	testWaitTx(sk3, client, CHAIN1, txId)
+	testGetTxByTxId(sk3, client, txId, CHAIN1)
+}
+
+func testNativePut(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId string) string {
+	txId := utils.GetRandTxId()
+	fmt.Printf("\n============ invoke contract %s[N] [%s] ============\n", contractName, txId)
+	// 构造Payload
+	pairs := []*commonPb.KeyValuePair{
+		{
+			Key:   "k",
+			Value: []byte("Name"),
+		},
+		{
+			Key:   "v",
+			Value: []byte("长安链chainmaker"),
+		},
+	}
+	payload := &commonPb.Payload{
+		ContractName: syscontract.SystemContract_T.String(),
+		Method:       syscontract.TestContractFunction_P.String(),
+		Parameters:   pairs,
+	}
+	resp := common.ProposalRequest(sk3, client, commonPb.TxType_INVOKE_CONTRACT,
+		chainId, txId, payload, nil)
+
+	fmt.Printf(logTempSendTx, resp.Code, resp.Message, resp.TxId, resp.ContractResult)
+	return txId
+}
+
+func testNativeGet(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId string, certPath string) string {
+	txId := utils.GetRandTxId()
+	fmt.Printf("\n============ query contract [%s] ============\n", txId)
+
+	// 构造Payload
+	pairs := []*commonPb.KeyValuePair{
+		{
+			Key:   "k",
+			Value: []byte("Name"),
+		},
+	}
+
+	payload := &commonPb.Payload{
+		ContractName: syscontract.SystemContract_T.String(),
+		Method:       syscontract.TestContractFunction_G.String(),
+		Parameters:   pairs,
+	}
+
+	resp := proposalRequest(sk3, client, commonPb.TxType_QUERY_CONTRACT,
+		chainId, txId, payload)
+	result := resp.ContractResult.Result
+
+	fmt.Printf("send tx resp: code:%d, msg:%s, payload:%+v\n", resp.Code, resp.Message, resp.ContractResult)
+	return string(result)
+}
+
+func testNativeNothing(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId string) string {
+	txId := utils.GetRandTxId()
+	fmt.Printf("\n============ invoke contract %s[N] [%s] ============\n", contractName, txId)
+	// 构造Payload
+	pairs := []*commonPb.KeyValuePair{
+		{
+			Key:   "kk",
+			Value: []byte("Name"),
+		},
+		{
+			Key:   "vv",
+			Value: []byte("长安链chainmaker"),
+		},
+	}
+	payload := &commonPb.Payload{
+		ContractName: syscontract.SystemContract_T.String(),
+		Method:       syscontract.TestContractFunction_N.String(),
+		Parameters:   pairs,
+	}
+	resp := common.ProposalRequest(sk3, client, commonPb.TxType_INVOKE_CONTRACT,
+		chainId, txId, payload, nil)
+
+	fmt.Printf(logTempSendTx, resp.Code, resp.Message, resp.TxId, resp.ContractResult)
+	return txId
 }

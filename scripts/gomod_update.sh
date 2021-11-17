@@ -109,12 +109,12 @@ go get chainmaker.org/chainmaker/pb-go/v2@${BRANCH}
 go get chainmaker.org/chainmaker/common/v2@${BRANCH}
 go mod tidy
 
-#cd ../tools/cmc
-#go get chainmaker.org/chainmaker/protocol/v2@${BRANCH}
-#go get chainmaker.org/chainmaker/sdk-go/v2@${BRANCH}
-#go get chainmaker.org/chainmaker/pb-go/v2@${BRANCH}
-#go get chainmaker.org/chainmaker/common/v2@${BRANCH}
-#go mod tidy
+cd ../../tools/cmc
+go get chainmaker.org/chainmaker/protocol/v2@${BRANCH}
+go get chainmaker.org/chainmaker/sdk-go/v2@${BRANCH}
+go get chainmaker.org/chainmaker/pb-go/v2@${BRANCH}
+go get chainmaker.org/chainmaker/common/v2@${BRANCH}
+go mod tidy
 
 cd ../../
 go get chainmaker.org/chainmaker/protocol/v2@${BRANCH}

@@ -3,9 +3,9 @@ module chainmaker.org/chainmaker-go/blockchain
 go 1.15
 
 require (
-	chainmaker.org/chainmaker-go/accesscontrol v0.0.0
-	chainmaker.org/chainmaker-go/consensus v0.0.0
-	chainmaker.org/chainmaker-go/core v0.0.0
+	chainmaker.org/chainmaker-go/accesscontrol v0.0.0-00010101000000-000000000000
+	chainmaker.org/chainmaker-go/consensus v0.0.0-00010101000000-000000000000
+	chainmaker.org/chainmaker-go/core v0.0.0-00010101000000-000000000000
 	chainmaker.org/chainmaker-go/net v0.0.0
 	chainmaker.org/chainmaker-go/snapshot v0.0.0
 	chainmaker.org/chainmaker-go/subscriber v0.0.0
@@ -16,12 +16,12 @@ require (
 	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211117131805-630800bfd361
 	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211110030026-ce2a7f3760cd
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211109074349-f79af5e1892d
-	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211110082822-61bdedd084bd
+	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211117140137-9095a7ab7a69
 	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211116092258-b0de845d438c
 	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211117095955-216c6fa45438
 	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20211109075600-a0a811fe0650 // indirect
-	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211109074701-81d58330e787
-	chainmaker.org/chainmaker/vm v0.0.0-20211028094551-9b2cca96d10d
+	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211117144316-3f4a940e94f0
+	chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211117062641-a1b17375caf8
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/hokaccha/go-prettyjson v0.0.0-20210113012101-fb4e108d2519 // indirect
 	github.com/mattn/go-colorable v0.1.11 // indirect

@@ -10,14 +10,13 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/golang/mock/gomock"
-
 	"chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/protocol/v2/mock"
 	"chainmaker.org/chainmaker/protocol/v2/test"
-	"chainmaker.org/chainmaker/vm"
+	"chainmaker.org/chainmaker/vm/v2"
+	"github.com/golang/mock/gomock"
 )
 
 var snapshotEvidence = &SnapshotEvidence{

@@ -7,7 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 package scheduler
 
 import (
-	"chainmaker.org/chainmaker/vm"
+	"encoding/json"
+
+	"chainmaker.org/chainmaker/vm/v2"
 	//	"encoding/hex"
 	"errors"
 	"fmt"
@@ -479,6 +481,12 @@ func (ts *TxScheduler) runVM(tx *commonpb.Transaction, txSimContext protocol.TxS
 			ts.log.Errorf("Get contract bytecode by name[%s] error:%s", contractName, err)
 			return nil, err
 		}
+	} else {
+		ts.log.DebugDynamic(func() string {
+			contractData, _ := json.Marshal(contract)
+			return fmt.Sprintf("contract[%s] is a native contract, defination:%s",
+				contractName, string(contractData))
+		})
 	}
 	//contract = &commonpb.Contract{
 	//	ContractName:    contractName,

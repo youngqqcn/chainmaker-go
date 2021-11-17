@@ -13,10 +13,6 @@ import (
 	"fmt"
 	"strings"
 
-	"chainmaker.org/chainmaker/store/v2"
-
-	componentVm "chainmaker.org/chainmaker-go/vm"
-
 	"chainmaker.org/chainmaker-go/accesscontrol"
 	"chainmaker.org/chainmaker-go/consensus"
 	"chainmaker.org/chainmaker-go/core"
@@ -27,6 +23,7 @@ import (
 	"chainmaker.org/chainmaker-go/subscriber"
 	blockSync "chainmaker.org/chainmaker-go/sync"
 	"chainmaker.org/chainmaker-go/txpool"
+	componentVm "chainmaker.org/chainmaker-go/vm"
 	"chainmaker.org/chainmaker/chainconf/v2"
 	"chainmaker.org/chainmaker/common/v2/container"
 	"chainmaker.org/chainmaker/localconf/v2"
@@ -35,9 +32,10 @@ import (
 	consensusPb "chainmaker.org/chainmaker/pb-go/v2/consensus"
 	storePb "chainmaker.org/chainmaker/pb-go/v2/store"
 	"chainmaker.org/chainmaker/protocol/v2"
+	"chainmaker.org/chainmaker/store/v2"
 	"chainmaker.org/chainmaker/store/v2/conf"
 	"chainmaker.org/chainmaker/utils/v2"
-	"chainmaker.org/chainmaker/vm"
+	"chainmaker.org/chainmaker/vm/v2"
 	"github.com/mitchellh/mapstructure"
 )
 
