@@ -18,7 +18,7 @@ import (
 	componentVm "chainmaker.org/chainmaker-go/vm"
 
 	"chainmaker.org/chainmaker-go/accesscontrol"
-	consensus "chainmaker.org/chainmaker/consensus/v2"
+	"chainmaker.org/chainmaker-go/consensus"
 	consensusUtils "chainmaker.org/chainmaker/consensus-utils/v2"
 	"chainmaker.org/chainmaker-go/core"
 	"chainmaker.org/chainmaker-go/core/cache"

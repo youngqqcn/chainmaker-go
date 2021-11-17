@@ -4,43 +4,34 @@ go 1.15
 
 require (
 	chainmaker.org/chainmaker-go/accesscontrol v0.0.0
+	chainmaker.org/chainmaker-go/consensus v0.0.0
+	chainmaker.org/chainmaker-go/core v0.0.0-00010101000000-000000000000
 	chainmaker.org/chainmaker-go/net v0.0.0
 	chainmaker.org/chainmaker-go/snapshot v0.0.0
 	chainmaker.org/chainmaker-go/subscriber v0.0.0
 	chainmaker.org/chainmaker-go/sync v0.0.0
 	chainmaker.org/chainmaker-go/txpool v0.0.0
 	chainmaker.org/chainmaker-go/vm v0.0.0
-	chainmaker.org/chainmaker/chainconf/v2 v2.0.0-20211108091950-b471f3c7ce3d
-	chainmaker.org/chainmaker/common/v2 v2.1.0
-	chainmaker.org/chainmaker/localconf/v2 v2.0.0-20211101111610-0d268248b5c8
-	chainmaker.org/chainmaker/logger/v2 v2.1.0
-	chainmaker.org/chainmaker/pb-go/v2 v2.1.0
-	chainmaker.org/chainmaker/protocol/v2 v2.0.1-0.20211108075639-576c31f03396
-	chainmaker.org/chainmaker/store/v2 v2.0.1-0.20211101060552-ab2318ad9c6e
-	chainmaker.org/chainmaker/txpool-batch/v2 v2.0.0-20211019074609-46e3d29f0908 // indirect
-	chainmaker.org/chainmaker/utils/v2 v2.0.0-20211108092352-2a3335a4ba15
+	chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211109075405-cc95de741f5e
+	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211116072705-04bdd8f42f8d
+	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211115084213-42e840e1efee
+	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211110030026-ce2a7f3760cd
+	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211109074349-f79af5e1892d
+	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211110082822-61bdedd084bd
+	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211116092258-b0de845d438c
+	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211117095955-216c6fa45438
+	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20211109075600-a0a811fe0650 // indirect
+	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211109074701-81d58330e787
 	chainmaker.org/chainmaker/vm v0.0.0-20211028094551-9b2cca96d10d
-	github.com/bketelsen/crypt v0.0.4 // indirect
-	github.com/ethereum/go-ethereum v1.10.3 // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/hokaccha/go-prettyjson v0.0.0-20210113012101-fb4e108d2519 // indirect
-	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mattn/go-colorable v0.1.11 // indirect
 	github.com/mitchellh/mapstructure v1.4.2
-	github.com/panjf2000/ants/v2 v2.4.3 // indirect
-	github.com/pelletier/go-toml v1.9.4 // indirect
-	github.com/sagikazarmark/crypt v0.1.0 // indirect
-	github.com/spf13/afero v1.6.0 // indirect
-	github.com/spf13/cast v1.4.1 // indirect
-	github.com/spf13/cobra v1.1.3 // indirect
-	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/viper v1.7.1 // indirect
-	gopkg.in/ini.v1 v1.63.2 // indirect
 )
 
 replace (
 	chainmaker.org/chainmaker-go/accesscontrol => ../accesscontrol
+	chainmaker.org/chainmaker-go/consensus => ../consensus
 	chainmaker.org/chainmaker-go/core => ../core
 	chainmaker.org/chainmaker-go/net => ../net
 	chainmaker.org/chainmaker-go/snapshot => ../snapshot

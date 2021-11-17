@@ -5,27 +5,26 @@ go 1.15
 require (
 	chainmaker.org/chainmaker-go/accesscontrol v0.0.0
 	chainmaker.org/chainmaker-go/blockchain v0.0.0-00010101000000-000000000000
-	chainmaker.org/chainmaker-go/core v0.0.0-00010101000000-000000000000 // indirect
+	chainmaker.org/chainmaker-go/consensus v0.0.0
 	chainmaker.org/chainmaker-go/net v0.0.0
 	chainmaker.org/chainmaker-go/rpcserver v0.0.0-00010101000000-000000000000
 	chainmaker.org/chainmaker-go/txpool v0.0.0
 	chainmaker.org/chainmaker-go/vm v0.0.0
-	chainmaker.org/chainmaker/common/v2 v2.1.0
-	chainmaker.org/chainmaker/consensus-chainedbft/v2 v2.0.0-20211114125204-a103fd7d5095
-	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211112092735-d15ea84c5f44
-	chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20211112163240-bd1b63cc16bb
-	chainmaker.org/chainmaker/consensus-solo/v2 v2.0.0-20211112091638-d0d658ddbdfa
-	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20211115084545-61cf847de91d
+	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211116072705-04bdd8f42f8d
+	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211117025121-106e166cbbe0
+	chainmaker.org/chainmaker/consensus-hotstuff/v2 v2.0.0-20211117031314-728e624e06bd
+	chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20211117025208-de42ca78a5bc
+	chainmaker.org/chainmaker/consensus-solo/v2 v2.0.0-20211117025052-3e60f135dd70
+	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20211117025915-6ab8ea182df8
 	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211115084213-42e840e1efee
-	chainmaker.org/chainmaker/consensus/v2 v2.0.0-20211112163732-66772d402b44
-	chainmaker.org/chainmaker/localconf/v2 v2.0.0-20211101111610-0d268248b5c8
-	chainmaker.org/chainmaker/logger/v2 v2.1.0
-	chainmaker.org/chainmaker/pb-go/v2 v2.1.0
-	chainmaker.org/chainmaker/protocol/v2 v2.0.1-0.20211108075639-576c31f03396
-	chainmaker.org/chainmaker/sdk-go/v2 v2.1.0
-	chainmaker.org/chainmaker/txpool-batch/v2 v2.0.0-20211019074609-46e3d29f0908
-	chainmaker.org/chainmaker/txpool-single/v2 v2.0.0-20211018131403-7eb37f80a128
-	chainmaker.org/chainmaker/utils/v2 v2.0.0-20211108092352-2a3335a4ba15
+	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211110030026-ce2a7f3760cd
+	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211109074349-f79af5e1892d
+	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211110082822-61bdedd084bd
+	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211116092258-b0de845d438c
+	chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211110082824-51f0b56a62ee
+	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20211109075600-a0a811fe0650
+	chainmaker.org/chainmaker/txpool-single/v2 v2.1.1-0.20211109075506-aea78872cdc6
+	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211109074701-81d58330e787
 	chainmaker.org/chainmaker/vm-evm v0.0.0-20211015132845-e5b020e52194
 	chainmaker.org/chainmaker/vm-gasm v0.0.0-20211101123646-aed5e0b2eeed
 	chainmaker.org/chainmaker/vm-wasmer v0.0.0-20211102025640-44ec33122e8c
@@ -46,6 +45,7 @@ require (
 replace (
 	chainmaker.org/chainmaker-go/accesscontrol => ./module/accesscontrol
 	chainmaker.org/chainmaker-go/blockchain => ./module/blockchain
+	chainmaker.org/chainmaker-go/consensus => ./module/consensus
 	chainmaker.org/chainmaker-go/core => ./module/core
 	chainmaker.org/chainmaker-go/net => ./module/net
 	chainmaker.org/chainmaker-go/rpcserver => ./module/rpcserver
