@@ -11,9 +11,8 @@ import (
 	"fmt"
 	"testing"
 
+	"chainmaker.org/chainmaker/protocol/v2/test"
 	"github.com/stretchr/testify/require"
-
-	"chainmaker.org/chainmaker/logger/v2"
 
 	"github.com/Workiva/go-datastructures/queue"
 )
@@ -36,7 +35,7 @@ func (mock *MockHandler) getState() string {
 
 func TestAddTask(t *testing.T) {
 	mock := NewMockHandler()
-	routine := NewRoutine("mock", mock.handler, mock.getState, logger.GetLogger("mock"))
+	routine := NewRoutine("mock", mock.handler, mock.getState, &test.GoLogger{})
 	require.NoError(t, routine.begin())
 
 	require.NoError(t, routine.addTask(NodeStatusMsg{from: "node1"}))

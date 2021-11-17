@@ -16,6 +16,7 @@ import (
 type ManagerImpl struct {
 	snapshots map[utils.BlockFingerPrint]*SnapshotImpl
 	delegate  *ManagerDelegate
+	log       protocol.Logger
 }
 
 func (m *ManagerImpl) storeAndLinkSnapshotImpl(snapshotImpl *SnapshotImpl,
@@ -41,7 +42,7 @@ func (m *ManagerImpl) NewSnapshot(prevBlock *commonPb.Block, block *commonPb.Blo
 	fingerPrint := utils.CalcBlockFingerPrint(block)
 	m.storeAndLinkSnapshotImpl(snapshotImpl, &prevFingerPrint, &fingerPrint)
 
-	log.Infof(
+	m.log.Infof(
 		"create snapshot@%s at height %d, fingerPrint[%v] -> prevFingerPrint[%v]",
 		block.Header.ChainId,
 		blockHeight,
@@ -55,7 +56,7 @@ func (m *ManagerImpl) NotifyBlockCommitted(block *commonPb.Block) error {
 	m.delegate.lock.Lock()
 	defer m.delegate.lock.Unlock()
 
-	log.Infof("commit snapshot@%s at height %d", block.Header.ChainId, block.Header.BlockHeight)
+	m.log.Infof("commit snapshot@%s at height %d", block.Header.ChainId, block.Header.BlockHeight)
 
 	// 计算刚落块的区块指纹
 	deleteFp := utils.CalcBlockFingerPrint(block)
@@ -70,7 +71,7 @@ func (m *ManagerImpl) NotifyBlockCommitted(block *commonPb.Block) error {
 		}
 	}
 
-	log.Infof("delete snapshot@%s %v at height %d", block.Header.ChainId, deleteFp, block.Header.BlockHeight)
+	m.log.Infof("delete snapshot@%s %v at height %d", block.Header.ChainId, deleteFp, block.Header.BlockHeight)
 	delete(m.snapshots, deleteFp)
 
 	// in case of switch-fork, gc too old snapshot
@@ -82,7 +83,7 @@ func (m *ManagerImpl) NotifyBlockCommitted(block *commonPb.Block) error {
 		if block.Header.BlockHeight-preSnapshot.GetBlockHeight() > 8 {
 			deleteOldFp := m.delegate.calcSnapshotFingerPrint(preSnapshot)
 			delete(m.snapshots, deleteOldFp)
-			log.Infof("delete snapshot %v at height %d while gc", deleteFp, preSnapshot.blockHeight)
+			m.log.Infof("delete snapshot %v at height %d while gc", deleteFp, preSnapshot.blockHeight)
 			snapshot.SetPreSnapshot(nil)
 		}
 	}

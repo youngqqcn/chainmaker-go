@@ -19,6 +19,7 @@ import (
 	acPb "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/protocol/v2"
+	"chainmaker.org/chainmaker/protocol/v2/test"
 )
 
 var _ protocol.TxSimContext = (*MockSimContextImpl)(nil)
@@ -186,6 +187,7 @@ func testSnapshot(t *testing.T, i int) {
 		txResultMap:     make(map[string]*commonPb.Result, 256),
 		readTable:       make(map[string]*sv, 256),
 		writeTable:      make(map[string]*sv, 256),
+		log:             &test.GoLogger{},
 	}
 
 	txSimContext := &MockSimContextImpl{
@@ -322,4 +324,21 @@ func dumpDAG(dag *commonPb.DAG) {
 		}
 	}
 	fmt.Println("}")
+}
+
+var snapshot = &SnapshotImpl{
+	lock:            sync.Mutex{},
+	blockchainStore: nil,
+	sealed:          false,
+	chainId:         "",
+	blockTimestamp:  0,
+	blockProposer:   nil,
+	blockHeight:     100,
+	preSnapshot:     nil,
+	txRWSetTable:    nil,
+	txTable:         make([]*commonPb.Transaction, 0, 2048),
+	txResultMap:     make(map[string]*commonPb.Result, 256),
+	readTable:       make(map[string]*sv, 256),
+	writeTable:      make(map[string]*sv, 256),
+	log:             &test.GoLogger{},
 }

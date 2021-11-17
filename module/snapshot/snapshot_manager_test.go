@@ -11,11 +11,12 @@ import (
 	"fmt"
 	"testing"
 
-	"chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
-
-	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
-	"chainmaker.org/chainmaker/utils/v2"
 	"github.com/stretchr/testify/require"
+
+	"chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
+	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
+	"chainmaker.org/chainmaker/protocol/v2/test"
+	"chainmaker.org/chainmaker/utils/v2"
 )
 
 func TestChainedSnapshot(t *testing.T) {
@@ -24,6 +25,7 @@ func TestChainedSnapshot(t *testing.T) {
 		delegate: &ManagerDelegate{
 			blockchainStore: nil,
 		},
+		log: &test.GoLogger{},
 	}
 
 	genesis := createNewBlock(0, 0)

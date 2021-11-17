@@ -5,6 +5,7 @@ chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211109075405-cc95de741f5e/go.m
 chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211014122130-4ba9d85a64f8/go.mod h1:jedib7j/RzHzLk0Z4axQ8jZX5gRCdtnRf1WYAMGzYL0=
 chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211015124616-4d3c85fa0a79/go.mod h1:jedib7j/RzHzLk0Z4axQ8jZX5gRCdtnRf1WYAMGzYL0=
 chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211020133403-66958ba788b8/go.mod h1:moutWpXQGfyrFcXozw60ZXjpwj1Jfg6N5kkJdtwOxFM=
+<<<<<<< HEAD
 chainmaker.org/chainmaker/common/v2 v2.1.0/go.mod h1:moutWpXQGfyrFcXozw60ZXjpwj1Jfg6N5kkJdtwOxFM=
 chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211108032042-88ed7467a15c/go.mod h1:moutWpXQGfyrFcXozw60ZXjpwj1Jfg6N5kkJdtwOxFM=
 chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211116072705-04bdd8f42f8d h1:WQnODCZUyDRcRcLsNrKJ2HayFXNBhuC6VWV+3oer6VY=
@@ -22,6 +23,11 @@ chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211114123151-70b5da68f448 
 chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211114123151-70b5da68f448/go.mod h1:BJgTOpRNTAArvGZB0xZx0IFYX98enwSuCsEGfpFK8Bc=
 chainmaker.org/chainmaker/consensus/v2 v2.0.0-20211117031842-05ab106b7c72 h1:HnQgvDwAbwP7mslHlHwUv6XDwApRMyh4m5goHhXsUL0=
 chainmaker.org/chainmaker/consensus/v2 v2.0.0-20211117031842-05ab106b7c72/go.mod h1:/ewetPNLid441Bzuk//eka7msQFWKj1TSe2X/3uqZHg=
+=======
+chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211101030932-bf3bcb20eb52/go.mod h1:moutWpXQGfyrFcXozw60ZXjpwj1Jfg6N5kkJdtwOxFM=
+chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211111105523-441fed4a8603 h1:h3oXapl0DjrIe6lpL0j9mQp+RXhAYjYIOMNqNDieCyY=
+chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211111105523-441fed4a8603/go.mod h1:moutWpXQGfyrFcXozw60ZXjpwj1Jfg6N5kkJdtwOxFM=
+>>>>>>> origin/develop
 chainmaker.org/chainmaker/localconf/v2 v2.0.0-20211014134424-9431ffcc5bbc/go.mod h1:p3YhnL3L/axKerYbJ0OdYiMCyyGMprbKwTGtupNlA0U=
 chainmaker.org/chainmaker/localconf/v2 v2.0.0-20211101111610-0d268248b5c8/go.mod h1:p3YhnL3L/axKerYbJ0OdYiMCyyGMprbKwTGtupNlA0U=
 chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211110030026-ce2a7f3760cd h1:AL10+/m+AxEG2wEFswP129DYuKpB6/47aVyVbD0ugYE=

@@ -15,7 +15,6 @@ import (
 	commonErrors "chainmaker.org/chainmaker/common/v2/errors"
 	"chainmaker.org/chainmaker/common/v2/msgbus"
 	"chainmaker.org/chainmaker/localconf/v2"
-	"chainmaker.org/chainmaker/logger/v2"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	netPb "chainmaker.org/chainmaker/pb-go/v2/net"
 	storePb "chainmaker.org/chainmaker/pb-go/v2/store"
@@ -36,7 +35,7 @@ type BlockChainSyncServer struct {
 	blockVerifier   protocol.BlockVerifier   // Verify Block Validity
 	blockCommitter  protocol.BlockCommitter  // Adds a validated block to the chain to update the state of the chain
 
-	log   *logger.CMLogger
+	log   protocol.Logger
 	conf  *BlockSyncServerConf // The configuration in sync module
 	start int32                // Identification of module startup
 	close chan bool            // Identification of module close
@@ -51,7 +50,8 @@ func NewBlockChainSyncServer(chainId string,
 	blockchainStore protocol.BlockchainStore,
 	ledgerCache protocol.LedgerCache,
 	blockVerifier protocol.BlockVerifier,
-	blockCommitter protocol.BlockCommitter) protocol.SyncService {
+	blockCommitter protocol.BlockCommitter,
+	log protocol.Logger) protocol.SyncService {
 
 	syncServer := &BlockChainSyncServer{
 		chainId:         chainId,
@@ -62,7 +62,7 @@ func NewBlockChainSyncServer(chainId string,
 		blockVerifier:   blockVerifier,
 		blockCommitter:  blockCommitter,
 		close:           make(chan bool),
-		log:             logger.GetLoggerByChain(logger.MODULE_SYNC, chainId),
+		log:             log, //logger.GetLoggerByChain(logger.MODULE_SYNC, chainId),
 	}
 	return syncServer
 }

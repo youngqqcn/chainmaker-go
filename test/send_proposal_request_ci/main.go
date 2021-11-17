@@ -363,7 +363,7 @@ func testGetBlockByTxId(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, txId
 	err := proto.Unmarshal(resp.ContractResult.Result, blockInfo)
 	if err != nil {
 		fmt.Printf(logTempUnmarshalBlockInfoFailed, err)
-		os.Exit(0)
+		os.Exit(1)
 	}
 	fmt.Printf(logTempSendBlock, resp.ContractResult.Code, resp.ContractResult.Message, blockInfo)
 }
@@ -397,7 +397,7 @@ func testGetBlockByHeight(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, ch
 	err := proto.Unmarshal(resp.ContractResult.Result, blockInfo)
 	if err != nil {
 		fmt.Printf(logTempUnmarshalBlockInfoFailed, err)
-		os.Exit(0)
+		os.Exit(1)
 	}
 	fmt.Printf(logTempSendBlock, resp.ContractResult.Code, resp.ContractResult.Message, blockInfo)
 
@@ -428,7 +428,7 @@ func testGetBlockWithTxRWSetsByHeight(sk3 crypto.PrivateKey, client *apiPb.RpcNo
 	err := proto.Unmarshal(resp.ContractResult.Result, blockInfo)
 	if err != nil {
 		fmt.Printf(logTempUnmarshalBlockInfoFailed, err)
-		os.Exit(0)
+		os.Exit(1)
 	}
 	fmt.Printf(logTempSendBlock, resp.ContractResult.Code, resp.ContractResult.Message, blockInfo)
 
@@ -463,7 +463,7 @@ func testGetBlockByHash(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chai
 	err := proto.Unmarshal(resp.ContractResult.Result, blockInfo)
 	if err != nil {
 		fmt.Printf(logTempUnmarshalBlockInfoFailed, err)
-		os.Exit(0)
+		os.Exit(1)
 	}
 	fmt.Printf(logTempSendBlock, resp.ContractResult.Code, resp.ContractResult.Message, blockInfo)
 }
@@ -492,7 +492,7 @@ func testGetBlockWithTxRWSetsByHash(sk3 crypto.PrivateKey, client *apiPb.RpcNode
 	err := proto.Unmarshal(resp.ContractResult.Result, blockInfo)
 	if err != nil {
 		fmt.Printf(logTempUnmarshalBlockInfoFailed, err)
-		os.Exit(0)
+		os.Exit(1)
 	}
 	fmt.Printf(logTempSendBlock, resp.ContractResult.Code, resp.ContractResult.Message, blockInfo)
 }
@@ -520,7 +520,7 @@ func testGetLastConfigBlock(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, 
 	err := proto.Unmarshal(resp.ContractResult.Result, blockInfo)
 	if err != nil {
 		fmt.Printf(logTempUnmarshalBlockInfoFailed, err)
-		os.Exit(0)
+		os.Exit(1)
 	}
 	fmt.Printf(logTempSendBlock, resp.ContractResult.Code, resp.ContractResult.Message, blockInfo)
 }
@@ -548,7 +548,7 @@ func testGetLastBlock(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainI
 	err := proto.Unmarshal(resp.ContractResult.Result, blockInfo)
 	if err != nil {
 		fmt.Printf(logTempUnmarshalBlockInfoFailed, err)
-		os.Exit(0)
+		os.Exit(1)
 	}
 	fmt.Printf(logTempSendBlock, resp.ContractResult.Code, resp.ContractResult.Message)
 }
@@ -571,7 +571,7 @@ func testGetChainInfo(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainI
 	err := proto.Unmarshal(resp.ContractResult.Result, chainInfo)
 	if err != nil {
 		fmt.Printf("chainInfo unmarshal error %s\n", err)
-		os.Exit(0)
+		os.Exit(1)
 	}
 	fmt.Printf(logTempSendBlock, resp.ContractResult.Code, resp.ContractResult.Message, chainInfo)
 }
@@ -1043,7 +1043,7 @@ func proposalRequest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, txType 
 	rawTxBytes, err := utils.CalcUnsignedTxRequestBytes(req)
 	if err != nil {
 		log.Fatalf("CalcUnsignedTxRequest failed, %s", err.Error())
-		os.Exit(0)
+		os.Exit(1)
 	}
 
 	fmt.Errorf("################ %s", string(sender.MemberInfo))
@@ -1053,7 +1053,7 @@ func proposalRequest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, txType 
 	//signBytes, err := signer.Sign("SM3", rawTxBytes)
 	if err != nil {
 		log.Fatalf("sign failed, %s", err.Error())
-		os.Exit(0)
+		os.Exit(1)
 	}
 
 	req.Sender.Signature = signBytes
@@ -1065,12 +1065,12 @@ func proposalRequest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, txType 
 		if ok {
 			if statusErr.Code() == codes.DeadlineExceeded {
 				fmt.Println("WARN: client.call err: deadline")
-				os.Exit(0)
+				os.Exit(1)
 			}
 		}
 
 		fmt.Printf("ERROR: client.call err: %v\n", err)
-		os.Exit(0)
+		os.Exit(1)
 	}
 	return result
 }

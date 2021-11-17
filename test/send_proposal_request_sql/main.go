@@ -23,17 +23,17 @@ import (
 	"strings"
 	"time"
 
-	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
-
-	"chainmaker.org/chainmaker-go/test/common"
-
 	"chainmaker.org/chainmaker-go/accesscontrol"
+	"chainmaker.org/chainmaker-go/test/common"
 	"chainmaker.org/chainmaker/common/v2/ca"
 	"chainmaker.org/chainmaker/common/v2/crypto"
 	"chainmaker.org/chainmaker/common/v2/crypto/asym"
 	acPb "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	apiPb "chainmaker.org/chainmaker/pb-go/v2/api"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
+	configPb "chainmaker.org/chainmaker/pb-go/v2/config"
+	"chainmaker.org/chainmaker/pb-go/v2/consensus"
+	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/utils/v2"
 	"github.com/gogo/protobuf/proto"
@@ -56,6 +56,13 @@ const (
 	userCrtPath    = certPathPrefix + "/crypto-config/wx-org1.chainmaker.org/user/client1/client1.sign.crt"
 	orgId          = "wx-org1.chainmaker.org"
 	prePathFmt     = certPathPrefix + "/crypto-config/wx-org%s.chainmaker.org/user/admin1/"
+
+	IPOrg2          = "localhost"
+	PortOrg2        = 12352
+	userKeyPathOrg2 = certPathPrefix + "/crypto-config/wx-org2.chainmaker.org/user/client1/client1.sign.key"
+	userCrtPathOrg2 = certPathPrefix + "/crypto-config/wx-org2.chainmaker.org/user/client1/client1.sign.crt"
+	orgIdOrg2       = "wx-org2.chainmaker.org"
+	prePathFmtOrg2  = certPathPrefix + "/crypto-config/wx-org%s.chainmaker.org/user/admin1/"
 )
 
 var (
@@ -65,20 +72,60 @@ var (
 	runtimeType     = commonPb.RuntimeType_WASMER
 )
 
-var caPaths = []string{certPathPrefix + "/crypto-config/wx-org1.chainmaker.org/ca"}
+var (
+	caPaths    = []string{certPathPrefix + "/crypto-config/wx-org1.chainmaker.org/ca"}
+	client     apiPb.RpcNodeClient
+	clientOrg2 *apiPb.RpcNodeClient
+	conn       *grpc.ClientConn
+	connOrg2   *grpc.ClientConn
+	err        error
+)
+
+func init() {
+
+}
+func initClientOrg2(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient) (isSolo bool) {
+	fmt.Println("====================get chain config===================")
+	// 构造Payload
+	var pairs []*commonPb.KeyValuePair
+
+	payloadBytes := common.ConstructQueryPayload(syscontract.SystemContract_CHAIN_CONFIG.String(), syscontract.ChainConfigFunction_GET_CHAIN_CONFIG.String(), pairs)
+
+	resp := common.ProposalRequest(sk3, client, commonPb.TxType_QUERY_CONTRACT,
+		CHAIN1, "", payloadBytes, nil)
+
+	result := &configPb.ChainConfig{}
+	err = proto.Unmarshal(resp.ContractResult.Result, result)
+	fmt.Println("Consensus Type is", result.Consensus.Type)
+
+	isSolo = result.Consensus.Type == consensus.ConsensusType_SOLO
+	if isSolo {
+		clientOrg2 = client
+		return isSolo
+	}
+
+	// init client org2
+	caPaths = append(caPaths, certPathPrefix+"/crypto-config/wx-org2.chainmaker.org/ca")
+	connOrg2, err = initGRPCConnectOrg2(true)
+	if err != nil {
+		panic(err)
+	}
+	c2 := apiPb.NewRpcNodeClient(connOrg2)
+	clientOrg2 = &c2
+	return isSolo
+}
 
 // vm wasmer 整体功能测试，合约创建、升级、执行、查询、冻结、解冻、吊销、交易区块的查询、链配置信息的查询
 func main() {
 	common.SetCertPathPrefix(certPathPrefix)
 
-	conn, err := initGRPCConnect(true)
+	// init client org1
+	conn, err = initGRPCConnect(true)
 	if err != nil {
-		fmt.Println(err)
-		return
+		panic(err)
 	}
 	defer conn.Close()
-
-	client := apiPb.NewRpcNodeClient(conn)
+	client = apiPb.NewRpcNodeClient(conn)
 
 	file, err := ioutil.ReadFile(userKeyPath)
 	if err != nil {
@@ -88,6 +135,10 @@ func main() {
 	sk3, err := asym.PrivateKeyFromPEM(file, nil)
 	if err != nil {
 		panic(err)
+	}
+	// init client org2
+	if isSolo := initClientOrg2(sk3, &client); !isSolo {
+		defer connOrg2.Close()
 	}
 
 	// test
@@ -115,20 +166,20 @@ func functionalTest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient) {
 
 	fmt.Println("//1) 合约创建")
 	txId = testCreate(sk3, client, CHAIN1)
-	testWaitTx(sk3, client, CHAIN1, txId)
+	testWaitTx(sk3, clientOrg2, CHAIN1, txId)
 
 	fmt.Println("// 2) 执行合约-sql insert")
-	txId = testInvokeSqlInsert(sk3, client, CHAIN1, "11")
-	txId = testInvokeSqlInsert(sk3, client, CHAIN1, "11")
+	txId = testInvokeSqlInsert(sk3, client, CHAIN1, "11", true)
+	txId = testInvokeSqlInsert(sk3, client, CHAIN1, "11", true)
 
 	for i := 0; i < 10; i++ {
-		txId = testInvokeSqlInsert(sk3, client, CHAIN1, strconv.Itoa(i))
+		txId = testInvokeSqlInsert(sk3, client, CHAIN1, strconv.Itoa(i), false)
 	}
-	testWaitTx(sk3, client, CHAIN1, txId)
+	testWaitTx(sk3, clientOrg2, CHAIN1, txId)
 	id = txId
 
 	fmt.Println("// 3) 查询 age11的 id:" + id)
-	_, result = testQuerySqlById(sk3, client, CHAIN1, id)
+	_, result = testQuerySqlById(sk3, clientOrg2, CHAIN1, id)
 	json.Unmarshal([]byte(result), &rs)
 	fmt.Println("testInvokeSqlUpdate query", rs)
 	if string(rs["id"]) != id {
@@ -141,10 +192,10 @@ func functionalTest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient) {
 
 	fmt.Println("// 4) 执行合约-sql update name=长安链chainmaker_update where id=" + id)
 	txId = testInvokeSqlUpdate(sk3, client, CHAIN1, id)
-	testWaitTx(sk3, client, CHAIN1, txId)
+	testWaitTx(sk3, clientOrg2, CHAIN1, txId)
 
 	fmt.Println("// 5) 查询 id=" + id + " 看name是不是更新成了长安链chainmaker_update：")
-	_, result = testQuerySqlById(sk3, client, CHAIN1, id)
+	_, result = testQuerySqlById(sk3, clientOrg2, CHAIN1, id)
 	json.Unmarshal([]byte(result), &rs)
 	fmt.Println("testInvokeSqlUpdate query", rs)
 	if string(rs["name"]) != "长安链chainmaker_update" {
@@ -155,14 +206,14 @@ func functionalTest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient) {
 	}
 
 	fmt.Println("// 6) 范围查询 rang age 1~10")
-	testQuerySqlRangAge(sk3, client, CHAIN1)
+	testQuerySqlRangAge(sk3, clientOrg2, CHAIN1)
 
 	fmt.Println("// 7) 执行合约-sql delete by id age=11")
 	txId = testInvokeSqlDelete(sk3, client, CHAIN1, id)
-	testWaitTx(sk3, client, CHAIN1, txId)
+	testWaitTx(sk3, clientOrg2, CHAIN1, txId)
 
 	fmt.Println("// 8) 再次查询 id age=11，应该查不到")
-	_, result = testQuerySqlById(sk3, client, CHAIN1, id)
+	_, result = testQuerySqlById(sk3, clientOrg2, CHAIN1, id)
 	if result != "{}" {
 		fmt.Println("result", result)
 		panic("查询结果错误")
@@ -171,19 +222,19 @@ func functionalTest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient) {
 	}
 	//// 9) 跨合约调用
 	txId = testCrossCall(sk3, client, CHAIN1)
-	testWaitTx(sk3, client, CHAIN1, txId)
+	testWaitTx(sk3, clientOrg2, CHAIN1, txId)
 
 	// 10) 交易回退
-	txId = testInvokeSqlInsert(sk3, client, CHAIN1, "2000")
-	testWaitTx(sk3, client, CHAIN1, txId)
+	txId = testInvokeSqlInsert(sk3, client, CHAIN1, "2000", true)
+	testWaitTx(sk3, clientOrg2, CHAIN1, txId)
 	id = txId
 	for i := 0; i < 3; i++ {
 		fmt.Println("试图将id=" + id + " 的name改为长安链chainmaker_save_point，但是发生了错误，所以修改不会成功")
 		txId = testInvokeSqlUpdateRollbackDbSavePoint(sk3, client, CHAIN1, id)
-		testWaitTx(sk3, client, CHAIN1, txId)
+		testWaitTx(sk3, clientOrg2, CHAIN1, txId)
 
 		fmt.Println("// 11 再次查询age=2000的这条数据，如果name被更新了，那么说明savepoint Rollback失败了")
-		_, result = testQuerySqlById(sk3, client, CHAIN1, id)
+		_, result = testQuerySqlById(sk3, clientOrg2, CHAIN1, id)
 		rs = make(map[string][]byte, 0)
 		json.Unmarshal([]byte(result), &rs)
 		fmt.Println("testInvokeSqlUpdateRollbackDbSavePoint query", rs)
@@ -198,13 +249,13 @@ func functionalTest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient) {
 
 	// 9) 升级合约
 	txId = testUpgrade(sk3, client, CHAIN1)
-	testWaitTx(sk3, client, CHAIN1, txId)
+	testWaitTx(sk3, clientOrg2, CHAIN1, txId)
 
 	// 10) 升级合约后执行插入
-	txId = testInvokeSqlInsert(sk3, client, CHAIN1, "100000")
+	txId = testInvokeSqlInsert(sk3, client, CHAIN1, "100000", true)
+	testWaitTx(sk3, clientOrg2, CHAIN1, txId)
 
-	testWaitTx(sk3, client, CHAIN1, txId)
-	_, result = testQuerySqlById(sk3, client, CHAIN1, txId)
+	_, result = testQuerySqlById(sk3, clientOrg2, CHAIN1, txId)
 	rs = make(map[string][]byte, 0)
 	json.Unmarshal([]byte(result), &rs)
 	fmt.Println("testInvokeSqlInsert query", rs)
@@ -217,9 +268,9 @@ func functionalTest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient) {
 
 	// 并发测试
 	for i := 500; i < 600; i++ {
-		txId = testInvokeSqlInsert(sk3, client, CHAIN1, strconv.Itoa(i))
+		txId = testInvokeSqlInsert(sk3, client, CHAIN1, strconv.Itoa(i), false)
 	}
-	testWaitTx(sk3, client, CHAIN1, txId)
+	testWaitTx(sk3, clientOrg2, CHAIN1, txId)
 
 	// 异常功能测试
 	if runtimeType == commonPb.RuntimeType_WASMER {
@@ -337,10 +388,11 @@ func testUpgrade(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId str
 	return resp.TxId
 }
 
-func testInvokeSqlInsert(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId string, age string) string {
+func testInvokeSqlInsert(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId string, age string, print bool) string {
 	txId := utils.GetRandTxId()
-	fmt.Printf("\n============ invoke contract %s[sql_insert] [%s,%s] ============\n", contractName, txId, age)
-
+	if print {
+		fmt.Printf("\n============ invoke contract %s[sql_insert] [%s,%s] ============\n", contractName, txId, age)
+	}
 	// 构造Payload
 	pairs := []*commonPb.KeyValuePair{
 		{
@@ -368,8 +420,9 @@ func testInvokeSqlInsert(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, cha
 
 	resp := proposalRequest(sk3, client, commonPb.TxType_INVOKE_CONTRACT,
 		chainId, txId, payload)
-
-	fmt.Printf(logTempSendTx, resp.Code, resp.Message, resp.ContractResult)
+	if print {
+		fmt.Printf(logTempSendTx, resp.Code, resp.Message, resp.ContractResult)
+	}
 	return txId
 }
 
@@ -828,7 +881,7 @@ func proposalRequest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, txType 
 	rawTxBytes, err := utils.CalcUnsignedTxRequestBytes(req)
 	if err != nil {
 		log.Fatalf("CalcUnsignedTxRequest failed, %s", err.Error())
-		os.Exit(0)
+		os.Exit(1)
 	}
 
 	fmt.Errorf("################ %s", string(sender.MemberInfo))
@@ -838,7 +891,7 @@ func proposalRequest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, txType 
 	//signBytes, err := signer.Sign("SM3", rawTxBytes)
 	if err != nil {
 		log.Fatalf("sign failed, %s", err.Error())
-		os.Exit(0)
+		os.Exit(1)
 	}
 
 	req.Sender.Signature = signBytes
@@ -849,10 +902,10 @@ func proposalRequest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, txType 
 		statusErr, ok := status.FromError(err)
 		if ok && statusErr.Code() == codes.DeadlineExceeded {
 			fmt.Println("WARN: client.call err: deadline")
-			os.Exit(0)
+			os.Exit(1)
 		}
 		fmt.Printf("ERROR: client.call err: %v\n", err)
-		os.Exit(0)
+		os.Exit(1)
 	}
 	return result
 }
@@ -880,6 +933,28 @@ func initGRPCConnect(useTLS bool) (*grpc.ClientConn, error) {
 			CaPaths:    caPaths,
 			CertFile:   userCrtPath,
 			KeyFile:    userKeyPath,
+		}
+
+		c, err := tlsClient.GetCredentialsByCA()
+		if err != nil {
+			log.Fatalf("GetTLSCredentialsByCA err: %v", err)
+			return nil, err
+		}
+		return grpc.Dial(url, grpc.WithTransportCredentials(*c))
+	} else {
+		return grpc.Dial(url, grpc.WithInsecure())
+	}
+}
+func initGRPCConnectOrg2(useTLS bool) (*grpc.ClientConn, error) {
+	fmt.Println("============init org2 conn============")
+	url := fmt.Sprintf("%s:%d", IPOrg2, PortOrg2)
+
+	if useTLS {
+		tlsClient := ca.CAClient{
+			ServerName: "chainmaker.org",
+			CaPaths:    caPaths,
+			CertFile:   userCrtPathOrg2,
+			KeyFile:    userKeyPathOrg2,
 		}
 
 		c, err := tlsClient.GetCredentialsByCA()

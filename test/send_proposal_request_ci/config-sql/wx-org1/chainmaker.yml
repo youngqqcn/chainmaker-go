@@ -76,6 +76,8 @@ pprof:
 storage:
   db_prefix: org1_
   store_path: ./data/org1/ledgerData1
+  encryptor: sm4    # sm4/aes
+  encrypt_key: "1234567890123456" #16 bytes key
   blockdb_config:
     provider: sql
     sqldb_config:

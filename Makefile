@@ -8,7 +8,7 @@ else
     endif
 endif
 DATETIME=$(shell date "+%Y%m%d%H%M%S")
-VERSION=v2.1.0
+VERSION=v2.1.0_alpha
 GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 GIT_COMMIT = $(shell git log --pretty=format:'%h' -n 1)
 
@@ -57,6 +57,9 @@ compile:
 cmc:
 	@cd tools/cmc && GOPATH=${GOPATH} go build -o ../../bin/cmc
 
+send-tool:
+	cd test/send_proposal_request_tool && go build -o ../../bin/send_proposal_request_tool
+
 scanner:
 	@cd tools/scanner && GOPATH=${GOPATH} go build -o ../../bin/scanner
 
@@ -67,8 +70,8 @@ generate:
 	go generate ./...
 
 docker-build:
-	rm -rf build/ data/ log/
-	cd main && go mod tidy
+	rm -rf build/ data/ log/ bin/
+	go mod tidy
 	docker build -t chainmaker -f ./DOCKER/Dockerfile .
 	docker tag chainmaker chainmaker:${VERSION}
 
