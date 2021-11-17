@@ -7,19 +7,22 @@ SPDX-License-Identifier: Apache-2.0
 package scheduler
 
 import (
-	"strconv"
-	//	"encoding/hex"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"sync"
 	"time"
 
 	"chainmaker.org/chainmaker-go/core/provider/conf"
 	"chainmaker.org/chainmaker/localconf/v2"
-	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
+	"chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
+	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
 	"chainmaker.org/chainmaker/protocol/v2"
+	"chainmaker.org/chainmaker/utils/v2"
+	"chainmaker.org/chainmaker/vm-native/v2/accountmgr"
 	"chainmaker.org/chainmaker/vm/v2"
 	"github.com/panjf2000/ants/v2"
 	"github.com/prometheus/client_golang/prometheus"
@@ -48,14 +51,14 @@ type TxScheduler struct {
 type dagNeighbors map[int]bool
 
 // Schedule according to a batch of transactions, and generating DAG according to the conflict relationship
-func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Transaction,
-	snapshot protocol.Snapshot) (map[string]*commonpb.TxRWSet, map[string][]*commonpb.ContractEvent, error) {
+func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Transaction,
+	snapshot protocol.Snapshot) (map[string]*commonPb.TxRWSet, map[string][]*commonPb.ContractEvent, error) {
 
 	ts.lock.Lock()
 	defer ts.lock.Unlock()
-	txRWSetMap := make(map[string]*commonpb.TxRWSet)
+	txRWSetMap := make(map[string]*commonPb.TxRWSet)
 	txBatchSize := len(txBatch)
-	runningTxC := make(chan *commonpb.Transaction, txBatchSize)
+	runningTxC := make(chan *commonPb.Transaction, txBatchSize)
 	timeoutC := time.After(ScheduleTimeout * time.Second)
 	finishC := make(chan bool)
 	var goRoutinePool *ants.Pool
@@ -80,7 +83,7 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 					ts.log.Debugf("run vm for tx id:%s", tx.Payload.GetTxId())
 					txSimContext := vm.NewTxSimContext(ts.VmManager, snapshot, tx, block.Header.BlockVersion)
 					runVmSuccess := true
-					var txResult *commonpb.Result
+					var txResult *commonPb.Result
 					var err error
 					var start time.Time
 					if localconf.ChainMakerConfig.MonitorConfig.Enabled {
@@ -156,7 +159,7 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 			txRWSetMap[txRWSet.TxId] = txRWSet
 		}
 	}
-	contractEventMap := make(map[string][]*commonpb.ContractEvent)
+	contractEventMap := make(map[string][]*commonPb.ContractEvent)
 	for _, tx := range block.Txs {
 		event := tx.Result.ContractResult.ContractEvent
 		contractEventMap[tx.Payload.TxId] = event
@@ -169,21 +172,21 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 }
 
 // SimulateWithDag based on the dag in the block, perform scheduling and execution transactions
-func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.Snapshot) (
-	map[string]*commonpb.TxRWSet, map[string]*commonpb.Result, error) {
+func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.Snapshot) (
+	map[string]*commonPb.TxRWSet, map[string]*commonPb.Result, error) {
 	ts.lock.Lock()
 	defer ts.lock.Unlock()
 
 	var (
 		startTime  = time.Now()
-		txRWSetMap = make(map[string]*commonpb.TxRWSet)
+		txRWSetMap = make(map[string]*commonPb.TxRWSet)
 	)
 	if len(block.Txs) == 0 {
 		ts.log.Debugf("no txs in block[%x] when simulate", block.Header.BlockHash)
 		return txRWSetMap, snapshot.GetTxResultMap(), nil
 	}
 	ts.log.Debugf("simulate with dag start, size %d", len(block.Txs))
-	txMapping := make(map[int]*commonpb.Transaction)
+	txMapping := make(map[int]*commonPb.Transaction)
 	for index, tx := range block.Txs {
 		txMapping[index] = tx
 	}
@@ -223,7 +226,7 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 					ts.log.Debugf("run vm with dag for tx id %s", tx.Payload.GetTxId())
 					txSimContext := vm.NewTxSimContext(ts.VmManager, snapshot, tx, block.Header.BlockVersion)
 					runVmSuccess := true
-					var txResult *commonpb.Result
+					var txResult *commonPb.Result
 					var err error
 
 					if txResult, err = ts.runVM(tx, txSimContext); err != nil {
@@ -327,19 +330,19 @@ func (ts *TxScheduler) Halt() {
 	ts.scheduleFinishC <- true
 }
 
-func (ts *TxScheduler) runVM(tx *commonpb.Transaction, txSimContext protocol.TxSimContext) (*commonpb.Result, error) {
-	//var contractId *commonpb.Contract
+func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxSimContext) (*commonPb.Result, error) {
+	//var contractId *commonPb.Contract
 	var contractName string
-	//var runtimeType commonpb.RuntimeType
+	//var runtimeType commonPb.RuntimeType
 	//var contractVersion string
 	var method string
 	var byteCode []byte
-	//var endorsements []*commonpb.EndorsementEntry
+	//var endorsements []*commonPb.EndorsementEntry
 	//var sequence uint64
 
-	result := &commonpb.Result{
-		Code: commonpb.TxStatusCode_SUCCESS,
-		ContractResult: &commonpb.ContractResult{
+	result := &commonPb.Result{
+		Code: commonPb.TxStatusCode_SUCCESS,
+		ContractResult: &commonPb.ContractResult{
 			Code:    uint32(0),
 			Result:  nil,
 			Message: "",
@@ -348,8 +351,8 @@ func (ts *TxScheduler) runVM(tx *commonpb.Transaction, txSimContext protocol.TxS
 	}
 	payload := tx.Payload
 	switch tx.Payload.TxType {
-	case commonpb.TxType_QUERY_CONTRACT:
-		//var payload commonpb.Payload
+	case commonPb.TxType_QUERY_CONTRACT:
+		//var payload commonPb.Payload
 		//if err := proto.Unmarshal(tx.RequestPayload, &payload); err == nil {
 		//contractName = payload.ContractName
 		//method = payload.Method
@@ -361,8 +364,8 @@ func (ts *TxScheduler) runVM(tx *commonpb.Transaction, txSimContext protocol.TxS
 		//	fmt.Errorf("failed to unmarshal query payload for tx %s, %s", tx.Payload.TxId, err),
 		//)
 		//}
-	case commonpb.TxType_INVOKE_CONTRACT:
-		//var payload commonpb.TransactPayload
+	case commonPb.TxType_INVOKE_CONTRACT:
+		//var payload commonPb.TransactPayload
 		//if err := proto.Unmarshal(tx.RequestPayload, &payload); err == nil {
 		//contractName = payload.ContractName
 		//method = payload.Method
@@ -374,8 +377,8 @@ func (ts *TxScheduler) runVM(tx *commonpb.Transaction, txSimContext protocol.TxS
 		//	fmt.Errorf("failed to unmarshal transact payload for tx %s, %s", tx.Payload.TxId, err),
 		//)
 		//}
-		//case commonpb.TxType_INVOKE_CONTRACT:
-		//	var payload commonpb.Payload
+		//case commonPb.TxType_INVOKE_CONTRACT:
+		//	var payload commonPb.Payload
 		//	if err := proto.Unmarshal(tx.RequestPayload, &payload); err == nil {
 		//		contractName = payload.ContractName
 		//		method = payload.Method
@@ -387,8 +390,8 @@ func (ts *TxScheduler) runVM(tx *commonpb.Transaction, txSimContext protocol.TxS
 		//	fmt.Errorf("failed to unmarshal invoke payload for tx %s, %s", tx.Payload.TxId, err),
 		//)
 		//	}
-		//case commonpb.TxType_INVOKE_CONTRACT:
-		//	var payload commonpb.Payload
+		//case commonPb.TxType_INVOKE_CONTRACT:
+		//	var payload commonPb.Payload
 		//	if err := proto.Unmarshal(tx.RequestPayload, &payload); err == nil {
 		//		contractName = payload.ContractName
 		//		method = payload.Method
@@ -419,8 +422,8 @@ func (ts *TxScheduler) runVM(tx *commonpb.Transaction, txSimContext protocol.TxS
 		//	fmt.Errorf("failed to unmarshal system contract payload for tx %s, %s", tx.Payload.TxId, err.Error()),
 		//)
 		//	}
-		//case commonpb.TxType_MANAGE_USER_CONTRACT:
-		//	var payload commonpb.Payload
+		//case commonPb.TxType_MANAGE_USER_CONTRACT:
+		//	var payload commonPb.Payload
 		//	if err := proto.Unmarshal(tx.RequestPayload, &payload); err == nil {
 		//		if payload.Contract == nil {
 		//			return errResult(result, fmt.Errorf("param is null"))
@@ -475,36 +478,51 @@ func (ts *TxScheduler) runVM(tx *commonpb.Transaction, txSimContext protocol.TxS
 		ts.log.Errorf("Get contract info by name[%s] error:%s", contractName, err)
 		return nil, err
 	}
-	if contract.RuntimeType != commonpb.RuntimeType_NATIVE {
+	if contract.RuntimeType != commonPb.RuntimeType_NATIVE {
 		byteCode, err = txSimContext.GetContractBytecode(contractName)
 		if err != nil {
 			ts.log.Errorf("Get contract bytecode by name[%s] error:%s", contractName, err)
 			return nil, err
 		}
 	}
-	//contract = &commonpb.Contract{
+	//contract = &commonPb.Contract{
 	//	ContractName:    contractName,
 	//	ContractVersion: contractVersion,
 	//	RuntimeType:     runtimeType,
 	//}
 
-	// charge gas limit
-    if ts.chainConf.ChainConfig().Scheduler.GetEnableGas() {
-		gasLimit, err := strconv.Atoi(string(tx.Payload.Limit))
-		if err != nil {
-			return nil, err
-		}
-		getBalanceContract, err := txSimContext.GetContractByName(syscontract.SystemContract_ACCOUNT_MANAGER.String())
-		runContract, _ := ts.VmManager.RunContract(getBalanceContract, syscontract.GasAccountFunction_CHARGE_GAS.String(), nil, parameters, txSimContext, 0, commonpb.TxType_QUERY_CONTRACT)
-
-		banlance, err := strconv.Atoi(string(runContract.Result))
-		if err != nil {
-			return nil, err
-		}
-		if banlance > gasLimit {
-		}
+	var pk []byte
+	var accountMangerContract *commonPb.Contract
+	accountMangerContract, err = txSimContext.GetContractByName(syscontract.SystemContract_ACCOUNT_MANAGER.String())
+	if err != nil {
+		ts.log.Error(err.Error())
+		return result, err
 	}
 
+	pk, err = ts.getSenderPk(txSimContext)
+	if err != nil {
+		ts.log.Error(err.Error())
+		return nil, err
+	}
+
+	// charge gas limit
+	if ts.chainConf.ChainConfig().Scheduler.GetEnableGas() {
+		var runChargeGasContract *commonPb.ContractResult
+		var code commonPb.TxStatusCode
+		chargeParameters := map[string][]byte{
+			accountmgr.ChargePublicKey: pk,
+			accountmgr.ChargeGasAmount: tx.Payload.Limit,
+		}
+
+		runChargeGasContract, code = ts.VmManager.RunContract(
+			accountMangerContract, syscontract.GasAccountFunction_CHARGE_GAS.String(),
+			nil, chargeParameters, txSimContext, 0, commonPb.TxType_INVOKE_CONTRACT)
+		if code != commonPb.TxStatusCode_SUCCESS {
+			result.Code = code
+			result.ContractResult = runChargeGasContract
+			return result, errors.New(runChargeGasContract.Message)
+		}
+	}
 
 	contractResultPayload, txStatusCode := ts.VmManager.RunContract(
 		contract, method, byteCode, parameters, txSimContext, 0, tx.Payload.TxType)
@@ -513,35 +531,46 @@ func (ts *TxScheduler) runVM(tx *commonpb.Transaction, txSimContext protocol.TxS
 	result.ContractResult = contractResultPayload
 
 	// refund gas
-	if ts.chainConf.ChainConfig().Scheduler.GetEnableGas()  {
-		gasLimit, err := strconv.Atoi(string(tx.Payload.Limit))
+	if ts.chainConf.ChainConfig().Scheduler.GetEnableGas() {
+		var gasLimit int
+		var code commonPb.TxStatusCode
+		var refundGasContract *commonPb.ContractResult
+		gasLimit, err = strconv.Atoi(string(tx.Payload.Limit))
 		if err != nil {
 			return nil, err
 		}
-		getBalanceContract, err := txSimContext.GetContractByName(syscontract.SystemContract_ACCOUNT_MANAGER.String())
-		runContract, _ := ts.VmManager.RunContract(getBalanceContract, syscontract.GasAccountFunction_CHARGE_GAS.String(), nil, parameters, txSimContext, 0, commonpb.TxType_QUERY_CONTRACT)
 
-		banlance, err := strconv.Atoi(string(runContract.Result))
-		if err != nil {
-			return nil, err
+		refundGas := gasLimit - int(contractResultPayload.GasUsed)
+		if refundGas != 0 {
+			refundGasParameters := map[string][]byte{
+				accountmgr.RechargeKey:       pk,
+				accountmgr.RechargeAmountKey: []byte(strconv.Itoa(refundGas)),
+			}
+			refundGasContract, code = ts.VmManager.RunContract(
+				accountMangerContract, syscontract.GasAccountFunction_REFUND_GAS_VM.String(),
+				nil, refundGasParameters, txSimContext, 0, commonPb.TxType_INVOKE_CONTRACT)
+			if code != commonPb.TxStatusCode_SUCCESS {
+				result.Code = code
+				result.ContractResult = refundGasContract
+				return result, errors.New(refundGasContract.Message)
+			}
 		}
-		if banlance > gasLimit {
-		}
+
 	}
 
-	if txStatusCode == commonpb.TxStatusCode_SUCCESS {
+	if txStatusCode == commonPb.TxStatusCode_SUCCESS {
 		return result, nil
 	}
 	return result, errors.New(contractResultPayload.Message)
 }
 
-func errResult(result *commonpb.Result, err error) (*commonpb.Result, error) {
+func errResult(result *commonPb.Result, err error) (*commonPb.Result, error) {
 	result.ContractResult.Message = err.Error()
-	result.Code = commonpb.TxStatusCode_INVALID_PARAMETER
+	result.Code = commonPb.TxStatusCode_INVALID_PARAMETER
 	result.ContractResult.Code = 1
 	return result, err
 }
-func (ts *TxScheduler) parseParameter(parameterPairs []*commonpb.KeyValuePair) (map[string][]byte, error) {
+func (ts *TxScheduler) parseParameter(parameterPairs []*commonPb.KeyValuePair) (map[string][]byte, error) {
 	// verify parameters
 	if len(parameterPairs) > protocol.ParametersKeyMaxCount {
 		return nil, fmt.Errorf(
@@ -585,7 +614,7 @@ func (ts *TxScheduler) parseParameter(parameterPairs []*commonpb.KeyValuePair) (
 
 /*
 func (ts *TxScheduler) acVerify(txSimContext protocol.TxSimContext, methodName string,
-	endorsements []*commonpb.EndorsementEntry, msg []byte, parameters map[string][]byte) error {
+	endorsements []*commonPb.EndorsementEntry, msg []byte, parameters map[string][]byte) error {
 	var ac protocol.AccessControlProvider
 	var targetOrgId string
 	var err error
@@ -605,7 +634,7 @@ func (ts *TxScheduler) acVerify(txSimContext protocol.TxSimContext, methodName s
 		targetOrgId = ""
 	}
 
-	var fullCertEndorsements []*commonpb.EndorsementEntry
+	var fullCertEndorsements []*commonPb.EndorsementEntry
 	for _, endorsement := range endorsements {
 		if endorsement == nil || endorsement.Signer == nil {
 			return fmt.Errorf("failed to get endorsement signer for tx: %s, endorsement: %+v", tx.Payload.TxId, endorsement)
@@ -613,7 +642,7 @@ func (ts *TxScheduler) acVerify(txSimContext protocol.TxSimContext, methodName s
 		if endorsement.Signer.MemberType == acpb.MemberType_CERT {
 			fullCertEndorsements = append(fullCertEndorsements, endorsement)
 		} else {
-			fullCertEndorsement := &commonpb.EndorsementEntry{
+			fullCertEndorsement := &commonPb.EndorsementEntry{
 				Signer: &acpb.Member{
 					OrgId:      endorsement.Signer.OrgId,
 					MemberInfo: nil,
@@ -648,7 +677,7 @@ func (ts *TxScheduler) acVerify(txSimContext protocol.TxSimContext, methodName s
 */
 
 //nolint: unused
-func (ts *TxScheduler) dumpDAG(dag *commonpb.DAG, txs []*commonpb.Transaction) {
+func (ts *TxScheduler) dumpDAG(dag *commonPb.DAG, txs []*commonPb.Transaction) {
 	dagString := "digraph DAG {\n"
 	for i, ns := range dag.Vertexes {
 		if len(ns.Neighbors) == 0 {
@@ -661,4 +690,71 @@ func (ts *TxScheduler) dumpDAG(dag *commonpb.DAG, txs []*commonpb.Transaction) {
 	}
 	dagString += "}"
 	ts.log.Infof("Dump Dag: %s", dagString)
+}
+
+func (ts *TxScheduler) getSenderPk(txSimContext protocol.TxSimContext) ([]byte, error) {
+
+	var err error
+	var pk []byte
+	sender := txSimContext.GetSender()
+	if sender == nil {
+		err = errors.New(" can not find sender from tx ")
+		ts.log.Error(err.Error())
+		return nil, err
+	}
+
+	switch sender.MemberType {
+	case accesscontrol.MemberType_CERT:
+		pk, err = publicKeyFromCert(sender.MemberInfo)
+		if err != nil {
+			ts.log.Error(err.Error())
+			return nil, err
+		}
+	case accesscontrol.MemberType_CERT_HASH:
+		var certInfo *commonPb.CertInfo
+		infoHex := hex.EncodeToString(sender.MemberInfo)
+		if certInfo, err = wholeCertInfo(txSimContext, infoHex); err != nil {
+			ts.log.Error(err.Error())
+			return nil, fmt.Errorf(" can not load the whole cert info,member[%s],reason: %s", infoHex, err)
+		}
+
+		if pk, err = publicKeyFromCert(certInfo.Cert); err != nil {
+			ts.log.Error(err.Error())
+			return nil, err
+		}
+
+	case accesscontrol.MemberType_PUBLIC_KEY:
+		pk = sender.MemberInfo
+	default:
+		err = fmt.Errorf("invalid member type: %s", sender.MemberType)
+		ts.log.Error(err.Error())
+		return nil, err
+	}
+
+	return pk, nil
+}
+
+// parseUserAddress
+func publicKeyFromCert(member []byte) ([]byte, error) {
+	certificate, err := utils.ParseCert(member)
+	if err != nil {
+		return nil, err
+	}
+	pubKeyBytes, err := certificate.PublicKey.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	return pubKeyBytes, nil
+}
+
+func wholeCertInfo(txSimContext protocol.TxSimContext, certHash string) (*commonPb.CertInfo, error) {
+	certBytes, err := txSimContext.Get(syscontract.SystemContract_CERT_MANAGE.String(), []byte(certHash))
+	if err != nil {
+		return nil, err
+	}
+
+	return &commonPb.CertInfo{
+		Hash: certHash,
+		Cert: certBytes,
+	}, nil
 }
