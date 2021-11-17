@@ -484,7 +484,7 @@ func (ts *TxScheduler) runVM(tx *commonpb.Transaction, txSimContext protocol.TxS
 	} else {
 		ts.log.DebugDynamic(func() string {
 			contractData, _ := json.Marshal(contract)
-			return fmt.Sprintf("contract[%s] is a native contract, defination:%s",
+			return fmt.Sprintf("contract[%s] is a native contract, definition:%s",
 				contractName, string(contractData))
 		})
 	}
