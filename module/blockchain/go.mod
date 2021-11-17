@@ -12,28 +12,20 @@ require (
 	chainmaker.org/chainmaker-go/sync v0.0.0
 	chainmaker.org/chainmaker-go/txpool v0.0.0
 	chainmaker.org/chainmaker-go/vm v0.0.0
-	chainmaker.org/chainmaker/chainconf/v2 v2.0.0-20211025081513-28594b541181
-	chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211111105523-441fed4a8603
-	chainmaker.org/chainmaker/localconf/v2 v2.0.0-20211101111610-0d268248b5c8
-	chainmaker.org/chainmaker/logger/v2 v2.0.1-0.20211015125919-8e5199930ac9
-	chainmaker.org/chainmaker/pb-go/v2 v2.0.1-0.20211021024710-9329804d1c21
-	chainmaker.org/chainmaker/protocol/v2 v2.0.1-0.20211014144951-97323532a236
-	chainmaker.org/chainmaker/store/v2 v2.0.1-0.20211104065448-86cab932b46b
-	chainmaker.org/chainmaker/utils/v2 v2.0.0-20211027124954-09b710bd9ce8
+	chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211109075405-cc95de741f5e
+	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211117131805-630800bfd361
+	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211110030026-ce2a7f3760cd
+	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211109074349-f79af5e1892d
+	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211110082822-61bdedd084bd
+	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211116092258-b0de845d438c
+	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211117095955-216c6fa45438
+	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20211109075600-a0a811fe0650 // indirect
+	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211109074701-81d58330e787
 	chainmaker.org/chainmaker/vm v0.0.0-20211028094551-9b2cca96d10d
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/fsnotify/fsnotify v1.5.1 // indirect
-	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/hokaccha/go-prettyjson v0.0.0-20210113012101-fb4e108d2519 // indirect
-	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mattn/go-colorable v0.1.11 // indirect
 	github.com/mitchellh/mapstructure v1.4.2
-	github.com/pelletier/go-toml v1.9.4 // indirect
-	github.com/spf13/afero v1.5.1 // indirect
-	github.com/spf13/cast v1.4.1 // indirect
-	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	go.opencensus.io v0.23.0 // indirect
-	gopkg.in/ini.v1 v1.63.2 // indirect
 )
 
 replace (
