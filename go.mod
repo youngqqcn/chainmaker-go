@@ -22,7 +22,6 @@ require (
 	chainmaker.org/chainmaker/vm-gasm v0.0.0-20211101123646-aed5e0b2eeed
 	chainmaker.org/chainmaker/vm-wasmer v0.0.0-20211102025640-44ec33122e8c
 	chainmaker.org/chainmaker/vm-wxvm v0.0.0-20211015133128-53c7b2ac262f
-	chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211117093141-36fc20e150dc // indirect
 	code.cloudfoundry.org/bytefmt v0.0.0-20200131002437-cf55d5288a48
 	github.com/common-nighthawk/go-figure v0.0.0-20200609044655-c4b36f998cf2
 	github.com/ethereum/go-ethereum v1.10.4
