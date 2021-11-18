@@ -3,7 +3,7 @@ module chainmaker.org/chainmaker-go/txpool
 go 1.15
 
 require (
-	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211116072705-04bdd8f42f8d
+	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211117131805-630800bfd361
 	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211116092258-b0de845d438c
 	chainmaker.org/chainmaker/txpool-single/v2 v2.1.1-0.20211109075506-aea78872cdc6
 	github.com/StackExchange/wmi v1.2.1 // indirect

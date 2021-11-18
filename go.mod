@@ -10,7 +10,7 @@ require (
 	chainmaker.org/chainmaker-go/rpcserver v0.0.0-00010101000000-000000000000
 	chainmaker.org/chainmaker-go/txpool v0.0.0
 	chainmaker.org/chainmaker-go/vm v0.0.0
-	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211116072705-04bdd8f42f8d
+	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211117131805-630800bfd361
 	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211117025121-106e166cbbe0
 	chainmaker.org/chainmaker/consensus-hotstuff/v2 v2.0.0-20211117031314-728e624e06bd
 	chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20211117025208-de42ca78a5bc
@@ -19,12 +19,12 @@ require (
 	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211115084213-42e840e1efee
 	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211110030026-ce2a7f3760cd
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211109074349-f79af5e1892d
-	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211110082822-61bdedd084bd
+	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211117140137-9095a7ab7a69
 	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211116092258-b0de845d438c
 	chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211110082824-51f0b56a62ee
 	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20211109075600-a0a811fe0650
 	chainmaker.org/chainmaker/txpool-single/v2 v2.1.1-0.20211109075506-aea78872cdc6
-	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211109074701-81d58330e787
+	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211117144316-3f4a940e94f0
 	chainmaker.org/chainmaker/vm-evm v0.0.0-20211015132845-e5b020e52194
 	chainmaker.org/chainmaker/vm-gasm v0.0.0-20211101123646-aed5e0b2eeed
 	chainmaker.org/chainmaker/vm-wasmer v0.0.0-20211102025640-44ec33122e8c
@@ -55,5 +55,6 @@ replace (
 	chainmaker.org/chainmaker-go/txpool => ./module/txpool
 	chainmaker.org/chainmaker-go/vm => ./module/vm
 	github.com/libp2p/go-libp2p-core => chainmaker.org/chainmaker/libp2p-core v0.0.2
+	github.com/spf13/viper => github.com/spf13/viper v1.7.1 //for go1.15 build
 	google.golang.org/grpc v1.40.0 => google.golang.org/grpc v1.26.0
 )

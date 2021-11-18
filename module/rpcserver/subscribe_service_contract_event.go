@@ -17,7 +17,7 @@ import (
 	apiPb "chainmaker.org/chainmaker/pb-go/v2/api"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
-	"chainmaker.org/chainmaker/protocol/v2"
+	protocol "chainmaker.org/chainmaker/protocol/v2"
 	"github.com/gogo/protobuf/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -241,7 +241,6 @@ func (s *ApiService) sendSubscribeContractEvent(server apiPb.RpcNode_SubscribeSe
 
 	for _, tx := range block.Txs {
 		var eventInfos commonPb.ContractEventInfoList
-
 		for idx, event := range tx.Result.ContractResult.ContractEvent {
 			if topic == "" || topic == event.Topic {
 				if contractName != event.ContractName {
@@ -259,7 +258,9 @@ func (s *ApiService) sendSubscribeContractEvent(server apiPb.RpcNode_SubscribeSe
 					EventData:       event.EventData,
 				}
 
-				eventInfos.ContractEvents = append(eventInfos.ContractEvents, &eventInfo)
+				if eventInfo.BlockHeight != 0 {
+					eventInfos.ContractEvents = append(eventInfos.ContractEvents, &eventInfo)
+				}
 			}
 		}
 

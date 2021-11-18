@@ -13,7 +13,7 @@ import (
 	pbac "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 
 	cmx509 "chainmaker.org/chainmaker/common/v2/crypto/x509"
-	"chainmaker.org/chainmaker/protocol/v2"
+	protocol "chainmaker.org/chainmaker/protocol/v2"
 )
 
 func createVerifyPeerCertificateFunc(

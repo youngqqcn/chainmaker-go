@@ -3,7 +3,7 @@ module chainmaker.org/chainmaker-go/tools/cmc
 go 1.15
 
 require (
-	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211108032042-88ed7467a15c
+	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211117131805-630800bfd361
 	chainmaker.org/chainmaker/pb-go/v2 v2.1.0
 	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211116092258-b0de845d438c
 	chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211021091600-97431e7dd301
@@ -18,7 +18,7 @@ require (
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.0
-	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
+	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
 	gorm.io/driver/mysql v1.0.6
 	gorm.io/gorm v1.21.9
 )

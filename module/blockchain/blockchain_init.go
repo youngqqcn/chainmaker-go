@@ -19,7 +19,6 @@ import (
 
 	"chainmaker.org/chainmaker-go/accesscontrol"
 	"chainmaker.org/chainmaker-go/consensus"
-	consensusUtils "chainmaker.org/chainmaker/consensus-utils/v2"
 	"chainmaker.org/chainmaker-go/core"
 	"chainmaker.org/chainmaker-go/core/cache"
 	providerConf "chainmaker.org/chainmaker-go/core/provider/conf"
@@ -30,6 +29,7 @@ import (
 	"chainmaker.org/chainmaker-go/txpool"
 	chainconf "chainmaker.org/chainmaker/chainconf/v2"
 	"chainmaker.org/chainmaker/common/v2/container"
+	consensusUtils "chainmaker.org/chainmaker/consensus-utils/v2"
 	localconf "chainmaker.org/chainmaker/localconf/v2"
 	logger "chainmaker.org/chainmaker/logger/v2"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
@@ -621,17 +621,17 @@ func (bc *Blockchain) initConsensus() (err error) {
 	}
 
 	config := &consensusUtils.ConsensusImplConfig{
-		ChainId: bc.chainId,
-		NodeId: id,
-		Ac: bc.ac,
-		Core: bc.coreEngine,
-		ChainConf: bc.chainConf,
-		NetService: bc.netService,
-		Signer: bc.identity,
-		Store: bc.store,
-		LedgerCache: bc.ledgerCache,
+		ChainId:       bc.chainId,
+		NodeId:        id,
+		Ac:            bc.ac,
+		Core:          bc.coreEngine,
+		ChainConf:     bc.chainConf,
+		NetService:    bc.netService,
+		Signer:        bc.identity,
+		Store:         bc.store,
+		LedgerCache:   bc.ledgerCache,
 		ProposalCache: bc.proposalCache,
-		MsgBus: bc.msgBus,
+		MsgBus:        bc.msgBus,
 	}
 	provider := consensus.GetConsensusProvider(bc.chainConf.ChainConfig().Consensus.Type)
 	bc.consensus, err = provider(config)
