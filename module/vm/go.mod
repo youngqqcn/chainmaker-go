@@ -6,5 +6,5 @@ require chainmaker.org/chainmaker/protocol/v2 v2.0.1-0.20211109074216-fc2674ef6e
 
 require (
 	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211117090630-0288e600fb3c
-	chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211118095044-4e0ae7541242 // indirect
+	chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211118123416-ff0ef3f6c258 // indirect
 )

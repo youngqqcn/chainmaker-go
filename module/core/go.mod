@@ -13,7 +13,7 @@ require (
 	chainmaker.org/chainmaker/protocol/v2 v2.0.1-0.20211109074216-fc2674ef6e22
 	chainmaker.org/chainmaker/txpool-batch/v2 v2.0.0-20211019074609-46e3d29f0908
 	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211109074701-81d58330e787
-	chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211118095044-4e0ae7541242
+	chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211118123416-ff0ef3f6c258
 	github.com/ethereum/go-ethereum v1.10.3 // indirect
 	github.com/gogo/protobuf v1.3.2
 	github.com/panjf2000/ants/v2 v2.4.3

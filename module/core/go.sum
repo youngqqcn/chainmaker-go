@@ -44,6 +44,8 @@ chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211117092853-de2e9463a3e5 h1:H
 chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211117092853-de2e9463a3e5/go.mod h1:6hjMULu6ZtvUXOm5yIyNSMam9WoHt7B/UEppAaazzV8=
 chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211118094914-d7313f337bec h1:tu0+aOzvhyK90hLfBhsREiPVvsIEiXYP9NgR12jfCCw=
 chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211118094914-d7313f337bec/go.mod h1:6hjMULu6ZtvUXOm5yIyNSMam9WoHt7B/UEppAaazzV8=
+chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211118123321-80ca987d4694 h1:V/gOqf4Z+U+QiazXDGpni0mxQIRIkppsPaC91ZIHMog=
+chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211118123321-80ca987d4694/go.mod h1:6hjMULu6ZtvUXOm5yIyNSMam9WoHt7B/UEppAaazzV8=
 chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211116035000-afce90d77990 h1:OYOGGttexUOcocGtpC/yl4k7Iu2F7oAgzrEYYHpdQy8=
 chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211116035000-afce90d77990/go.mod h1:U8Ltq5f0DOOW+IDuByzFV1buRN0KWNQ1JdElRgeEuqA=
 chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211116120002-c392a1cc6f0d h1:avBAwfHQETgvpuU6uV2t/Hu6bEQVIfPuyU7zi7OBUvA=
@@ -52,6 +54,8 @@ chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211117093141-36fc20e150dc h1:E+VEc+iz
 chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211117093141-36fc20e150dc/go.mod h1:W0yGaiFKP4nhRk5RMJJjBZ7LhU12wR3fc9beP3kpliw=
 chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211118095044-4e0ae7541242 h1:kwKSkHgX2zk0VsRPZVIkalykkN1b9NygPqDLSG49Etw=
 chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211118095044-4e0ae7541242/go.mod h1:6Qy+m2Hxr7/8BsWgGHpIpTY7NKvtO52D/9RmB2rWJ+8=
+chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211118123416-ff0ef3f6c258 h1:kb5vrYjqrPHdiTBsY0HHVi+wRsy3+XvvvXz6vPEFvoo=
+chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211118123416-ff0ef3f6c258/go.mod h1:0z62huN3JNLZz4wZRCYyic4LYveqwjhaOttPj2g6aRk=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.38.0/go.mod h1:990N+gfupTy94rShfmMCWGDn0LpTmnzTp2qbd1dvSRU=
