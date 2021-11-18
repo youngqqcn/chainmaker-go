@@ -7,7 +7,7 @@
 #
 
 set -x
-BRANCH=v2.1.0
+BRANCH=develop
 
 cd ../module/accesscontrol
 go get chainmaker.org/chainmaker/protocol/v2@${BRANCH}
@@ -46,9 +46,9 @@ go get chainmaker.org/chainmaker/protocol/v2@${BRANCH}
 go get chainmaker.org/chainmaker/pb-go/v2@${BRANCH}
 go get chainmaker.org/chainmaker/common/v2@${BRANCH}
 go get chainmaker.org/chainmaker/logger/v2@${BRANCH}
-go get chainmaker.org/chainmaker/net-common@v1.0.0
-go get chainmaker.org/chainmaker/net-liquid@v1.0.0
-go get chainmaker.org/chainmaker/net-libp2p@v1.0.0
+go get chainmaker.org/chainmaker/net-common@${BRANCH}
+go get chainmaker.org/chainmaker/net-liquid@${BRANCH}
+go get chainmaker.org/chainmaker/net-libp2p@${BRANCH}
 go mod tidy
 
 cd ../rpcserver
@@ -113,8 +113,6 @@ go get chainmaker.org/chainmaker/txpool-batch/v2@${BRANCH}
 go get chainmaker.org/chainmaker/vm/v2@${BRANCH}
 go get chainmaker.org/chainmaker/utils/v2@${BRANCH}
 go mod tidy
-
-
 
 cd ../../tools/cmc
 go get chainmaker.org/chainmaker/protocol/v2@${BRANCH}
