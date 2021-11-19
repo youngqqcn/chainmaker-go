@@ -65,13 +65,12 @@ func init() {
 	consensus.RegisterConsensusProvider(
 		consensusPb.ConsensusType_DPOS,
 		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
-			dposEngine := dpos.NewDPoSImpl(config)
-			tbftEngine, err := tbft.New(config, dposEngine)
+			tbftEngine, err := tbft.New(config) // DPoS based in TBFT
 			if err != nil {
 				return nil, err
 			}
-			dposEngine.SetConsensusEngine(tbftEngine)
-			return tbftEngine, nil
+			dposEngine := dpos.NewDPoSImpl(config, tbftEngine)
+			return dposEngine, nil
 		},
 	)
 
@@ -85,8 +84,7 @@ func init() {
 	consensus.RegisterConsensusProvider(
 		consensusPb.ConsensusType_TBFT,
 		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
-			dp := dpos.NewNilDPoSImpl()
-			return tbft.New(config, dp)
+			return tbft.New(config)
 		},
 	)
 

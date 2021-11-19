@@ -11,16 +11,16 @@ require (
 	chainmaker.org/chainmaker-go/txpool v0.0.0
 	chainmaker.org/chainmaker-go/vm v0.0.0
 	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211117131805-630800bfd361
-	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211117025121-106e166cbbe0
+	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211119090249-35ee4a6e5c94
 	chainmaker.org/chainmaker/consensus-hotstuff/v2 v2.0.0-20211117031314-728e624e06bd
-	chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20211117025208-de42ca78a5bc
+	chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20211119090331-4f44db82b941
 	chainmaker.org/chainmaker/consensus-solo/v2 v2.0.0-20211117025052-3e60f135dd70
-	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20211117025915-6ab8ea182df8
+	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20211119090013-24b538ae0166
 	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211115084213-42e840e1efee
 	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211110030026-ce2a7f3760cd
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211109074349-f79af5e1892d
 	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211117140137-9095a7ab7a69
-	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211116092258-b0de845d438c
+	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211119081550-ff85fecc318d
 	chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211110082824-51f0b56a62ee
 	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20211109075600-a0a811fe0650
 	chainmaker.org/chainmaker/txpool-single/v2 v2.1.1-0.20211109075506-aea78872cdc6
@@ -39,6 +39,7 @@ require (
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.0
+	go.opencensus.io v0.23.0 // indirect
 	google.golang.org/grpc v1.41.0
 )
 
