@@ -11,9 +11,9 @@ require (
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211109074349-f79af5e1892d
 	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211117140137-9095a7ab7a69
 	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211119081550-ff85fecc318d
-	chainmaker.org/chainmaker/txpool-batch/v2 v2.0.0-20211019074609-46e3d29f0908
+	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20211109075600-a0a811fe0650
 	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211117144316-3f4a940e94f0
-	chainmaker.org/chainmaker/vm v0.0.0-20211028094551-9b2cca96d10d
+	chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211117062641-a1b17375caf8
 	github.com/ethereum/go-ethereum v1.10.3 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gogo/protobuf v1.3.2
@@ -31,6 +31,11 @@ require (
 )
 
 replace (
+	chainmaker.org/chainmaker-go/accesscontrol => ../accesscontrol
+	chainmaker.org/chainmaker-go/consensus => ../consensus
+	chainmaker.org/chainmaker-go/consensus/dpos => ./../consensus/dpos
+
+	chainmaker.org/chainmaker-go/monitor => ../monitor
 	chainmaker.org/chainmaker-go/subscriber => ../subscriber
 	github.com/spf13/viper => github.com/spf13/viper v1.7.1 //for go1.15 build
 )

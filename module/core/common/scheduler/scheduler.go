@@ -7,8 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package scheduler
 
 import (
-	"chainmaker.org/chainmaker/vm"
-	//	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -19,6 +18,7 @@ import (
 	"chainmaker.org/chainmaker/localconf/v2"
 	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/protocol/v2"
+	"chainmaker.org/chainmaker/vm/v2"
 	"github.com/panjf2000/ants/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	//	acpb "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
@@ -479,6 +479,12 @@ func (ts *TxScheduler) runVM(tx *commonpb.Transaction, txSimContext protocol.TxS
 			ts.log.Errorf("Get contract bytecode by name[%s] error:%s", contractName, err)
 			return nil, err
 		}
+	} else {
+		ts.log.DebugDynamic(func() string {
+			contractData, _ := json.Marshal(contract)
+			return fmt.Sprintf("contract[%s] is a native contract, definition:%s",
+				contractName, string(contractData))
+		})
 	}
 	//contract = &commonpb.Contract{
 	//	ContractName:    contractName,

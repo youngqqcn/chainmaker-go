@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"testing"
 
+	"chainmaker.org/chainmaker/protocol/v2/test"
 	"github.com/golang/mock/gomock"
 
-	"chainmaker.org/chainmaker/logger/v2"
 	"chainmaker.org/chainmaker/protocol/v2/mock"
 )
 
@@ -20,7 +20,7 @@ func TestNewSnapshotManager(t *testing.T) {
 	t.Log("TestNewSnapshotManager")
 	var (
 		snapshotFactory Factory
-		log             = logger.GetLogger(logger.MODULE_SNAPSHOT)
+		log             = &test.GoLogger{}
 		ctl             = gomock.NewController(t)
 		store           = mock.NewMockBlockchainStore(ctl)
 	)
@@ -35,7 +35,7 @@ func TestNewSnapshotEvidenceMgr(t *testing.T) {
 	t.Log("TestNewSnapshotEvidenceMgr")
 	var (
 		snapshotFactory Factory
-		log             = logger.GetLogger(logger.MODULE_SNAPSHOT)
+		log             = &test.GoLogger{}
 		ctl             = gomock.NewController(t)
 		store           = mock.NewMockBlockchainStore(ctl)
 	)

@@ -196,7 +196,7 @@ func ProposalMultiRequest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, tx
 	}
 
 	req.Sender.Signature = signBytes
-	fmt.Printf("client signed tx request sender:%+v,\nendorsers:%+v\n", req.Sender, req.Endorsers)
+	//fmt.Printf("client signed tx request sender:%+v,\nendorsers:%+v\n", req.Sender, req.Endorsers)
 	result, err := (*client).SendRequest(ctx, req)
 	//result, err := client.SendRequest(ctx, req)
 
