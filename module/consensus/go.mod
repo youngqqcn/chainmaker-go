@@ -1,6 +1,6 @@
 module chainmaker.org/chainmaker-go/consensus
 
-go 1.16
+go 1.15
 
 require (
 	chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211109075405-cc95de741f5e // indirect
