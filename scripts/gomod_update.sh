@@ -113,16 +113,25 @@ go get chainmaker.org/chainmaker/consensus-utils/v2@${BRANCH}
 go mod tidy
 
 cd ../vm
+go get chainmaker.org/chainmaker/protocol/v2@${BRANCH}
 go get chainmaker.org/chainmaker/pb-go/v2@${BRANCH}
 go get chainmaker.org/chainmaker/common/v2@${BRANCH}
 go mod tidy
 
-#cd ../tools/cmc
-#go get chainmaker.org/chainmaker/protocol/v2@${BRANCH}
+cd ../../tools/cmc
+go get chainmaker.org/chainmaker/protocol/v2@${BRANCH}
 #go get chainmaker.org/chainmaker/sdk-go/v2@${BRANCH}
-#go get chainmaker.org/chainmaker/pb-go/v2@${BRANCH}
-#go get chainmaker.org/chainmaker/common/v2@${BRANCH}
-#go mod tidy
+go get chainmaker.org/chainmaker/pb-go/v2@${BRANCH}
+go get chainmaker.org/chainmaker/common/v2@${BRANCH}
+go mod tidy
+
+cd ../../test/send_proposal_request_tool
+go get chainmaker.org/chainmaker/common/v2@${BRANCH}
+go get chainmaker.org/chainmaker/logger/v2@${BRANCH}
+go get chainmaker.org/chainmaker/pb-go/v2@${BRANCH}
+go get chainmaker.org/chainmaker/protocol/v2@${BRANCH}
+go get chainmaker.org/chainmaker/utils/v2@${BRANCH}
+go mod tidy
 
 cd ../../
 go get chainmaker.org/chainmaker/protocol/v2@${BRANCH}
@@ -134,7 +143,7 @@ go get chainmaker.org/chainmaker/localconf/v2@${BRANCH}
 go get chainmaker.org/chainmaker/txpool-batch/v2@${BRANCH}
 go get chainmaker.org/chainmaker/txpool-single/v2@${BRANCH}
 go get chainmaker.org/chainmaker/logger/v2@${BRANCH}
-go get chainmaker.org/chainmaker/sdk-go/v2@${BRANCH}
+#go get chainmaker.org/chainmaker/sdk-go/v2@${BRANCH}
 go get chainmaker.org/chainmaker/consensus-utils/v2@${BRANCH}
 go get chainmaker.org/chainmaker/consensus-solo/v2@${BRANCH}
 go get chainmaker.org/chainmaker/consensus-dpos/v2@${BRANCH}

@@ -2,7 +2,7 @@ module chainmaker.org/chainmaker-go/vm
 
 go 1.15
 
-require chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211116092258-b0de845d438c
+require chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211119081550-ff85fecc318d
 
 require (
 	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211117131805-630800bfd361 // indirect
