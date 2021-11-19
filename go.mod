@@ -11,11 +11,11 @@ require (
 	chainmaker.org/chainmaker-go/txpool v0.0.0
 	chainmaker.org/chainmaker-go/vm v0.0.0
 	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211117131805-630800bfd361
-	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211119090249-35ee4a6e5c94
-	chainmaker.org/chainmaker/consensus-hotstuff/v2 v2.0.0-20211117031314-728e624e06bd
-	chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20211119090331-4f44db82b941
-	chainmaker.org/chainmaker/consensus-solo/v2 v2.0.0-20211117025052-3e60f135dd70
-	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20211119090013-24b538ae0166
+	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211119100858-b806ddbb6d35
+	chainmaker.org/chainmaker/consensus-hotstuff/v2 v2.0.0-20211119101639-ae06999f7408
+	chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20211119100947-ce17472c410c
+	chainmaker.org/chainmaker/consensus-solo/v2 v2.0.0-20211119095958-4b1cce193b32
+	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20211119101400-96829b485267
 	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211115084213-42e840e1efee
 	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211110030026-ce2a7f3760cd
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211109074349-f79af5e1892d
