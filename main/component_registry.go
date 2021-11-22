@@ -7,8 +7,16 @@ SPDX-License-Identifier: Apache-2.0
 package main
 
 import (
+	"chainmaker.org/chainmaker-go/consensus"
 	"chainmaker.org/chainmaker-go/txpool"
 	"chainmaker.org/chainmaker-go/vm"
+	dpos "chainmaker.org/chainmaker/consensus-dpos/v2"
+	hotstuff "chainmaker.org/chainmaker/consensus-hotstuff/v2"
+	raft "chainmaker.org/chainmaker/consensus-raft/v2"
+	solo "chainmaker.org/chainmaker/consensus-solo/v2"
+	tbft "chainmaker.org/chainmaker/consensus-tbft/v2"
+	utils "chainmaker.org/chainmaker/consensus-utils/v2"
+	consensusPb "chainmaker.org/chainmaker/pb-go/v2/consensus"
 	"chainmaker.org/chainmaker/protocol/v2"
 	batch "chainmaker.org/chainmaker/txpool-batch/v2"
 	single "chainmaker.org/chainmaker/txpool-single/v2"
@@ -49,6 +57,47 @@ func init() {
 		"EVM",
 		func(chainId string) (protocol.VmInstancesManager, error) {
 			return &evm.InstancesManager{}, nil
+		},
+	)
+
+	// consensus
+	consensus.RegisterConsensusProvider(
+		consensusPb.ConsensusType_SOLO,
+		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
+			return solo.New(config)
+		},
+	)
+
+	consensus.RegisterConsensusProvider(
+		consensusPb.ConsensusType_DPOS,
+		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
+			tbftEngine, err := tbft.New(config) // DPoS based in TBFT
+			if err != nil {
+				return nil, err
+			}
+			dposEngine := dpos.NewDPoSImpl(config, tbftEngine)
+			return dposEngine, nil
+		},
+	)
+
+	consensus.RegisterConsensusProvider(
+		consensusPb.ConsensusType_RAFT,
+		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
+			return raft.New(config)
+		},
+	)
+
+	consensus.RegisterConsensusProvider(
+		consensusPb.ConsensusType_TBFT,
+		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
+			return tbft.New(config)
+		},
+	)
+
+	consensus.RegisterConsensusProvider(
+		consensusPb.ConsensusType_HOTSTUFF,
+		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
+			return hotstuff.New(config)
 		},
 	)
 }

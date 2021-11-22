@@ -15,8 +15,8 @@ import (
 	apiPb "chainmaker.org/chainmaker/pb-go/v2/api"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
-	"chainmaker.org/chainmaker/protocol/v2"
-	"chainmaker.org/chainmaker/utils/v2"
+	protocol "chainmaker.org/chainmaker/protocol/v2"
+	utils "chainmaker.org/chainmaker/utils/v2"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

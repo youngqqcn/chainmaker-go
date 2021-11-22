@@ -14,10 +14,10 @@ import (
 	"chainmaker.org/chainmaker-go/core/common"
 	"chainmaker.org/chainmaker-go/core/provider/conf"
 
-	"chainmaker.org/chainmaker-go/consensus"
 	commonErrors "chainmaker.org/chainmaker/common/v2/errors"
 	"chainmaker.org/chainmaker/common/v2/monitor"
 	"chainmaker.org/chainmaker/common/v2/msgbus"
+	consensus "chainmaker.org/chainmaker/consensus/v2"
 	"chainmaker.org/chainmaker/localconf/v2"
 	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
 	consensuspb "chainmaker.org/chainmaker/pb-go/v2/consensus"

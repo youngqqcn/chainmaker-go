@@ -7,7 +7,7 @@ require (
 	chainmaker.org/chainmaker/net-libp2p v1.0.1-0.20211109090515-4889a63c74af
 	chainmaker.org/chainmaker/net-liquid v1.0.1-0.20211109090708-3be221384c3e
 	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211117140137-9095a7ab7a69
-	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211116092258-b0de845d438c
+	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211119081550-ff85fecc318d
 	github.com/gogo/protobuf v1.3.2
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect

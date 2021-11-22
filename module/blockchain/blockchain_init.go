@@ -26,8 +26,9 @@ import (
 	componentVm "chainmaker.org/chainmaker-go/vm"
 	"chainmaker.org/chainmaker/chainconf/v2"
 	"chainmaker.org/chainmaker/common/v2/container"
-	"chainmaker.org/chainmaker/localconf/v2"
-	"chainmaker.org/chainmaker/logger/v2"
+	consensusUtils "chainmaker.org/chainmaker/consensus-utils/v2"
+	localconf "chainmaker.org/chainmaker/localconf/v2"
+	logger "chainmaker.org/chainmaker/logger/v2"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	consensusPb "chainmaker.org/chainmaker/pb-go/v2/consensus"
 	storePb "chainmaker.org/chainmaker/pb-go/v2/store"
@@ -593,7 +594,7 @@ func (bc *Blockchain) initCore() (err error) {
 
 func (bc *Blockchain) initConsensus() (err error) {
 	// init consensus module
-	var consensusFactory consensus.Factory
+	//var consensusFactory consensus.Factory
 	id := localconf.ChainMakerConfig.NodeConfig.NodeId
 	nodes := bc.chainConf.ChainConfig().Consensus.Nodes
 	nodeIds := make([]string, len(nodes))
@@ -616,25 +617,22 @@ func (bc *Blockchain) initConsensus() (err error) {
 		bc.log.Infof("consensus module existed, ignore.")
 		return
 	}
-	dbHandle := bc.store.GetDBHandle(protocol.ConsensusDBName)
-	bc.consensus, err = consensusFactory.NewConsensusEngine(
-		bc.getConsensusType(),
-		bc.chainId,
-		id,
-		nodeIds,
-		bc.identity,
-		bc.ac,
-		dbHandle,
-		bc.ledgerCache,
-		bc.proposalCache,
-		bc.coreEngine.GetBlockVerifier(),
-		bc.coreEngine.GetBlockCommitter(),
-		bc.netService,
-		bc.msgBus,
-		bc.chainConf,
-		bc.store,
-		bc.coreEngine.GetHotStuffHelper(),
-	)
+
+	config := &consensusUtils.ConsensusImplConfig{
+		ChainId:       bc.chainId,
+		NodeId:        id,
+		Ac:            bc.ac,
+		Core:          bc.coreEngine,
+		ChainConf:     bc.chainConf,
+		NetService:    bc.netService,
+		Signer:        bc.identity,
+		Store:         bc.store,
+		LedgerCache:   bc.ledgerCache,
+		ProposalCache: bc.proposalCache,
+		MsgBus:        bc.msgBus,
+	}
+	provider := consensus.GetConsensusProvider(bc.chainConf.ChainConfig().Consensus.Type)
+	bc.consensus, err = provider(config)
 	if err != nil {
 		bc.log.Errorf("new consensus engine failed, %s", err)
 		return err
