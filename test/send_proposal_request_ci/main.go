@@ -84,8 +84,17 @@ func main() {
 	evmtest()
 	initWasmerTest()
 	runTest()
+	initGasmTest()
+	runTest()
 }
 
+func initGasmTest() {
+	WasmPath = "../wasm/go-func-verify-2.0.0.wasm"
+	WasmUpgradePath = WasmPath
+	contractName = "contract201"
+	runtimeType = commonPb.RuntimeType_GASM
+	printConfig("gasm")
+}
 func runTest() {
 	var (
 		conn   *grpc.ClientConn
