@@ -511,7 +511,7 @@ func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxS
 		var code commonPb.TxStatusCode
 		chargeParameters := map[string][]byte{
 			accountmgr.ChargePublicKey: pk,
-			accountmgr.ChargeGasAmount: tx.Payload.Limit,
+			accountmgr.ChargeGasAmount: []byte(strconv.FormatUint(tx.Payload.Limit.GasLimit, 10)),
 		}
 
 		runChargeGasContract, code = ts.VmManager.RunContract(
@@ -532,19 +532,14 @@ func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxS
 
 	// refund gas
 	if ts.chainConf.ChainConfig().Scheduler.GetEnableGas() {
-		var gasLimit int
 		var code commonPb.TxStatusCode
 		var refundGasContract *commonPb.ContractResult
-		gasLimit, err = strconv.Atoi(string(tx.Payload.Limit))
-		if err != nil {
-			return nil, err
-		}
 
-		refundGas := gasLimit - int(contractResultPayload.GasUsed)
+		refundGas := tx.Payload.Limit.GasLimit - contractResultPayload.GasUsed
 		if refundGas != 0 {
 			refundGasParameters := map[string][]byte{
 				accountmgr.RechargeKey:       pk,
-				accountmgr.RechargeAmountKey: []byte(strconv.Itoa(refundGas)),
+				accountmgr.RechargeAmountKey: []byte(strconv.FormatUint(refundGas, 10)),
 			}
 			refundGasContract, code = ts.VmManager.RunContract(
 				accountMangerContract, syscontract.GasAccountFunction_REFUND_GAS_VM.String(),
