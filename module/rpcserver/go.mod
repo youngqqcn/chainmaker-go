@@ -6,17 +6,17 @@ require (
 	chainmaker.org/chainmaker-go/blockchain v0.0.0-00010101000000-000000000000
 	chainmaker.org/chainmaker-go/subscriber v0.0.0
 	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211108032042-88ed7467a15c
-	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211109075212-1129a47532af
+	chainmaker.org/chainmaker/localconf/v2 v2.1.0
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211109074349-f79af5e1892d
 	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211122052606-1ea3f17343e7
-	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211116092258-b0de845d438c
+	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211117024857-2641037a7269
 	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211122063451-8a41802784e4
 	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211109074701-81d58330e787
-	chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211118125947-ae325a95372e
+	chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211122122336-75d168875de2
 	github.com/gogo/protobuf v1.3.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/prometheus/client_golang v1.11.0
-	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba
+	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11
 	google.golang.org/grpc v1.41.0
 )
 
@@ -31,6 +31,6 @@ replace (
 	chainmaker.org/chainmaker-go/sync => ../sync
 	chainmaker.org/chainmaker-go/txpool => ../txpool
 	chainmaker.org/chainmaker-go/vm => ../vm
-	github.com/libp2p/go-libp2p-core => chainmaker.org/chainmaker/libp2p-core v0.0.2
+	github.com/libp2p/go-libp2p-core => chainmaker.org/chainmaker/libp2p-core v1.0.0
 	google.golang.org/grpc v1.40.0 => google.golang.org/grpc v1.26.0
 )

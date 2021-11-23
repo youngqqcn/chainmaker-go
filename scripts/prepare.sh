@@ -26,8 +26,8 @@ CRYPTOGEN_TOOL_PKCS11_KEYS=${CRYPTOGEN_TOOL_PATH}/config/pkcs11_keys.yml
 
 VERSION=v2.1.0_alpha
 
-BC_YML_TRUST_ROOT_LINE=126
-BC_YML_TRUST_ROOT_LINE_END=146
+BC_YML_TRUST_ROOT_LINE=128
+BC_YML_TRUST_ROOT_LINE_END=148
 
 function show_help() {
     echo "Usage:  "
@@ -128,10 +128,12 @@ function generate_config() {
     MONITOR_PORT=14321
     PPROF_PORT=24321
     TRUSTED_PORT=13301
+    DOCKER_VM_CONTAINER_NAME_PREFIX="chainmaker-vm-docker-go-container"
+    ENABLE_DOCKERVM="false"
 
-    read -p "input consensus type (0-SOLO,1-TBFT(default),3-HOTSTUFF,4-RAFT,5-DPOS): " tmp
+    read -p "input consensus type (0-SOLO,1-TBFT(default),3-HOTSTUFF,4-RAFT): " tmp
     if  [ ! -z "$tmp" ] ;then
-      if  [ $tmp -eq 0 ] || [ $tmp -eq 1 ] || [ $tmp -eq 3 ] || [ $tmp -eq 4 ] || [ $tmp -eq 5 ] ;then
+      if  [ $tmp -eq 0 ] || [ $tmp -eq 1 ] || [ $tmp -eq 3 ] || [ $tmp -eq 4 ] ;then
           CONSENSUS_TYPE=$tmp
       else
         echo "unknown consensus type [" $tmp "], so use default"
@@ -144,6 +146,14 @@ function generate_config() {
           LOG_LEVEL=$tmp
       else
         echo "unknown log level [" $tmp "], so use default"
+      fi
+    fi
+
+    read -p "enable docker vm (YES|NO(default))" enable_dockervm
+    if  [ ! -z "$enable_dockervm" ]; then
+      if  [ $enable_dockervm == "YES" ]; then
+          ENABLE_DOCKERVM="true"
+          echo "enable docker vm"
       fi
     fi
 
@@ -172,6 +182,8 @@ function generate_config() {
         xsed "s%{monitor_port}%$(($MONITOR_PORT+$i-1))%g" node$i/chainmaker.yml
         xsed "s%{pprof_port}%$(($PPROF_PORT+$i-1))%g" node$i/chainmaker.yml
         xsed "s%{trusted_port}%$(($TRUSTED_PORT+$i-1))%g" node$i/chainmaker.yml
+        xsed "s%{enable_dockervm}%$ENABLE_DOCKERVM%g" node$i/chainmaker.yml
+        xsed "s%{dockervm_container_name}%"${DOCKER_VM_CONTAINER_NAME_PREFIX}$i"%g" node$i/chainmaker.yml
 
         system=$(uname)
 
@@ -302,22 +314,22 @@ function generate_config() {
           for ((k = 1; k < $CHAIN_CNT + 1; k = k + 1)); do
             for file in `ls -tr $BUILD_CRYPTO_CONFIG_PATH`
             do
-                org_id_tmp=" - org_id: \"${file}\""
-                org_root="   root:"
-                org_root_tmp="     - \"../config/wx-org${i}.chainmaker.org/certs/ca/${file}/ca.crt\""
+                org_id_tmp="\ - org_id: \"${file}\""
+                org_root="\ \ \ root:"
+                org_root_tmp="\ \ \ \ \ - \"../config/wx-org${i}.chainmaker.org/certs/ca/${file}/ca.crt\""
                 if [ "${system}" = "Linux" ]; then
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\ ${org_root_tmp}" node$i/chainconfig/bc$k.yml
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\ ${org_root}" node$i/chainconfig/bc$k.yml
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\ ${org_id_tmp}"   node$i/chainconfig/bc$k.yml
                 else
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\\
- ${org_root_tmp}\\
+\ ${org_root_tmp}\\
 " node$i/chainconfig/bc$k.yml
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\\
- ${org_root}\\
+\ ${org_root}\\
 "  node$i/chainconfig/bc$k.yml
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\\
- ${org_id_tmp}\\
+\ ${org_id_tmp}\\
 "    node$i/chainconfig/bc$k.yml
                 fi
             done

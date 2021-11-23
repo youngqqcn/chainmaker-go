@@ -10,6 +10,8 @@ package snapshot
 import (
 	"sync"
 
+	"go.uber.org/atomic"
+
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/utils/v2"
@@ -40,7 +42,7 @@ func (m *ManagerDelegate) makeSnapshotImpl(block *commonPb.Block, blockHeight ui
 	txCount := len(block.Txs) // as map init size
 	snapshotImpl := &SnapshotImpl{
 		blockchainStore: m.blockchainStore,
-		sealed:          false,
+		sealed:          atomic.NewBool(false),
 		preSnapshot:     nil,
 		log:             m.log,
 		txResultMap:     make(map[string]*commonPb.Result, txCount),

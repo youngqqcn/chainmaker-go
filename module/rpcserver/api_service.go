@@ -221,8 +221,7 @@ func (s *ApiService) dealQuery(tx *commonPb.Transaction, source protocol.TxSourc
 		txWriteKeyMap:    map[string]*commonPb.TxWrite{},
 		txWriteKeySql:    make([]*commonPb.TxWrite, 0),
 		txWriteKeyDdlSql: make([]*commonPb.TxWrite, 0),
-		sqlRowCache:      make(map[int32]protocol.SqlRows),
-		kvRowCache:       make(map[int32]protocol.StateIterator),
+		rowCache:         make(map[int32]interface{}),
 		blockchainStore:  store,
 		vmManager:        vmMgr,
 		blockVersion:     protocol.DefaultBlockVersion,
@@ -248,7 +247,7 @@ func (s *ApiService) dealQuery(tx *commonPb.Transaction, source protocol.TxSourc
 			return resp
 		}
 	}
-	txResult, txStatusCode := vmMgr.RunContract(contract, tx.Payload.Method,
+	txResult, _, txStatusCode := vmMgr.RunContract(contract, tx.Payload.Method,
 		bytecode, s.kvPair2Map(tx.Payload.Parameters), ctx, 0, tx.Payload.TxType)
 	s.log.DebugDynamic(func() string {
 		contractJson, _ := json.Marshal(contract)
@@ -311,8 +310,7 @@ func (s *ApiService) dealSystemChainQuery(tx *commonPb.Transaction, vmMgr protoc
 		txWriteKeyMap:    map[string]*commonPb.TxWrite{},
 		txWriteKeySql:    make([]*commonPb.TxWrite, 0),
 		txWriteKeyDdlSql: make([]*commonPb.TxWrite, 0),
-		sqlRowCache:      make(map[int32]protocol.SqlRows),
-		kvRowCache:       make(map[int32]protocol.StateIterator),
+		rowCache:         make(map[int32]interface{}),
 		vmManager:        vmMgr,
 		blockVersion:     protocol.DefaultBlockVersion,
 	}
