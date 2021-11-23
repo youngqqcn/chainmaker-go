@@ -19,9 +19,9 @@ import (
 	"syscall"
 	"time"
 
-	"chainmaker.org/chainmaker-go/blockchain"
+	"chainmaker.org/chainmaker-go/module/blockchain"
 	"chainmaker.org/chainmaker-go/module/monitor"
-	"chainmaker.org/chainmaker-go/rpcserver"
+	"chainmaker.org/chainmaker-go/module/rpcserver"
 	"chainmaker.org/chainmaker/localconf/v2"
 	"chainmaker.org/chainmaker/logger/v2"
 	"code.cloudfoundry.org/bytefmt"

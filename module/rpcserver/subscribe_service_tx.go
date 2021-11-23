@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"strings"
 
-	"chainmaker.org/chainmaker-go/subscriber"
-	"chainmaker.org/chainmaker-go/subscriber/model"
+	"chainmaker.org/chainmaker-go/module/subscriber"
+	"chainmaker.org/chainmaker-go/module/subscriber/model"
 	"chainmaker.org/chainmaker/common/v2/bytehelper"
 	commonErr "chainmaker.org/chainmaker/common/v2/errors"
 	apiPb "chainmaker.org/chainmaker/pb-go/v2/api"

@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"chainmaker.org/chainmaker-go/accesscontrol"
+	"chainmaker.org/chainmaker-go/module/accesscontrol"
 	"chainmaker.org/chainmaker-go/test/common"
 	"chainmaker.org/chainmaker/common/v2/ca"
 	"chainmaker.org/chainmaker/common/v2/crypto"
@@ -164,11 +164,11 @@ func functionalTest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient) {
 		rs     = make(map[string][]byte, 0)
 	)
 
-	fmt.Println("//1) 合约创建")
+	fmt.Println("//1) 合约创建", time.Now().Format("2006-01-02 15:04:05"))
 	txId = testCreate(sk3, client, CHAIN1)
 	testWaitTx(sk3, clientOrg2, CHAIN1, txId)
 
-	fmt.Println("// 2) 执行合约-sql insert")
+	fmt.Println("// 2) 执行合约-sql insert", time.Now().Format("2006-01-02 15:04:05"))
 	txId = testInvokeSqlInsert(sk3, client, CHAIN1, "11", true)
 	txId = testInvokeSqlInsert(sk3, client, CHAIN1, "11", true)
 
@@ -178,23 +178,23 @@ func functionalTest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient) {
 	testWaitTx(sk3, clientOrg2, CHAIN1, txId)
 	id = txId
 
-	fmt.Println("// 3) 查询 age11的 id:" + id)
+	fmt.Println("// 3) 查询 age11的 id:"+id, time.Now().Format("2006-01-02 15:04:05"))
 	_, result = testQuerySqlById(sk3, clientOrg2, CHAIN1, id)
 	json.Unmarshal([]byte(result), &rs)
-	fmt.Println("testInvokeSqlUpdate query", rs)
+	fmt.Println("testInvokeSqlUpdate query", rs, time.Now().Format("2006-01-02 15:04:05"))
 	if string(rs["id"]) != id {
 		fmt.Println("result", rs)
 		panic("query by id error, id err")
 	} else {
-		fmt.Println("  【testInvokeSqlInsert】 pass")
+		fmt.Println("  【testInvokeSqlInsert】 pass", time.Now().Format("2006-01-02 15:04:05"))
 		fmt.Println("  【testQuerySqlById】 pass")
 	}
 
-	fmt.Println("// 4) 执行合约-sql update name=长安链chainmaker_update where id=" + id)
+	fmt.Println("// 4) 执行合约-sql update name=长安链chainmaker_update where id="+id, time.Now().Format("2006-01-02 15:04:05"))
 	txId = testInvokeSqlUpdate(sk3, client, CHAIN1, id)
 	testWaitTx(sk3, clientOrg2, CHAIN1, txId)
 
-	fmt.Println("// 5) 查询 id=" + id + " 看name是不是更新成了长安链chainmaker_update：")
+	fmt.Println("// 5) 查询 id="+id+" 看name是不是更新成了长安链chainmaker_update：", time.Now().Format("2006-01-02 15:04:05"))
 	_, result = testQuerySqlById(sk3, clientOrg2, CHAIN1, id)
 	json.Unmarshal([]byte(result), &rs)
 	fmt.Println("testInvokeSqlUpdate query", rs)
@@ -205,14 +205,14 @@ func functionalTest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient) {
 		fmt.Println("  【testInvokeSqlUpdate】 pass")
 	}
 
-	fmt.Println("// 6) 范围查询 rang age 1~10")
+	fmt.Println("// 6) 范围查询 rang age 1~10", time.Now().Format("2006-01-02 15:04:05"))
 	testQuerySqlRangAge(sk3, clientOrg2, CHAIN1)
 
-	fmt.Println("// 7) 执行合约-sql delete by id age=11")
+	fmt.Println("// 7) 执行合约-sql delete by id age=11", time.Now().Format("2006-01-02 15:04:05"))
 	txId = testInvokeSqlDelete(sk3, client, CHAIN1, id)
 	testWaitTx(sk3, clientOrg2, CHAIN1, txId)
 
-	fmt.Println("// 8) 再次查询 id age=11，应该查不到")
+	fmt.Println("// 8) 再次查询 id age=11，应该查不到", time.Now().Format("2006-01-02 15:04:05"))
 	_, result = testQuerySqlById(sk3, clientOrg2, CHAIN1, id)
 	if result != "{}" {
 		fmt.Println("result", result)
@@ -229,11 +229,11 @@ func functionalTest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient) {
 	testWaitTx(sk3, clientOrg2, CHAIN1, txId)
 	id = txId
 	for i := 0; i < 3; i++ {
-		fmt.Println("试图将id=" + id + " 的name改为长安链chainmaker_save_point，但是发生了错误，所以修改不会成功")
+		fmt.Println("试图将id="+id+" 的name改为长安链chainmaker_save_point，但是发生了错误，所以修改不会成功", time.Now().Format("2006-01-02 15:04:05"))
 		txId = testInvokeSqlUpdateRollbackDbSavePoint(sk3, client, CHAIN1, id)
 		testWaitTx(sk3, clientOrg2, CHAIN1, txId)
 
-		fmt.Println("// 11 再次查询age=2000的这条数据，如果name被更新了，那么说明savepoint Rollback失败了")
+		fmt.Println("// 11 再次查询age=2000的这条数据，如果name被更新了，那么说明savepoint Rollback失败了", time.Now().Format("2006-01-02 15:04:05"))
 		_, result = testQuerySqlById(sk3, clientOrg2, CHAIN1, id)
 		rs = make(map[string][]byte, 0)
 		json.Unmarshal([]byte(result), &rs)
@@ -262,7 +262,7 @@ func functionalTest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient) {
 	if string(rs["age"]) != "100000" {
 		panic("query by id error, age err")
 	} else {
-		fmt.Println("  【testUpgrade】 pass")
+		fmt.Println("  【testUpgrade】 pass", time.Now().Format("2006-01-02 15:04:05"))
 		fmt.Println("  【testInvokeSqlInsert】 pass")
 	}
 
@@ -376,7 +376,6 @@ func testCreate(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId stri
 }
 
 func testUpgrade(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId string) string {
-	fmt.Println("============================================================")
 	fmt.Println("============================================================")
 	fmt.Println("========================test upgrade========================")
 	fmt.Println("============================================================")
@@ -581,7 +580,7 @@ func InvokeCommit(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId st
 func testGetTxByTxId(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, txId, chainId string) *commonPb.TransactionInfo {
 	fmt.Println("========================================================================================================")
 	fmt.Println("========================================================================================================")
-	fmt.Println("========get tx by txId ", txId, "===============")
+	fmt.Println("========get tx by txId ", txId, "===============", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Println("========================================================================================================")
 	fmt.Println("========================================================================================================")
 	fmt.Printf("\n============ get tx by txId [%s] ============\n", txId)
@@ -605,7 +604,7 @@ func testGetTxByTxId(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, txId, c
 }
 
 func testWaitTx(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId string, txId string) {
-	fmt.Printf("\n============ testWaitTx [%s] ============\n", txId)
+	fmt.Printf("\n============ testWaitTx [%s] ============%s\n", txId, time.Now().Format("2006-01-02 15:04:05"))
 	// 构造Payload
 	pair := &commonPb.KeyValuePair{Key: "txId", Value: []byte(txId)}
 	var pairs []*commonPb.KeyValuePair
