@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"chainmaker.org/chainmaker-go/core/provider/conf"
+	"chainmaker.org/chainmaker-go/module/core/provider/conf"
 	"chainmaker.org/chainmaker/localconf/v2"
 	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/protocol/v2"

@@ -7,9 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 package main
 
 import (
-	"chainmaker.org/chainmaker-go/consensus"
-	"chainmaker.org/chainmaker-go/txpool"
-	"chainmaker.org/chainmaker-go/vm"
+	"chainmaker.org/chainmaker-go/module/consensus"
+	"chainmaker.org/chainmaker-go/module/txpool"
+	"chainmaker.org/chainmaker-go/module/vm"
 	dpos "chainmaker.org/chainmaker/consensus-dpos/v2"
 	hotstuff "chainmaker.org/chainmaker/consensus-hotstuff/v2"
 	raft "chainmaker.org/chainmaker/consensus-raft/v2"

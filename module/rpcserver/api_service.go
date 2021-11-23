@@ -13,7 +13,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"chainmaker.org/chainmaker-go/blockchain"
+	"chainmaker.org/chainmaker-go/module/blockchain"
 	commonErr "chainmaker.org/chainmaker/common/v2/errors"
 	"chainmaker.org/chainmaker/common/v2/monitor"
 	localconf "chainmaker.org/chainmaker/localconf/v2"
