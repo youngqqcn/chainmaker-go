@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"sync"
 
-
 	"go.uber.org/atomic"
 
 	"chainmaker.org/chainmaker/localconf/v2"
@@ -40,7 +39,6 @@ type SnapshotImpl struct {
 	blockProposer  *accesscontrol.Member
 	blockHeight    uint64
 	preBlockHash   []byte
-
 
 	preSnapshot protocol.Snapshot
 
