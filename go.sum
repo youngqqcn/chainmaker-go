@@ -1,5 +1,4 @@
 bazil.org/fuse v0.0.0-20160811212531-371fbbdaa898/go.mod h1:Xbm+BRKSBEpa4q4hTSxohYNQpsxXPbPry4JJWOB3LB8=
-chainmaker.org/chainmaker/chainconf/v2 v2.1.0/go.mod h1:I4QqMydBUG8kInKv/x9JqU5a6xc5hul/Y4B3dcuvTKw=
 chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211109075405-cc95de741f5e/go.mod h1:WZvaza49nJxtJNNbkh+v0t9KdYNKWR/Ph2LDzEuzC4Y=
 chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211110023535-5bf814f90c4c h1:ftaqXETcncwCD/dalzGHIuI9Zt+SxxO/yxCDFxSPDiI=
 chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211110023535-5bf814f90c4c/go.mod h1:vavV4Ae6n2wmQ/9RDKGuvFE3z7q+dkI9j7oiPU8t+Kg=
@@ -63,7 +62,6 @@ chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20211117040955-9f886a6ed864 h1:XsK+
 chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20211117040955-9f886a6ed864/go.mod h1:AhEfwQzooxcS+5GBUWIAd2etQgL8PHiWoFz6gDyiYhU=
 chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20211117071021-e940cf22a033 h1:VXYw7fJ0dOxNx4C23Tafb5T+lZl2JXIjHD8CeokR9cY=
 chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20211117071021-e940cf22a033/go.mod h1:4J97O6+JvNMWZtkI7apRNAW8Ik6+hmotrEvmpLQ6YW0=
-chainmaker.org/chainmaker/vm-native/v2 v2.1.0/go.mod h1:/pBoCPqKr1DjoJDK6bnxSl9Pt+Jfb4A1wzhfwDQPeMY=
 chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211117040012-eb18e7861363/go.mod h1:6TtJIyRyXzCId10FsELeZrFecvBm5QPFBzyhYwmniSU=
 chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211122122336-75d168875de2 h1:AlQTISstTjiFu7sjK+KIrHIJlovRfWzVnYcixAHEJqI=
 chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211122122336-75d168875de2/go.mod h1:Xy3EJNAsvjqkOEvthhqGsI42WKqTqF3oHlru5HdHBUE=
@@ -71,7 +69,6 @@ chainmaker.org/chainmaker/vm-wasmer/v2 v2.1.1-0.20211117071057-eee2c7f08b39 h1:m
 chainmaker.org/chainmaker/vm-wasmer/v2 v2.1.1-0.20211117071057-eee2c7f08b39/go.mod h1:aa7fLWCGmqcS8udV91W2RSQOhSU3NG+08v1vOR2BHlM=
 chainmaker.org/chainmaker/vm-wxvm/v2 v2.1.1-0.20211117041254-a6cd6aecd988 h1:1e3E6Gy+adLUsaWsSozx4j1+XFhL3IkLLlKNecCiwPs=
 chainmaker.org/chainmaker/vm-wxvm/v2 v2.1.1-0.20211117041254-a6cd6aecd988/go.mod h1:Wd8YTaYAe1SQY+diCwSOc3a3REtiftkIiNhD1XpNa3Q=
-chainmaker.org/chainmaker/vm/v2 v2.1.0/go.mod h1:GnssAjfKyPf3YCpq5lbJUcxQvJgbnKo74HaIf1GwRiM=
 chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211117065933-3bd2fccd1033/go.mod h1:YmrzLIJe1T8f/vJckIR/ZWIBXtxNyYUjl2mf26NXAzI=
 chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211122122434-4b8be524bd12 h1:lNv2kwkk8ommrmCU+OAMCyMw0Mr7esN3qNBKNdJKqBg=
 chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211122122434-4b8be524bd12/go.mod h1:b6XArlrFWktax3lPPWv/OExcuHVRvRrqTXp1iSkiWp8=

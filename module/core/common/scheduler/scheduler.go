@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"sync"
 	"time"
 
@@ -22,6 +23,7 @@ import (
 	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/utils/v2"
+	"chainmaker.org/chainmaker/vm-native/v2/accountmgr"
 	"chainmaker.org/chainmaker/vm/v2"
 	"github.com/panjf2000/ants/v2"
 	"github.com/prometheus/client_golang/prometheus"
@@ -382,9 +384,14 @@ func (ts *TxScheduler) Halt() {
 
 func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxSimContext) (
 	*commonPb.Result, protocol.ExecOrderTxType, error) {
-	var contractName string
-	var method string
-	var byteCode []byte
+	var (
+		contractName          string
+		method                string
+		byteCode              []byte
+		pk                    []byte
+		specialTxType         protocol.ExecOrderTxType
+		accountMangerContract *commonPb.Contract
+	)
 
 	result := &commonPb.Result{
 		Code: commonPb.TxStatusCode_SUCCESS,
@@ -425,11 +432,66 @@ func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxS
 			return errResult(result, err)
 		}
 	}
-	contractResultPayload, specialTxType, txStatusCode := ts.VmManager.RunContract(contract, method, byteCode,
-		parameters, txSimContext, 0, tx.Payload.TxType)
+
+	accountMangerContract, err = txSimContext.GetContractByName(syscontract.SystemContract_ACCOUNT_MANAGER.String())
+	if err != nil {
+		ts.log.Error(err.Error())
+		return result, specialTxType, err
+	}
+
+	pk, err = ts.getSenderPk(txSimContext)
+	if err != nil {
+		ts.log.Error(err.Error())
+		return nil, specialTxType, err
+	}
+
+	// charge gas limit
+	if ts.chainConf.ChainConfig().Scheduler.GetEnableGas() {
+		var runChargeGasContract *commonPb.ContractResult
+		var code commonPb.TxStatusCode
+		chargeParameters := map[string][]byte{
+			accountmgr.ChargePublicKey: pk,
+			accountmgr.ChargeGasAmount: []byte(strconv.FormatUint(tx.Payload.Limit.GasLimit, 10)),
+		}
+
+		runChargeGasContract, specialTxType, code = ts.VmManager.RunContract(
+			accountMangerContract, syscontract.GasAccountFunction_CHARGE_GAS.String(),
+			nil, chargeParameters, txSimContext, 0, commonPb.TxType_INVOKE_CONTRACT)
+		if code != commonPb.TxStatusCode_SUCCESS {
+			result.Code = code
+			result.ContractResult = runChargeGasContract
+			return result, specialTxType, errors.New(runChargeGasContract.Message)
+		}
+	}
+
+	contractResultPayload, specialTxType, txStatusCode := ts.VmManager.RunContract(
+		contract, method, byteCode, parameters, txSimContext, 0, tx.Payload.TxType)
 
 	result.Code = txStatusCode
 	result.ContractResult = contractResultPayload
+
+	// refund gas
+	if ts.chainConf.ChainConfig().Scheduler.GetEnableGas() {
+		var code commonPb.TxStatusCode
+		var refundGasContract *commonPb.ContractResult
+
+		refundGas := tx.Payload.Limit.GasLimit - contractResultPayload.GasUsed
+		if refundGas != 0 {
+			refundGasParameters := map[string][]byte{
+				accountmgr.RechargeKey:       pk,
+				accountmgr.RechargeAmountKey: []byte(strconv.FormatUint(refundGas, 10)),
+			}
+			refundGasContract, specialTxType, code = ts.VmManager.RunContract(
+				accountMangerContract, syscontract.GasAccountFunction_REFUND_GAS_VM.String(),
+				nil, refundGasParameters, txSimContext, 0, commonPb.TxType_INVOKE_CONTRACT)
+			if code != commonPb.TxStatusCode_SUCCESS {
+				result.Code = code
+				result.ContractResult = refundGasContract
+				return result, specialTxType, errors.New(refundGasContract.Message)
+			}
+		}
+
+	}
 
 	if txStatusCode == commonPb.TxStatusCode_SUCCESS {
 		return result, specialTxType, nil
