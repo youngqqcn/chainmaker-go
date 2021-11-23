@@ -31,7 +31,7 @@ go get chainmaker.org/chainmaker/consensus-solo/v2@${BRANCH}
 go get chainmaker.org/chainmaker/consensus-dpos/v2@${BRANCH}
 go get chainmaker.org/chainmaker/consensus-raft/v2@${BRANCH}
 go get chainmaker.org/chainmaker/consensus-tbft/v2@${BRANCH}
-go get chainmaker.org/chainmaker/consensus-hotstuff/v2@${BRANCH}
+go get chainmaker.org/chainmaker/consensus-chainedbft/v2@${BRANCH}
 go mod tidy
 
 cd ../core
@@ -153,7 +153,7 @@ go get chainmaker.org/chainmaker/consensus-solo/v2@${BRANCH}
 go get chainmaker.org/chainmaker/consensus-dpos/v2@${BRANCH}
 go get chainmaker.org/chainmaker/consensus-raft/v2@${BRANCH}
 go get chainmaker.org/chainmaker/consensus-tbft/v2@${BRANCH}
-go get chainmaker.org/chainmaker/consensus-hotstuff/v2@${BRANCH}
+go get chainmaker.org/chainmaker/consensus-chainedbft/v2@${BRANCH}
 go mod tidy
 
 cd ./main

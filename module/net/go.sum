@@ -11,8 +11,8 @@ chainmaker.org/chainmaker/net-common v0.0.7-0.20211109085844-739f0f904b96 h1:TG1
 chainmaker.org/chainmaker/net-common v0.0.7-0.20211109085844-739f0f904b96/go.mod h1:px59kiNO9fHD4GSknu9nc8mUmjh4DEIyprXtXyCcRps=
 chainmaker.org/chainmaker/net-libp2p v1.0.1-0.20211109090515-4889a63c74af h1:kAC3/k0CJK72qnIPrLlZUa5Rf5SPuaDzJD9mJsW2ogs=
 chainmaker.org/chainmaker/net-libp2p v1.0.1-0.20211109090515-4889a63c74af/go.mod h1:M6Rm7VEph1kxezj51Lsa67ZKNczBbelcyfpGq9sgSpM=
-chainmaker.org/chainmaker/net-liquid v1.0.1-0.20211109090708-3be221384c3e h1:ZcCqLVwJwUem71QkeB082v2Cc8DXQgG2dD54tW1fQnE=
-chainmaker.org/chainmaker/net-liquid v1.0.1-0.20211109090708-3be221384c3e/go.mod h1:MQkKbLcgg0s+/xIs5ZGTawmOk81AEhZ8us0vQnzTZ/s=
+chainmaker.org/chainmaker/net-liquid v1.0.1-0.20211122114338-22ed0765724f h1:lGKkDiX5/2rCd2u8mVb2NjFTQms9fWJqxp3G0VXcyVQ=
+chainmaker.org/chainmaker/net-liquid v1.0.1-0.20211122114338-22ed0765724f/go.mod h1:MQkKbLcgg0s+/xIs5ZGTawmOk81AEhZ8us0vQnzTZ/s=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.0/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211117140137-9095a7ab7a69 h1:TjZh0cJ+jzmefIr4wsecIzODxUWlc6BVR7tFmc/2RDY=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211117140137-9095a7ab7a69/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
