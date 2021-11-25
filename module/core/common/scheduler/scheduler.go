@@ -446,7 +446,7 @@ func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxS
 	}
 
 	// charge gas limit
-	if ts.chainConf.ChainConfig().Scheduler.GetEnableGas() {
+	if ts.chainConf.ChainConfig().AccountConfig.EnableGas {
 		var runChargeGasContract *commonPb.ContractResult
 		var code commonPb.TxStatusCode
 		chargeParameters := map[string][]byte{
@@ -471,7 +471,7 @@ func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxS
 	result.ContractResult = contractResultPayload
 
 	// refund gas
-	if ts.chainConf.ChainConfig().Scheduler.GetEnableGas() {
+	if ts.chainConf.ChainConfig().AccountConfig.EnableGas {
 		var code commonPb.TxStatusCode
 		var refundGasContract *commonPb.ContractResult
 

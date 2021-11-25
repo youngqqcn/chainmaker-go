@@ -12,7 +12,7 @@ require (
 	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211125080705-8c4f85e6ca19
 	chainmaker.org/chainmaker/localconf/v2 v2.1.0
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211109074349-f79af5e1892d
-	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211125125051-7aa6e0da2379
+	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211125132649-b12a180c788a
 	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211125064016-15cf21479e69
 	chainmaker.org/chainmaker/sdk-go/v2 v2.1.0
 	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.0

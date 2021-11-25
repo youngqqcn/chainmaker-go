@@ -6,7 +6,7 @@ require (
 	chainmaker.org/chainmaker-go/accesscontrol v0.0.0
 	chainmaker.org/chainmaker/common/v2 v2.1.0
 	chainmaker.org/chainmaker/logger/v2 v2.1.0
-	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211125125051-7aa6e0da2379
+	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211125132649-b12a180c788a
 	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211117024857-2641037a7269
 	chainmaker.org/chainmaker/utils/v2 v2.1.0
 	github.com/Rican7/retry v0.1.0
@@ -20,10 +20,4 @@ require (
 	google.golang.org/grpc v1.37.0
 )
 
-replace (
-	chainmaker.org/chainmaker-go/accesscontrol => ../../module/accesscontrol
-
-	//chainmaker.org/chainmaker-go/localconf => ../../module/conf/localconf
-	//chainmaker.org/chainmaker-go/logger => ../../module/logger
-
-)
+replace chainmaker.org/chainmaker-go/accesscontrol => ../../module/accesscontrol
