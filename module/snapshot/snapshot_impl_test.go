@@ -177,7 +177,7 @@ func TestSnapshot(t *testing.T) {
 }
 func testSnapshot(t *testing.T, i int) {
 	snapshot := &SnapshotImpl{
-		lock:            sync.Mutex{},
+		lock:            sync.RWMutex{},
 		blockchainStore: nil,
 		sealed:          false,
 		chainId:         "",
