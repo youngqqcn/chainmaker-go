@@ -8,7 +8,7 @@ require (
 	chainmaker.org/chainmaker/net-common v1.0.0
 	chainmaker.org/chainmaker/net-libp2p v1.0.0
 	chainmaker.org/chainmaker/net-liquid v1.0.0
-	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211122052606-1ea3f17343e7
+	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211125125051-7aa6e0da2379
 	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211117024857-2641037a7269
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/groupcache v0.0.0-20191227052852-215e87163ea7 // indirect
