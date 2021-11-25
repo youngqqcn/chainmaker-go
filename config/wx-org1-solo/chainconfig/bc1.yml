@@ -29,7 +29,7 @@ vm:
 
 # evm配置
 evm:
-  addr_type: 1 #0:ethereum, 1:zxl
+  addr_type: 1 #0:chainmaker, 1:zxl
 
 # 交易、区块相关配置
 block:
