@@ -27,6 +27,10 @@ vm:
     - "wxvm"
     - "dockergo"
 
+# evm配置
+evm:
+  addr_type: 1 #0:ethereum, 1:zxl
+
 # 交易、区块相关配置
 block:
   tx_timestamp_verify: true # 是否需要开启交易时间戳校验
