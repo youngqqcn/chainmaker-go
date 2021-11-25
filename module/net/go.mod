@@ -7,8 +7,8 @@ require (
 	chainmaker.org/chainmaker-go/logger v0.0.0
 	chainmaker.org/chainmaker-go/utils v0.0.0
 	chainmaker.org/chainmaker/common/v2 v2.0.0
-	chainmaker.org/chainmaker/pb-go/v2 v2.0.0
-	chainmaker.org/chainmaker/protocol/v2 v2.0.0
+	chainmaker.org/chainmaker/pb-go/v2 v2.0.0-evm-perf
+	chainmaker.org/chainmaker/protocol/v2 v2.0.0-evm-perf
 	github.com/gogo/protobuf v1.3.2
 	github.com/libp2p/go-libp2p v0.11.0
 	github.com/libp2p/go-libp2p-circuit v0.3.1

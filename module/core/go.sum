@@ -1,11 +1,10 @@
-chainmaker.org/chainmaker/common/v2 v2.0.0 h1:hjh3iRBxWZKXfgrFSNcMCtA0jkhmiQwQ9eBZlZV4XHI=
 chainmaker.org/chainmaker/common/v2 v2.0.0/go.mod h1:b64BYSa9NusSCqk/D3u9H/svftiLQQbQH+LDV5F76Vw=
-chainmaker.org/chainmaker/pb-go/v2 v2.0.0 h1:ffY3Z4v9lNZP1a1g5CumtlqFXQZVDtoPImWeyaXRvEA=
-chainmaker.org/chainmaker/pb-go/v2 v2.0.0/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
-chainmaker.org/chainmaker/protocol/v2 v2.0.0-evm-perf/go.mod h1:l8RM8Z9XkNtvk6EQrWO/BV1S+96C41rVNaux82pVIe4=
-chainmaker.org/chainmaker/protocol/v2 v2.0.0/go.mod h1:l8RM8Z9XkNtvk6EQrWO/BV1S+96C41rVNaux82pVIe4=
-chainmaker.org/chainmaker/protocol/v2 v2.0.1-0.20211025124118-75638aac6fb5 h1:F0UrKcjsH7wSF7YLGg+gGocz4fooyweprpp6s48Ljrs=
-chainmaker.org/chainmaker/protocol/v2 v2.0.1-0.20211025124118-75638aac6fb5/go.mod h1:l8RM8Z9XkNtvk6EQrWO/BV1S+96C41rVNaux82pVIe4=
+chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211102114739-f3996e94d55a h1:O7iQfSIWJdHUoxIxhcBqDbFYJfMfo25Z0wkijo0wUkI=
+chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211102114739-f3996e94d55a/go.mod h1:b64BYSa9NusSCqk/D3u9H/svftiLQQbQH+LDV5F76Vw=
+chainmaker.org/chainmaker/pb-go/v2 v2.0.0-evm-perf h1:ti4xN3h60iyp2wdV/b4qyNjFBTYnx9w5R11/hn+NHgM=
+chainmaker.org/chainmaker/pb-go/v2 v2.0.0-evm-perf/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
+chainmaker.org/chainmaker/protocol/v2 v2.0.0-evm-perf h1:txqazrspz134qndUzpumKIMpIfEJ19DBqkPTkBNoMjI=
+chainmaker.org/chainmaker/protocol/v2 v2.0.0-evm-perf/go.mod h1:BWhjK0tQCWpKRVFcT9SJsZ8fR1VAEADZd0kmQgaEtuA=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.38.0/go.mod h1:990N+gfupTy94rShfmMCWGDn0LpTmnzTp2qbd1dvSRU=
@@ -379,7 +378,6 @@ github.com/google/go-cmp v0.3.1/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMyw
 github.com/google/go-cmp v0.4.0/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.4.1/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.5.0/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
-github.com/google/go-cmp v0.5.0/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.5.4/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.5.5 h1:Khx7svrCpmxxtHBq5j2mp/xVjsi8hQMfNLvJFAlrGgU=
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
@@ -454,6 +452,7 @@ github.com/hashicorp/serf v0.8.2/go.mod h1:6hOLApaqBFA1NXqRQAsxw9QxuDEvNxSQRwA/J
 github.com/hokaccha/go-prettyjson v0.0.0-20201222001619-a42f9ac2ec8e h1:1vxUQ6PL1sROZtmO5IBbWKpq2y0CxjeZJl50rnen5js=
 github.com/hokaccha/go-prettyjson v0.0.0-20201222001619-a42f9ac2ec8e/go.mod h1:pFlLw2CfqZiIBOx6BuCeRLCrfxBJipTY0nIOF/VbGcI=
 github.com/holiman/bloomfilter/v2 v2.0.3/go.mod h1:zpoh+gs7qcpqrHr3dB55AMiJwo0iURXE7ZOP9L9hSkA=
+github.com/holiman/uint256 v1.1.1 h1:4JywC80b+/hSfljFlEBLHrrh+CIONLDz9NuFl0af4Mw=
 github.com/holiman/uint256 v1.1.1/go.mod h1:y4ga/t+u+Xwd7CpDgZESaRcWy0I7XMlTMA25ApIH5Jw=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
 github.com/hudl/fargo v1.3.0/go.mod h1:y3CKSmjA+wD2gak7sUSXTAoopbhU08POFhmITJgmKTg=

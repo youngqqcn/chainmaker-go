@@ -7,20 +7,19 @@ SPDX-License-Identifier: Apache-2.0
 package scheduler
 
 import (
-	//	"encoding/hex"
+	"crypto/sha256"
 	"errors"
 	"fmt"
+	"math"
 	"regexp"
 	"sync"
 	"time"
 
 	"chainmaker.org/chainmaker-go/core/provider/conf"
-
 	"chainmaker.org/chainmaker-go/localconf"
-	//	acpb "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
-	//	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
 	"chainmaker.org/chainmaker/protocol/v2"
+
 	"github.com/panjf2000/ants/v2"
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -84,19 +83,63 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 	ts.log.Infof("schedule tx batch start, size %d", txBatchSize)
 
 	poolCapacity := ts.StoreHelper.GetPoolCapacity()
-	if goRoutinePool, err = ants.NewPool(poolCapacity, ants.WithPreAlloc(true)); err != nil {
+	if goRoutinePool, err = ants.NewPool(poolCapacity, ants.WithPreAlloc(false)); err != nil {
 		return nil, nil, err
 	}
 	defer goRoutinePool.Release()
 	startTime := time.Now()
 
-	// Put the pending transaction into the running queue
-	go func() {
-		for _, tx := range txBatch {
-			runningTxC <- tx
-		}
-	}()
+	conflictsBitWindow := NewConflictsBitWindow(txBatchSize)
+	senderConflictsHandler := NewSenderConflictsHandler(txBatch)
+	enableSenderGroup := ts.chainConf.ChainConfig().Core.EnableSenderGroup
+	enableConflictsBitWindow := ts.chainConf.ChainConfig().Core.EnableConflictsBitWindow
 
+	// enable sender conflicts
+	if enableSenderGroup {
+		// set maxPoolCapacity, tune pool capacity if necessary
+		nextMaxPoolCapacity := int(math.Min(float64(len(senderConflictsHandler.txsMap)), float64(poolCapacity)))
+		if nextMaxPoolCapacity < goRoutinePool.Cap() {
+			goRoutinePool.Tune(nextMaxPoolCapacity)
+		}
+		if conflictsBitWindow != nil {
+			conflictsBitWindow.setMaxPoolCapacity(nextMaxPoolCapacity)
+		}
+
+		go func() {
+			// first round
+			for _, v := range senderConflictsHandler.txsMap {
+				runningTxC <- v[0]
+			}
+			// solve done tx channel
+			for {
+				k := <-senderConflictsHandler.doneTxKeyC
+				senderConflictsHandler.txsMap[k] = senderConflictsHandler.txsMap[k][1:]
+				if len(senderConflictsHandler.txsMap[k]) > 0 {
+					runningTxC <- senderConflictsHandler.txsMap[k][0]
+				} else {
+					delete(senderConflictsHandler.txsMap, k)
+					nextMaxPoolCapacity := int(math.Min(float64(len(senderConflictsHandler.txsMap)), float64(poolCapacity)))
+					if nextMaxPoolCapacity < goRoutinePool.Cap() {
+						goRoutinePool.Tune(nextMaxPoolCapacity)
+					}
+					if conflictsBitWindow != nil {
+						conflictsBitWindow.setMaxPoolCapacity(nextMaxPoolCapacity)
+					}
+					if len(senderConflictsHandler.txsMap) == 0 {
+						return
+					}
+				}
+			}
+		}()
+	} else {
+		go func() {
+			for _, tx := range txBatch {
+				runningTxC <- tx
+			}
+		}()
+	}
+
+	// Put the pending transaction into the running queue
 	go func() {
 		for {
 			select {
@@ -134,13 +177,23 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 					ts.log.Debugf("run vm finished, tx:%s, runVmSuccess:%v", tx.Payload.TxId, runVmSuccess)
 					applyResult, applySize := snapshot.ApplyTxSimContext(txSimContext, runVmSuccess)
 					if !applyResult {
+						if enableConflictsBitWindow && conflictsBitWindow != nil{
+							ts.adjustPoolSize(goRoutinePool, conflictsBitWindow, ConflictTx)
+						}
 						runningTxC <- tx
 						ts.log.Debugf("apply to snapshot failed, tx id:%s, result:%+v, apply count:%d",
 							tx.Payload.GetTxId(), txResult, applySize)
 					} else {
+						if enableConflictsBitWindow && conflictsBitWindow != nil{
+							ts.adjustPoolSize(goRoutinePool, conflictsBitWindow, NormalTx)
+						}
 						if localconf.ChainMakerConfig.MonitorConfig.Enabled {
 							elapsed := time.Since(start)
 							ts.metricVMRunTime.WithLabelValues(tx.Payload.ChainId).Observe(elapsed.Seconds())
+						}
+						if enableSenderGroup {
+							hashKey, _ := getHashKey(tx)
+							senderConflictsHandler.doneTxKeyC <- hashKey
 						}
 						ts.log.Debugf("apply to snapshot success, tx id:%s, result:%+v, apply count:%d",
 							tx.Payload.GetTxId(), txResult, applySize)
@@ -332,6 +385,14 @@ func (ts *TxScheduler) SimulateWithDag(block *commonpb.Block, snapshot protocol.
 		ts.log.Debugf("rwset %v", txRWSetMap)
 	}
 	return txRWSetMap, snapshot.GetTxResultMap(), nil
+}
+
+func (ts *TxScheduler) adjustPoolSize(pool *ants.Pool, conflictsBitWindow *ConflictsBitWindow, txExecType TxExecType) {
+	newPoolSize := conflictsBitWindow.Enqueue(txExecType, pool.Cap())
+	if newPoolSize == -1 {
+		return
+	}
+	pool.Tune(newPoolSize)
 }
 
 func (ts *TxScheduler) shrinkDag(txIndex int, dagRemain map[int]dagNeighbors) {
@@ -596,4 +657,34 @@ func (ts *TxScheduler) dumpDAG(dag *commonpb.DAG, txs []*commonpb.Transaction) {
 	}
 	dagString += "}"
 	ts.log.Infof("Dump Dag: %s", dagString)
+}
+
+type SenderConflictsHandler struct {
+	txsMap     map[[32]byte][]*commonpb.Transaction
+	doneTxKeyC chan [32]byte
+}
+
+func NewSenderConflictsHandler(txBatch []*commonpb.Transaction) *SenderConflictsHandler {
+	return &SenderConflictsHandler{
+		txsMap:     getSenderTxsMap(txBatch),
+		doneTxKeyC: make(chan [32]byte, len(txBatch)),
+	}
+}
+
+func getSenderTxsMap(txBatch []*commonpb.Transaction) map[[32]byte][]*commonpb.Transaction {
+	senderTxsMap := make(map[[32]byte][]*commonpb.Transaction)
+	for _, tx := range txBatch {
+		hashKey, _ := getHashKey(tx)
+		senderTxsMap[hashKey] = append(senderTxsMap[hashKey], tx)
+	}
+	return senderTxsMap
+}
+
+func getHashKey(tx *commonpb.Transaction) ([32]byte, error) {
+	sender := tx.GetSender().GetSigner()
+	keyBytes, err := sender.Marshal()
+	if err != nil {
+		return [32]byte{}, err
+	}
+	return sha256.Sum256(keyBytes), nil
 }

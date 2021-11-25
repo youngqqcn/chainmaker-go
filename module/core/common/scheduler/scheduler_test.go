@@ -6,6 +6,30 @@ SPDX-License-Identifier: Apache-2.0
 
 package scheduler
 
+import (
+	"github.com/stretchr/testify/require"
+	"testing"
+)
+
+// TestConflictsBitWindow_Enqueue tests the enqueue module of conflicts bit window.
+func TestConflictsBitWindow_Enqueue(t *testing.T) {
+	conflictsSlideWindow := NewConflictsBitWindow(1000)
+	for i := 0; i < 1000; i++ {
+		// enqueue a conflict every 8 tx, there are 8 conflicts txs in 64 window size
+		if i % 8 == 0 {
+			conflictsSlideWindow.Enqueue(ConflictTx, 256)
+		} else {
+			conflictsSlideWindow.Enqueue(NormalTx, 256)
+		}
+		if i < conflictsSlideWindow.bitWindowCapacity {
+			require.Equal(t, i / 8 + 1, conflictsSlideWindow.conflictsNum)
+		} else {
+			require.Equal(t, 8, conflictsSlideWindow.conflictsNum)
+		}
+
+	}
+}
+
 //
 //import (
 //	"encoding/hex"

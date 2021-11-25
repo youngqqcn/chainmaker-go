@@ -35,6 +35,8 @@ const (
 
 	paramNameTxSchedulerTimeout         = "tx_scheduler_timeout"
 	paramNameTxSchedulerValidateTimeout = "tx_scheduler_validate_timeout"
+	paramNameEnableSenderGroup          = "enable_sender_group"
+	paramNameEnableConflictsBitWindow   = "enable_conflicts_bit_window"
 
 	paramNameTxTimestampVerify    = "tx_timestamp_verify"
 	paramNameTxTimeout            = "tx_timeout"
@@ -245,6 +247,28 @@ func (r *ChainCoreRuntime) CoreUpdate(txSimContext protocol.TxSimContext, params
 			return nil, common.ErrOutOfRange
 		}
 		chainConfig.Core.TxSchedulerValidateTimeout = parseUint
+		changed = true
+	}
+
+	if enableSenderGroup, ok := params[paramNameEnableSenderGroup]; ok {
+		parseBool, err := strconv.ParseBool(string(enableSenderGroup))
+		if err != nil {
+			r.log.Error(err)
+			return nil, err
+		}
+		chainConfig.Core.EnableSenderGroup = parseBool
+		fmt.Println(chainConfig.Core.EnableSenderGroup)
+
+		changed = true
+	}
+
+	if enableConflictsBitWindow, ok := params[paramNameEnableConflictsBitWindow]; ok {
+		parseBool, err := strconv.ParseBool(string(enableConflictsBitWindow))
+		if err != nil {
+			r.log.Error(err)
+			return nil, err
+		}
+		chainConfig.Core.EnableConflictsBitWindow = parseBool
 		changed = true
 	}
 
