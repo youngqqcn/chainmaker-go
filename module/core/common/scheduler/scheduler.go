@@ -446,9 +446,9 @@ func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxS
 	}
 
 	// charge gas limit
-	if ts.chainConf.ChainConfig().AccountConfig.EnableGas {
-		var runChargeGasContract *commonPb.ContractResult
+	if ts.checkGasEnable() {
 		var code commonPb.TxStatusCode
+		var runChargeGasContract *commonPb.ContractResult
 		chargeParameters := map[string][]byte{
 			accountmgr.ChargePublicKey: pk,
 			accountmgr.ChargeGasAmount: []byte(strconv.FormatUint(tx.Payload.Limit.GasLimit, 10)),
@@ -471,26 +471,27 @@ func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxS
 	result.ContractResult = contractResultPayload
 
 	// refund gas
-	if ts.chainConf.ChainConfig().AccountConfig.EnableGas {
+	if ts.checkGasEnable() {
 		var code commonPb.TxStatusCode
 		var refundGasContract *commonPb.ContractResult
 
 		refundGas := tx.Payload.Limit.GasLimit - contractResultPayload.GasUsed
-		if refundGas != 0 {
-			refundGasParameters := map[string][]byte{
-				accountmgr.RechargeKey:       pk,
-				accountmgr.RechargeAmountKey: []byte(strconv.FormatUint(refundGas, 10)),
-			}
-			refundGasContract, specialTxType, code = ts.VmManager.RunContract(
-				accountMangerContract, syscontract.GasAccountFunction_REFUND_GAS_VM.String(),
-				nil, refundGasParameters, txSimContext, 0, commonPb.TxType_INVOKE_CONTRACT)
-			if code != commonPb.TxStatusCode_SUCCESS {
-				result.Code = code
-				result.ContractResult = refundGasContract
-				return result, specialTxType, errors.New(refundGasContract.Message)
-			}
+		if refundGas == 0 {
+			return result, specialTxType, nil
 		}
 
+		refundGasParameters := map[string][]byte{
+			accountmgr.RechargeKey:       pk,
+			accountmgr.RechargeAmountKey: []byte(strconv.FormatUint(refundGas, 10)),
+		}
+		refundGasContract, specialTxType, code = ts.VmManager.RunContract(
+			accountMangerContract, syscontract.GasAccountFunction_REFUND_GAS_VM.String(),
+			nil, refundGasParameters, txSimContext, 0, commonPb.TxType_INVOKE_CONTRACT)
+		if code != commonPb.TxStatusCode_SUCCESS {
+			result.Code = code
+			result.ContractResult = refundGasContract
+			return result, specialTxType, errors.New(refundGasContract.Message)
+		}
 	}
 
 	if txStatusCode == commonPb.TxStatusCode_SUCCESS {
@@ -624,6 +625,13 @@ func (ts *TxScheduler) dumpDAG(dag *commonPb.DAG, txs []*commonPb.Transaction) {
 	}
 	dagString += "}"
 	ts.log.Infof("Dump Dag: %s", dagString)
+}
+
+func (ts *TxScheduler) checkGasEnable() bool {
+	if ts.chainConf.ChainConfig() != nil {
+		return ts.chainConf.ChainConfig().AccountConfig.EnableGas
+	}
+	return false
 }
 
 func (ts *TxScheduler) getSenderPk(txSimContext protocol.TxSimContext) ([]byte, error) {
