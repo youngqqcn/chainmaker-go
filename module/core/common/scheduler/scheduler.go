@@ -628,9 +628,8 @@ func (ts *TxScheduler) dumpDAG(dag *commonPb.DAG, txs []*commonPb.Transaction) {
 }
 
 func (ts *TxScheduler) checkGasEnable() bool {
-	if ts.chainConf.ChainConfig() != nil {
-		return false
-		//return ts.chainConf.ChainConfig().AccountConfig.EnableGas
+	if ts.chainConf.ChainConfig() != nil && ts.chainConf.ChainConfig().AccountConfig != nil {
+		return ts.chainConf.ChainConfig().AccountConfig.EnableGas
 	}
 	return false
 }
