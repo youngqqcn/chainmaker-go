@@ -4,11 +4,11 @@ go 1.15
 
 require (
 	chainmaker.org/chainmaker-go/accesscontrol v0.0.0
-	chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211020133403-66958ba788b8
-	chainmaker.org/chainmaker/logger/v2 v2.0.1-0.20211014131951-892d098049bc
-	chainmaker.org/chainmaker/pb-go/v2 v2.0.1-0.20211021024710-9329804d1c21
-	chainmaker.org/chainmaker/protocol/v2 v2.0.1-0.20211014144951-97323532a236
-	chainmaker.org/chainmaker/utils/v2 v2.0.0-20211020061817-1e64a279af4f
+	chainmaker.org/chainmaker/common/v2 v2.1.0
+	chainmaker.org/chainmaker/logger/v2 v2.1.0
+	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211125132649-b12a180c788a
+	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211117024857-2641037a7269
+	chainmaker.org/chainmaker/utils/v2 v2.1.0
 	github.com/Rican7/retry v0.1.0
 	github.com/ethereum/go-ethereum v1.10.2
 	github.com/gogo/protobuf v1.3.2
@@ -20,10 +20,4 @@ require (
 	google.golang.org/grpc v1.37.0
 )
 
-replace (
-	chainmaker.org/chainmaker-go/accesscontrol => ../../module/accesscontrol
-
-	chainmaker.org/chainmaker-go/localconf => ../../module/conf/localconf
-	chainmaker.org/chainmaker-go/logger => ../../module/logger
-
-)
+replace chainmaker.org/chainmaker-go/accesscontrol => ../../module/accesscontrol

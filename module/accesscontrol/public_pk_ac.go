@@ -329,11 +329,11 @@ func (p *pkACProvider) createDefaultResourcePolicy() {
 
 	// disable multisign for public mode
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_MULTI_SIGN.String()+"-"+
-		syscontract.MultiSignFunction_REQ.String(), pubPolicyForbidden)
+		syscontract.MultiSignFunction_REQ.String(), pubPolicyTransaction)
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_MULTI_SIGN.String()+"-"+
-		syscontract.MultiSignFunction_VOTE.String(), pubPolicyForbidden)
+		syscontract.MultiSignFunction_VOTE.String(), pubPolicyTransaction)
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_MULTI_SIGN.String()+"-"+
-		syscontract.MultiSignFunction_QUERY.String(), pubPolicyForbidden)
+		syscontract.MultiSignFunction_QUERY.String(), pubPolicyTransaction)
 
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
 		syscontract.ChainConfigFunction_CORE_UPDATE.String(), pubPolicyManage)
