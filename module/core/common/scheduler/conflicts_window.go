@@ -35,9 +35,6 @@ type ConflictsBitWindow struct {
 
 // NewConflictsBitWindow returns an empty queue.
 func NewConflictsBitWindow(txBatchSize int) *ConflictsBitWindow {
-	if AdjustWindowSize * MinAdjustTimes > txBatchSize {
-		return nil
-	}
 	return &ConflictsBitWindow{
 		bitWindow:         uint256.NewInt(),
 		bitWindowCapacity: AdjustWindowSize,
@@ -80,11 +77,11 @@ func (q *ConflictsBitWindow) getNewPoolCapacity(currPoolCapacity int) int {
 	}
 	if targetCapacity > q.maxPoolCapacity {
 		return q.maxPoolCapacity
-	} else if targetCapacity < MinPoolCapacity {
-		return MinPoolCapacity
-	} else {
-		return targetCapacity
 	}
+	if targetCapacity < MinPoolCapacity {
+		return MinPoolCapacity
+	}
+	return targetCapacity
 }
 
 // getConflictsRate return the conflicts rate in slide window.

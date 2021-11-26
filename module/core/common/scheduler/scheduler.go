@@ -10,7 +10,6 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	"math"
 	"regexp"
 	"sync"
 	"time"
@@ -89,44 +88,47 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 	defer goRoutinePool.Release()
 	startTime := time.Now()
 
-	conflictsBitWindow := NewConflictsBitWindow(txBatchSize)
-	senderConflictsHandler := NewSenderConflictsHandler(txBatch)
-	enableSenderGroup := ts.chainConf.ChainConfig().Core.EnableSenderGroup
+	var conflictsBitWindow *ConflictsBitWindow
 	enableConflictsBitWindow := ts.chainConf.ChainConfig().Core.EnableConflictsBitWindow
+	if AdjustWindowSize * MinAdjustTimes > txBatchSize {
+		enableConflictsBitWindow = false
+	}
+	if enableConflictsBitWindow {
+		conflictsBitWindow = NewConflictsBitWindow(txBatchSize)
+	}
+
+	var senderGroup *SenderGroup
+	enableSenderGroup := ts.chainConf.ChainConfig().Core.EnableSenderGroup
+	if enableSenderGroup {
+		senderGroup = NewSenderGroup(txBatch)
+	}
 
 	// enable sender conflicts
 	if enableSenderGroup {
 		// set maxPoolCapacity, tune pool capacity if necessary
-		nextMaxPoolCapacity := int(math.Min(float64(len(senderConflictsHandler.txsMap)), float64(poolCapacity)))
-		if nextMaxPoolCapacity < goRoutinePool.Cap() {
-			goRoutinePool.Tune(nextMaxPoolCapacity)
+		if enableConflictsBitWindow {
+			conflictsBitWindow.setMaxPoolCapacity(len(senderGroup.txsMap))
 		}
-		if conflictsBitWindow != nil {
-			conflictsBitWindow.setMaxPoolCapacity(nextMaxPoolCapacity)
-		}
+		goRoutinePool.Tune(len(senderGroup.txsMap))
 
 		go func() {
 			// first round
-			for _, v := range senderConflictsHandler.txsMap {
+			for _, v := range senderGroup.txsMap {
 				runningTxC <- v[0]
 			}
 			// solve done tx channel
 			for {
-				k := <-senderConflictsHandler.doneTxKeyC
-				senderConflictsHandler.txsMap[k] = senderConflictsHandler.txsMap[k][1:]
-				if len(senderConflictsHandler.txsMap[k]) > 0 {
-					runningTxC <- senderConflictsHandler.txsMap[k][0]
+				k := <-senderGroup.doneTxKeyC
+				if k == [32]byte{} {
+					return
+				}
+				senderGroup.txsMap[k] = senderGroup.txsMap[k][1:]
+				if len(senderGroup.txsMap[k]) > 0 {
+					runningTxC <- senderGroup.txsMap[k][0]
 				} else {
-					delete(senderConflictsHandler.txsMap, k)
-					nextMaxPoolCapacity := int(math.Min(float64(len(senderConflictsHandler.txsMap)), float64(poolCapacity)))
-					if nextMaxPoolCapacity < goRoutinePool.Cap() {
-						goRoutinePool.Tune(nextMaxPoolCapacity)
-					}
-					if conflictsBitWindow != nil {
-						conflictsBitWindow.setMaxPoolCapacity(nextMaxPoolCapacity)
-					}
-					if len(senderConflictsHandler.txsMap) == 0 {
-						return
+					delete(senderGroup.txsMap, k)
+					if enableConflictsBitWindow {
+						conflictsBitWindow.setMaxPoolCapacity(len(senderGroup.txsMap))
 					}
 				}
 			}
@@ -145,7 +147,7 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 			select {
 			case tx := <-runningTxC:
 				ts.log.Debugf("prepare to submit running task for tx id:%s", tx.Payload.GetTxId())
-				err := goRoutinePool.Submit(func() {
+				err := goRoutinePool.Submit(func() {//封装个函数
 					// If snapshot is sealed, no more transaction will be added into snapshot
 					if snapshot.IsSealed() {
 						return
@@ -177,14 +179,14 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 					ts.log.Debugf("run vm finished, tx:%s, runVmSuccess:%v", tx.Payload.TxId, runVmSuccess)
 					applyResult, applySize := snapshot.ApplyTxSimContext(txSimContext, runVmSuccess)
 					if !applyResult {
-						if enableConflictsBitWindow && conflictsBitWindow != nil{
+						if enableConflictsBitWindow {
 							ts.adjustPoolSize(goRoutinePool, conflictsBitWindow, ConflictTx)
 						}
 						runningTxC <- tx
 						ts.log.Debugf("apply to snapshot failed, tx id:%s, result:%+v, apply count:%d",
 							tx.Payload.GetTxId(), txResult, applySize)
 					} else {
-						if enableConflictsBitWindow && conflictsBitWindow != nil{
+						if enableConflictsBitWindow {
 							ts.adjustPoolSize(goRoutinePool, conflictsBitWindow, NormalTx)
 						}
 						if localconf.ChainMakerConfig.MonitorConfig.Enabled {
@@ -193,7 +195,7 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 						}
 						if enableSenderGroup {
 							hashKey, _ := getHashKey(tx)
-							senderConflictsHandler.doneTxKeyC <- hashKey
+							senderGroup.doneTxKeyC <- hashKey
 						}
 						ts.log.Debugf("apply to snapshot success, tx id:%s, result:%+v, apply count:%d",
 							tx.Payload.GetTxId(), txResult, applySize)
@@ -209,11 +211,17 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 				}
 			case <-timeoutC:
 				ts.scheduleFinishC <- true
+				if enableSenderGroup {
+					senderGroup.doneTxKeyC <- [32]byte{}
+				}
 				ts.log.Warnf("block [%d] schedule reached time limit", block.Header.BlockHeight)
 				return
 			case <-finishC:
 				ts.log.Debugf("schedule finish")
 				ts.scheduleFinishC <- true
+				if enableSenderGroup {
+					senderGroup.doneTxKeyC <- [32]byte{}
+				}
 				return
 			}
 		}
@@ -659,13 +667,13 @@ func (ts *TxScheduler) dumpDAG(dag *commonpb.DAG, txs []*commonpb.Transaction) {
 	ts.log.Infof("Dump Dag: %s", dagString)
 }
 
-type SenderConflictsHandler struct {
+type SenderGroup struct {
 	txsMap     map[[32]byte][]*commonpb.Transaction
 	doneTxKeyC chan [32]byte
 }
 
-func NewSenderConflictsHandler(txBatch []*commonpb.Transaction) *SenderConflictsHandler {
-	return &SenderConflictsHandler{
+func NewSenderGroup(txBatch []*commonpb.Transaction) *SenderGroup {
+	return &SenderGroup{
 		txsMap:     getSenderTxsMap(txBatch),
 		doneTxKeyC: make(chan [32]byte, len(txBatch)),
 	}
