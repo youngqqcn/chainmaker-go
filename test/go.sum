@@ -1,11 +1,11 @@
 chainmaker.org/chainmaker/common/v2 v2.0.0 h1:hjh3iRBxWZKXfgrFSNcMCtA0jkhmiQwQ9eBZlZV4XHI=
 chainmaker.org/chainmaker/common/v2 v2.0.0/go.mod h1:b64BYSa9NusSCqk/D3u9H/svftiLQQbQH+LDV5F76Vw=
-chainmaker.org/chainmaker/pb-go/v2 v2.0.0 h1:ffY3Z4v9lNZP1a1g5CumtlqFXQZVDtoPImWeyaXRvEA=
-chainmaker.org/chainmaker/pb-go/v2 v2.0.0/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
-chainmaker.org/chainmaker/protocol/v2 v2.0.0 h1:3qa2Vz7rPUC9ilJts8rS7p2PyPzBZUAPqOq58fRQ32A=
-chainmaker.org/chainmaker/protocol/v2 v2.0.0/go.mod h1:l8RM8Z9XkNtvk6EQrWO/BV1S+96C41rVNaux82pVIe4=
-chainmaker.org/chainmaker/sdk-go/v2 v2.0.0 h1:jVlG5ClfgAQMJi82OXSxGFF16QUeh9AyOSQfjZBKOsg=
-chainmaker.org/chainmaker/sdk-go/v2 v2.0.0/go.mod h1:wxzk9e556Txczc6ojUVv+RcGpsHTLP+aKxw7Awc2KTc=
+chainmaker.org/chainmaker/pb-go/v2 v2.0.0-evm-perf h1:ti4xN3h60iyp2wdV/b4qyNjFBTYnx9w5R11/hn+NHgM=
+chainmaker.org/chainmaker/pb-go/v2 v2.0.0-evm-perf/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
+chainmaker.org/chainmaker/protocol/v2 v2.0.0-evm-perf h1:txqazrspz134qndUzpumKIMpIfEJ19DBqkPTkBNoMjI=
+chainmaker.org/chainmaker/protocol/v2 v2.0.0-evm-perf/go.mod h1:BWhjK0tQCWpKRVFcT9SJsZ8fR1VAEADZd0kmQgaEtuA=
+chainmaker.org/chainmaker/sdk-go/v2 v2.0.0-evm-perf h1:/hj9huIgcZCQfNFQo4+kEp/qNTqFlLqDDp8nI3dpWr4=
+chainmaker.org/chainmaker/sdk-go/v2 v2.0.0-evm-perf/go.mod h1:k+z8631AiVmUNg0aJxEkjhJpzuce3y1OLu9JOVQNxoY=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.38.0/go.mod h1:990N+gfupTy94rShfmMCWGDn0LpTmnzTp2qbd1dvSRU=
@@ -914,7 +914,6 @@ github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81P
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
-github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/studyzy/sqlparse v0.0.0-20210520090832-d40c792e1576 h1:B+ky6y8layrNpWyLZV7vUBXaz8l4fC1U51ZE5/cx5Ts=
 github.com/studyzy/sqlparse v0.0.0-20210520090832-d40c792e1576/go.mod h1:CwlutJYtBPc/M6R2P1e32ub0YyP9l6gaQ/xJjUMkEwA=

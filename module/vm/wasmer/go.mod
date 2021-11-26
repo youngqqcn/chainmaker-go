@@ -8,8 +8,8 @@ require (
 	chainmaker.org/chainmaker-go/utils v0.0.0
 	chainmaker.org/chainmaker-go/wasi v0.0.0
 	chainmaker.org/chainmaker/common/v2 v2.0.0
-	chainmaker.org/chainmaker/pb-go/v2 v2.0.0
-	chainmaker.org/chainmaker/protocol/v2 v2.0.0
+	chainmaker.org/chainmaker/pb-go/v2 v2.0.0-evm-perf
+	chainmaker.org/chainmaker/protocol/v2 v2.0.0-evm-perf
 )
 
 replace (

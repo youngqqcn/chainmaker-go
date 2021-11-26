@@ -6,8 +6,8 @@ require (
 	chainmaker.org/chainmaker-go/logger v0.0.0
 	chainmaker.org/chainmaker-go/wasi v0.0.0
 	chainmaker.org/chainmaker/common/v2 v2.0.0
-	chainmaker.org/chainmaker/pb-go/v2 v2.0.0
-	chainmaker.org/chainmaker/protocol/v2 v2.0.0
+	chainmaker.org/chainmaker/pb-go/v2 v2.0.0-evm-perf
+	chainmaker.org/chainmaker/protocol/v2 v2.0.0-evm-perf
 	github.com/golang/groupcache v0.0.0-20191227052852-215e87163ea7
 	github.com/stretchr/testify v1.7.0
 )

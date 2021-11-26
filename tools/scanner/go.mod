@@ -3,8 +3,8 @@ module chainmaker.org/chainmaker-go/tools/scanner
 go 1.15
 
 require (
-	chainmaker.org/chainmaker/pb-go/v2 v2.0.0 // indirect
-	chainmaker.org/chainmaker/protocol/v2 v2.0.0
+	chainmaker.org/chainmaker/pb-go/v2 v2.0.0-evm-perf // indirect
+	chainmaker.org/chainmaker/protocol/v2 v2.0.0-evm-perf
 	github.com/hpcloud/tail v1.0.0
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/viper v1.7.1

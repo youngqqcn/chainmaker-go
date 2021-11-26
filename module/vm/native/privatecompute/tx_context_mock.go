@@ -21,6 +21,10 @@ type TxContextMock struct {
 	cacheMap dataStore
 }
 
+func (mock *TxContextMock) GetBlockTimestamp() int64 {
+	panic("implement me")
+}
+
 func (mock *TxContextMock) GetContractByName(name string) (*commonPb.Contract, error) {
 	panic("implement me")
 }
