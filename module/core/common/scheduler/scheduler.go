@@ -194,7 +194,7 @@ func (ts *TxScheduler) Schedule(block *commonpb.Block, txBatch []*commonpb.Trans
 							ts.metricVMRunTime.WithLabelValues(tx.Payload.ChainId).Observe(elapsed.Seconds())
 						}
 						if enableSenderGroup {
-							hashKey, _ := getHashKey(tx)
+							hashKey, _ := getSenderHashKey(tx)
 							senderGroup.doneTxKeyC <- hashKey
 						}
 						ts.log.Debugf("apply to snapshot success, tx id:%s, result:%+v, apply count:%d",
@@ -682,13 +682,13 @@ func NewSenderGroup(txBatch []*commonpb.Transaction) *SenderGroup {
 func getSenderTxsMap(txBatch []*commonpb.Transaction) map[[32]byte][]*commonpb.Transaction {
 	senderTxsMap := make(map[[32]byte][]*commonpb.Transaction)
 	for _, tx := range txBatch {
-		hashKey, _ := getHashKey(tx)
+		hashKey, _ := getSenderHashKey(tx)
 		senderTxsMap[hashKey] = append(senderTxsMap[hashKey], tx)
 	}
 	return senderTxsMap
 }
 
-func getHashKey(tx *commonpb.Transaction) ([32]byte, error) {
+func getSenderHashKey(tx *commonpb.Transaction) ([32]byte, error) {
 	sender := tx.GetSender().GetSigner()
 	keyBytes, err := sender.Marshal()
 	if err != nil {

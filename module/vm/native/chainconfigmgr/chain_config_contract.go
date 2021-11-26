@@ -257,8 +257,6 @@ func (r *ChainCoreRuntime) CoreUpdate(txSimContext protocol.TxSimContext, params
 			return nil, err
 		}
 		chainConfig.Core.EnableSenderGroup = parseBool
-		fmt.Println(chainConfig.Core.EnableSenderGroup)
-
 		changed = true
 	}
 
