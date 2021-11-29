@@ -15,8 +15,8 @@ import (
 	"time"
 
 	"chainmaker.org/chainmaker/common/v2/msgbus"
+	hotstuff "chainmaker.org/chainmaker/consensus-chainedbft/v2"
 	dpos "chainmaker.org/chainmaker/consensus-dpos/v2"
-	hotstuff "chainmaker.org/chainmaker/consensus-hotstuff/v2"
 	raft "chainmaker.org/chainmaker/consensus-raft/v2"
 	solo "chainmaker.org/chainmaker/consensus-solo/v2"
 	tbft "chainmaker.org/chainmaker/consensus-tbft/v2"
