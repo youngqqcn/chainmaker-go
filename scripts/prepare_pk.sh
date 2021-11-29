@@ -122,14 +122,14 @@ function generate_keys() {
 
 function generate_config() {
     LOG_LEVEL="INFO"
-    CONSENSUS_TYPE=5
+    CONSENSUS_TYPE=1
     CONSENSUS_ORGID="public"
     HASH_TYPE="SHA256"
     MONITOR_PORT=14321
     PPROF_PORT=24321
     TRUSTED_PORT=13301
 
-    read -p "input consensus type (1-TBFT,5-DPOS(default)): " tmp
+    read -p "input consensus type (1-TBFT(default),5-DPOS): " tmp
     if  [ ! -z "$tmp" ] ;then
       if  [ $tmp -eq 1 ] || [ $tmp -eq 5 ] ;then
           CONSENSUS_TYPE=$tmp
