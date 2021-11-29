@@ -3,7 +3,7 @@ module chainmaker.org/chainmaker-go
 go 1.15
 
 require (
-	chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211109075405-cc95de741f5e
+	chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211119071921-0016c1ff89e8
 	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211117131805-630800bfd361
 	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211119100858-b806ddbb6d35
 	chainmaker.org/chainmaker/consensus-hotstuff/v2 v2.0.0-20211119101639-ae06999f7408
