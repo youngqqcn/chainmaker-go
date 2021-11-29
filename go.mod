@@ -19,7 +19,7 @@ require (
 	chainmaker.org/chainmaker/txpool-single/v2 v2.1.0
 	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211109074701-81d58330e787
 	chainmaker.org/chainmaker/vm-docker-go v0.0.0-20211122064347-23cc0a21ba97
-	chainmaker.org/chainmaker/vm-evm/v2 v2.0.0-20211125123754-15febac04a8d
+	chainmaker.org/chainmaker/vm-evm/v2 v2.0.0-20211129125029-7c5ed2f12105
 	chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20211117071021-e940cf22a033
 	chainmaker.org/chainmaker/vm-wasmer/v2 v2.1.1-0.20211117071057-eee2c7f08b39
 	chainmaker.org/chainmaker/vm-wxvm/v2 v2.1.1-0.20211117041254-a6cd6aecd988
@@ -49,7 +49,7 @@ replace (
 	chainmaker.org/chainmaker-go/txpool => ./module/txpool
 	chainmaker.org/chainmaker-go/vm => ./module/vm
 	github.com/libp2p/go-libp2p-core => chainmaker.org/chainmaker/libp2p-core v1.0.0
-	google.golang.org/grpc v1.40.0 => google.golang.org/grpc v1.26.0
 	github.com/spf13/afero => github.com/spf13/afero v1.5.1 //for go1.15 build
 	github.com/spf13/viper => github.com/spf13/viper v1.7.1 //for go1.15 build
+	google.golang.org/grpc v1.40.0 => google.golang.org/grpc v1.26.0
 )
