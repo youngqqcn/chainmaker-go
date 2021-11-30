@@ -13,7 +13,7 @@ import (
 
 	"chainmaker.org/chainmaker/common/v2/crypto/hash"
 	"chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
-	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
+	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/protocol/v2/test"
 	"chainmaker.org/chainmaker/utils/v2"
@@ -27,13 +27,13 @@ func TestFinalizeBlock_Async(t *testing.T) {
 
 	log := &test.GoLogger{}
 	block := createBlock(10)
-	txs := make([]*commonpb.Transaction, 0)
-	txRWSetMap := make(map[string]*commonpb.TxRWSet)
+	txs := make([]*commonPb.Transaction, 0)
+	txRWSetMap := make(map[string]*commonPb.TxRWSet)
 	for i := 0; i < 100000; i++ {
 		txId := "0x123456789" + fmt.Sprint(i)
 		tx := createNewTestTx(txId)
 		txs = append(txs, tx)
-		txRWSetMap[txId] = &commonpb.TxRWSet{
+		txRWSetMap[txId] = &commonPb.TxRWSet{
 			TxId:     txId,
 			TxReads:  nil,
 			TxWrites: nil,
@@ -65,11 +65,11 @@ func TestFinalizeBlock_Async(t *testing.T) {
 
 }
 
-func createBlock(height uint64) *commonpb.Block {
+func createBlock(height uint64) *commonPb.Block {
 	var hash = []byte("0123456789")
 	var version = uint32(1)
-	var block = &commonpb.Block{
-		Header: &commonpb.BlockHeader{
+	var block = &commonPb.Block{
+		Header: &commonPb.BlockHeader{
 			ChainId:        "Chain1",
 			BlockHeight:    height,
 			PreBlockHash:   hash,
@@ -85,7 +85,7 @@ func createBlock(height uint64) *commonpb.Block {
 			TxCount:        1,
 			Signature:      []byte(""),
 		},
-		Dag: &commonpb.DAG{
+		Dag: &commonPb.DAG{
 			Vertexes: nil,
 		},
 		Txs: nil,
@@ -94,10 +94,10 @@ func createBlock(height uint64) *commonpb.Block {
 	return block
 }
 
-func createNewTestTx(txID string) *commonpb.Transaction {
+func createNewTestTx(txID string) *commonPb.Transaction {
 	//var hash = []byte("0123456789")
-	return &commonpb.Transaction{
-		Payload: &commonpb.Payload{
+	return &commonPb.Transaction{
+		Payload: &commonPb.Payload{
 			ChainId:        "Chain1",
 			TxType:         0,
 			TxId:           txID,
@@ -106,8 +106,8 @@ func createNewTestTx(txID string) *commonpb.Transaction {
 		},
 		//RequestPayload:   hash,
 		//RequestSignature: hash,
-		Result: &commonpb.Result{
-			Code:           commonpb.TxStatusCode_SUCCESS,
+		Result: &commonPb.Result{
+			Code:           commonPb.TxStatusCode_SUCCESS,
 			ContractResult: nil,
 			RwSetHash:      nil,
 		},
@@ -120,9 +120,9 @@ func CurrentTimeMillisSeconds() int64 {
 
 // the sync way fo finalize block
 func FinalizeBlockSync(
-	block *commonpb.Block,
-	txRWSetMap map[string]*commonpb.TxRWSet,
-	aclFailTxs []*commonpb.Transaction,
+	block *commonPb.Block,
+	txRWSetMap map[string]*commonPb.TxRWSet,
+	aclFailTxs []*commonPb.Transaction,
 	hashType string,
 	logger protocol.Logger) error {
 
@@ -142,7 +142,7 @@ func FinalizeBlockSync(
 		// finalize tx, put rwsethash into tx.Result
 		rwSet := txRWSetMap[tx.Payload.TxId]
 		if rwSet == nil {
-			rwSet = &commonpb.TxRWSet{
+			rwSet = &commonPb.TxRWSet{
 				TxId:     tx.Payload.TxId,
 				TxReads:  nil,
 				TxWrites: nil,
