@@ -61,7 +61,6 @@ func (q *ConflictsBitWindow) Enqueue(v TxExecType, currPoolCapacity int) int {
 	q.bitWindow.Or(q.bitWindow.Lsh(q.bitWindow, 1), v256)
 	q.execCount++
 	if q.execCount%q.bitWindowCapacity == 0 {
-		//fmt.Printf("current conflict rate: %f, current conflicts num: %d, current pool capacity: %d\n", q.getConflictsRate(), q.conflictsNum, currPoolCapacity)
 		return q.getNewPoolCapacity(currPoolCapacity)
 	}
 	return -1
