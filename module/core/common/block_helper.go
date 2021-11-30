@@ -112,19 +112,24 @@ func (bb *BlockBuilder) GenerateNewBlock(proposingHeight uint64, preHash []byte,
 	// 2. calculate dag and fill into block
 	// 3. fill txs into block
 	// If only part of the txBatch is filled into the Block, consider executing it again
-	ssStartTick := utils.CurrentTimeMillisSeconds()
-	snapshot := bb.snapshotManager.NewSnapshot(lastBlock, block)
-	vmStartTick := utils.CurrentTimeMillisSeconds()
-	ssLasts := vmStartTick - ssStartTick
-	bb.storeHelper.BeginDbTransaction(snapshot.GetBlockchainStore(), block.GetTxKey())
-	txRWSetMap, contractEventMap, err := bb.txScheduler.Schedule(block, validatedTxs, snapshot)
+    ssStartTick := utils.CurrentTimeMillisSeconds()
+    snapshot := bb.snapshotManager.NewSnapshot(lastBlock, block)
+
+    beginDbTick := utils.CurrentTimeMillisSeconds()
+    bb.storeHelper.BeginDbTransaction(snapshot.GetBlockchainStore(), block.GetTxKey())
+
+    vmStartTick := utils.CurrentTimeMillisSeconds()
+    txRWSetMap, contractEventMap, err := bb.txScheduler.Schedule(block, validatedTxs, snapshot)
+
+    ssLasts := beginDbTick - ssStartTick
+    dbLasts := vmStartTick - beginDbTick
+    vmLasts := utils.CurrentTimeMillisSeconds() - vmStartTick
+    timeLasts = append(timeLasts, ssLasts, dbLasts, vmLasts)
+
 	if err != nil {
 		return nil, timeLasts, fmt.Errorf("schedule block(%d,%x) error %s",
 			block.Header.BlockHeight, block.Header.BlockHash, err)
 	}
-
-	vmLasts := utils.CurrentTimeMillisSeconds() - vmStartTick
-	timeLasts = append(timeLasts, ssLasts, vmLasts)
 
 	// deal with the special situation：
 	// 1. only one tx and schedule time out
@@ -140,12 +145,11 @@ func (bb *BlockBuilder) GenerateNewBlock(proposingHeight uint64, preHash []byte,
 		aclFailTxs,
 		bb.chainConf.ChainConfig().Crypto.Hash,
 		bb.log)
+	finalizeLasts := utils.CurrentTimeMillisSeconds() - finalizeStartTick
 	if err != nil {
 		return nil, timeLasts, fmt.Errorf("finalizeBlock block(%d,%s) error %s",
 			block.Header.BlockHeight, hex.EncodeToString(block.Header.BlockHash), err)
 	}
-
-	finalizeLasts := utils.CurrentTimeMillisSeconds() - finalizeStartTick
 	timeLasts = append(timeLasts, finalizeLasts)
 	// get txs schedule timeout and put back to txpool
 	var txsTimeout = make([]*commonpb.Transaction, 0)
@@ -537,6 +541,7 @@ func (vb *VerifierBlock) ValidateBlock(
 	}
 	// we must new a snapshot for the vacant block,
 	// otherwise the subsequent snapshot can not link to the previous snapshot.
+    snapshotTick := utils.CurrentTimeMillisSeconds()
 	snapshot := vb.snapshotManager.NewSnapshot(lastBlock, block)
 	if len(block.Txs) == 0 {
 		return nil, nil, timeLasts, nil
@@ -547,16 +552,20 @@ func (vb *VerifierBlock) ValidateBlock(
 	}
 
 	// simulate with DAG, and verify read write set
-	startVMTick := utils.CurrentTimeMillisSeconds()
-	vb.storeHelper.BeginDbTransaction(snapshot.GetBlockchainStore(), block.GetTxKey())
-	txRWSetMap, txResultMap, err := vb.txScheduler.SimulateWithDag(block, snapshot)
+    startDbTxTick := utils.CurrentTimeMillisSeconds()
+    vb.storeHelper.BeginDbTransaction(snapshot.GetBlockchainStore(), block.GetTxKey())
+
+    startVMTick := utils.CurrentTimeMillisSeconds()
+    txRWSetMap, txResultMap, err := vb.txScheduler.SimulateWithDag(block, snapshot)
+    vmLasts := utils.CurrentTimeMillisSeconds() - startVMTick
+    vb.log.Infof("Validate block[%v](txs:%v), time used(new snapshot:%v, start DB transaction:%v, vm:%v)",
+        block.Header.BlockHeight, block.Header.TxCount, startDbTxTick - snapshotTick, startVMTick - startDbTxTick, vmLasts)
+
+
+	timeLasts = append(timeLasts, vmLasts)
 	if err != nil {
 		return nil, nil, timeLasts, fmt.Errorf("simulate %s", err)
 	}
-
-	vmLasts := utils.CurrentTimeMillisSeconds() - startVMTick
-	timeLasts = append(timeLasts, vmLasts)
-
 	if block.Header.TxCount != uint32(len(txRWSetMap)) {
 		return nil, nil, timeLasts, fmt.Errorf("simulate txcount expect %d, got %d",
 			block.Header.TxCount, len(txRWSetMap))
@@ -576,7 +585,6 @@ func (vb *VerifierBlock) ValidateBlock(
 	}
 	verifiertx := NewVerifierTx(verifierTxConf)
 	txHashes, _, errTxs, err := verifiertx.verifierTxs(block)
-	vb.log.Warnf("verifierTxs txhashes %d, block.txs %d, %x", len(txHashes), len(block.Txs), block.Header.TxRoot)
 	txLasts := utils.CurrentTimeMillisSeconds() - startTxTick
 	timeLasts = append(timeLasts, txLasts)
 	if err != nil {

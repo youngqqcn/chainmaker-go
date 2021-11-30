@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 package scheduler
 
 import (
+	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -57,24 +58,84 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 	defer ts.lock.Unlock()
 	txRWSetMap := make(map[string]*commonPb.TxRWSet)
 	txBatchSize := len(txBatch)
+	if txBatchSize == 0 {
+		ts.log.Error("there are no txs to schedule")
+		return nil, nil, fmt.Errorf("there are no txs to schedule")
+	}
 	runningTxC := make(chan *commonPb.Transaction, txBatchSize)
 	timeoutC := time.After(ScheduleTimeout * time.Second)
 	finishC := make(chan bool)
-	ts.log.Infof("schedule tx batch start, size %d", txBatchSize)
 	var goRoutinePool *ants.Pool
 	var err error
+	ts.log.Infof("schedule tx batch start, size %d", txBatchSize)
 
 	poolCapacity := ts.StoreHelper.GetPoolCapacity()
-	if goRoutinePool, err = ants.NewPool(poolCapacity, ants.WithPreAlloc(true)); err != nil {
+	if goRoutinePool, err = ants.NewPool(poolCapacity, ants.WithPreAlloc(false)); err != nil {
 		return nil, nil, err
 	}
 	defer goRoutinePool.Release()
 	startTime := time.Now()
+
+	var conflictsBitWindow *ConflictsBitWindow
+	enableConflictsBitWindow := ts.chainConf.ChainConfig().Core.EnableConflictsBitWindow
+	if AdjustWindowSize*MinAdjustTimes > txBatchSize {
+		enableConflictsBitWindow = false
+	}
+	if enableConflictsBitWindow {
+		conflictsBitWindow = NewConflictsBitWindow(txBatchSize)
+	}
+
+	var senderGroup *SenderGroup
+	enableSenderGroup := ts.chainConf.ChainConfig().Core.EnableSenderGroup
+	if enableSenderGroup {
+		senderGroup = NewSenderGroup(txBatch)
+	}
+
+	// enable sender conflicts
+	if enableSenderGroup {
+		// set maxPoolCapacity, tune pool capacity if necessary
+		if enableConflictsBitWindow {
+			conflictsBitWindow.setMaxPoolCapacity(len(senderGroup.txsMap))
+		}
+		goRoutinePool.Tune(len(senderGroup.txsMap))
+
+		go func() {
+			// first round
+			for _, v := range senderGroup.txsMap {
+				runningTxC <- v[0]
+			}
+			// solve done tx channel
+			for {
+				k := <-senderGroup.doneTxKeyC
+				if k == [32]byte{} {
+					return
+				}
+				senderGroup.txsMap[k] = senderGroup.txsMap[k][1:]
+				if len(senderGroup.txsMap[k]) > 0 {
+					runningTxC <- senderGroup.txsMap[k][0]
+				} else {
+					delete(senderGroup.txsMap, k)
+					if enableConflictsBitWindow {
+						conflictsBitWindow.setMaxPoolCapacity(len(senderGroup.txsMap))
+					}
+				}
+			}
+		}()
+	} else {
+		go func() {
+			for _, tx := range txBatch {
+				runningTxC <- tx
+			}
+		}()
+	}
+
+	// Put the pending transaction into the running queue
 	go func() {
 		for {
 			select {
 			case tx := <-runningTxC:
-				err := goRoutinePool.Submit(func() {
+				ts.log.Debugf("prepare to submit running task for tx id:%s", tx.Payload.GetTxId())
+				err := goRoutinePool.Submit(func() { //封装个函数
 					// If snapshot is sealed, no more transaction will be added into snapshot
 					if snapshot.IsSealed() {
 						return
@@ -90,13 +151,25 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 					applyResult, applySize := snapshot.ApplyTxSimContext(txSimContext, specialTxType,
 						runVmSuccess, false)
 					if !applyResult {
+						if enableConflictsBitWindow {
+							ts.adjustPoolSize(goRoutinePool, conflictsBitWindow, ConflictTx)
+						}
 						runningTxC <- tx
+						ts.log.Debugf("apply to snapshot failed, tx id:%s, result:%+v, apply count:%d",
+							tx.Payload.GetTxId(), txSimContext.GetTxResult(), applySize)
 					} else {
+						if enableConflictsBitWindow {
+							ts.adjustPoolSize(goRoutinePool, conflictsBitWindow, NormalTx)
+						}
 						if localconf.ChainMakerConfig.MonitorConfig.Enabled {
 							elapsed := time.Since(start)
 							ts.metricVMRunTime.WithLabelValues(tx.Payload.ChainId).Observe(elapsed.Seconds())
 						}
-						ts.log.Debugf("apply to snapshot tx id:%s, result:%+v, apply count:%d",
+						if enableSenderGroup {
+							hashKey, _ := getSenderHashKey(tx)
+							senderGroup.doneTxKeyC <- hashKey
+						}
+						ts.log.Debugf("apply to snapshot success, tx id:%s, result:%+v, apply count:%d",
 							tx.Payload.GetTxId(), txSimContext.GetTxResult(), applySize)
 					}
 					// If all transactions have been successfully added to dag
@@ -105,27 +178,24 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 					}
 				})
 				if err != nil {
-					ts.log.Warnf("failed to submit tx id %s during schedule, %+v", tx.Payload.GetTxId(), err)
+					ts.log.Warnf("failed to submit running task, tx id:%s during schedule, %+v",
+						tx.Payload.GetTxId(), err)
 				}
 			case <-timeoutC:
 				ts.scheduleFinishC <- true
+				if enableSenderGroup {
+					senderGroup.doneTxKeyC <- [32]byte{}
+				}
 				ts.log.Warnf("block [%d] schedule reached time limit", block.Header.BlockHeight)
 				return
 			case <-finishC:
 				ts.log.Debugf("schedule finish")
 				ts.scheduleFinishC <- true
+				if enableSenderGroup {
+					senderGroup.doneTxKeyC <- [32]byte{}
+				}
 				return
 			}
-		}
-	}()
-	// Put the pending transaction into the running queue
-	go func() {
-		if len(txBatch) > 0 {
-			for _, tx := range txBatch {
-				runningTxC <- tx
-			}
-		} else {
-			finishC <- true
 		}
 	}()
 
@@ -142,7 +212,7 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 	}
 
 	timeCostB := time.Since(startTime)
-	ts.log.Infof("schedule tx batch finished, success %d, time used %v, time used (dag include) %v ",
+	ts.log.Infof("schedule tx batch finished, success %d, time used(without dag) %v, time used (dag include) %v ",
 		len(block.Dag.Vertexes), timeCostA, timeCostB)
 	block.Txs = snapshot.GetTxTable()
 	txRWSetTable := snapshot.GetTxRWSetTable()
@@ -177,7 +247,7 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 		ts.log.Debugf("no txs in block[%x] when simulate", block.Header.BlockHash)
 		return txRWSetMap, snapshot.GetTxResultMap(), nil
 	}
-	ts.log.Debugf("simulate with dag start, size %d", len(block.Txs))
+	ts.log.Infof("simulate with dag start, size %d", len(block.Txs))
 	txMapping := make(map[int]*commonPb.Transaction)
 	for index, tx := range block.Txs {
 		txMapping[index] = tx
@@ -195,6 +265,10 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 	}
 
 	txBatchSize := len(block.Dag.Vertexes)
+	if txBatchSize == 0 {
+		ts.log.Error("found empty block when simulating txs")
+		return nil, nil, fmt.Errorf("found empty block when simulating txs")
+	}
 	runningTxC := make(chan int, txBatchSize)
 	doneTxC := make(chan int, txBatchSize)
 
@@ -209,21 +283,32 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 	}
 	defer goRoutinePool.Release()
 
+	txIndexBatch := ts.popNextTxBatchFromDag(dagRemain)
+	ts.log.Debugf("block [%d] simulate with dag first batch size:%d, total batch size:%d",
+		block.Header.BlockHeight, len(txIndexBatch), txBatchSize)
+
+	go func() {
+		for _, tx := range txIndexBatch {
+			runningTxC <- tx
+		}
+	}()
+
 	go func() {
 		for {
 			select {
 			case txIndex := <-runningTxC:
 				tx := txMapping[txIndex]
+				ts.log.Debugf("simulate with dag, prepare to submit running task for tx id:%s", tx.Payload.GetTxId())
 				err := goRoutinePool.Submit(func() {
 					txSimContext, specialTxType, runVmSuccess := ts.executeTx(tx, snapshot, block)
 					// if apply failed means this tx's read set conflict with other txs' write set
 					applyResult, applySize := snapshot.ApplyTxSimContext(txSimContext, specialTxType,
 						runVmSuccess, true)
 					if !applyResult {
-						ts.log.Debugf("failed to apply according to dag with tx %s ", tx.Payload.TxId)
+						ts.log.Debugf("failed to apply snapshot for tx id:%s ", tx.Payload.TxId)
 						runningTxC <- txIndex
 					} else {
-						ts.log.Debugf("apply to snapshot tx id:%s, result:%+v, apply count:%d, tx batch size:%d",
+						ts.log.Debugf("apply to snapshot for tx id:%s, result:%+v, apply count:%d, tx batch size:%d",
 							tx.Payload.GetTxId(), txSimContext.GetTxResult(), applySize, txBatchSize)
 						doneTxC <- txIndex
 					}
@@ -240,13 +325,13 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 				}
 			case doneTxIndex := <-doneTxC:
 				ts.shrinkDag(doneTxIndex, dagRemain)
-				txIndexBatch := ts.popNextTxBatchFromDag(dagRemain)
-				ts.log.Debugf("block [%d] schedule with dag, pop next tx index batch size:%d", len(txIndexBatch))
-				for _, tx := range txIndexBatch {
+
+				txIndexBatchAfterShrink := ts.popNextTxBatchFromDag(dagRemain)
+				ts.log.Debugf("block [%d] schedule with dag, pop next tx index batch size:%d, dagRemain size:%d",
+					block.Header.BlockHeight, len(txIndexBatchAfterShrink), len(dagRemain))
+				for _, tx := range txIndexBatchAfterShrink {
 					runningTxC <- tx
 				}
-				ts.log.Debugf("shrinkDag and pop next tx batch size:%d, dagRemain size:%d",
-					len(txIndexBatch), len(dagRemain))
 			case <-finishC:
 				ts.log.Debugf("block [%d] schedule with dag finish", block.Header.BlockHeight)
 				ts.scheduleFinishC <- true
@@ -259,21 +344,12 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 		}
 	}()
 
-	txIndexBatch := ts.popNextTxBatchFromDag(dagRemain)
-	ts.log.Debugf("simulate with dag first batch size:%d, total batch size:%d", len(txIndexBatch), txBatchSize)
-	go func() {
-		for _, tx := range txIndexBatch {
-			runningTxC <- tx
-		}
-	}()
-
 	<-ts.scheduleFinishC
 	snapshot.Seal()
 
 	ts.log.Infof("simulate with dag finished, size %d, time used %+v", len(block.Txs), time.Since(startTime))
 
 	// Return the read and write set after the scheduled execution
-
 	for _, txRWSet := range snapshot.GetTxRWSetTable() {
 		if txRWSet != nil {
 			txRWSetMap[txRWSet.TxId] = txRWSet
@@ -285,11 +361,19 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 	return txRWSetMap, snapshot.GetTxResultMap(), nil
 }
 
+func (ts *TxScheduler) adjustPoolSize(pool *ants.Pool, conflictsBitWindow *ConflictsBitWindow, txExecType TxExecType) {
+	newPoolSize := conflictsBitWindow.Enqueue(txExecType, pool.Cap())
+	if newPoolSize == -1 {
+		return
+	}
+	pool.Tune(newPoolSize)
+}
+
 func (ts *TxScheduler) executeTx(tx *commonPb.Transaction, snapshot protocol.Snapshot, block *commonPb.Block) (
 	protocol.TxSimContext, protocol.ExecOrderTxType, bool) {
 	ts.log.Debugf("run vm start for tx:%s", tx.Payload.GetTxId())
 	txSimContext := vm.NewTxSimContext(ts.VmManager, snapshot, tx, block.Header.BlockVersion)
-	ts.log.Debugf("new tx simulate context for tx:%s", tx.Payload.GetTxId())
+	ts.log.Debugf("new tx simulate context finished for tx id:%s", tx.Payload.GetTxId())
 	runVmSuccess := true
 	var txResult *commonPb.Result
 	var err error
@@ -547,70 +631,6 @@ func (ts *TxScheduler) parseParameter(parameterPairs []*commonPb.KeyValuePair) (
 	return parameters, nil
 }
 
-/*
-func (ts *TxScheduler) acVerify(txSimContext protocol.TxSimContext, methodName string,
-	endorsements []*commonPb.EndorsementEntry, msg []byte, parameters map[string][]byte) error {
-	var ac protocol.AccessControlProvider
-	var targetOrgId string
-	var err error
-
-	tx := txSimContext.GetTx()
-
-	if ac, err = txSimContext.GetAccessControl(); err != nil {
-		return fmt.Errorf(
-			"failed to get access control from tx sim context for tx: %s, error: %s",
-			tx.Payload.TxId,
-			err.Error(),
-		)
-	}
-	if orgId, ok := parameters[protocol.ConfigNameOrgId]; ok {
-		targetOrgId = string(orgId)
-	} else {
-		targetOrgId = ""
-	}
-
-	var fullCertEndorsements []*commonPb.EndorsementEntry
-	for _, endorsement := range endorsements {
-		if endorsement == nil || endorsement.Signer == nil {
-			return fmt.Errorf("failed to get endorsement signer for tx: %s, endorsement: %+v", tx.Payload.TxId, endorsement)
-		}
-		if endorsement.Signer.MemberType == acpb.MemberType_CERT {
-			fullCertEndorsements = append(fullCertEndorsements, endorsement)
-		} else {
-			fullCertEndorsement := &commonPb.EndorsementEntry{
-				Signer: &acpb.Member{
-					OrgId:      endorsement.Signer.OrgId,
-					MemberInfo: nil,
-					//IsFullCert: true,
-				},
-				Signature: endorsement.Signature,
-			}
-			memberInfoHex := hex.EncodeToString(endorsement.Signer.MemberInfo)
-			if fullMemberInfo, err := txSimContext.Get(
-				syscontract.SystemContract_CERT_MANAGE.String(), []byte(memberInfoHex)); err != nil {
-				return fmt.Errorf(
-					"failed to get full cert from tx sim context for tx: %s,
-					error: %s",
-					tx.Payload.TxId,
-					err.Error(),
-				)
-			} else {
-				fullCertEndorsement.Signer.MemberInfo = fullMemberInfo
-			}
-			fullCertEndorsements = append(fullCertEndorsements, fullCertEndorsement)
-		}
-	}
-	if verifyResult, err := utils.VerifyConfigUpdateTx(
-		methodName, fullCertEndorsements, msg, targetOrgId, ac); err != nil {
-		return fmt.Errorf("failed to verify endorsements for tx: %s, error: %s", tx.Payload.TxId, err.Error())
-	} else if !verifyResult {
-		return fmt.Errorf("failed to verify endorsements for tx: %s", tx.Payload.TxId)
-	} else {
-		return nil
-	}
-}
-*/
-
 //nolint: unused
 func (ts *TxScheduler) dumpDAG(dag *commonPb.DAG, txs []*commonPb.Transaction) {
 	dagString := "digraph DAG {\n"
@@ -699,4 +719,34 @@ func wholeCertInfo(txSimContext protocol.TxSimContext, certHash string) (*common
 		Hash: certHash,
 		Cert: certBytes,
 	}, nil
+}
+
+type SenderGroup struct {
+	txsMap     map[[32]byte][]*commonPb.Transaction
+	doneTxKeyC chan [32]byte
+}
+
+func NewSenderGroup(txBatch []*commonPb.Transaction) *SenderGroup {
+	return &SenderGroup{
+		txsMap:     getSenderTxsMap(txBatch),
+		doneTxKeyC: make(chan [32]byte, len(txBatch)),
+	}
+}
+
+func getSenderTxsMap(txBatch []*commonPb.Transaction) map[[32]byte][]*commonPb.Transaction {
+	senderTxsMap := make(map[[32]byte][]*commonPb.Transaction)
+	for _, tx := range txBatch {
+		hashKey, _ := getSenderHashKey(tx)
+		senderTxsMap[hashKey] = append(senderTxsMap[hashKey], tx)
+	}
+	return senderTxsMap
+}
+
+func getSenderHashKey(tx *commonPb.Transaction) ([32]byte, error) {
+	sender := tx.GetSender().GetSigner()
+	keyBytes, err := sender.Marshal()
+	if err != nil {
+		return [32]byte{}, err
+	}
+	return sha256.Sum256(keyBytes), nil
 }

@@ -34,6 +34,10 @@ type MockSimContextImpl struct {
 	txResult     *commonPb.Result
 }
 
+func (s *MockSimContextImpl) GetBlockTimestamp() int64 {
+	panic("implement me")
+}
+
 func (s *MockSimContextImpl) GetHistoryIterForKey(contractName string, key []byte) (protocol.KeyHistoryIterator, error) {
 	panic("implement me")
 }
@@ -192,7 +196,7 @@ func TestSnapshot(t *testing.T) {
 }
 func testSnapshot(t *testing.T, i int) {
 	snapshot := &SnapshotImpl{
-		lock:            sync.Mutex{},
+		lock:            sync.RWMutex{},
 		blockchainStore: nil,
 		sealed:          uberAtomic.NewBool(false),
 		chainId:         "",

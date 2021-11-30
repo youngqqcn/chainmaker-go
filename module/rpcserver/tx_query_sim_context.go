@@ -40,6 +40,13 @@ func (s *txQuerySimContextImpl) PutIntoReadSet(contractName string, key []byte, 
 	// do nothing
 }
 
+func (s *txQuerySimContextImpl) GetBlockTimestamp() int64 {
+	if lastBlock, err := s.blockchainStore.GetLastBlock(); err == nil {
+		return lastBlock.Header.BlockTimestamp
+	}
+	return 0
+}
+
 type callContractResult struct {
 	contractName string
 	method       string

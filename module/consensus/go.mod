@@ -8,8 +8,8 @@ require (
 	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211125080705-8c4f85e6ca19
 	chainmaker.org/chainmaker/localconf/v2 v2.1.0
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211109074349-f79af5e1892d
-	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211125132649-b12a180c788a
-	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211125064016-15cf21479e69
+	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211130072802-e9d8fae57083
+	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211130023410-5df7eb63bfb8
 	chainmaker.org/chainmaker/raftwal/v2 v2.1.0
 	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211109074701-81d58330e787
 	chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211125132759-e608899855e9

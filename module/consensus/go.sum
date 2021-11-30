@@ -19,6 +19,8 @@ chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211125125051-7aa6e0da2379 h1:fBJ9v
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211125125051-7aa6e0da2379/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211125132649-b12a180c788a h1:q6tVhjpGrrihAFdbU20eO7Ngcvd6dQAzusuvHqZN4ng=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211125132649-b12a180c788a/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
+chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211130072802-e9d8fae57083 h1:yEYrdL5ZeUENomWcPKyv1FZEZYAAEvkQpN1kUqZzOus=
+chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211130072802-e9d8fae57083/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/protocol/v2 v2.0.1-0.20211109074216-fc2674ef6e22/go.mod h1:HfUAVSphtyXjvk0vVJSQCLYBocUuxxZxMDrrIc72vic=
 chainmaker.org/chainmaker/protocol/v2 v2.1.0/go.mod h1:jlMaZq/AcwWOxYsehh+R0Qx99AIRLMLQyKEXYx5Bu4o=
 chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211110022918-9516552c201a/go.mod h1:jlMaZq/AcwWOxYsehh+R0Qx99AIRLMLQyKEXYx5Bu4o=
@@ -26,6 +28,8 @@ chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211117024857-2641037a7269 h1:0x
 chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211117024857-2641037a7269/go.mod h1:jlMaZq/AcwWOxYsehh+R0Qx99AIRLMLQyKEXYx5Bu4o=
 chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211125064016-15cf21479e69 h1:W5nkESh9EknSvz692bgAVqmgmsLR0Td0q1Qt3uPCY84=
 chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211125064016-15cf21479e69/go.mod h1:jlMaZq/AcwWOxYsehh+R0Qx99AIRLMLQyKEXYx5Bu4o=
+chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211130023410-5df7eb63bfb8 h1:VWAujGerLVCfqn9fNECgxImK69Mpq0w2qn7pzSEekdU=
+chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211130023410-5df7eb63bfb8/go.mod h1:jlMaZq/AcwWOxYsehh+R0Qx99AIRLMLQyKEXYx5Bu4o=
 chainmaker.org/chainmaker/raftwal/v2 v2.1.0 h1:8TNEw1XtWBZkjqoNgcc9qoD/0xFkSb0SDXyzM2rQxjo=
 chainmaker.org/chainmaker/raftwal/v2 v2.1.0/go.mod h1:19ulESU/EH/OxbMpo1PJMsRoJDM91BPrvXCyQhkHWpk=
 chainmaker.org/chainmaker/utils/v2 v2.1.0/go.mod h1:GppORTQ5PexKKU/vX+PQrnjCvl1uiBZ6rEbb2S0tPOU=

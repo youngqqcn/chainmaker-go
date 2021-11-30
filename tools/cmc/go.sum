@@ -2,15 +2,14 @@ chainmaker.org/chainmaker/common/v2 v2.0.1-0.20211018081711-f7191d1cd92f/go.mod 
 chainmaker.org/chainmaker/common/v2 v2.1.0 h1:0jCwxN0UJbebXkMrX6JgBksD5Rm9xTV2hlLhwv0WQoA=
 chainmaker.org/chainmaker/common/v2 v2.1.0/go.mod h1:moutWpXQGfyrFcXozw60ZXjpwj1Jfg6N5kkJdtwOxFM=
 chainmaker.org/chainmaker/pb-go/v2 v2.0.1-0.20211014120010-525e2ffaf04d/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
-chainmaker.org/chainmaker/pb-go/v2 v2.1.0 h1:l6E1WvlT1a2kXxZZaw3cS8ewLGwYgjCY8YEdO1bvjao=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.0/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211122052606-1ea3f17343e7/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211125132649-b12a180c788a h1:q6tVhjpGrrihAFdbU20eO7Ngcvd6dQAzusuvHqZN4ng=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211125132649-b12a180c788a/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211117024857-2641037a7269 h1:0xVLojPKDs1WnYSoRsJZGO+Ilkp2oi7MWkIiopvnJ98=
 chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211117024857-2641037a7269/go.mod h1:jlMaZq/AcwWOxYsehh+R0Qx99AIRLMLQyKEXYx5Bu4o=
-chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211125123744-8e8085390a7d h1:CDBgYSruoy/gGU6hgR+sDD0wHCsLDQvtE3PPmA6JDSI=
-chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211125123744-8e8085390a7d/go.mod h1:lyEzUfIWKaVAI84GEKySBs2IAjztpRvt5ZUJ/KwW5+8=
+chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211126034817-c7a1903e2f83 h1:trEkEWyk9e+/IFjLP5sThH22o8aRr+ZViWlmfirDLvI=
+chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211126034817-c7a1903e2f83/go.mod h1:lyEzUfIWKaVAI84GEKySBs2IAjztpRvt5ZUJ/KwW5+8=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.38.0/go.mod h1:990N+gfupTy94rShfmMCWGDn0LpTmnzTp2qbd1dvSRU=
@@ -303,7 +302,6 @@ github.com/hashicorp/serf v0.8.2/go.mod h1:6hOLApaqBFA1NXqRQAsxw9QxuDEvNxSQRwA/J
 github.com/hokaccha/go-prettyjson v0.0.0-20201222001619-a42f9ac2ec8e h1:1vxUQ6PL1sROZtmO5IBbWKpq2y0CxjeZJl50rnen5js=
 github.com/hokaccha/go-prettyjson v0.0.0-20201222001619-a42f9ac2ec8e/go.mod h1:pFlLw2CfqZiIBOx6BuCeRLCrfxBJipTY0nIOF/VbGcI=
 github.com/holiman/bloomfilter/v2 v2.0.3/go.mod h1:zpoh+gs7qcpqrHr3dB55AMiJwo0iURXE7ZOP9L9hSkA=
-github.com/holiman/uint256 v1.2.0/go.mod h1:y4ga/t+u+Xwd7CpDgZESaRcWy0I7XMlTMA25ApIH5Jw=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
 github.com/hudl/fargo v1.3.0/go.mod h1:y3CKSmjA+wD2gak7sUSXTAoopbhU08POFhmITJgmKTg=
 github.com/huin/goupnp v1.0.1-0.20210310174557-0ca763054c88/go.mod h1:nNs7wvRfN1eKaMknBydLNQU6146XQim8t4h+q90biWo=
