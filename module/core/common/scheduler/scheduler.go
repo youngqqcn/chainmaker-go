@@ -74,20 +74,7 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 	timeoutC := time.After(ScheduleTimeout * time.Second)
 	startTime := time.Now()
 
-	var conflictsBitWindow *ConflictsBitWindow
-	enableConflictsBitWindow := ts.chainConf.ChainConfig().Core.EnableConflictsBitWindow
-	if AdjustWindowSize*MinAdjustTimes > txBatchSize {
-		enableConflictsBitWindow = false
-	}
-	if enableConflictsBitWindow {
-		conflictsBitWindow = NewConflictsBitWindow(txBatchSize)
-	}
-
-	var senderGroup *SenderGroup
-	enableSenderGroup := ts.chainConf.ChainConfig().Core.EnableSenderGroup
-	if enableSenderGroup {
-		senderGroup = NewSenderGroup(txBatch)
-	}
+	enableConflictsBitWindow, enableSenderGroup, conflictsBitWindow, senderGroup := ts.initOptimizeTools(txBatch)
 	runningTxC := make(chan *commonPb.Transaction, txBatchSize)
 	finishC := make(chan bool)
 	if enableSenderGroup {
@@ -186,6 +173,26 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 	txRWSetMap := ts.getTxRWSetTable(snapshot, block)
 	contractEventMap := ts.getContractEventMap(block)
 	return txRWSetMap, contractEventMap, nil
+}
+
+func (ts *TxScheduler) initOptimizeTools(txBatch []*commonPb.Transaction) (bool, bool,
+	*ConflictsBitWindow, *SenderGroup) {
+	txBatchSize := len(txBatch)
+	var conflictsBitWindow *ConflictsBitWindow
+	enableConflictsBitWindow := ts.chainConf.ChainConfig().Core.EnableConflictsBitWindow
+	if AdjustWindowSize*MinAdjustTimes > txBatchSize {
+		enableConflictsBitWindow = false
+	}
+	if enableConflictsBitWindow {
+		conflictsBitWindow = NewConflictsBitWindow(txBatchSize)
+	}
+
+	var senderGroup *SenderGroup
+	enableSenderGroup := ts.chainConf.ChainConfig().Core.EnableSenderGroup
+	if enableSenderGroup {
+		senderGroup = NewSenderGroup(txBatch)
+	}
+	return enableConflictsBitWindow, enableSenderGroup, conflictsBitWindow, senderGroup
 }
 
 func (ts *TxScheduler) sendTxBySenderGroup(conflictsBitWindow *ConflictsBitWindow, senderGroup *SenderGroup,
