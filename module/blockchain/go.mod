@@ -20,7 +20,7 @@ require (
 	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211130023410-5df7eb63bfb8
 	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211122063451-8a41802784e4
 	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211130112814-b3126608050b
-	chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211130032227-0ca40727ed48
+	chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211201074641-57d2383c0b29
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/hokaccha/go-prettyjson v0.0.0-20210113012101-fb4e108d2519 // indirect
 	github.com/mattn/go-colorable v0.1.11 // indirect

@@ -13,8 +13,8 @@ require (
 	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211130023410-5df7eb63bfb8
 	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.0
 	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211130112814-b3126608050b
-	chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211130120720-bc90fbffc7c6
-	chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211130032227-0ca40727ed48
+	chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211201072525-3484cf854cde
+	chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211201074641-57d2383c0b29
 	github.com/gogo/protobuf v1.3.2
 	github.com/holiman/uint256 v1.2.0
 	github.com/panjf2000/ants/v2 v2.4.6

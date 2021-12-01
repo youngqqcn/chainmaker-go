@@ -32,7 +32,7 @@ type SnapshotImpl struct {
 	blockchainStore protocol.BlockchainStore
 	log             protocol.Logger
 	// If the snapshot has been sealed, the results of subsequent vm execution will not be added to the snapshot
-	sealed         *atomic.Bool
+	sealed *atomic.Bool
 
 	chainId        string
 	blockTimestamp int64
@@ -311,7 +311,8 @@ func (s *SnapshotImpl) Seal() {
 //	return readBitmap, writeBitmap
 //}
 //
-//func (s *SnapshotImpl) buildCumulativeBitmap(readBitmap []*bitmap.Bitmap, writeBitmap []*bitmap.Bitmap) ([]*bitmap.Bitmap, []*bitmap.Bitmap) {
+//func (s *SnapshotImpl) buildCumulativeBitmap(readBitmap []*bitmap.Bitmap,
+//writeBitmap []*bitmap.Bitmap) ([]*bitmap.Bitmap, []*bitmap.Bitmap) {
 //	cumulativeReadBitmap := make([]*bitmap.Bitmap, len(readBitmap))
 //	cumulativeWriteBitmap := make([]*bitmap.Bitmap, len(writeBitmap))
 //
@@ -454,6 +455,7 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 	reachMap[i] = allReachForI
 	return directReachForI
 }
+
 // According to the read-write table, the read-write dependency is checked from back to front to determine whether
 // the transaction can be executed concurrently.
 // From the process of building the read-write table, we have known that every transaction is based on a known
