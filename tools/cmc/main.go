@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 package main
 
 import (
+	"chainmaker.org/chainmaker-go/tools/cmc/parallel"
 	"strings"
 
 	"chainmaker.org/chainmaker-go/tools/cmc/pubkey"
@@ -47,6 +48,7 @@ For detailed logs, please see ./sdk.log
 	mainCmd.AddCommand(bulletproofs.BulletproofsCMD())
 	mainCmd.AddCommand(tee.NewTeeCMD())
 	mainCmd.AddCommand(pubkey.NewPubkeyCMD())
+	mainCmd.AddCommand(parallel.ParallelCMD())
 
 	// 后续改成go-sdk
 	//mainCmd.AddCommand(payload.PayloadCMD())
