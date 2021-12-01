@@ -17,7 +17,7 @@ require (
 	chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211126034817-c7a1903e2f83
 	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.0
 	chainmaker.org/chainmaker/txpool-single/v2 v2.1.0
-	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211109074701-81d58330e787
+	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211130112814-b3126608050b
 	chainmaker.org/chainmaker/vm-docker-go v0.0.0-20211122064347-23cc0a21ba97
 	chainmaker.org/chainmaker/vm-evm/v2 v2.0.0-20211130025150-83cc8c18e71b
 	chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20211117071021-e940cf22a033
@@ -33,7 +33,6 @@ require (
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.0
-	github.com/tjfoc/gmtls v1.2.1 // indirect
 	google.golang.org/grpc v1.41.0
 )
 

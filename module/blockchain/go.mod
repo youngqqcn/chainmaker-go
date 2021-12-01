@@ -12,14 +12,14 @@ require (
 	chainmaker.org/chainmaker-go/sync v0.0.0
 	chainmaker.org/chainmaker-go/txpool v0.0.0
 	chainmaker.org/chainmaker-go/vm v0.0.0
-	chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211110023535-5bf814f90c4c
+	chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211201032240-900b959567cf
 	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211125080705-8c4f85e6ca19
 	chainmaker.org/chainmaker/localconf/v2 v2.1.0
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211109074349-f79af5e1892d
 	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211130072802-e9d8fae57083
 	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211130023410-5df7eb63bfb8
 	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211122063451-8a41802784e4
-	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211109074701-81d58330e787
+	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211130112814-b3126608050b
 	chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211130032227-0ca40727ed48
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/hokaccha/go-prettyjson v0.0.0-20210113012101-fb4e108d2519 // indirect

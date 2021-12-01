@@ -11,8 +11,8 @@ require (
 	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211130072802-e9d8fae57083
 	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211130023410-5df7eb63bfb8
 	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211122063451-8a41802784e4
-	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211109074701-81d58330e787
-	chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211125132759-e608899855e9
+	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211130112814-b3126608050b
+	chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211130120720-bc90fbffc7c6
 	github.com/gogo/protobuf v1.3.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/prometheus/client_golang v1.11.0

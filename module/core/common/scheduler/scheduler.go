@@ -90,36 +90,14 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 	if enableSenderGroup {
 		senderGroup = NewSenderGroup(txBatch)
 	}
-
 	// enable sender conflicts
 	if enableSenderGroup {
-		// set maxPoolCapacity, tune pool capacity if necessary
 		if enableConflictsBitWindow {
 			conflictsBitWindow.setMaxPoolCapacity(len(senderGroup.txsMap))
 		}
 		goRoutinePool.Tune(len(senderGroup.txsMap))
-
 		go func() {
-			// first round
-			for _, v := range senderGroup.txsMap {
-				runningTxC <- v[0]
-			}
-			// solve done tx channel
-			for {
-				k := <-senderGroup.doneTxKeyC
-				if k == [32]byte{} {
-					return
-				}
-				senderGroup.txsMap[k] = senderGroup.txsMap[k][1:]
-				if len(senderGroup.txsMap[k]) > 0 {
-					runningTxC <- senderGroup.txsMap[k][0]
-				} else {
-					delete(senderGroup.txsMap, k)
-					if enableConflictsBitWindow {
-						conflictsBitWindow.setMaxPoolCapacity(len(senderGroup.txsMap))
-					}
-				}
-			}
+			ts.sendTxBySenderGroup(conflictsBitWindow, senderGroup, runningTxC, enableConflictsBitWindow)
 		}()
 	} else {
 		go func() {
@@ -231,6 +209,30 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 		ts.log.Debugf("rwset %v", txRWSetMap)
 	}
 	return txRWSetMap, contractEventMap, nil
+}
+
+func (ts *TxScheduler) sendTxBySenderGroup(conflictsBitWindow *ConflictsBitWindow, senderGroup *SenderGroup,
+	runningTxC chan *commonPb.Transaction, enableConflictsBitWindow bool) {
+	// first round
+	for _, v := range senderGroup.txsMap {
+		runningTxC <- v[0]
+	}
+	// solve done tx channel
+	for {
+		k := <-senderGroup.doneTxKeyC
+		if k == [32]byte{} {
+			return
+		}
+		senderGroup.txsMap[k] = senderGroup.txsMap[k][1:]
+		if len(senderGroup.txsMap[k]) > 0 {
+			runningTxC <- senderGroup.txsMap[k][0]
+		} else {
+			delete(senderGroup.txsMap, k)
+			if enableConflictsBitWindow {
+				conflictsBitWindow.setMaxPoolCapacity(len(senderGroup.txsMap))
+			}
+		}
+	}
 }
 
 // SimulateWithDag based on the dag in the block, perform scheduling and execution transactions
@@ -346,7 +348,7 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 
 	<-ts.scheduleFinishC
 	snapshot.Seal()
-
+	ts.log.Infof("simulate with dag finished, size %d, time used %+v", len(block.Txs), time.Since(startTime))
 	ts.log.Infof("simulate with dag finished, size %d, time used %+v", len(block.Txs), time.Since(startTime))
 
 	// Return the read and write set after the scheduled execution
