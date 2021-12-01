@@ -15,7 +15,7 @@ func queryCMD() *cobra.Command {
 		Short: "Query",
 		Long:  "Query",
 		RunE: func(_ *cobra.Command, _ []string) error {
-			return parallel("query")
+			return parallel(queryMethod)
 		},
 	}
 
