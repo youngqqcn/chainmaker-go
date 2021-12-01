@@ -56,24 +56,22 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 
 	ts.lock.Lock()
 	defer ts.lock.Unlock()
-	txRWSetMap := make(map[string]*commonPb.TxRWSet)
 	txBatchSize := len(txBatch)
 	if txBatchSize == 0 {
 		ts.log.Error("there are no txs to schedule")
 		return nil, nil, fmt.Errorf("there are no txs to schedule")
 	}
-	runningTxC := make(chan *commonPb.Transaction, txBatchSize)
-	timeoutC := time.After(ScheduleTimeout * time.Second)
-	finishC := make(chan bool)
-	var goRoutinePool *ants.Pool
-	var err error
 	ts.log.Infof("schedule tx batch start, size %d", txBatchSize)
 
+	var goRoutinePool *ants.Pool
+	var err error
 	poolCapacity := ts.StoreHelper.GetPoolCapacity()
 	if goRoutinePool, err = ants.NewPool(poolCapacity, ants.WithPreAlloc(false)); err != nil {
 		return nil, nil, err
 	}
 	defer goRoutinePool.Release()
+
+	timeoutC := time.After(ScheduleTimeout * time.Second)
 	startTime := time.Now()
 
 	var conflictsBitWindow *ConflictsBitWindow
@@ -90,7 +88,8 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 	if enableSenderGroup {
 		senderGroup = NewSenderGroup(txBatch)
 	}
-	// enable sender conflicts
+	runningTxC := make(chan *commonPb.Transaction, txBatchSize)
+	finishC := make(chan bool)
 	if enableSenderGroup {
 		if enableConflictsBitWindow {
 			conflictsBitWindow.setMaxPoolCapacity(len(senderGroup.txsMap))
@@ -113,7 +112,7 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 			select {
 			case tx := <-runningTxC:
 				ts.log.Debugf("prepare to submit running task for tx id:%s", tx.Payload.GetTxId())
-				err := goRoutinePool.Submit(func() { //封装个函数
+				err := goRoutinePool.Submit(func() {
 					// If snapshot is sealed, no more transaction will be added into snapshot
 					if snapshot.IsSealed() {
 						return
@@ -136,17 +135,8 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 						ts.log.Debugf("apply to snapshot failed, tx id:%s, result:%+v, apply count:%d",
 							tx.Payload.GetTxId(), txSimContext.GetTxResult(), applySize)
 					} else {
-						if enableConflictsBitWindow {
-							ts.adjustPoolSize(goRoutinePool, conflictsBitWindow, NormalTx)
-						}
-						if localconf.ChainMakerConfig.MonitorConfig.Enabled {
-							elapsed := time.Since(start)
-							ts.metricVMRunTime.WithLabelValues(tx.Payload.ChainId).Observe(elapsed.Seconds())
-						}
-						if enableSenderGroup {
-							hashKey, _ := getSenderHashKey(tx)
-							senderGroup.doneTxKeyC <- hashKey
-						}
+						ts.handleApplyResult(enableConflictsBitWindow, enableSenderGroup,
+							conflictsBitWindow, senderGroup, goRoutinePool,tx, start)
 						ts.log.Debugf("apply to snapshot success, tx id:%s, result:%+v, apply count:%d",
 							tx.Payload.GetTxId(), txSimContext.GetTxResult(), applySize)
 					}
@@ -192,22 +182,9 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 	timeCostB := time.Since(startTime)
 	ts.log.Infof("schedule tx batch finished, success %d, time used(without dag) %v, time used (dag include) %v ",
 		len(block.Dag.Vertexes), timeCostA, timeCostB)
-	block.Txs = snapshot.GetTxTable()
-	txRWSetTable := snapshot.GetTxRWSetTable()
-	for _, txRWSet := range txRWSetTable {
-		if txRWSet != nil {
-			txRWSetMap[txRWSet.TxId] = txRWSet
-		}
-	}
-	contractEventMap := make(map[string][]*commonPb.ContractEvent)
-	for _, tx := range block.Txs {
-		event := tx.Result.ContractResult.ContractEvent
-		contractEventMap[tx.Payload.TxId] = event
-	}
-	//ts.dumpDAG(block.Dag, block.Txs)
-	if localconf.ChainMakerConfig.SchedulerConfig.RWSetLog {
-		ts.log.Debugf("rwset %v", txRWSetMap)
-	}
+
+	txRWSetMap := ts.getTxRWSetTable(snapshot, block)
+	contractEventMap := ts.getContractEventMap(block)
 	return txRWSetMap, contractEventMap, nil
 }
 
@@ -233,6 +210,47 @@ func (ts *TxScheduler) sendTxBySenderGroup(conflictsBitWindow *ConflictsBitWindo
 			}
 		}
 	}
+}
+
+func (ts *TxScheduler) handleApplyResult(enableConflictsBitWindow bool, enableSenderGroup bool,
+	conflictsBitWindow *ConflictsBitWindow, senderGroup *SenderGroup, goRoutinePool *ants.Pool,
+	tx *commonPb.Transaction, start time.Time) {
+	if enableConflictsBitWindow {
+		ts.adjustPoolSize(goRoutinePool, conflictsBitWindow, NormalTx)
+	}
+	if localconf.ChainMakerConfig.MonitorConfig.Enabled {
+		elapsed := time.Since(start)
+		ts.metricVMRunTime.WithLabelValues(tx.Payload.ChainId).Observe(elapsed.Seconds())
+	}
+	if enableSenderGroup {
+		hashKey, _ := getSenderHashKey(tx)
+		senderGroup.doneTxKeyC <- hashKey
+	}
+}
+
+func (ts *TxScheduler) getTxRWSetTable(snapshot protocol.Snapshot, block *commonPb.Block) map[string]*commonPb.TxRWSet {
+	txRWSetMap := make(map[string]*commonPb.TxRWSet)
+	block.Txs = snapshot.GetTxTable()
+	txRWSetTable := snapshot.GetTxRWSetTable()
+	for _, txRWSet := range txRWSetTable {
+		if txRWSet != nil {
+			txRWSetMap[txRWSet.TxId] = txRWSet
+		}
+	}
+	//ts.dumpDAG(block.Dag, block.Txs)
+	if localconf.ChainMakerConfig.SchedulerConfig.RWSetLog {
+		ts.log.Debugf("rwset %v", txRWSetMap)
+	}
+	return txRWSetMap
+}
+
+func (ts *TxScheduler) getContractEventMap(block *commonPb.Block) map[string][]*commonPb.ContractEvent {
+	contractEventMap := make(map[string][]*commonPb.ContractEvent)
+	for _, tx := range block.Txs {
+		event := tx.Result.ContractResult.ContractEvent
+		contractEventMap[tx.Payload.TxId] = event
+	}
+	return contractEventMap
 }
 
 // SimulateWithDag based on the dag in the block, perform scheduling and execution transactions
@@ -348,7 +366,6 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 
 	<-ts.scheduleFinishC
 	snapshot.Seal()
-	ts.log.Infof("simulate with dag finished, size %d, time used %+v", len(block.Txs), time.Since(startTime))
 	ts.log.Infof("simulate with dag finished, size %d, time used %+v", len(block.Txs), time.Since(startTime))
 
 	// Return the read and write set after the scheduled execution
