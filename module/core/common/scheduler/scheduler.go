@@ -123,7 +123,7 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 							tx.Payload.GetTxId(), txSimContext.GetTxResult(), applySize)
 					} else {
 						ts.handleApplyResult(enableConflictsBitWindow, enableSenderGroup,
-							conflictsBitWindow, senderGroup, goRoutinePool,tx, start)
+							conflictsBitWindow, senderGroup, goRoutinePool, tx, start)
 						ts.log.Debugf("apply to snapshot success, tx id:%s, result:%+v, apply count:%d",
 							tx.Payload.GetTxId(), txSimContext.GetTxResult(), applySize)
 					}
