@@ -545,16 +545,9 @@ func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxS
 		}
 	}
 
-	accountMangerContract, err = txSimContext.GetContractByName(syscontract.SystemContract_ACCOUNT_MANAGER.String())
+	accountMangerContract, pk, err = ts.getAccountMgrContractAndPk(txSimContext, tx, contractName, method)
 	if err != nil {
-		ts.log.Error(err.Error())
 		return result, specialTxType, err
-	}
-
-	pk, err = ts.getSenderPk(txSimContext)
-	if err != nil {
-		ts.log.Error(err.Error())
-		return nil, specialTxType, err
 	}
 
 	// charge gas limit
@@ -714,6 +707,26 @@ func (ts *TxScheduler) refundGas(accountMangerContract *commonPb.Contract, tx *c
 		}
 	}
 	return result, nil
+}
+
+func (ts *TxScheduler) getAccountMgrContractAndPk(txSimContext protocol.TxSimContext, tx *commonPb.Transaction,
+	contractName, method string) (accountMangerContract *commonPb.Contract, pk []byte, err error) {
+	if ts.checkGasEnable() && ts.checkNativeFilter(contractName, method) &&
+		tx.Payload.TxType == commonPb.TxType_INVOKE_CONTRACT {
+		accountMangerContract, err = txSimContext.GetContractByName(syscontract.SystemContract_ACCOUNT_MANAGER.String())
+		if err != nil {
+			ts.log.Error(err.Error())
+			return nil, nil, err
+		}
+
+		pk, err = ts.getSenderPk(txSimContext)
+		if err != nil {
+			ts.log.Error(err.Error())
+			return accountMangerContract, nil, err
+		}
+		return accountMangerContract, pk, err
+	}
+	return nil, nil, nil
 }
 
 func (ts *TxScheduler) checkGasEnable() bool {
