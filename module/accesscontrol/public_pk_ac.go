@@ -376,6 +376,10 @@ func (p *pkACProvider) createDefaultResourcePolicy() {
 	// forbidden charge gas by go sdk
 	p.resourceNamePolicyMap.Store(syscontract.SystemContract_ACCOUNT_MANAGER.String()+"-"+
 		syscontract.GasAccountFunction_CHARGE_GAS.String(), pubPolicyForbidden)
+
+	// forbidden refund gas vm by go sdk
+	p.resourceNamePolicyMap.Store(syscontract.SystemContract_ACCOUNT_MANAGER.String()+"-"+
+		syscontract.GasAccountFunction_REFUND_GAS_VM.String(), pubPolicyForbidden)
 }
 
 func (p *pkACProvider) verifyPrincipalPolicy(principal,
