@@ -75,6 +75,12 @@ core:
     # Retry interval of fetching transaction in txpool by txid, in ms.
     # retry_interval: 20
 
+# gas account config
+account_config:
+  enable_gas: false
+  gas_count: 0
+  gas_admin_address: ""
+
 # Consensus settings
 consensus:
   # Consensus type 5-DPOS
