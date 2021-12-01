@@ -8,6 +8,7 @@ run:
   #  skip-files:
   skip-dirs:
     - tee
+    - parallel
 linters:
   disable-all: true
   enable:

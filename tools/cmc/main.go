@@ -8,10 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 package main
 
 import (
-	"chainmaker.org/chainmaker-go/tools/cmc/parallel"
 	"strings"
-
-	"chainmaker.org/chainmaker-go/tools/cmc/pubkey"
 
 	"chainmaker.org/chainmaker-go/tools/cmc/archive"
 	"chainmaker.org/chainmaker-go/tools/cmc/bulletproofs"
@@ -21,7 +18,9 @@ import (
 	"chainmaker.org/chainmaker-go/tools/cmc/hibe"
 	"chainmaker.org/chainmaker-go/tools/cmc/key"
 	"chainmaker.org/chainmaker-go/tools/cmc/paillier"
+	"chainmaker.org/chainmaker-go/tools/cmc/parallel"
 	"chainmaker.org/chainmaker-go/tools/cmc/payload"
+	"chainmaker.org/chainmaker-go/tools/cmc/pubkey"
 	"chainmaker.org/chainmaker-go/tools/cmc/query"
 	"chainmaker.org/chainmaker-go/tools/cmc/tee"
 	"github.com/spf13/cobra"
