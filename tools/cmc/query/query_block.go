@@ -7,7 +7,9 @@ package query
 
 import (
 	"encoding/hex"
+	"errors"
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/hokaccha/go-prettyjson"
@@ -17,6 +19,21 @@ import (
 	"chainmaker.org/chainmaker-go/tools/cmc/util"
 )
 
+func getInputHeight(arg []string) (uint64, error) {
+	if len(arg) == 0 {
+		return 0, errors.New("parameter needed")
+	}
+	arg0 := arg[0]
+	height, err := strconv.ParseUint(arg0, 10, 64)
+	if err != nil {
+		if arg0 == "-1" {
+			return math.MaxUint64, nil
+		}
+		return 0, err
+	}
+	return height, nil
+}
+
 // newQueryBlockByHeightOnChainCMD `query block by block height` command implementation
 func newQueryBlockByHeightOnChainCMD() *cobra.Command {
 	cmd := &cobra.Command{
@@ -25,7 +42,7 @@ func newQueryBlockByHeightOnChainCMD() *cobra.Command {
 		Long:  "query on-chain block by height",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			height, err := strconv.ParseUint(args[0], 10, 64)
+			height, err := getInputHeight(args)
 			if err != nil {
 				return err
 			}

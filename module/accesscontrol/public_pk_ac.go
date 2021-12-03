@@ -1,3 +1,10 @@
+/*
+Copyright (C) BABEC. All rights reserved.
+Copyright (C) THL A29 Limited, a Tencent company. All rights reserved.
+
+SPDX-License-Identifier: Apache-2.0
+*/
+
 package accesscontrol
 
 import (
@@ -29,6 +36,9 @@ const (
 	AdminPublicKey = "public"
 	// chainconfig the DPoS of orgId
 	DposOrgId = "dpos_org_id"
+
+	// chainconfig orgId for permission consensus, such as tbft
+	PermissionConsensusOrgId = "public"
 )
 
 var (
@@ -119,7 +129,7 @@ func newPkACProvider(chainConfig *config.ChainConfig,
 		exceptionalPolicyMap:  &sync.Map{},
 	}
 
-	pkAcProvider.createDefaultResourcePolicy()
+	pkAcProvider.createDefaultResourcePolicy(chainConfig.Consensus.Type)
 
 	err := pkAcProvider.initAdminMembers(chainConfig.TrustRoots)
 	if err != nil {
@@ -173,6 +183,8 @@ func (p *pkACProvider) initAdminMembers(trustRootList []*config.TrustRootConfig)
 func (p *pkACProvider) initConsensusMember(chainConfig *config.ChainConfig) error {
 	if chainConfig.Consensus.Type == consensus.ConsensusType_DPOS {
 		return p.initDPoSMember(chainConfig.Consensus.Nodes)
+	} else if chainConfig.Consensus.Type == consensus.ConsensusType_TBFT {
+		return p.initPermissionMember(chainConfig.Consensus.Nodes)
 	}
 	return fmt.Errorf("public chain mode does not support other consensus")
 }
@@ -191,6 +203,23 @@ func (p *pkACProvider) initDPoSMember(consensusConf []*config.OrgConfig) error {
 	}
 	p.consensusMember = &consensusMember
 	p.log.Infof("update consensus list: [%v]", p.consensusMember)
+	return nil
+}
+
+func (p *pkACProvider) initPermissionMember(consensusConf []*config.OrgConfig) error {
+	if len(consensusConf) == 0 {
+		return fmt.Errorf("update permission consensus member failed: consensus node config can't be empty in chain config")
+	}
+
+	var consensusMember sync.Map
+	if consensusConf[0].OrgId != PermissionConsensusOrgId {
+		return fmt.Errorf("update permission consensus member failed: node config orgId do not match")
+	}
+	for _, nodeId := range consensusConf[0].NodeId {
+		consensusMember.Store(nodeId, struct{}{})
+	}
+	p.consensusMember = &consensusMember
+	p.log.Infof("update permission consensus list: [%v]", p.consensusMember)
 	return nil
 }
 
@@ -247,7 +276,7 @@ func (p *pkACProvider) NewMember(pbMember *pbac.Member) (protocol.Member, error)
 	return member, nil
 }
 
-func (p *pkACProvider) createDefaultResourcePolicy() {
+func (p *pkACProvider) createDefaultResourcePolicy(consensusType consensus.ConsensusType) {
 
 	p.resourceNamePolicyMap.Store(protocol.ResourceNameConsensusNode, pubPolicyConsensus)
 	// for txtype
@@ -270,17 +299,28 @@ func (p *pkACProvider) createDefaultResourcePolicy() {
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
 		syscontract.ChainConfigFunction_TRUST_MEMBER_UPDATE.String(), pubPolicyForbidden)
 
-	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
-		syscontract.ChainConfigFunction_NODE_ID_ADD.String(), pubPolicyForbidden)
-	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
-		syscontract.ChainConfigFunction_NODE_ID_DELETE.String(), pubPolicyForbidden)
-	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
-		syscontract.ChainConfigFunction_NODE_ID_UPDATE.String(), pubPolicyForbidden)
+	if consensusType == consensus.ConsensusType_DPOS {
+		p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+			syscontract.ChainConfigFunction_NODE_ID_ADD.String(), pubPolicyForbidden)
+		p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+			syscontract.ChainConfigFunction_NODE_ID_DELETE.String(), pubPolicyForbidden)
+		p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+			syscontract.ChainConfigFunction_NODE_ID_UPDATE.String(), pubPolicyForbidden)
+		p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+			syscontract.ChainConfigFunction_NODE_ORG_UPDATE.String(), pubPolicyForbidden)
+	} else {
+		p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+			syscontract.ChainConfigFunction_NODE_ID_ADD.String(), pubPolicyManage)
+		p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+			syscontract.ChainConfigFunction_NODE_ID_DELETE.String(), pubPolicyManage)
+		p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+			syscontract.ChainConfigFunction_NODE_ID_UPDATE.String(), pubPolicyManage)
+		p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+			syscontract.ChainConfigFunction_NODE_ORG_UPDATE.String(), pubPolicyManage)
+	}
 
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
 		syscontract.ChainConfigFunction_NODE_ORG_ADD.String(), pubPolicyForbidden)
-	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
-		syscontract.ChainConfigFunction_NODE_ORG_UPDATE.String(), pubPolicyForbidden)
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
 		syscontract.ChainConfigFunction_NODE_ORG_DELETE.String(), pubPolicyForbidden)
 
@@ -320,6 +360,14 @@ func (p *pkACProvider) createDefaultResourcePolicy() {
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
 		syscontract.ChainConfigFunction_TRUST_ROOT_DELETE.String(), pubPolicyForbidden)
 
+	// disable multisign for public mode
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_MULTI_SIGN.String()+"-"+
+		syscontract.MultiSignFunction_REQ.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_MULTI_SIGN.String()+"-"+
+		syscontract.MultiSignFunction_VOTE.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_MULTI_SIGN.String()+"-"+
+		syscontract.MultiSignFunction_QUERY.String(), pubPolicyForbidden)
+
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
 		syscontract.ChainConfigFunction_CORE_UPDATE.String(), pubPolicyManage)
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
@@ -333,6 +381,15 @@ func (p *pkACProvider) createDefaultResourcePolicy() {
 		syscontract.ContractManageFunction_UNFREEZE_CONTRACT.String(), pubPolicyManage)
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
 		syscontract.ContractManageFunction_REVOKE_CONTRACT.String(), pubPolicyManage)
+	// disable contract access for public mode
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
+		syscontract.ContractManageFunction_GRANT_CONTRACT_ACCESS.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
+		syscontract.ContractManageFunction_REVOKE_CONTRACT_ACCESS.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
+		syscontract.ContractManageFunction_VERIFY_CONTRACT_ACCESS.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
+		syscontract.ContractQueryFunction_GET_DISABLED_CONTRACT_LIST.String(), pubPolicyForbidden)
 
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
 		syscontract.ContractManageFunction_GRANT_CONTRACT_ACCESS.String(), pubPolicyForbidden)

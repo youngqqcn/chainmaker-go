@@ -26,8 +26,8 @@ CRYPTOGEN_TOOL_PKCS11_KEYS=${CRYPTOGEN_TOOL_PATH}/config/pkcs11_keys.yml
 
 VERSION=v2.1.0_alpha
 
-BC_YML_TRUST_ROOT_LINE=126
-BC_YML_TRUST_ROOT_LINE_END=146
+BC_YML_TRUST_ROOT_LINE=176
+BC_YML_TRUST_ROOT_LINE_END=196
 
 function show_help() {
     echo "Usage:  "
@@ -129,9 +129,9 @@ function generate_config() {
     PPROF_PORT=24321
     TRUSTED_PORT=13301
 
-    read -p "input consensus type (0-SOLO,1-TBFT(default),3-HOTSTUFF,4-RAFT,5-DPOS): " tmp
+    read -p "input consensus type (0-SOLO,1-TBFT(default),3-HOTSTUFF,4-RAFT): " tmp
     if  [ ! -z "$tmp" ] ;then
-      if  [ $tmp -eq 0 ] || [ $tmp -eq 1 ] || [ $tmp -eq 3 ] || [ $tmp -eq 4 ] || [ $tmp -eq 5 ] ;then
+      if  [ $tmp -eq 0 ] || [ $tmp -eq 1 ] || [ $tmp -eq 3 ] || [ $tmp -eq 4 ] ;then
           CONSENSUS_TYPE=$tmp
       else
         echo "unknown consensus type [" $tmp "], so use default"
@@ -302,22 +302,22 @@ function generate_config() {
           for ((k = 1; k < $CHAIN_CNT + 1; k = k + 1)); do
             for file in `ls -tr $BUILD_CRYPTO_CONFIG_PATH`
             do
-                org_id_tmp=" - org_id: \"${file}\""
-                org_root="   root:"
-                org_root_tmp="     - \"../config/wx-org${i}.chainmaker.org/certs/ca/${file}/ca.crt\""
+                org_id_tmp="\ - org_id: \"${file}\""
+                org_root="\ \ \ root:"
+                org_root_tmp="\ \ \ \ \ - \"../config/wx-org${i}.chainmaker.org/certs/ca/${file}/ca.crt\""
                 if [ "${system}" = "Linux" ]; then
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\ ${org_root_tmp}" node$i/chainconfig/bc$k.yml
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\ ${org_root}" node$i/chainconfig/bc$k.yml
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\ ${org_id_tmp}"   node$i/chainconfig/bc$k.yml
                 else
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\\
- ${org_root_tmp}\\
+\ ${org_root_tmp}\\
 " node$i/chainconfig/bc$k.yml
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\\
- ${org_root}\\
+\ ${org_root}\\
 "  node$i/chainconfig/bc$k.yml
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\\
- ${org_id_tmp}\\
+\ ${org_id_tmp}\\
 "    node$i/chainconfig/bc$k.yml
                 fi
             done

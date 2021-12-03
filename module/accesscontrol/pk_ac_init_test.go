@@ -1,3 +1,10 @@
+/*
+Copyright (C) BABEC. All rights reserved.
+Copyright (C) THL A29 Limited, a Tencent company. All rights reserved.
+
+SPDX-License-Identifier: Apache-2.0
+*/
+
 package accesscontrol
 
 import (
@@ -414,7 +421,7 @@ var testAdmin4PKInfo = &testPKInfo{
 // }
 
 const (
-	testPermissionedKeyAuthType = "permissionedWithKey"
+	testPermissionedKeyAuthType = "permissionedwithkey"
 )
 
 var testPermissionedPKChainConfig = &config.ChainConfig{

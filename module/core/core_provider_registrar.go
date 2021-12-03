@@ -7,9 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 package core
 
 import (
-	hotstuffMode "chainmaker.org/chainmaker-go/core/hotstuffmode"
-	"chainmaker.org/chainmaker-go/core/provider"
-	syncMode "chainmaker.org/chainmaker-go/core/syncmode"
+	hotstuffMode "chainmaker.org/chainmaker-go/module/core/hotstuffmode"
+	"chainmaker.org/chainmaker-go/module/core/provider"
+	syncMode "chainmaker.org/chainmaker-go/module/core/syncmode"
 )
 
 func init() {
