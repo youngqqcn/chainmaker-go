@@ -16,14 +16,14 @@ import (
 	"chainmaker.org/chainmaker-go/module/blockchain"
 	commonErr "chainmaker.org/chainmaker/common/v2/errors"
 	"chainmaker.org/chainmaker/common/v2/monitor"
-	localconf "chainmaker.org/chainmaker/localconf/v2"
-	logger "chainmaker.org/chainmaker/logger/v2"
+	"chainmaker.org/chainmaker/localconf/v2"
+	"chainmaker.org/chainmaker/logger/v2"
 	apiPb "chainmaker.org/chainmaker/pb-go/v2/api"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	configPb "chainmaker.org/chainmaker/pb-go/v2/config"
-	protocol "chainmaker.org/chainmaker/protocol/v2"
+	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/store/v2/archive"
-	utils "chainmaker.org/chainmaker/utils/v2"
+	"chainmaker.org/chainmaker/utils/v2"
 	native "chainmaker.org/chainmaker/vm-native/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/time/rate"
@@ -316,8 +316,9 @@ func (s *ApiService) dealSystemChainQuery(tx *commonPb.Transaction, vmMgr protoc
 		vmManager:        vmMgr,
 		blockVersion:     protocol.DefaultBlockVersion,
 	}
-
-	runtimeInstance := native.GetRuntimeInstance(chainId)
+	//TODO: get default gas from chain config
+	defaultGas := uint64(0)
+	runtimeInstance := native.GetRuntimeInstance(chainId, defaultGas)
 	txResult := runtimeInstance.Invoke(&commonPb.Contract{
 		Name: tx.Payload.ContractName,
 	},
