@@ -154,13 +154,10 @@ func (sync *BlockChainSyncServer) blockSyncMsgHandler(from string, msg []byte, m
 		err     error
 		syncMsg = syncPb.SyncMsg{}
 	)
-	sync.log.Info("blockSyncMsgHandler start")
-	sync.log.Infof("blockSyncMsgHandler msg: %s", msg)
 	if err = proto.Unmarshal(msg, &syncMsg); err != nil {
 		sync.log.Errorf("fail to proto.Unmarshal the syncPb.SyncMsg:%s", err.Error())
 		return err
 	}
-	sync.log.Infof("blockSyncMsgHandler syncMsg: %+v", syncMsg)
 	sync.log.Debugf("receive the NetMsg_SYNC_BLOCK_MSG:the Type is %d", syncMsg.Type)
 
 	switch syncMsg.Type {
@@ -208,7 +205,6 @@ func (sync *BlockChainSyncServer) handleBlockReq(syncMsg *syncPb.SyncMsg, from s
 		err error
 		req syncPb.BlockSyncReq
 	)
-	sync.log.Info("handleBlockReq start")
 	if err = proto.Unmarshal(syncMsg.Payload, &req); err != nil {
 		sync.log.Errorf("fail to proto.Unmarshal the syncPb.SyncMsg:%s", err.Error())
 		return err
@@ -227,7 +223,6 @@ func (sync *BlockChainSyncServer) sendBlocks(req *syncPb.BlockSyncReq, from stri
 		err error
 		blk *commonPb.Block
 	)
-	sync.log.Info("sendBlocks start")
 	for i := uint64(0); i < req.BatchSize; i++ {
 		if blk, err = sync.blockChainStore.GetBlock(req.BlockHeight + i); err != nil || blk == nil {
 			return err
@@ -250,7 +245,6 @@ func (sync *BlockChainSyncServer) sendInfos(req *syncPb.BlockSyncReq, from strin
 		err       error
 		blkRwInfo *storePb.BlockWithRWSet
 	)
-	sync.log.Info("sendInfos start")
 	for i := uint64(0); i < req.BatchSize; i++ {
 		if blkRwInfo, err = sync.blockChainStore.GetBlockWithRWSets(req.BlockHeight + i); err != nil || blkRwInfo == nil {
 			return err
@@ -338,19 +332,6 @@ func (sync *BlockChainSyncServer) loop() {
 			if err := sync.processor.addTask(ProcessBlockMsg{}); err != nil {
 				sync.log.Errorf("add process block task to processor failed, reason: %s", err)
 			}
-			//isFastSync := localconf.ChainMakerConfig.NodeConfig.FastSyncConfig.Enable
-			//sync.log.Infof("doProcessBlockTk NodeConfig is: %+v",localconf.ChainMakerConfig.NodeConfig)
-			//if isFastSync{
-			//	sync.log.Infof("loop doProcessBlockTk sync module is: %v",isFastSync)
-			//	if err := sync.processor.addTask(ProcessBlockWithRwSetMsg{}); err != nil {
-			//		sync.log.Errorf("add process block task to processor failed, reason: %s", err)
-			//	}
-			//}else {
-			//	sync.log.Infof("loop doProcessBlockTk sync module is: %v",isFastSync)
-			//	if err := sync.processor.addTask(ProcessBlockMsg{}); err != nil {
-			//		sync.log.Errorf("add process block task to processor failed, reason: %s", err)
-			//	}
-			//}
 		case <-doScheduleTk.C:
 			if err := sync.scheduler.addTask(SchedulerMsg{}); err != nil {
 				sync.log.Errorf("add scheduler task to scheduler failed, reason: %s", err)
@@ -413,7 +394,6 @@ func (sync *BlockChainSyncServer) validateAndCommitBlock(block *commonPb.Block) 
 }
 
 func (sync *BlockChainSyncServer) validateAndCommitBlockWithRwSets(block *commonPb.Block, rwsets []*commonPb.TxRWSet) processedBlockStatus {
-	sync.log.Info("validateAndCommitBlockWithRwSets start")
 	if blk := sync.ledgerCache.GetLastCommittedBlock(); blk != nil && blk.Header.BlockHeight >= block.Header.BlockHeight {
 		sync.log.Infof("the block: %d has been committed in the blockChainStore ", block.Header.BlockHeight)
 		return hasProcessed

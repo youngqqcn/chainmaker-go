@@ -333,11 +333,10 @@ func (sch *scheduler) handleSyncedBlockMsg(msg *SyncedBlockMsg) (queue.Item, err
 			return &ReceivedBlocksWithRwSets{
 				blkinfos: blkBatch.GetBlockinfoBatch().Batch,
 				from:     msg.from}, nil
-		} else {
-			return &ReceivedBlocks{
-				blks: blkBatch.GetBlockBatch().Batches,
-				from: msg.from}, nil
 		}
+		return &ReceivedBlocks{
+			blks: blkBatch.GetBlockBatch().Batches,
+			from: msg.from}, nil
 	}
 	return nil, nil
 }

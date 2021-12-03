@@ -238,7 +238,8 @@ func (v *BlockVerifierImpl) VerifyBlock(block *commonpb.Block, mode protocol.Ver
 }
 
 // VerifyBlock, to check if block is valid
-func (v *BlockVerifierImpl) VerifyBlockWithRwSets(block *commonpb.Block, rwsets []*commonpb.TxRWSet, mode protocol.VerifyMode) (err error) {
+func (v *BlockVerifierImpl) VerifyBlockWithRwSets(block *commonpb.Block,
+	rwsets []*commonpb.TxRWSet, mode protocol.VerifyMode) (err error) {
 
 	startTick := utils.CurrentTimeMillisSeconds()
 	if err = utils.IsEmptyBlock(block); err != nil {
@@ -284,9 +285,7 @@ func (v *BlockVerifierImpl) VerifyBlockWithRwSets(block *commonpb.Block, rwsets 
 		return err
 	}
 	lastPool := utils.CurrentTimeMillisSeconds() - startPoolTick
-	timeLasts := make([]int64, 0)
-
-	contractEventMap, timeLasts, err = v.validateBlockWithRWSets(newBlock, lastBlock, txRWSetMap)
+	contractEventMap, timeLasts, err := v.validateBlockWithRWSets(newBlock, lastBlock, txRWSetMap)
 	if err != nil {
 		v.log.Warnf("verify failed [%d](%x),preBlockHash:%x, %s",
 			newBlock.Header.BlockHeight, newBlock.Header.BlockHash, newBlock.Header.PreBlockHash, err.Error())
@@ -364,7 +363,8 @@ func (v *BlockVerifierImpl) validateBlock(block, lastBlock *commonpb.Block) (
 	return v.verifierBlock.ValidateBlock(block, lastBlock, hashType, timeLasts)
 }
 
-func (v *BlockVerifierImpl) validateBlockWithRWSets(block, lastBlock *commonpb.Block, txRWSetMap map[string]*commonpb.TxRWSet) (
+func (v *BlockVerifierImpl) validateBlockWithRWSets(block, lastBlock *commonpb.Block,
+	txRWSetMap map[string]*commonpb.TxRWSet) (
 	map[string][]*commonpb.ContractEvent, []int64, error) {
 	hashType := v.chainConf.ChainConfig().Crypto.Hash
 	timeLasts := make([]int64, 0)
