@@ -75,6 +75,7 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 	startTime := time.Now()
 
 	enableConflictsBitWindow, enableSenderGroup, conflictsBitWindow, senderGroup := ts.initOptimizeTools(txBatch)
+
 	runningTxC := make(chan *commonPb.Transaction, txBatchSize)
 	finishC := make(chan bool)
 	if enableSenderGroup {
@@ -167,8 +168,8 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 	}
 
 	timeCostB := time.Since(startTime)
-	ts.log.Infof("schedule tx batch finished, success %d, time used(without dag) %v, time used (dag include) %v ",
-		len(block.Dag.Vertexes), timeCostA, timeCostB)
+	ts.log.Infof("schedule tx batch finished, success %d, txs execution cost %v, dag building cost %v, total cost %v\n",
+		len(block.Dag.Vertexes), timeCostA, timeCostB-timeCostA, timeCostB)
 
 	txRWSetMap := ts.getTxRWSetTable(snapshot, block)
 	contractEventMap := ts.getContractEventMap(block)
@@ -179,16 +180,19 @@ func (ts *TxScheduler) initOptimizeTools(txBatch []*commonPb.Transaction) (bool,
 	*ConflictsBitWindow, *SenderGroup) {
 	txBatchSize := len(txBatch)
 	var conflictsBitWindow *ConflictsBitWindow
+	var senderGroup *SenderGroup
 	enableConflictsBitWindow := ts.chainConf.ChainConfig().Core.EnableConflictsBitWindow
+	enableSenderGroup := ts.chainConf.ChainConfig().Core.EnableSenderGroup
+
+	ts.log.Infof("enable conflicts bit window: [%t], enable sender group: [%t]\n",
+		enableConflictsBitWindow, enableSenderGroup)
+
 	if AdjustWindowSize*MinAdjustTimes > txBatchSize {
 		enableConflictsBitWindow = false
 	}
 	if enableConflictsBitWindow {
 		conflictsBitWindow = NewConflictsBitWindow(txBatchSize)
 	}
-
-	var senderGroup *SenderGroup
-	enableSenderGroup := ts.chainConf.ChainConfig().Core.EnableSenderGroup
 	if enableSenderGroup {
 		senderGroup = NewSenderGroup(txBatch)
 	}
