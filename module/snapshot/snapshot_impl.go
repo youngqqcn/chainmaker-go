@@ -422,6 +422,7 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 			}
 			directReachForI.Set(int(writeKeyTxs[j]))
 			allReachForI.Or(reachMap[writeKeyTxs[j]])
+			break
 		}
 	}
 	//WriteSet and (ReadSet, WriteSet) conflict
@@ -438,6 +439,7 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 			}
 			directReachForI.Set(int(readKeyTxs[j]))
 			allReachForI.Or(reachMap[readKeyTxs[j]])
+			break
 		}
 		writeKeyTxs := writeKeyDict[writeKey]
 		if len(writeKeyTxs) == 0 {
@@ -450,6 +452,7 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 			}
 			directReachForI.Set(int(writeKeyTxs[j]))
 			allReachForI.Or(reachMap[writeKeyTxs[j]])
+			break
 		}
 	}
 	reachMap[i] = allReachForI
