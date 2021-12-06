@@ -416,14 +416,18 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 			continue
 		}
 		j := int(writePos[i][readKey]) - 1
-		for ; j >= 0; j-- {
-			if allReachForI.Has(int(writeKeyTxs[j])) {
-				continue
-			}
+		if j >= 0 && !allReachForI.Has(int(writeKeyTxs[j])) {
 			directReachForI.Set(int(writeKeyTxs[j]))
 			allReachForI.Or(reachMap[writeKeyTxs[j]])
-			break
 		}
+		//for ; j >= 0; j-- {
+		//	if allReachForI.Has(int(writeKeyTxs[j])) {
+		//		continue
+		//	}
+		//	directReachForI.Set(int(writeKeyTxs[j]))
+		//	allReachForI.Or(reachMap[writeKeyTxs[j]])
+		//	break
+		//}
 	}
 	//WriteSet and (ReadSet, WriteSet) conflict
 	for _, keyForI := range writeTableItemForI {
@@ -433,27 +437,35 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 			continue
 		}
 		j := int(readPos[i][writeKey]) - 1
-		for ; j >= 0; j-- {
-			if allReachForI.Has(int(readKeyTxs[j])) {
-				continue
-			}
+		if j > 0 && !allReachForI.Has(int(readKeyTxs[j])) {
 			directReachForI.Set(int(readKeyTxs[j]))
 			allReachForI.Or(reachMap[readKeyTxs[j]])
-			break
 		}
+		//for ; j >= 0; j-- {
+		//	if allReachForI.Has(int(readKeyTxs[j])) {
+		//		continue
+		//	}
+		//	directReachForI.Set(int(readKeyTxs[j]))
+		//	allReachForI.Or(reachMap[readKeyTxs[j]])
+		//	break
+		//}
 		writeKeyTxs := writeKeyDict[writeKey]
 		if len(writeKeyTxs) == 0 {
 			continue
 		}
 		j = int(writePos[i][writeKey]) - 1
-		for ; j >= 0; j-- {
-			if allReachForI.Has(int(writeKeyTxs[j])) {
-				continue
-			}
+		if j > 0 && !allReachForI.Has(int(writeKeyTxs[j])) {
 			directReachForI.Set(int(writeKeyTxs[j]))
 			allReachForI.Or(reachMap[writeKeyTxs[j]])
-			break
 		}
+		//for ; j >= 0; j-- {
+		//	if allReachForI.Has(int(writeKeyTxs[j])) {
+		//		continue
+		//	}
+		//	directReachForI.Set(int(writeKeyTxs[j]))
+		//	allReachForI.Or(reachMap[writeKeyTxs[j]])
+		//	break
+		//}
 	}
 	reachMap[i] = allReachForI
 	return directReachForI
