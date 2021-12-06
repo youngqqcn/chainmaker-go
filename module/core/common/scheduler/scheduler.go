@@ -164,7 +164,7 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 
 	// Execute special tx sequentially, and add to dag
 	if len(snapshot.GetSpecialTxTable()) > 0 {
-		ts.simulateSpecialTxs(block.Dag, snapshot, block)
+		ts.simulateSpecialTxs(block.Dag, snapshot, block, txBatchSize)
 	}
 
 	timeCostB := time.Since(startTime)
