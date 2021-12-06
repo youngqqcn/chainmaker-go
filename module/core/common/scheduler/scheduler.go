@@ -418,11 +418,12 @@ func (ts *TxScheduler) executeTx(tx *commonPb.Transaction, snapshot protocol.Sna
 	return txSimContext, specialTxType, runVmSuccess
 }
 
-func (ts *TxScheduler) simulateSpecialTxs(dag *commonPb.DAG, snapshot protocol.Snapshot, block *commonPb.Block) {
+func (ts *TxScheduler) simulateSpecialTxs(dag *commonPb.DAG, snapshot protocol.Snapshot, block *commonPb.Block,
+	txBatchSize int) {
 	specialTxs := snapshot.GetSpecialTxTable()
-	txsLen := len(specialTxs)
+	specialTxsLen := len(specialTxs)
 	var firstTx *commonPb.Transaction
-	runningTxC := make(chan *commonPb.Transaction, txsLen)
+	runningTxC := make(chan *commonPb.Transaction, specialTxsLen)
 	scheduleFinishC := make(chan bool)
 	timeoutC := time.After(ScheduleWithDagTimeout * time.Second)
 	go func() {
@@ -461,8 +462,9 @@ func (ts *TxScheduler) simulateSpecialTxs(dag *commonPb.DAG, snapshot protocol.S
 					dagNeighbors.Neighbors = append(dagNeighbors.Neighbors, uint32(snapshot.GetSnapshotSize())-2)
 					dag.Vertexes = append(dag.Vertexes, dagNeighbors)
 				}
-				if applySize >= len(block.Txs) {
-					ts.log.Errorf("block [%d] schedule special txs finished", block.Header.BlockHeight)
+				if applySize >= txBatchSize {
+					ts.log.Debugf("block [%d] schedule special txs finished, apply size:%d, len of txs:%d, "+
+						"len of special txs:%d", block.Header.BlockHeight, applySize, txBatchSize, specialTxsLen)
 					scheduleFinishC <- true
 					return
 				}
