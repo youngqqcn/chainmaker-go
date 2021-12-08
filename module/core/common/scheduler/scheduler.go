@@ -510,6 +510,9 @@ func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxS
 		accountMangerContract *commonPb.Contract
 		contractResultPayload *commonPb.ContractResult
 		txStatusCode          commonPb.TxStatusCode
+		initSetAdminResult    *commonPb.Result
+		chargeGasResult       *commonPb.Result
+		refundGasResult       *commonPb.Result
 	)
 
 	result := &commonPb.Result{
@@ -556,11 +559,15 @@ func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxS
 	if err != nil {
 		return result, specialTxType, err
 	}
-
-	// charge gas limit
-	result, err = ts.chargeGasLimit(accountMangerContract, tx, txSimContext, contractName, method, pk, result)
+	// init set gas admin
+	initSetAdminResult, err = ts.initSetGasAdmin(accountMangerContract, txSimContext, result)
 	if err != nil {
-		return result, specialTxType, err
+		return initSetAdminResult, specialTxType, err
+	}
+	// charge gas limit
+	chargeGasResult, err = ts.chargeGasLimit(accountMangerContract, tx, txSimContext, contractName, method, pk, result)
+	if err != nil {
+		return chargeGasResult, specialTxType, err
 	}
 
 	contractResultPayload, specialTxType, txStatusCode = ts.VmManager.RunContract(contract, method, byteCode,
@@ -569,10 +576,10 @@ func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxS
 	result.ContractResult = contractResultPayload
 
 	// refund gas
-	result, err = ts.refundGas(accountMangerContract, tx, txSimContext, contractName, method, pk, result,
+	refundGasResult, err = ts.refundGas(accountMangerContract, tx, txSimContext, contractName, method, pk, result,
 		contractResultPayload)
 	if err != nil {
-		return result, specialTxType, err
+		return refundGasResult, specialTxType, err
 	}
 
 	if txStatusCode == commonPb.TxStatusCode_SUCCESS {
@@ -716,6 +723,26 @@ func (ts *TxScheduler) refundGas(accountMangerContract *commonPb.Contract, tx *c
 	return result, nil
 }
 
+func (ts *TxScheduler) initSetGasAdmin(accountMangerContract *commonPb.Contract, txSimContext protocol.TxSimContext,
+	result *commonPb.Result) (re *commonPb.Result, err error) {
+	if ts.checkAdminAddress() {
+		var code commonPb.TxStatusCode
+		var initGasAdminContract *commonPb.ContractResult
+		refundGasParameters := map[string][]byte{
+			accountmgr.PublicKey: []byte(ts.chainConf.ChainConfig().AccountConfig.GasAdminAddress),
+		}
+		initGasAdminContract, _, code = ts.VmManager.RunContract(
+			accountMangerContract, syscontract.GasAccountFunction_SET_ADMIN.String(),
+			nil, refundGasParameters, txSimContext, 0, commonPb.TxType_INVOKE_CONTRACT)
+		if code != commonPb.TxStatusCode_SUCCESS {
+			result.Code = code
+			result.ContractResult = initGasAdminContract
+			return result, errors.New(initGasAdminContract.Message)
+		}
+	}
+	return result, nil
+}
+
 func (ts *TxScheduler) getAccountMgrContractAndPk(txSimContext protocol.TxSimContext, tx *commonPb.Transaction,
 	contractName, method string) (accountMangerContract *commonPb.Contract, pk []byte, err error) {
 	if ts.checkGasEnable() && ts.checkNativeFilter(contractName, method) &&
@@ -740,6 +767,16 @@ func (ts *TxScheduler) checkGasEnable() bool {
 	if ts.chainConf.ChainConfig() != nil && ts.chainConf.ChainConfig().AccountConfig != nil {
 		ts.log.Debugf("=====ChainConfig().AccountConfig.EnableGas is:%v", ts.chainConf.ChainConfig().AccountConfig.EnableGas)
 		return ts.chainConf.ChainConfig().AccountConfig.EnableGas
+	}
+	return false
+}
+
+func (ts *TxScheduler) checkAdminAddress() bool {
+	if ts.chainConf.ChainConfig() != nil && ts.chainConf.ChainConfig().AccountConfig != nil {
+		ts.log.Infof("chain config gas admin address is:%v", ts.chainConf.ChainConfig().AccountConfig.GasAdminAddress)
+		ts.log.Infof("chain config enable gas is:%v", ts.chainConf.ChainConfig().AccountConfig.EnableGas)
+		return len(ts.chainConf.ChainConfig().AccountConfig.GasAdminAddress) > 0 &&
+			ts.chainConf.ChainConfig().AccountConfig.EnableGas
 	}
 	return false
 }
