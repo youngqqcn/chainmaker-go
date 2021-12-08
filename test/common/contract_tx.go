@@ -19,7 +19,7 @@ import (
 	"chainmaker.org/chainmaker/common/v2/crypto/asym"
 	"chainmaker.org/chainmaker/common/v2/helper"
 
-	"chainmaker.org/chainmaker-go/accesscontrol"
+	"chainmaker.org/chainmaker-go/module/accesscontrol"
 	"chainmaker.org/chainmaker/common/v2/crypto"
 	acPb "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	apiPb "chainmaker.org/chainmaker/pb-go/v2/api"
@@ -196,7 +196,7 @@ func ProposalMultiRequest(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, tx
 	}
 
 	req.Sender.Signature = signBytes
-	fmt.Printf("client signed tx request sender:%+v,\nendorsers:%+v\n", req.Sender, req.Endorsers)
+	//fmt.Printf("client signed tx request sender:%+v,\nendorsers:%+v\n", req.Sender, req.Endorsers)
 	result, err := (*client).SendRequest(ctx, req)
 	//result, err := client.SendRequest(ctx, req)
 

@@ -347,3 +347,20 @@ func dumpDAG(dag *commonPb.DAG) {
 	}
 	fmt.Println("}")
 }
+
+var snapshot = &SnapshotImpl{
+	lock:            sync.Mutex{},
+	blockchainStore: nil,
+	sealed:          false,
+	chainId:         "",
+	blockTimestamp:  0,
+	blockProposer:   nil,
+	blockHeight:     100,
+	preSnapshot:     nil,
+	txRWSetTable:    nil,
+	txTable:         make([]*commonPb.Transaction, 0, 2048),
+	txResultMap:     make(map[string]*commonPb.Result, 256),
+	readTable:       make(map[string]*sv, 256),
+	writeTable:      make(map[string]*sv, 256),
+	log:             &test.GoLogger{},
+}

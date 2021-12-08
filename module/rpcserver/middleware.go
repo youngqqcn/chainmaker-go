@@ -17,8 +17,8 @@ import (
 	"sync"
 	"time"
 
-	"chainmaker.org/chainmaker/localconf/v2"
-	"chainmaker.org/chainmaker/logger/v2"
+	localconf "chainmaker.org/chainmaker/localconf/v2"
+	logger "chainmaker.org/chainmaker/logger/v2"
 	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

@@ -9,7 +9,7 @@ package scheduler
 import (
 	"sync"
 
-	"chainmaker.org/chainmaker-go/core/provider/conf"
+	"chainmaker.org/chainmaker-go/module/core/provider/conf"
 	"chainmaker.org/chainmaker/common/v2/monitor"
 	"chainmaker.org/chainmaker/localconf/v2"
 	"chainmaker.org/chainmaker/logger/v2"

@@ -9,7 +9,7 @@ package proposer
 //
 //import (
 //	"chainmaker.org/chainmaker/common/v2/random/uuid"
-//	"chainmaker.org/chainmaker-go/core/cache"
+//	"chainmaker.org/chainmaker-go/module/core/cache"
 //	"chainmaker.org/chainmaker/localconf/v2"
 //	"chainmaker.org/chainmaker/logger/v2"
 //	"chainmaker.org/chainmaker/protocol/v2/mock"

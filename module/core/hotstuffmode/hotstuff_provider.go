@@ -7,8 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 package hotstuffmode
 
 import (
-	"chainmaker.org/chainmaker-go/core/provider"
-	"chainmaker.org/chainmaker-go/core/provider/conf"
+	"chainmaker.org/chainmaker-go/module/core/provider"
+	"chainmaker.org/chainmaker-go/module/core/provider/conf"
 	"chainmaker.org/chainmaker/protocol/v2"
 )
 
