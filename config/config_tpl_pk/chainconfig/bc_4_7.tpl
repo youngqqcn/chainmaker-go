@@ -77,9 +77,9 @@ core:
 
 # gas account config
 account_config:
-  enable_gas: false
+  enable_gas: true
   gas_count: 0
-  gas_admin_address: ""
+  gas_admin_address: "ZXff78ca3b84e3f5f91ff18b45fc1ecfda2d5990db"
 
 # Consensus settings
 consensus:

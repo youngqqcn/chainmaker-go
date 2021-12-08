@@ -718,7 +718,6 @@ func (ts *TxScheduler) refundGas(accountMangerContract *commonPb.Contract, tx *c
 	return result, nil
 }
 
-
 func (ts *TxScheduler) getAccountMgrContractAndPk(txSimContext protocol.TxSimContext, tx *commonPb.Transaction,
 	contractName, method string) (accountMangerContract *commonPb.Contract, pk []byte, err error) {
 	if ts.checkGasEnable() && ts.checkNativeFilter(contractName, method) &&
