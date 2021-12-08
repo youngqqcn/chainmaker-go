@@ -12,6 +12,7 @@ import (
 	"math/rand"
 	"strconv"
 	"sync"
+
 	"sync/atomic"
 	"testing"
 	"time"
@@ -20,6 +21,7 @@ import (
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/protocol/v2/test"
+	uatomic "go.uber.org/atomic"
 	uberAtomic "go.uber.org/atomic"
 )
 
@@ -349,9 +351,9 @@ func dumpDAG(dag *commonPb.DAG) {
 }
 
 var snapshot = &SnapshotImpl{
-	lock:            sync.Mutex{},
+	lock:            sync.RWMutex{},
 	blockchainStore: nil,
-	sealed:          false,
+	sealed:          uatomic.NewBool(false),
 	chainId:         "",
 	blockTimestamp:  0,
 	blockProposer:   nil,
