@@ -18,7 +18,7 @@ import (
 
 	netPb "chainmaker.org/chainmaker/pb-go/v2/net"
 
-	"chainmaker.org/chainmaker-go/net"
+	"chainmaker.org/chainmaker-go/module/net"
 	"chainmaker.org/chainmaker/protocol/v2"
 )
 
