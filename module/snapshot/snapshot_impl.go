@@ -11,11 +11,10 @@ import (
 	"fmt"
 	"sync"
 
-	"go.uber.org/atomic"
-
 	"chainmaker.org/chainmaker/localconf/v2"
 	"chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
+	"go.uber.org/atomic"
 
 	"chainmaker.org/chainmaker/common/v2/bitmap"
 	"chainmaker.org/chainmaker/protocol/v2"

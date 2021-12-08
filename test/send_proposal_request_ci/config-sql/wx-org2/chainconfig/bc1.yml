@@ -17,6 +17,16 @@ crypto:
 contract:
   enable_sql_support: true
 
+# 虚拟机配置
+vm:
+  addr_type: 1 #0:chainmaker, 1:zxl, 2:ethereum(预留值，当前尚未支持)
+  # 虚拟机支持列表
+  support_list:
+    - "wasmer"
+    - "gasm"
+    - "evm"
+    - "dockergo"
+
 # 交易、区块相关配置
 block:
   tx_timestamp_verify: true # 是否需要开启交易时间戳校验

@@ -10,6 +10,7 @@ package scheduler
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -17,7 +18,7 @@ import (
 	"sync"
 	"time"
 
-	"chainmaker.org/chainmaker-go/core/provider/conf"
+	"chainmaker.org/chainmaker-go/module/core/provider/conf"
 	"chainmaker.org/chainmaker/localconf/v2"
 	"chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
@@ -552,6 +553,12 @@ func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxS
 			ts.log.Errorf("Get contract bytecode by name[%s] error:%s", contractName, err)
 			return errResult(result, err)
 		}
+	} else {
+		ts.log.DebugDynamic(func() string {
+			contractData, _ := json.Marshal(contract)
+			return fmt.Sprintf("contract[%s] is a native contract, definition:%s",
+				contractName, string(contractData))
+		})
 	}
 
 	accountMangerContract, pk, err = ts.getAccountMgrContractAndPk(txSimContext, tx, contractName, method)

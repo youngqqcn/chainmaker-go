@@ -27,7 +27,7 @@ import (
 
 	"chainmaker.org/chainmaker-go/test/common"
 
-	"chainmaker.org/chainmaker-go/accesscontrol"
+	"chainmaker.org/chainmaker-go/module/accesscontrol"
 	"chainmaker.org/chainmaker/common/v2/ca"
 	"chainmaker.org/chainmaker/common/v2/crypto"
 	"chainmaker.org/chainmaker/common/v2/crypto/asym"
@@ -220,7 +220,7 @@ func testKvIterator(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient) {
 	}
 }
 func testPerformanceModeTransfer(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId string) {
-	fmt.Println("==============================================")
+	fmt.Println("==============================================", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Println("==============================================")
 	fmt.Println("==============start batch invoke==============")
 	fmt.Println("==============================================")
@@ -242,7 +242,7 @@ func testPerformanceModeTransfer(sk3 crypto.PrivateKey, client *apiPb.RpcNodeCli
 	fmt.Println("发送100个交易所花时间", spend, "ms")
 }
 func testFreezeOrUnfreezeOrRevokeFlow(sk3 crypto.PrivateKey, client apiPb.RpcNodeClient) {
-	fmt.Println("============================================================")
+	fmt.Println("============================================================", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Println("============================================================")
 	fmt.Println("==============test freeze unfreeze revoke flow==============")
 	fmt.Println("============================================================")
@@ -305,7 +305,7 @@ func testFreezeOrUnfreezeOrRevokeFlow(sk3 crypto.PrivateKey, client apiPb.RpcNod
 }
 
 func testGetTxByTxId(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, txId, chainId string) []byte {
-	fmt.Println("========================================================================================================")
+	fmt.Println("==============================================================================", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Println("========================================================================================================")
 	fmt.Println("========get tx by txId ", txId, "===============")
 	fmt.Println("========================================================================================================")
@@ -339,7 +339,7 @@ func testGetTxByTxId(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, txId, c
 }
 
 func testGetBlockByTxId(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, txId, chainId string) {
-	fmt.Println("============================================================")
+	fmt.Println("============================================================", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Println("============================================================")
 	fmt.Println("========get block by txId ", txId, "===============")
 	fmt.Println("============================================================")
@@ -372,7 +372,7 @@ func testGetBlockByTxId(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, txId
 }
 
 func testGetBlockByHeight(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId string, height uint64) string {
-	fmt.Println("============================================================")
+	fmt.Println("============================================================", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Println("============================================================")
 	fmt.Println("========get block by height ", height, "===============")
 	fmt.Println("============================================================")
@@ -408,7 +408,7 @@ func testGetBlockByHeight(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, ch
 }
 
 func testGetBlockWithTxRWSetsByHeight(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId string, height uint64) string {
-	fmt.Println("============================================================")
+	fmt.Println("============================================================", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Println("============================================================")
 	fmt.Println("========get block with txRWsets by height ", height, "===============")
 	fmt.Println("============================================================")
@@ -439,7 +439,7 @@ func testGetBlockWithTxRWSetsByHeight(sk3 crypto.PrivateKey, client *apiPb.RpcNo
 }
 
 func testGetBlockByHash(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId string, hash string) {
-	fmt.Println("============================================================")
+	fmt.Println("============================================================", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Println("============================================================")
 	fmt.Println("========get block by hash ", hash, "===============")
 	fmt.Println("============================================================")
@@ -472,7 +472,7 @@ func testGetBlockByHash(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chai
 }
 
 func testGetBlockWithTxRWSetsByHash(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId string, hash string) {
-	fmt.Println("============================================================")
+	fmt.Println("============================================================", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Println("============================================================")
 	fmt.Println("========get block with txRWsets by hash ", hash, "===============")
 	fmt.Println("============================================================")
@@ -501,7 +501,7 @@ func testGetBlockWithTxRWSetsByHash(sk3 crypto.PrivateKey, client *apiPb.RpcNode
 }
 
 func testGetLastConfigBlock(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId string) {
-	fmt.Println("============================================================")
+	fmt.Println("============================================================", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Println("============================================================")
 	fmt.Println("====================get last config block===================")
 	fmt.Println("============================================================")
@@ -529,7 +529,7 @@ func testGetLastConfigBlock(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, 
 }
 
 func testGetLastBlock(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId string) {
-	fmt.Println("============================================================")
+	fmt.Println("============================================================", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Println("============================================================")
 	fmt.Println("=======================get last block=======================")
 	fmt.Println("============================================================")
@@ -557,7 +557,7 @@ func testGetLastBlock(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainI
 }
 
 func testGetChainInfo(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId string) {
-	fmt.Println("============================================================")
+	fmt.Println("============================================================", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Println("============================================================")
 	fmt.Println("=======================get chain info=======================")
 	fmt.Println("============================================================")
@@ -584,7 +584,7 @@ func testCreate(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId stri
 }
 
 func testUpgrade(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId string) {
-	fmt.Println("============================================================")
+	fmt.Println("============================================================", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Println("============================================================")
 	fmt.Println("========================test upgrade========================")
 	fmt.Println("============================================================")
@@ -906,7 +906,7 @@ func initGRPCConnect(useTLS bool) (*grpc.ClientConn, error) {
 //}
 
 func testWaitTx(sk3 crypto.PrivateKey, client *apiPb.RpcNodeClient, chainId string, txId string) {
-	fmt.Printf("\n============ testWaitTx [%s] ============\n", txId)
+	fmt.Printf("\n============ testWaitTx [%s] ============%s\n", txId, time.Now().Format("2006-01-02 15:04:05"))
 	// 构造Payload
 	pair := &commonPb.KeyValuePair{Key: "txId", Value: []byte(txId)}
 	var pairs []*commonPb.KeyValuePair

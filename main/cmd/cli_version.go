@@ -9,7 +9,7 @@ package cmd
 import (
 	"fmt"
 
-	"chainmaker.org/chainmaker-go/blockchain"
+	"chainmaker.org/chainmaker-go/module/blockchain"
 	"github.com/common-nighthawk/go-figure"
 	"github.com/spf13/cobra"
 )

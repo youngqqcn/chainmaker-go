@@ -14,7 +14,7 @@ import (
 
 	acPb "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
-	"chainmaker.org/chainmaker/protocol/v2"
+	protocol "chainmaker.org/chainmaker/protocol/v2"
 )
 
 // Storage interface for smart contracts, implement TxSimContext
@@ -228,10 +228,14 @@ func (s *txQuerySimContextImpl) GetTxRWSet(runVmSuccess bool) *commonPb.TxRWSet 
 		return txRwSet
 	}
 	for _, txRead := range s.txReadKeyMap {
-		txRwSet.TxReads = append(txRwSet.TxReads, txRead)
+		if txRead != nil {
+			txRwSet.TxReads = append(txRwSet.TxReads, txRead)
+		}
 	}
 	for _, txWrite := range s.txWriteKeyMap {
-		txRwSet.TxWrites = append(txRwSet.TxWrites, txWrite)
+		if txWrite != nil {
+			txRwSet.TxWrites = append(txRwSet.TxWrites, txWrite)
+		}
 	}
 	txRwSet.TxWrites = append(txRwSet.TxWrites, s.txWriteKeySql...)
 	return txRwSet

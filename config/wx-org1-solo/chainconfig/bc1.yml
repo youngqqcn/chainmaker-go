@@ -25,7 +25,6 @@ vm:
     - "wasmer"
     - "gasm"
     - "evm"
-    - "wxvm"
     - "dockergo"
 
 # 交易、区块相关配置
@@ -46,6 +45,13 @@ core:
     consensus_message_turbo: true # 是否开启共识报文压缩
     retry_time: 500 # 根据交易ID列表从交易池获取交易的重试次数
     retry_interval: 20 # 重试间隔，单位:ms
+
+# gas account config
+account_config:
+  enable_gas: false
+  gas_count: 0
+  gas_admin_address: ""
+  default_gas: 1234567
 
 #共识配置
 consensus:

@@ -12,6 +12,7 @@ import (
 	"math/rand"
 	"strconv"
 	"sync"
+
 	"sync/atomic"
 	"testing"
 	"time"
@@ -20,6 +21,7 @@ import (
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/protocol/v2/test"
+	uatomic "go.uber.org/atomic"
 	uberAtomic "go.uber.org/atomic"
 )
 
@@ -346,4 +348,21 @@ func dumpDAG(dag *commonPb.DAG) {
 		}
 	}
 	fmt.Println("}")
+}
+
+var snapshot = &SnapshotImpl{
+	lock:            sync.RWMutex{},
+	blockchainStore: nil,
+	sealed:          uatomic.NewBool(false),
+	chainId:         "",
+	blockTimestamp:  0,
+	blockProposer:   nil,
+	blockHeight:     100,
+	preSnapshot:     nil,
+	txRWSetTable:    nil,
+	txTable:         make([]*commonPb.Transaction, 0, 2048),
+	txResultMap:     make(map[string]*commonPb.Result, 256),
+	readTable:       make(map[string]*sv, 256),
+	writeTable:      make(map[string]*sv, 256),
+	log:             &test.GoLogger{},
 }
