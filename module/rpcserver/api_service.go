@@ -314,8 +314,11 @@ func (s *ApiService) dealSystemChainQuery(tx *commonPb.Transaction, vmMgr protoc
 		vmManager:        vmMgr,
 		blockVersion:     protocol.DefaultBlockVersion,
 	}
-	//TODO: get default gas from chain config
 	defaultGas := uint64(0)
+	chainConfig, _ := s.chainMakerServer.GetChainConf(chainId)
+	if chainConfig.ChainConfig().AccountConfig.EnableGas {
+		defaultGas = chainConfig.ChainConfig().AccountConfig.DefaultGas
+	}
 	runtimeInstance := native.GetRuntimeInstance(chainId, defaultGas)
 	txResult := runtimeInstance.Invoke(&commonPb.Contract{
 		Name: tx.Payload.ContractName,

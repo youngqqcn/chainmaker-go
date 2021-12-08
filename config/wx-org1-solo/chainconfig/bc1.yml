@@ -46,6 +46,13 @@ core:
     retry_time: 500 # 根据交易ID列表从交易池获取交易的重试次数
     retry_interval: 20 # 重试间隔，单位:ms
 
+# gas account config
+account_config:
+  enable_gas: false
+  gas_count: 0
+  gas_admin_address: ""
+  default_gas: 1234567
+
 #共识配置
 consensus:
   # 共识类型(0-SOLO,1-TBFT,2-MBFT,3-HOTSTUFF,4-RAFT,10-POW)
