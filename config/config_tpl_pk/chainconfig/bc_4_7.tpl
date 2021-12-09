@@ -80,6 +80,7 @@ account_config:
   enable_gas: true
   gas_count: 0
   gas_admin_address: "ZXff78ca3b84e3f5f91ff18b45fc1ecfda2d5990db"
+  default_gas: 0
 
 # Consensus settings
 consensus:
