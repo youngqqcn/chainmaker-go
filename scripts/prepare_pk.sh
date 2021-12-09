@@ -215,30 +215,30 @@ function generate_config() {
                 xsed "s%{consensus_type}%$CONSENSUS_TYPE%g" node$i/chainconfig/bc$j.yml
 
                 if  [ $CONSENSUS_TYPE -eq 1 ]; then
-                    xsed '94,141d' node$i/chainconfig/bc$j.yml
+                    xsed '111,158d' node$i/chainconfig/bc$j.yml
                     xsed "s%{public_org_id}%$CONSENSUS_ORGID%g" node$i/chainconfig/bc$j.yml
                 elif  [ $CONSENSUS_TYPE -eq 5 ]; then
-                    xsed '82,93d' node$i/chainconfig/bc$j.yml
+                    xsed '99,110d' node$i/chainconfig/bc$j.yml
                 fi
             elif [ $NODE_CNT -eq 16 ]; then
                 cp $CONFIG_TPL_PATH/chainconfig/bc_16.tpl node$i/chainconfig/bc$j.yml
                 xsed "s%{consensus_type}%$CONSENSUS_TYPE%g" node$i/chainconfig/bc$j.yml
 
                 if  [ $CONSENSUS_TYPE -eq 1 ]; then
-                    xsed '103,186d' node$i/chainconfig/bc$j.yml
+                    xsed '120,203d' node$i/chainconfig/bc$j.yml
                     xsed "s%{public_org_id}%$CONSENSUS_ORGID%g" node$i/chainconfig/bc$j.yml
                 elif  [ $CONSENSUS_TYPE -eq 5 ]; then
-                    xsed '82,102d' node$i/chainconfig/bc$j.yml
+                    xsed '99,119d' node$i/chainconfig/bc$j.yml
                 fi
             else
                 cp $CONFIG_TPL_PATH/chainconfig/bc_10_13.tpl node$i/chainconfig/bc$j.yml
                 xsed "s%{consensus_type}%$CONSENSUS_TYPE%g" node$i/chainconfig/bc$j.yml
 
                 if  [ $CONSENSUS_TYPE -eq 1 ]; then
-                    xsed '100,171d' node$i/chainconfig/bc$j.yml
+                    xsed '117,188d' node$i/chainconfig/bc$j.yml
                     xsed "s%{public_org_id}%$CONSENSUS_ORGID%g" node$i/chainconfig/bc$j.yml
                 elif  [ $CONSENSUS_TYPE -eq 5 ]; then
-                    xsed '82,99d' node$i/chainconfig/bc$j.yml
+                    xsed '99,116d' node$i/chainconfig/bc$j.yml
                 fi
             fi
 
