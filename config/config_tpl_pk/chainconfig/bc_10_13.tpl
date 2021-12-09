@@ -36,6 +36,16 @@ contract:
   # If it is true, storage.statedb_config.provider in chainmaker.yml should be sql.
   enable_sql_support: false
 
+vm:
+  #0:chainmaker, 1:zxl, 2:ethereum(reserved)
+  addr_type: 1
+  # support vm list
+  support_list:
+    - "wasmer"
+    - "gasm"
+    - "evm"
+    - "dockergo"
+
 # Block proposing related settings
 block:
   # Verify the transaction timestamp or not
