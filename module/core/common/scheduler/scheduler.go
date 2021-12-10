@@ -702,7 +702,7 @@ func (ts *TxScheduler) refundGas(accountMangerContract *commonPb.Contract, tx *c
 
 		limit = tx.Payload.Limit.GasLimit
 		if limit < contractResultPayload.GasUsed {
-			err = errors.New("gas limit is not enough ")
+			err = fmt.Errorf("gas limit is not enough, [limit:%d]/[gasUsed:%d]", limit, contractResultPayload.GasUsed)
 			ts.log.Error(err.Error())
 			result.Message = err.Error()
 			return result, err
