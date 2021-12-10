@@ -11,7 +11,7 @@ import (
 	"fmt"
 
 	dpos "chainmaker.org/chainmaker/consensus-dpos/v2"
-	hotstuff "chainmaker.org/chainmaker/consensus-maxbft/v2"
+	maxbft "chainmaker.org/chainmaker/consensus-maxbft/v2"
 	raft "chainmaker.org/chainmaker/consensus-raft/v2"
 	tbft "chainmaker.org/chainmaker/consensus-tbft/v2"
 	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
@@ -41,7 +41,7 @@ func VerifyBlockSignatures(
 	case consensuspb.ConsensusType_RAFT:
 		return raft.VerifyBlockSignatures(block)
 	case consensuspb.ConsensusType_HOTSTUFF:
-		return hotstuff.VerifyBlockSignatures(chainConf, ac, store, block, ledger)
+		return maxbft.VerifyBlockSignatures(chainConf, ac, store, block, ledger)
 	case consensuspb.ConsensusType_SOLO:
 		fallthrough
 	default:
