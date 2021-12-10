@@ -463,12 +463,7 @@ func (bc *Blockchain) initVM() (err error) {
 			)
 		*/
 
-		chainConfig, err := chainconf.Genesis(bc.genesis)
-		if err != nil {
-			bc.log.Errorf("invoke chain config genesis failed, %s", err)
-			return err
-		}
-
+		chainConfig := bc.chainConf.ChainConfig()
 		supportedVmManagerList := make(map[common.RuntimeType]protocol.VmInstancesManager)
 
 		for _, vmType := range chainConfig.Vm.SupportList {
@@ -515,12 +510,7 @@ func (bc *Blockchain) initVM() (err error) {
 			)
 		*/
 
-		chainConfig, err := chainconf.Genesis(bc.genesis)
-		if err != nil {
-			bc.log.Errorf("invoke chain config genesis failed, %s", err)
-			return err
-		}
-
+		chainConfig := bc.chainConf.ChainConfig()
 		supportedVmManagerList := make(map[common.RuntimeType]protocol.VmInstancesManager)
 
 		for _, vmType := range chainConfig.Vm.SupportList {
