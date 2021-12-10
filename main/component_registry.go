@@ -10,7 +10,7 @@ import (
 	"chainmaker.org/chainmaker-go/module/consensus"
 	"chainmaker.org/chainmaker-go/module/txpool"
 	"chainmaker.org/chainmaker-go/module/vm"
-	hotstuff "chainmaker.org/chainmaker/consensus-chainedbft/v2"
+	hotstuff "chainmaker.org/chainmaker/consensus-maxbft/v2"
 	dpos "chainmaker.org/chainmaker/consensus-dpos/v2"
 	raft "chainmaker.org/chainmaker/consensus-raft/v2"
 	solo "chainmaker.org/chainmaker/consensus-solo/v2"

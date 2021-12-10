@@ -4,13 +4,14 @@ go 1.15
 
 require (
 	chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211129064036-3ae6487c7770
-	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211117131805-630800bfd361
+	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211207040503-8ad7b3a608bc
 	chainmaker.org/chainmaker/consensus-chainedbft/v2 v2.0.0-20211123115807-5d8e35647df4
-	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211119100858-b806ddbb6d35
-	chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20211119100947-ce17472c410c
-	chainmaker.org/chainmaker/consensus-solo/v2 v2.0.0-20211123123020-d0f19f91f625
-	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20211119101400-96829b485267
-	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211115084213-42e840e1efee
+	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211210081306-4784edc9d839
+	chainmaker.org/chainmaker/consensus-maxbft/v2 v2.0.0-20211210081411-5ef693cd806f
+	chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20211210081055-081f0ac8ee2a
+	chainmaker.org/chainmaker/consensus-solo/v2 v2.0.0-20211210081341-96bcb7aa4b9c
+	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20211210081027-a7ce3e1dcb7c
+	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211210075517-b641978ff2fc
 	chainmaker.org/chainmaker/consensus/v2 v2.0.0-20211123121814-dd9c430b5a7b
 	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211110030026-ce2a7f3760cd
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211109074349-f79af5e1892d
