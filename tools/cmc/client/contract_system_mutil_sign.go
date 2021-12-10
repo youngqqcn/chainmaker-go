@@ -197,6 +197,14 @@ func multiSignVote() error {
 		}
 		adminKey = adminKeys[0]
 		adminOrg = adminOrgs[0]
+	} else {
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
+		if len(adminKeys) == 0 {
+			return fmt.Errorf(ADMIN_ORGID_KEY_LENGTH_NOT_EQUAL_FORMAT, len(adminKeys), len(adminOrgs))
+		}
+		adminKey = adminKeys[0]
 	}
 
 	result, err := client.GetTxByTxId(txId)
@@ -215,6 +223,13 @@ func multiSignVote() error {
 		if err != nil {
 			return fmt.Errorf("multi sign vote failed, %s", err.Error())
 		}
+	} else {
+		endorser, err = sdkutils.MakePkEndorserWithPath(adminKey, crypto.HashAlgoMap[client.GetHashType()],
+			"", payload)
+		if err != nil {
+			return fmt.Errorf("multi sign vote failed, %s", err.Error())
+		}
+
 	}
 
 	resp, err := client.MultiSignContractVote(payload, endorser)
