@@ -144,7 +144,9 @@ func configTrustRoot(op int) error {
 			return fmt.Errorf(ADMIN_ORGID_KEY_LENGTH_NOT_EQUAL_FORMAT, len(adminKeys), len(adminOrgs))
 		}
 	} else {
-		adminKeys = strings.Split(adminKeyFilePaths, ",")
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
 		if len(adminKeys) == 0 {
 			return errAdminOrgIdKeyCertIsEmpty
 		}
