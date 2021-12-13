@@ -49,6 +49,12 @@ type BlockVerifierImpl struct {
 	metricBlockVerifyTime *prometheus.HistogramVec // metrics monitor
 }
 
+func (v *BlockVerifierImpl) VerifyBlockWithRwSets(block *commonpb.Block, rwsets []*commonpb.TxRWSet,
+	mode protocol.VerifyMode) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 type BlockVerifierConfig struct {
 	ChainId         string
 	MsgBus          msgbus.MessageBus
