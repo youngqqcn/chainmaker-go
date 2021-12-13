@@ -25,8 +25,10 @@ CRYPTOGEN_TOOL_BIN=${CRYPTOGEN_TOOL_PATH}/bin/chainmaker-cryptogen
 CRYPTOGEN_TOOL_CONF=${CRYPTOGEN_TOOL_PATH}/config/pwk_config_template.yml
 #CRYPTOGEN_TOOL_PKCS11_KEYS=${CRYPTOGEN_TOOL_PATH}/config/pkcs11_keys.yml
 
-BC_YML_TRUST_ROOT_LINE=79
-BC_YML_TRUST_ROOT_LINE_END=99
+VERSION=v2.2.0_alpha
+
+BC_YML_TRUST_ROOT_LINE=128
+BC_YML_TRUST_ROOT_LINE_END=148
 
 function show_help() {
     echo "Usage:  "
@@ -124,6 +126,7 @@ function generate_keys() {
 function generate_config() {
     LOG_LEVEL="INFO"
     CONSENSUS_TYPE=1
+    HASH_TYPE="SHA256"
     MONITOR_PORT=14321
     PPROF_PORT=24321
     TRUSTED_PORT=13301
@@ -143,6 +146,15 @@ function generate_config() {
           LOG_LEVEL=$tmp
       else
         echo "unknown log level [" $tmp "], so use default"
+      fi
+    fi
+
+    read -p "input hash type (SHA256(default)|SM3): " tmp
+    if  [ ! -z "$tmp" ] ;then
+      if  [ $tmp == "SHA256" ] || [ $tmp == "SM3" ] ;then
+          HASH_TYPE=$tmp
+      else
+        echo "unknown hash type [" $tmp "], so use default"
       fi
     fi
 
@@ -219,7 +231,8 @@ function generate_config() {
             fi
 
             xsed "s%{chain_id}%chain$j%g" node$i/chainconfig/bc$j.yml
-            xsed "s%{org_top_path}%$file%g" node$i/chainconfig/bc$j.yml
+            xsed "s%{hash_type}%$HASH_TYPE%g" node$i/chainconfig/bc$j.yml
+            xsed "s%{version}%$VERSION%g" node$i/chainconfig/bc$j.yml
 
             if  [ $NODE_CNT -eq 7 ] || [ $NODE_CNT -eq 13 ] || [ $NODE_CNT -eq 16 ]; then
                 xsed "s%#\(.*\)- org_id:%\1- org_id:%g" node$i/chainconfig/bc$j.yml
@@ -276,24 +289,24 @@ function generate_config() {
         echo "begin node$i trust config..."
         if  [ $NODE_CNT -eq 4 ] || [ $NODE_CNT -eq 7 ]; then
           for ((k = 1; k < $CHAIN_CNT + 1; k = k + 1)); do
-            for file in `ls -r $BUILD_CRYPTO_CONFIG_PATH`
+            for file in `ls -t $BUILD_CRYPTO_CONFIG_PATH`
             do
-                org_id_tmp=" - org_id: \"${file}\""
-                org_root="   root:"
-                org_root_tmp="     - \"../config/wx-org${i}.chainmaker.org/keys/admin/${file}/admin.pem\""
+                org_id_tmp="\ - org_id: \"${file}\""
+                org_root="\ \ \ root:"
+                org_root_tmp="\ \ \ \ \ - \"../config/wx-org${i}.chainmaker.org/keys/admin/${file}/admin.pem\""
                 if [ "${system}" = "Linux" ]; then
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\ ${org_root_tmp}" node$i/chainconfig/bc$k.yml
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\ ${org_root}" node$i/chainconfig/bc$k.yml
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\ ${org_id_tmp}"   node$i/chainconfig/bc$k.yml
                 else
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\\
- ${org_root_tmp}\\
+\ ${org_root_tmp}\\
 " node$i/chainconfig/bc$k.yml
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\\
- ${org_root}\\
+\ ${org_root}\\
 "  node$i/chainconfig/bc$k.yml
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\\
- ${org_id_tmp}\\
+\ ${org_id_tmp}\\
 "    node$i/chainconfig/bc$k.yml
                 fi
             done

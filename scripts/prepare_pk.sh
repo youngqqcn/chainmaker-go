@@ -25,6 +25,8 @@ CRYPTOGEN_TOOL_BIN=${CRYPTOGEN_TOOL_PATH}/bin/chainmaker-cryptogen
 CRYPTOGEN_TOOL_CONF=${CRYPTOGEN_TOOL_PATH}/config/pk_config_template.yml
 #CRYPTOGEN_TOOL_PKCS11_KEYS=${CRYPTOGEN_TOOL_PATH}/config/pkcs11_keys.yml
 
+VERSION=v2.2.0_alpha
+
 function show_help() {
     echo "Usage:  "
     echo "  prepare_pk.sh node_cnt(4/7/10/13/16) chain_cnt(1-4) p2p_port(default:11301) rpc_port(default:12301)"
@@ -120,14 +122,16 @@ function generate_keys() {
 
 function generate_config() {
     LOG_LEVEL="INFO"
-    CONSENSUS_TYPE=5
+    CONSENSUS_TYPE=1
+    CONSENSUS_ORGID="public"
+    HASH_TYPE="SHA256"
     MONITOR_PORT=14321
     PPROF_PORT=24321
     TRUSTED_PORT=13301
 
-    read -p "input consensus type (5-DPOS(default)): " tmp
+    read -p "input consensus type (1-TBFT(default),5-DPOS): " tmp
     if  [ ! -z "$tmp" ] ;then
-      if  [ $tmp -eq 5 ] ;then
+      if  [ $tmp -eq 1 ] || [ $tmp -eq 5 ] ;then
           CONSENSUS_TYPE=$tmp
       else
         echo "unknown consensus type [" $tmp "], so use default"
@@ -142,6 +146,16 @@ function generate_config() {
         echo "unknown log level [" $tmp "], so use default"
       fi
     fi
+
+    read -p "input hash type (SHA256(default)|SM3): " tmp
+    if  [ ! -z "$tmp" ] ;then
+      if  [ $tmp == "SHA256" ] || [ $tmp == "SM3" ] ;then
+          HASH_TYPE=$tmp
+      else
+        echo "unknown hash type [" $tmp "], so use default"
+      fi
+    fi
+
 
     cd "${BUILD_PATH}"
     if [ -d config ]; then
@@ -199,21 +213,48 @@ function generate_config() {
             if  [ $NODE_CNT -eq 4 ] || [ $NODE_CNT -eq 7 ]; then
                 cp $CONFIG_TPL_PATH/chainconfig/bc_4_7.tpl node$i/chainconfig/bc$j.yml
                 xsed "s%{consensus_type}%$CONSENSUS_TYPE%g" node$i/chainconfig/bc$j.yml
+
+                if  [ $CONSENSUS_TYPE -eq 1 ]; then
+                    xsed '94,141d' node$i/chainconfig/bc$j.yml
+                    xsed "s%{public_org_id}%$CONSENSUS_ORGID%g" node$i/chainconfig/bc$j.yml
+                elif  [ $CONSENSUS_TYPE -eq 5 ]; then
+                    xsed '82,93d' node$i/chainconfig/bc$j.yml
+                fi
             elif [ $NODE_CNT -eq 16 ]; then
                 cp $CONFIG_TPL_PATH/chainconfig/bc_16.tpl node$i/chainconfig/bc$j.yml
                 xsed "s%{consensus_type}%$CONSENSUS_TYPE%g" node$i/chainconfig/bc$j.yml
+
+                if  [ $CONSENSUS_TYPE -eq 1 ]; then
+                    xsed '103,186d' node$i/chainconfig/bc$j.yml
+                    xsed "s%{public_org_id}%$CONSENSUS_ORGID%g" node$i/chainconfig/bc$j.yml
+                elif  [ $CONSENSUS_TYPE -eq 5 ]; then
+                    xsed '82,102d' node$i/chainconfig/bc$j.yml
+                fi
             else
                 cp $CONFIG_TPL_PATH/chainconfig/bc_10_13.tpl node$i/chainconfig/bc$j.yml
                 xsed "s%{consensus_type}%$CONSENSUS_TYPE%g" node$i/chainconfig/bc$j.yml
+
+                if  [ $CONSENSUS_TYPE -eq 1 ]; then
+                    xsed '100,171d' node$i/chainconfig/bc$j.yml
+                    xsed "s%{public_org_id}%$CONSENSUS_ORGID%g" node$i/chainconfig/bc$j.yml
+                elif  [ $CONSENSUS_TYPE -eq 5 ]; then
+                    xsed '82,99d' node$i/chainconfig/bc$j.yml
+                fi
             fi
 
             xsed "s%{chain_id}%chain$j%g" node$i/chainconfig/bc$j.yml
+            xsed "s%{version}%$VERSION%g" node$i/chainconfig/bc$j.yml
+            xsed "s%{hash_type}%$HASH_TYPE%g" node$i/chainconfig/bc$j.yml
 
-            if  [ $NODE_CNT -eq 7 ] || [ $NODE_CNT -eq 13 ] || [ $NODE_CNT -eq 16 ]; then
+            if  [ $NODE_CNT -eq 7 ] || [ $NODE_CNT -eq 13 ]; then
                 # dpos cancel kv annotation
                 if  [ $CONSENSUS_TYPE -eq 5 ]; then
                     xsed "s%#\(.*\)- key:%\1- key:%g" node$i/chainconfig/bc$j.yml
                     xsed "s%#\(.*\)value:%\1value:%g" node$i/chainconfig/bc$j.yml
+                fi
+                # cancel node ids
+                if  [ $CONSENSUS_TYPE -eq 1 ]; then
+                    xsed "s%#\(.*\)- \"{org%\1- \"{org%g" node$i/chainconfig/bc$j.yml
                 fi
             fi
 

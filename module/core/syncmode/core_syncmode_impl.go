@@ -8,12 +8,12 @@ SPDX-License-Identifier: Apache-2.0
 package syncmode
 
 import (
-	"chainmaker.org/chainmaker-go/core/common"
-	"chainmaker.org/chainmaker-go/core/common/scheduler"
-	"chainmaker.org/chainmaker-go/core/provider/conf"
-	"chainmaker.org/chainmaker-go/core/syncmode/proposer"
-	"chainmaker.org/chainmaker-go/core/syncmode/verifier"
-	"chainmaker.org/chainmaker-go/subscriber"
+	"chainmaker.org/chainmaker-go/module/core/common"
+	"chainmaker.org/chainmaker-go/module/core/common/scheduler"
+	"chainmaker.org/chainmaker-go/module/core/provider/conf"
+	"chainmaker.org/chainmaker-go/module/core/syncmode/proposer"
+	"chainmaker.org/chainmaker-go/module/core/syncmode/verifier"
+	"chainmaker.org/chainmaker-go/module/subscriber"
 	"chainmaker.org/chainmaker/common/v2/msgbus"
 	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/consensus/chainedbft"

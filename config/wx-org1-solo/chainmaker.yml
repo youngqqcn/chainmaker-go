@@ -21,12 +21,10 @@ blockchain:
 #    genesis: ../config/wx-org1-solo/chainconfig/bc4.yml
 
 node:
-  # 节点类型：full
   type: full
   org_id: wx-org1.chainmaker.org
   priv_key_file: ../config/wx-org1-solo/certs/node/consensus1/consensus1.sign.key
   cert_file: ../config/wx-org1-solo/certs/node/consensus1/consensus1.sign.crt
-  signer_cache_size: 1000
   cert_cache_size: 1000
 
 net:
@@ -76,6 +74,16 @@ storage:
   store_path: ../data/org1/ledgerData1
   encryptor: sm4    # sm4/aes
   encrypt_key: "1234567890123456" #16 bytes key
+  write_block_type: 0  # 0普通写模式，1快速写模式
+  state_cache_config:
+    life_window: 3000000000000   #key/value ttl 时间，单位 ns
+    clean_window: 1000000000
+    max_entry_size: 500
+    hard_max_cache_size: 10240   #缓存大小，单位MB
+  txexistdb_config:
+    provider: leveldb
+    leveldb_config:
+      store_path: ../data/org1/txexist
   blockdb_config:
     provider: leveldb
     leveldb_config:

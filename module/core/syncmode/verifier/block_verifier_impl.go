@@ -11,10 +11,9 @@ import (
 	"fmt"
 	"sync"
 
-	"chainmaker.org/chainmaker-go/core/common"
-	"chainmaker.org/chainmaker-go/core/provider/conf"
-
-	"chainmaker.org/chainmaker-go/consensus"
+	"chainmaker.org/chainmaker-go/module/consensus"
+	"chainmaker.org/chainmaker-go/module/core/common"
+	"chainmaker.org/chainmaker-go/module/core/provider/conf"
 	commonErrors "chainmaker.org/chainmaker/common/v2/errors"
 	"chainmaker.org/chainmaker/common/v2/monitor"
 	"chainmaker.org/chainmaker/common/v2/msgbus"
