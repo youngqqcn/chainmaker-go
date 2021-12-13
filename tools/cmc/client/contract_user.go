@@ -509,7 +509,7 @@ func getUserContract() error {
 		}
 	}
 
-	resp, err := client.QueryContract(contractName, method, util.ConvertParameters(pairs), -1, nil)
+	resp, err := client.QueryContract(contractName, method, util.ConvertParameters(pairs), -1)
 	if err != nil {
 		return fmt.Errorf("query contract failed, %s", err.Error())
 	}

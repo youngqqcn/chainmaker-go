@@ -54,7 +54,7 @@ func runInvokeContract(client *sdk.ChainClient, contractName, method string, kvs
 
 	for i := 0; i < totalCntPerGoroutine; i++ {
 		txId := sdkutils.GetRandTxId()
-		resp, err := client.InvokeContract(contractName, method, txId, kvs, timeout, syncResult, nil)
+		resp, err := client.InvokeContract(contractName, method, txId, kvs, timeout, syncResult)
 		if err != nil {
 			fmt.Printf("[ERROR] invoke contract failed, %s", err.Error())
 			return
@@ -87,7 +87,7 @@ func runInvokeContractOnce(client *sdk.ChainClient, contractName, method string,
 	}()
 
 	txId := sdkutils.GetRandTxId()
-	resp, err := client.InvokeContract(contractName, method, txId, kvs, timeout, syncResult, nil)
+	resp, err := client.InvokeContract(contractName, method, txId, kvs, timeout, syncResult)
 	if err != nil {
 		fmt.Printf("[ERROR] invoke contract failed, %s", err.Error())
 		return
