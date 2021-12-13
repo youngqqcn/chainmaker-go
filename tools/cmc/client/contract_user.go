@@ -332,38 +332,29 @@ func createUserContract() error {
 
 	endorsementEntrys := make([]*common.EndorsementEntry, len(adminKeys))
 	for i := range adminKeys {
+		var e *common.EndorsementEntry
+		var err error
 		if sdk.AuthTypeToStringMap[client.GetAuthType()] == protocol.PermissionedWithCert {
-			e, err := sdkutils.MakeEndorserWithPath(adminKeys[i], adminCrts[i], payload)
-			if err != nil {
-				return err
-			}
-
-			endorsementEntrys[i] = e
+			e, err = sdkutils.MakeEndorserWithPath(adminKeys[i], adminCrts[i], payload)
 		} else if sdk.AuthTypeToStringMap[client.GetAuthType()] == protocol.PermissionedWithKey {
-			e, err := sdkutils.MakePkEndorserWithPath(
+			e, err = sdkutils.MakePkEndorserWithPath(
 				adminKeys[i],
 				crypto.HashAlgoMap[client.GetHashType()],
 				adminOrgs[i],
 				payload,
 			)
-			if err != nil {
-				return err
-			}
-
-			endorsementEntrys[i] = e
 		} else {
-			e, err := sdkutils.MakePkEndorserWithPath(
+			e, err = sdkutils.MakePkEndorserWithPath(
 				adminKeys[i],
 				crypto.HashAlgoMap[client.GetHashType()],
 				"",
 				payload,
 			)
-			if err != nil {
-				return err
-			}
-
-			endorsementEntrys[i] = e
 		}
+		if err != nil {
+			return err
+		}
+		endorsementEntrys[i] = e
 	}
 
 	resp, err := client.SendContractManageRequest(payload, endorsementEntrys, timeout, syncResult)
