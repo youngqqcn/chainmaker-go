@@ -239,7 +239,16 @@ storage:
   # Symmetric encryption key:16 bytes key
   # If pkcs11 is enabled, it is the keyID
   # encrypt_key: "1234567890123456"
-
+  write_block_type: 0  # 0普通写模式，1快速写模式
+  state_cache_config:
+    life_window: 3000000000000   #key/value ttl 时间，单位 ns
+    clean_window: 1000000000
+    max_entry_size: 500
+    hard_max_cache_size: 10240   #缓存大小，单位MB
+  txexistdb_config:
+    provider: leveldb
+    leveldb_config:
+      store_path: ../data/{org_id}/txexist
   # Block db config
   blockdb_config:
     # Databases type support leveldb, sql, badgerdb
