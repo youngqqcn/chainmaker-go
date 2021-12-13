@@ -122,7 +122,7 @@ func newCertMemberFromParam(orgId, role, hashType string, isCompressed bool,
 		}
 	}
 
-	if err := cryptoEngineOption(cert); err != nil {
+	if err = cryptoEngineOption(cert); err != nil {
 		return nil, fmt.Errorf("set crypto engine failed, err = %s", err)
 	}
 
@@ -162,7 +162,7 @@ func newMemberFromCertPem(orgId, hashType string, certPEM []byte, isCompressed b
 		}
 	}
 
-	if err := cryptoEngineOption(cert); err != nil {
+	if err = cryptoEngineOption(cert); err != nil {
 		return nil, fmt.Errorf("set crypto engine failed, err = %s", err)
 	}
 
