@@ -8,7 +8,6 @@ SPDX-License-Identifier: Apache-2.0
 package sync
 
 import (
-	"chainmaker.org/chainmaker/localconf/v2"
 	"fmt"
 	"math"
 	"sort"
@@ -159,7 +158,6 @@ func (sch *scheduler) handleLivinessMsg() {
 func (sch *scheduler) handleScheduleMsg() (queue.Item, error) {
 	var (
 		err           error
-		isFast        bool
 		bz            []byte
 		peer          string
 		pendingHeight uint64
@@ -173,18 +171,9 @@ func (sch *scheduler) handleScheduleMsg() (queue.Item, error) {
 		sch.log.Debugf("pendingHeight: %d, block status %v", pendingHeight, sch.blockStates)
 		return nil, nil
 	}
-	isFastSync := localconf.ChainMakerConfig.NodeConfig.FastSyncConfig.Enable
-	minFullBlocks := localconf.ChainMakerConfig.NodeConfig.FastSyncConfig.MinFullBlocks
-	peer = sch.selectPeer(pendingHeight + uint64(minFullBlocks))
-	if len(peer) != 0 && isFastSync {
-		isFast = true
-	} else {
-		isFast = false
-	}
-	var bsr = syncPb.BlockSyncReq{
-		BlockHeight: pendingHeight, BatchSize: sch.BatchesizeInEachReq, WithRwset: isFast,
-	}
-	if bz, err = proto.Marshal(&bsr); err != nil {
+	if bz, err = proto.Marshal(&syncPb.BlockSyncReq{
+		BlockHeight: pendingHeight, BatchSize: sch.BatchesizeInEachReq,
+	}); err != nil {
 		return nil, err
 	}
 
@@ -284,56 +273,26 @@ func (sch *scheduler) getPendingReqInPeer(peer string) int {
 }
 
 func (sch *scheduler) handleSyncedBlockMsg(msg *SyncedBlockMsg) (queue.Item, error) {
-	sch.log.Info("handleSyncedBlockMsg start")
-	sch.log.Infof("SyncedBlockMsg: %s", msg)
 	blkBatch := syncPb.SyncBlockBatch{}
 	if err := proto.Unmarshal(msg.msg, &blkBatch); err != nil {
 		return nil, err
 	}
-	sch.log.Infof("SyncBlockBatch: %+v", blkBatch)
+	if len(blkBatch.GetBlockBatch().Batches) == 0 {
+		return nil, nil
+	}
 	needToProcess := false
-	isFastSync := localconf.ChainMakerConfig.NodeConfig.FastSyncConfig.Enable
-	withRWSet := blkBatch.WithRwset
-	if isFastSync && withRWSet {
-		if len(blkBatch.GetBlockinfoBatch().Batch) == 0 {
-			sch.log.Info("GetBlockinfoBatch null")
-			return nil, nil
+	for _, blk := range blkBatch.GetBlockBatch().Batches {
+		delete(sch.pendingBlocks, blk.Header.BlockHeight)
+		delete(sch.pendingTime, blk.Header.BlockHeight)
+		if _, exist := sch.blockStates[blk.Header.BlockHeight]; exist {
+			needToProcess = true
+			sch.blockStates[blk.Header.BlockHeight] = receivedBlock
+			sch.receivedBlocks[blk.Header.BlockHeight] = msg.from
 		}
-		for _, blkinfo := range blkBatch.GetBlockinfoBatch().GetBatch() {
-			delete(sch.pendingBlocks, blkinfo.Block.Header.BlockHeight)
-			delete(sch.pendingTime, blkinfo.Block.Header.BlockHeight)
-			if _, exist := sch.blockStates[blkinfo.Block.Header.BlockHeight]; exist {
-				needToProcess = true
-				sch.blockStates[blkinfo.Block.Header.BlockHeight] = receivedBlock
-				sch.receivedBlocks[blkinfo.Block.Header.BlockHeight] = msg.from
-			}
-			sch.log.Debugf("received block [height:%d:%x] needToProcess: %v from "+
-				"node [%s]", blkinfo.Block.Header.BlockHeight, blkinfo.Block.Header.BlockHash, needToProcess, msg.from)
-		}
-	} else {
-		if len(blkBatch.GetBlockBatch().Batches) == 0 {
-			sch.log.Info("GetBlockBatch null")
-			return nil, nil
-		}
-		for _, blk := range blkBatch.GetBlockBatch().Batches {
-			delete(sch.pendingBlocks, blk.Header.BlockHeight)
-			delete(sch.pendingTime, blk.Header.BlockHeight)
-			if _, exist := sch.blockStates[blk.Header.BlockHeight]; exist {
-				needToProcess = true
-				sch.blockStates[blk.Header.BlockHeight] = receivedBlock
-				sch.receivedBlocks[blk.Header.BlockHeight] = msg.from
-			}
-			sch.log.Debugf("received block [height:%d:%x] needToProcess: %v from "+
-				"node [%s]", blk.Header.BlockHeight, blk.Header.BlockHash, needToProcess, msg.from)
-		}
+		sch.log.Debugf("received block [height:%d:%x] needToProcess: %v from "+
+			"node [%s]", blk.Header.BlockHeight, blk.Header.BlockHash, needToProcess, msg.from)
 	}
 	if needToProcess {
-
-		if isFastSync && withRWSet {
-			return &ReceivedBlocksWithRwSets{
-				blkinfos: blkBatch.GetBlockinfoBatch().Batch,
-				from:     msg.from}, nil
-		}
 		return &ReceivedBlocks{
 			blks: blkBatch.GetBlockBatch().Batches,
 			from: msg.from}, nil
