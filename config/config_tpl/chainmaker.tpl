@@ -20,6 +20,9 @@ log:
   # Logger configuration file path.
   config_file: ../config/{org_path}/log.yml
 
+# Crypto engine config
+crypto_engine: tjfoc #support gmssl, tencentsm and tjfoc
+
 # Chains the node currently joined in
 blockchain:
   # chain id and its genesis block file path.
@@ -316,5 +319,3 @@ storage:
       sqldb_type: mysql
       # Mysql connection info, such as:  root:admin@tcp(127.0.0.1:3306)/
       dsn: root:password@tcp(127.0.0.1:3306)/
-# Crypto engine config
-crypto_engine: tjfoc #support gmssl, tencentsm and tjfoc (default: tjfoc)

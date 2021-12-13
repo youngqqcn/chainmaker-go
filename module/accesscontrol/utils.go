@@ -13,6 +13,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"chainmaker.org/chainmaker/common/v2/crypto/engine"
+
 	bcx509 "chainmaker.org/chainmaker/common/v2/crypto/x509"
 
 	"chainmaker.org/chainmaker/common/v2/cert"
@@ -174,7 +176,7 @@ func cryptoEngineOption(cert *bcx509.Certificate) error {
 	if err != nil {
 		return fmt.Errorf("failed to get cert.PublicKey string, err = %s", err)
 	}
-	asym.InitCryptoEngine(localconf.ChainMakerConfig.CryptoEngine, false)
+	engine.InitCryptoEngine(localconf.ChainMakerConfig.CryptoEngine, false)
 	//fmt.Printf("ac crypto engine: %s\n", localconf.ChainMakerConfig.CryptoEngine)
 	cert.PublicKey, err = asym.PublicKeyFromPEM([]byte(pkPem))
 	if err != nil {

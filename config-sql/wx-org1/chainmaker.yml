@@ -20,6 +20,8 @@ log:
   # Logger configuration file path
   config_file: ../config-sql/wx-org1/log.yml
 
+crypto_engine: tjfoc #crypto engine config setting, support gmssl, tencentsm and tjfoc
+
 # Chains the node currently knows
 blockchain:
   # chain id and its genesis block file path

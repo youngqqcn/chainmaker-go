@@ -13,6 +13,8 @@ import (
 	"fmt"
 	"strings"
 
+	"chainmaker.org/chainmaker/common/v2/crypto/engine"
+
 	"chainmaker.org/chainmaker-go/module/accesscontrol"
 	"chainmaker.org/chainmaker-go/module/consensus"
 	"chainmaker.org/chainmaker-go/module/core"
@@ -361,7 +363,7 @@ func (bc *Blockchain) initAC() (err error) {
 		return
 	}
 	//init crypto engine for ac
-	asym.InitCryptoEngine(localconf.ChainMakerConfig.CryptoEngine, false)
+	engine.InitCryptoEngine(localconf.ChainMakerConfig.CryptoEngine, false)
 
 	switch bc.chainConf.ChainConfig().AuthType {
 	case protocol.PermissionedWithCert, protocol.Identity:
