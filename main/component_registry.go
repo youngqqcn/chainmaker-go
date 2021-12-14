@@ -25,6 +25,7 @@ import (
 	evm "chainmaker.org/chainmaker/vm-evm/v2"
 	gasm "chainmaker.org/chainmaker/vm-gasm/v2"
 	wasmer "chainmaker.org/chainmaker/vm-wasmer/v2"
+	wxvm "chainmaker.org/chainmaker/vm-wxvm/v2"
 )
 
 func init() {
@@ -43,11 +44,11 @@ func init() {
 		func(chainId string, configs map[string]interface{}) (protocol.VmInstancesManager, error) {
 			return wasmer.NewInstancesManager(chainId), nil
 		})
-	//vm.RegisterVmProvider(
-	//	"WXVM",
-	//	func(chainId string, configs map[string]interface{}) (protocol.VmInstancesManager, error) {
-	//		return &wxvm.InstancesManager{}, nil
-	//	})
+	vm.RegisterVmProvider(
+		"WXVM",
+		func(chainId string, configs map[string]interface{}) (protocol.VmInstancesManager, error) {
+			return &wxvm.InstancesManager{}, nil
+		})
 	vm.RegisterVmProvider(
 		"EVM",
 		func(chainId string, configs map[string]interface{}) (protocol.VmInstancesManager, error) {

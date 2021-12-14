@@ -100,6 +100,8 @@ chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211213072243-6cb0732b0787 h1:W
 chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211213072243-6cb0732b0787/go.mod h1:45fm90jW+ZnKRuZvrkEmrJPa9+bX6yW5Uxb4ORpjNvQ=
 chainmaker.org/chainmaker/vm-wasmer/v2 v2.1.1-0.20211210095550-20541baca032 h1:T2qejmdr/aBh+gkuvXlrn2RXHw5K3tpNjSrW1nK1iro=
 chainmaker.org/chainmaker/vm-wasmer/v2 v2.1.1-0.20211210095550-20541baca032/go.mod h1:2EGIPtNo5JItqcQ3Opv0gzX0eY3x+IqyV/+Kfpbc0bA=
+chainmaker.org/chainmaker/vm-wxvm/v2 v2.1.1-0.20211214062844-e41c8f17122f h1:seAYtxCeF7qrTSzKGYOdHjxduhPptyShLRpXu94XxeI=
+chainmaker.org/chainmaker/vm-wxvm/v2 v2.1.1-0.20211214062844-e41c8f17122f/go.mod h1:BhpyG08teZIw+Yw0k7SuSeJ6mARdAxOLRkTTOg3ObXU=
 chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211210095054-3cb65a1ecfc8 h1:q0X+Ui23dup5M6gK6LaWGs64aq/ky3aSsYwVSmMsOXQ=
 chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211210095054-3cb65a1ecfc8/go.mod h1:DF6tQ2tctCOp28tdtf3dLnt85bH0U3bLI1b8hPTeW+k=
 cloud.google.com/go v0.31.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
@@ -1442,6 +1444,7 @@ github.com/pingcap/errcode v0.3.0/go.mod h1:4b2X8xSqxIroj/IZ9MX/VGZhAwc11wB9wRIz
 github.com/pingcap/errors v0.11.0/go.mod h1:Oi8TUi2kEtXXLMJk9l1cGmz20kV3TaQ0usTwv5KuLY8=
 github.com/pingcap/errors v0.11.4/go.mod h1:Oi8TUi2kEtXXLMJk9l1cGmz20kV3TaQ0usTwv5KuLY8=
 github.com/pingcap/errors v0.11.5-0.20190809092503-95897b64e011/go.mod h1:Oi8TUi2kEtXXLMJk9l1cGmz20kV3TaQ0usTwv5KuLY8=
+github.com/pingcap/errors v0.11.5-0.20201029093017-5a7df2af2ac7/go.mod h1:G7x87le1poQzLB/TqvTJI2ILrSgobnq4Ut7luOwvfvI=
 github.com/pingcap/errors v0.11.5-0.20201126102027-b0a155152ca3 h1:LllgC9eGfqzkfubMgjKIDyZYaa609nNWAyNZtpy2B3M=
 github.com/pingcap/errors v0.11.5-0.20201126102027-b0a155152ca3/go.mod h1:G7x87le1poQzLB/TqvTJI2ILrSgobnq4Ut7luOwvfvI=
 github.com/pingcap/failpoint v0.0.0-20191029060244-12f4ac2fd11d/go.mod h1:DNS3Qg7bEDhU6EXNHF+XSv/PGznQaMJ5FWvctpm6pQI=
