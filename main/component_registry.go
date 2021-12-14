@@ -10,7 +10,6 @@ import (
 	"chainmaker.org/chainmaker-go/module/consensus"
 	"chainmaker.org/chainmaker-go/module/txpool"
 	"chainmaker.org/chainmaker-go/module/vm"
-	hotstuff "chainmaker.org/chainmaker/consensus-chainedbft/v2"
 	dpos "chainmaker.org/chainmaker/consensus-dpos/v2"
 	maxbft "chainmaker.org/chainmaker/consensus-maxbft/v2"
 	raft "chainmaker.org/chainmaker/consensus-raft/v2"
@@ -61,47 +60,6 @@ func init() {
 		func(chainId string, configs map[string]interface{}) (protocol.VmInstancesManager, error) {
 			return dockergo.NewDockerManager(chainId, localconf.ChainMakerConfig.VMConfig), nil
 		})
-
-	// consensus
-	consensus.RegisterConsensusProvider(
-		consensusPb.ConsensusType_SOLO,
-		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
-			return solo.New(config)
-		},
-	)
-
-	consensus.RegisterConsensusProvider(
-		consensusPb.ConsensusType_DPOS,
-		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
-			tbftEngine, err := tbft.New(config) // DPoS based in TBFT
-			if err != nil {
-				return nil, err
-			}
-			dposEngine := dpos.NewDPoSImpl(config, tbftEngine)
-			return dposEngine, nil
-		},
-	)
-
-	consensus.RegisterConsensusProvider(
-		consensusPb.ConsensusType_RAFT,
-		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
-			return raft.New(config)
-		},
-	)
-
-	consensus.RegisterConsensusProvider(
-		consensusPb.ConsensusType_TBFT,
-		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
-			return tbft.New(config)
-		},
-	)
-
-	consensus.RegisterConsensusProvider(
-		consensusPb.ConsensusType_HOTSTUFF,
-		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
-			return hotstuff.New(config)
-		},
-	)
 
 	// consensus
 	consensus.RegisterConsensusProvider(

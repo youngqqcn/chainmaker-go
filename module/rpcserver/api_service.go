@@ -316,7 +316,7 @@ func (s *ApiService) dealSystemChainQuery(tx *commonPb.Transaction, vmMgr protoc
 	}
 	defaultGas := uint64(0)
 	chainConfig, _ := s.chainMakerServer.GetChainConf(chainId)
-	if chainConfig.ChainConfig().AccountConfig.EnableGas {
+	if chainConfig.ChainConfig().AccountConfig != nil && chainConfig.ChainConfig().AccountConfig.EnableGas {
 		defaultGas = chainConfig.ChainConfig().AccountConfig.DefaultGas
 	}
 	runtimeInstance := native.GetRuntimeInstance(chainId, defaultGas)

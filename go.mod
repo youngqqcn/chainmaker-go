@@ -3,7 +3,7 @@ module chainmaker.org/chainmaker-go
 go 1.15
 
 require (
-	chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211214123351-e021f6d8cb59
+	chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211214124802-19ea4d68bca7
 	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211214041159-fe0b2240f08c
 	chainmaker.org/chainmaker/consensus-chainedbft/v2 v2.0.0-20211214032204-5f155aeeb5a2
 	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211214121831-4dd49113fb25
@@ -12,18 +12,18 @@ require (
 	chainmaker.org/chainmaker/consensus-solo/v2 v2.0.0-20211214030920-ea0e463ad738
 	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20211214120032-9eb483ea4ef5
 	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211214095113-179cc53746eb
-	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211213123219-8e2e0cdcd628
-	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211109074349-f79af5e1892d
+	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211214124610-bb7620382194
+	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211214124250-621f11b35ab0
 	chainmaker.org/chainmaker/net-common v0.0.7-0.20211109085844-739f0f904b96
 	chainmaker.org/chainmaker/net-libp2p v1.0.1-0.20211213064428-ff6ab75341e1
 	chainmaker.org/chainmaker/net-liquid v1.0.1-0.20211122114338-22ed0765724f
 	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211214073209-1288f39035e8
-	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211214120754-62a8fab32ce9
+	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211214124103-9512460ad844
 	chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211214070956-cbd556d24c45
 	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211214122914-2b1b06e513cb
-	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20211129022941-e7a476018d0c
-	chainmaker.org/chainmaker/txpool-single/v2 v2.1.1-0.20211109075506-aea78872cdc6
-	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211214122833-8d8805891d58
+	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20211214125718-bd38cc2cf4bf
+	chainmaker.org/chainmaker/txpool-single/v2 v2.1.1-0.20211214125452-9037b3ed764a
+	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211214124429-d110e27a8fa2
 	chainmaker.org/chainmaker/vm-docker-go v0.0.0-20211214063103-6f6b10d166d2
 	chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20211214063845-92b7c135504e
 	chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20211214075335-8b840f5c2760
