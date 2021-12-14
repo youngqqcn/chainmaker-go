@@ -10,7 +10,6 @@ package consensus
 import (
 	"fmt"
 
-	dpos "chainmaker.org/chainmaker/consensus-dpos/v2"
 	maxbft "chainmaker.org/chainmaker/consensus-maxbft/v2"
 	raft "chainmaker.org/chainmaker/consensus-raft/v2"
 	tbft "chainmaker.org/chainmaker/consensus-tbft/v2"
@@ -35,9 +34,10 @@ func VerifyBlockSignatures(
 	case consensuspb.ConsensusType_TBFT:
 		// get validator list by module of tbft
 		return tbft.VerifyBlockSignatures(chainConf, ac, block, store, tbft.GetValidatorList)
-	case consensuspb.ConsensusType_DPOS:
-		// get validator list by module of dpos
-		return tbft.VerifyBlockSignatures(chainConf, ac, block, store, dpos.GetValidatorList)
+	//case consensuspb.ConsensusType_DPOS:
+	//	// get validator list by module of dpos
+	//	return tbft.VerifyBlockSignatures(chainConf, ac, block, store, dpos.GetValidatorList)
+	//TODO: dpos.GetValidatorList not found
 	case consensuspb.ConsensusType_RAFT:
 		return raft.VerifyBlockSignatures(block)
 	case consensuspb.ConsensusType_HOTSTUFF:

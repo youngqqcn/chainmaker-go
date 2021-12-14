@@ -621,13 +621,13 @@ func (vb *VerifierBlock) ValidateBlock(
 
 // validateBlock, validate block and transactions
 func (vb *VerifierBlock) ValidateBlockWithRWSets(
-	block, lastBlock *commonpb.Block, hashType string, timeLasts []int64, txRWSetMap map[string]*commonpb.TxRWSet) (
-	map[string][]*commonpb.ContractEvent, []int64, error) {
+	block, lastBlock *commonPb.Block, hashType string, timeLasts []int64, txRWSetMap map[string]*commonPb.TxRWSet) (
+	map[string][]*commonPb.ContractEvent, []int64, error) {
 
 	if err := IsBlockHashValid(block, vb.chainConf.ChainConfig().Crypto.Hash); err != nil {
 		return nil, timeLasts, err
 	}
-	txResultMap := make(map[string]*commonpb.Result)
+	txResultMap := make(map[string]*commonPb.Result)
 	for _, tx := range block.GetTxs() {
 		if tx.Result != nil {
 			txResultMap[tx.Payload.TxId] = tx.Result
@@ -706,9 +706,9 @@ func (vb *VerifierBlock) ValidateBlockWithRWSets(
 	//}
 
 	// get contract events
-	contractEventMap := make(map[string][]*commonpb.ContractEvent)
+	contractEventMap := make(map[string][]*commonPb.ContractEvent)
 	for _, tx := range block.Txs {
-		var events []*commonpb.ContractEvent
+		var events []*commonPb.ContractEvent
 		if result, ok := txResultMap[tx.Payload.TxId]; ok {
 			events = result.ContractResult.ContractEvent
 		}
