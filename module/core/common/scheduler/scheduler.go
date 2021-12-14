@@ -287,24 +287,7 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 
 	// Construct the adjacency list of dag, which describes the subsequent adjacency transactions of all transactions
 	dag := block.Dag
-	dagRemain := make(map[int]dagNeighbors)
-	reverseDagRemain := make(map[int]dagNeighbors)
-	var txIndexBatch []int
-	for txIndex, neighbors := range dag.Vertexes {
-		if len(neighbors.Neighbors) == 0 {
-			txIndexBatch = append(txIndexBatch, txIndex)
-			continue
-		}
-		dn := make(dagNeighbors)
-		for _, neighbor := range neighbors.Neighbors {
-			dn[int(neighbor)] = true
-			if _, ok := reverseDagRemain[int(neighbor)]; !ok {
-				reverseDagRemain[int(neighbor)] = make(dagNeighbors)
-			}
-			reverseDagRemain[int(neighbor)][txIndex] = true
-		}
-		dagRemain[txIndex] = dn
-	}
+	txIndexBatch, dagRemain, reverseDagRemain := ts.initSimulateDagGraph(dag)
 
 	txBatchSize := len(block.Dag.Vertexes)
 	if txBatchSize == 0 {
@@ -398,6 +381,28 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 	return txRWSetMap, snapshot.GetTxResultMap(), nil
 }
 
+func (ts *TxScheduler) initSimulateDagGraph(dag *commonPb.DAG) ([]int, map[int]dagNeighbors, map[int]dagNeighbors){
+	dagRemain := make(map[int]dagNeighbors)
+	reverseDagRemain := make(map[int]dagNeighbors)
+	var txIndexBatch []int
+	for txIndex, neighbors := range dag.Vertexes {
+		if len(neighbors.Neighbors) == 0 {
+			txIndexBatch = append(txIndexBatch, txIndex)
+			continue
+		}
+		dn := make(dagNeighbors)
+		for _, neighbor := range neighbors.Neighbors {
+			dn[int(neighbor)] = true
+			if _, ok := reverseDagRemain[int(neighbor)]; !ok {
+				reverseDagRemain[int(neighbor)] = make(dagNeighbors)
+			}
+			reverseDagRemain[int(neighbor)][txIndex] = true
+		}
+		dagRemain[txIndex] = dn
+	}
+	return txIndexBatch, dagRemain, reverseDagRemain
+}
+
 func (ts *TxScheduler) adjustPoolSize(pool *ants.Pool, conflictsBitWindow *ConflictsBitWindow, txExecType TxExecType) {
 	newPoolSize := conflictsBitWindow.Enqueue(txExecType, pool.Cap())
 	if newPoolSize == -1 {
@@ -485,7 +490,8 @@ func (ts *TxScheduler) simulateSpecialTxs(dag *commonPb.DAG, snapshot protocol.S
 	<-scheduleFinishC
 }
 
-func (ts *TxScheduler) shrinkDag(txIndex int, dagRemain map[int]dagNeighbors, reverseDagRemain map[int]dagNeighbors) []int {
+func (ts *TxScheduler) shrinkDag(txIndex int, dagRemain map[int]dagNeighbors,
+	reverseDagRemain map[int]dagNeighbors) []int {
 	var txIndexBatch []int
 	for k, _ := range reverseDagRemain[txIndex] {
 		delete(dagRemain[k], txIndex)
