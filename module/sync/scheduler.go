@@ -13,6 +13,7 @@ import (
 	"sort"
 	"time"
 
+	"chainmaker.org/chainmaker/localconf/v2"
 	syncPb "chainmaker.org/chainmaker/pb-go/v2/sync"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"github.com/Workiva/go-datastructures/queue"
@@ -273,26 +274,56 @@ func (sch *scheduler) getPendingReqInPeer(peer string) int {
 }
 
 func (sch *scheduler) handleSyncedBlockMsg(msg *SyncedBlockMsg) (queue.Item, error) {
+	sch.log.Info("handleSyncedBlockMsg start")
+	sch.log.Infof("SyncedBlockMsg: %s", msg)
 	blkBatch := syncPb.SyncBlockBatch{}
 	if err := proto.Unmarshal(msg.msg, &blkBatch); err != nil {
 		return nil, err
 	}
-	if len(blkBatch.GetBlockBatch().Batches) == 0 {
-		return nil, nil
-	}
+	sch.log.Infof("SyncBlockBatch: %+v", blkBatch)
 	needToProcess := false
-	for _, blk := range blkBatch.GetBlockBatch().Batches {
-		delete(sch.pendingBlocks, blk.Header.BlockHeight)
-		delete(sch.pendingTime, blk.Header.BlockHeight)
-		if _, exist := sch.blockStates[blk.Header.BlockHeight]; exist {
-			needToProcess = true
-			sch.blockStates[blk.Header.BlockHeight] = receivedBlock
-			sch.receivedBlocks[blk.Header.BlockHeight] = msg.from
+	isFastSync := localconf.ChainMakerConfig.NodeConfig.FastSyncConfig.Enable
+	withRWSet := blkBatch.WithRwset
+	if isFastSync && withRWSet {
+		if len(blkBatch.GetBlockinfoBatch().Batch) == 0 {
+			sch.log.Info("GetBlockinfoBatch null")
+			return nil, nil
 		}
-		sch.log.Debugf("received block [height:%d:%x] needToProcess: %v from "+
-			"node [%s]", blk.Header.BlockHeight, blk.Header.BlockHash, needToProcess, msg.from)
+		for _, blkinfo := range blkBatch.GetBlockinfoBatch().GetBatch() {
+			delete(sch.pendingBlocks, blkinfo.Block.Header.BlockHeight)
+			delete(sch.pendingTime, blkinfo.Block.Header.BlockHeight)
+			if _, exist := sch.blockStates[blkinfo.Block.Header.BlockHeight]; exist {
+				needToProcess = true
+				sch.blockStates[blkinfo.Block.Header.BlockHeight] = receivedBlock
+				sch.receivedBlocks[blkinfo.Block.Header.BlockHeight] = msg.from
+			}
+			sch.log.Debugf("received block [height:%d:%x] needToProcess: %v from "+
+				"node [%s]", blkinfo.Block.Header.BlockHeight, blkinfo.Block.Header.BlockHash, needToProcess, msg.from)
+		}
+	} else {
+		if len(blkBatch.GetBlockBatch().Batches) == 0 {
+			sch.log.Info("GetBlockBatch null")
+			return nil, nil
+		}
+		for _, blk := range blkBatch.GetBlockBatch().Batches {
+			delete(sch.pendingBlocks, blk.Header.BlockHeight)
+			delete(sch.pendingTime, blk.Header.BlockHeight)
+			if _, exist := sch.blockStates[blk.Header.BlockHeight]; exist {
+				needToProcess = true
+				sch.blockStates[blk.Header.BlockHeight] = receivedBlock
+				sch.receivedBlocks[blk.Header.BlockHeight] = msg.from
+			}
+			sch.log.Debugf("received block [height:%d:%x] needToProcess: %v from "+
+				"node [%s]", blk.Header.BlockHeight, blk.Header.BlockHash, needToProcess, msg.from)
+		}
 	}
 	if needToProcess {
+
+		if isFastSync && withRWSet {
+			return &ReceivedBlocksWithRwSets{
+				blkinfos: blkBatch.GetBlockinfoBatch().Batch,
+				from:     msg.from}, nil
+		}
 		return &ReceivedBlocks{
 			blks: blkBatch.GetBlockBatch().Batches,
 			from: msg.from}, nil
