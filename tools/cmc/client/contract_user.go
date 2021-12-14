@@ -262,22 +262,31 @@ func createUserContract() error {
 	defer client.Stop()
 
 	if sdk.AuthTypeToStringMap[client.GetAuthType()] == protocol.PermissionedWithCert {
-		adminKeys = strings.Split(adminKeyFilePaths, ",")
-		adminCrts = strings.Split(adminCrtFilePaths, ",")
-		if len(adminKeys) == 0 || len(adminCrts) == 0 {
-			return errAdminOrgIdKeyCertIsEmpty
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
+		if adminCrtFilePaths != "" {
+			adminCrts = strings.Split(adminCrtFilePaths, ",")
 		}
 		if len(adminKeys) != len(adminCrts) {
 			return fmt.Errorf(ADMIN_ORGID_KEY_CERT_LENGTH_NOT_EQUAL_FORMAT, len(adminKeys), len(adminCrts))
 		}
 	} else if sdk.AuthTypeToStringMap[client.GetAuthType()] == protocol.PermissionedWithKey {
-		adminKeys = strings.Split(adminKeyFilePaths, ",")
-		adminOrgs = strings.Split(adminOrgIds, ",")
-		if len(adminKeys) == 0 || len(adminOrgs) == 0 {
-			return errAdminOrgIdKeyCertIsEmpty
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
+		if adminOrgIds != "" {
+			adminOrgs = strings.Split(adminOrgIds, ",")
 		}
 		if len(adminKeys) != len(adminOrgs) {
 			return fmt.Errorf(ADMIN_ORGID_KEY_LENGTH_NOT_EQUAL_FORMAT, len(adminKeys), len(adminOrgs))
+		}
+	} else {
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
+		if len(adminKeys) == 0 {
+			return errAdminOrgIdKeyCertIsEmpty
 		}
 	}
 
@@ -323,26 +332,29 @@ func createUserContract() error {
 
 	endorsementEntrys := make([]*common.EndorsementEntry, len(adminKeys))
 	for i := range adminKeys {
+		var e *common.EndorsementEntry
+		var err error
 		if sdk.AuthTypeToStringMap[client.GetAuthType()] == protocol.PermissionedWithCert {
-			e, err := sdkutils.MakeEndorserWithPath(adminKeys[i], adminCrts[i], payload)
-			if err != nil {
-				return err
-			}
-
-			endorsementEntrys[i] = e
+			e, err = sdkutils.MakeEndorserWithPath(adminKeys[i], adminCrts[i], payload)
 		} else if sdk.AuthTypeToStringMap[client.GetAuthType()] == protocol.PermissionedWithKey {
-			e, err := sdkutils.MakePkEndorserWithPath(
+			e, err = sdkutils.MakePkEndorserWithPath(
 				adminKeys[i],
 				crypto.HashAlgoMap[client.GetHashType()],
 				adminOrgs[i],
 				payload,
 			)
-			if err != nil {
-				return err
-			}
-
-			endorsementEntrys[i] = e
+		} else {
+			e, err = sdkutils.MakePkEndorserWithPath(
+				adminKeys[i],
+				crypto.HashAlgoMap[client.GetHashType()],
+				"",
+				payload,
+			)
 		}
+		if err != nil {
+			return err
+		}
+		endorsementEntrys[i] = e
 	}
 
 	resp, err := client.SendContractManageRequest(payload, endorsementEntrys, timeout, syncResult)
@@ -520,22 +532,31 @@ func upgradeUserContract() error {
 	defer client.Stop()
 
 	if sdk.AuthTypeToStringMap[client.GetAuthType()] == protocol.PermissionedWithCert {
-		adminKeys = strings.Split(adminKeyFilePaths, ",")
-		adminCrts = strings.Split(adminCrtFilePaths, ",")
-		if len(adminKeys) == 0 || len(adminCrts) == 0 {
-			return errAdminOrgIdKeyCertIsEmpty
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
+		if adminCrtFilePaths != "" {
+			adminCrts = strings.Split(adminCrtFilePaths, ",")
 		}
 		if len(adminKeys) != len(adminCrts) {
 			return fmt.Errorf(ADMIN_ORGID_KEY_CERT_LENGTH_NOT_EQUAL_FORMAT, len(adminKeys), len(adminCrts))
 		}
 	} else if sdk.AuthTypeToStringMap[client.GetAuthType()] == protocol.PermissionedWithKey {
-		adminKeys = strings.Split(adminKeyFilePaths, ",")
-		adminOrgs = strings.Split(adminOrgIds, ",")
-		if len(adminKeys) == 0 || len(adminOrgs) == 0 {
-			return errAdminOrgIdKeyCertIsEmpty
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
+		if adminOrgIds != "" {
+			adminOrgs = strings.Split(adminOrgIds, ",")
 		}
 		if len(adminKeys) != len(adminOrgs) {
 			return fmt.Errorf(ADMIN_ORGID_KEY_LENGTH_NOT_EQUAL_FORMAT, len(adminKeys), len(adminOrgs))
+		}
+	} else {
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
+		if len(adminKeys) == 0 {
+			return errAdminOrgIdKeyCertIsEmpty
 		}
 	}
 
@@ -580,6 +601,18 @@ func upgradeUserContract() error {
 			}
 
 			endorsementEntrys[i] = e
+		} else {
+			e, err := sdkutils.MakePkEndorserWithPath(
+				adminKeys[i],
+				crypto.HashAlgoMap[client.GetHashType()],
+				"",
+				payload,
+			)
+			if err != nil {
+				return err
+			}
+
+			endorsementEntrys[i] = e
 		}
 	}
 
@@ -612,22 +645,31 @@ func freezeOrUnfreezeOrRevokeUserContract(which int) error {
 	defer client.Stop()
 
 	if sdk.AuthTypeToStringMap[client.GetAuthType()] == protocol.PermissionedWithCert {
-		adminKeys = strings.Split(adminKeyFilePaths, ",")
-		adminCrts = strings.Split(adminCrtFilePaths, ",")
-		if len(adminKeys) == 0 || len(adminCrts) == 0 {
-			return errAdminOrgIdKeyCertIsEmpty
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
+		if adminCrtFilePaths != "" {
+			adminCrts = strings.Split(adminCrtFilePaths, ",")
 		}
 		if len(adminKeys) != len(adminCrts) {
 			return fmt.Errorf(ADMIN_ORGID_KEY_CERT_LENGTH_NOT_EQUAL_FORMAT, len(adminKeys), len(adminCrts))
 		}
 	} else if sdk.AuthTypeToStringMap[client.GetAuthType()] == protocol.PermissionedWithKey {
-		adminKeys = strings.Split(adminKeyFilePaths, ",")
-		adminOrgs = strings.Split(adminOrgIds, ",")
-		if len(adminKeys) == 0 || len(adminOrgs) == 0 {
-			return errAdminOrgIdKeyCertIsEmpty
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
+		if adminOrgIds != "" {
+			adminOrgs = strings.Split(adminOrgIds, ",")
 		}
 		if len(adminKeys) != len(adminOrgs) {
 			return fmt.Errorf(ADMIN_ORGID_KEY_LENGTH_NOT_EQUAL_FORMAT, len(adminKeys), len(adminOrgs))
+		}
+	} else {
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
+		if len(adminKeys) == 0 {
+			return errAdminOrgIdKeyCertIsEmpty
 		}
 	}
 
@@ -667,6 +709,18 @@ func freezeOrUnfreezeOrRevokeUserContract(which int) error {
 				adminKeys[i],
 				crypto.HashAlgoMap[client.GetHashType()],
 				adminOrgs[i],
+				payload,
+			)
+			if err != nil {
+				return err
+			}
+
+			endorsementEntrys[i] = e
+		} else {
+			e, err := sdkutils.MakePkEndorserWithPath(
+				adminKeys[i],
+				crypto.HashAlgoMap[client.GetHashType()],
+				"",
 				payload,
 			)
 			if err != nil {
