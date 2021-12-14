@@ -381,7 +381,7 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 	return txRWSetMap, snapshot.GetTxResultMap(), nil
 }
 
-func (ts *TxScheduler) initSimulateDagGraph(dag *commonPb.DAG) ([]int, map[int]dagNeighbors, map[int]dagNeighbors){
+func (ts *TxScheduler) initSimulateDagGraph(dag *commonPb.DAG) ([]int, map[int]dagNeighbors, map[int]dagNeighbors) {
 	dagRemain := make(map[int]dagNeighbors)
 	reverseDagRemain := make(map[int]dagNeighbors)
 	var txIndexBatch []int
@@ -493,7 +493,7 @@ func (ts *TxScheduler) simulateSpecialTxs(dag *commonPb.DAG, snapshot protocol.S
 func (ts *TxScheduler) shrinkDag(txIndex int, dagRemain map[int]dagNeighbors,
 	reverseDagRemain map[int]dagNeighbors) []int {
 	var txIndexBatch []int
-	for k, _ := range reverseDagRemain[txIndex] {
+	for k := range reverseDagRemain[txIndex] {
 		delete(dagRemain[k], txIndex)
 		if len(dagRemain[k]) == 0 {
 			txIndexBatch = append(txIndexBatch, k)
