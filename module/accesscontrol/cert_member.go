@@ -122,6 +122,10 @@ func newCertMemberFromParam(orgId, role, hashType string, isCompressed bool,
 		}
 	}
 
+	if err = cryptoEngineOption(cert); err != nil {
+		return nil, fmt.Errorf("set crypto engine failed, err = %s", err)
+	}
+
 	id, err := bcx509.GetExtByOid(bcx509.OidNodeId, cert.Extensions)
 	if err != nil {
 		id = []byte(cert.Subject.CommonName)
@@ -156,6 +160,10 @@ func newMemberFromCertPem(orgId, hashType string, certPEM []byte, isCompressed b
 		if err != nil {
 			return nil, fmt.Errorf("new cert member failed, invalid certificate")
 		}
+	}
+
+	if err = cryptoEngineOption(cert); err != nil {
+		return nil, fmt.Errorf("set crypto engine failed, err = %s", err)
 	}
 
 	member.hashType = hashType
