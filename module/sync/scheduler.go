@@ -159,6 +159,7 @@ func (sch *scheduler) handleLivinessMsg() {
 func (sch *scheduler) handleScheduleMsg() (queue.Item, error) {
 	var (
 		err           error
+		isFast        bool
 		bz            []byte
 		peer          string
 		pendingHeight uint64
@@ -172,9 +173,20 @@ func (sch *scheduler) handleScheduleMsg() (queue.Item, error) {
 		sch.log.Debugf("pendingHeight: %d, block status %v", pendingHeight, sch.blockStates)
 		return nil, nil
 	}
-	if bz, err = proto.Marshal(&syncPb.BlockSyncReq{
-		BlockHeight: pendingHeight, BatchSize: sch.BatchesizeInEachReq,
-	}); err != nil {
+	isFastSync := localconf.ChainMakerConfig.NodeConfig.FastSyncConfig.Enable
+	minFullBlocks := localconf.ChainMakerConfig.NodeConfig.FastSyncConfig.MinFullBlocks
+	peer = sch.selectPeer(pendingHeight + uint64(minFullBlocks))
+	// len(peer) != 0 indicates that there is still a block at position minFullBlocks afterwards, perform fast sync;
+	//otherwise, perform normal sync
+	if len(peer) != 0 && isFastSync {
+		isFast = true
+	} else {
+		isFast = false
+	}
+	var bsr = syncPb.BlockSyncReq{
+		BlockHeight: pendingHeight, BatchSize: sch.BatchesizeInEachReq, WithRwset: isFast,
+	}
+	if bz, err = proto.Marshal(&bsr); err != nil {
 		return nil, err
 	}
 
@@ -274,16 +286,14 @@ func (sch *scheduler) getPendingReqInPeer(peer string) int {
 }
 
 func (sch *scheduler) handleSyncedBlockMsg(msg *SyncedBlockMsg) (queue.Item, error) {
-	sch.log.Info("handleSyncedBlockMsg start")
-	sch.log.Infof("SyncedBlockMsg: %s", msg)
 	blkBatch := syncPb.SyncBlockBatch{}
 	if err := proto.Unmarshal(msg.msg, &blkBatch); err != nil {
 		return nil, err
 	}
-	sch.log.Infof("SyncBlockBatch: %+v", blkBatch)
 	needToProcess := false
 	isFastSync := localconf.ChainMakerConfig.NodeConfig.FastSyncConfig.Enable
 	withRWSet := blkBatch.WithRwset
+	sch.log.Debugf("isFastSync: %v ,withRWSet: %v", isFastSync, withRWSet)
 	if isFastSync && withRWSet {
 		if len(blkBatch.GetBlockinfoBatch().Batch) == 0 {
 			sch.log.Info("GetBlockinfoBatch null")

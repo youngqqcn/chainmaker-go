@@ -70,7 +70,7 @@ func (pro *processor) handleReceivedBlocks(msg *ReceivedBlocks) {
 		}
 		if _, exist := pro.queue[blk.Header.BlockHeight]; !exist {
 			pro.queue[blk.Header.BlockHeight] = blockWithPeerInfo{
-				blk: blk, id: msg.from,
+				blk: blk, id: msg.from, withRWSets: false,
 			}
 			pro.log.Debugf("received block [height: %d] from node [%s]", blk.Header.BlockHeight, msg.from)
 		}
@@ -88,7 +88,7 @@ func (pro *processor) handleReceivedBlocksWithRwSets(msg *ReceivedBlocksWithRwSe
 			pro.queue[blkinfo.Block.Header.BlockHeight] = blockWithPeerInfo{
 				blk: blkinfo.Block, rwsets: blkinfo.RwsetList, id: msg.from, withRWSets: true,
 			}
-			pro.log.Debugf("received block [height: %d] from node [%s]", blkinfo.Block.Header.BlockHeight, msg.from)
+			pro.log.Debugf("received block with rwsets [height: %d] from node [%s]", blkinfo.Block.Header.BlockHeight, msg.from)
 		}
 	}
 }

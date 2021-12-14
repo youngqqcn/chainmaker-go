@@ -210,7 +210,7 @@ func (sync *BlockChainSyncServer) handleBlockReq(syncMsg *syncPb.SyncMsg, from s
 		return err
 	}
 	sync.log.Debugf("receive request to get block [height: %d, batch_size: %d] from "+
-		"node [%s]", req.BlockHeight, req.BatchSize, from)
+		"node [%s]"+"WithRwset [%v]", req.BlockHeight, req.BatchSize, from, req.WithRwset)
 	if req.WithRwset {
 		return sync.sendInfos(&req, from)
 	}
