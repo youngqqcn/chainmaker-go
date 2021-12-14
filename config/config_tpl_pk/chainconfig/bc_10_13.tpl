@@ -36,6 +36,16 @@ contract:
   # If it is true, storage.statedb_config.provider in chainmaker.yml should be sql.
   enable_sql_support: false
 
+vm:
+  #0:chainmaker, 1:zxl, 2:ethereum(reserved)
+  addr_type: 1
+  # support vm list
+  support_list:
+    - "wasmer"
+    - "gasm"
+    - "evm"
+    - "dockergo"
+
 # Block proposing related settings
 block:
   # Verify the transaction timestamp or not
@@ -74,6 +84,13 @@ core:
 
     # Retry interval of fetching transaction in txpool by txid, in ms.
     # retry_interval: 20
+
+# gas account config
+account_config:
+  enable_gas: true
+  gas_count: 0
+  gas_admin_address: "ZXff78ca3b84e3f5f91ff18b45fc1ecfda2d5990db"
+  default_gas: 0
 
 # Consensus settings
 consensus:

@@ -174,10 +174,11 @@ func multiSignVote() error {
 	defer client.Stop()
 
 	if sdk.AuthTypeToStringMap[client.GetAuthType()] == protocol.PermissionedWithCert {
-		adminKeys = strings.Split(adminKeyFilePaths, ",")
-		adminCrts = strings.Split(adminCrtFilePaths, ",")
-		if len(adminKeys) == 0 || len(adminCrts) == 0 {
-			return errAdminOrgIdKeyCertIsEmpty
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
+		if adminCrtFilePaths != "" {
+			adminCrts = strings.Split(adminCrtFilePaths, ",")
 		}
 		if len(adminKeys) != len(adminCrts) {
 			return fmt.Errorf(ADMIN_ORGID_KEY_CERT_LENGTH_NOT_EQUAL_FORMAT, len(adminKeys), len(adminCrts))
@@ -185,16 +186,25 @@ func multiSignVote() error {
 		adminKey = adminKeys[0]
 		adminCrt = adminCrts[0]
 	} else if sdk.AuthTypeToStringMap[client.GetAuthType()] == protocol.PermissionedWithKey {
-		adminKeys = strings.Split(adminKeyFilePaths, ",")
-		adminOrgs = strings.Split(adminOrgIds, ",")
-		if len(adminKeys) == 0 || len(adminOrgs) == 0 {
-			return errAdminOrgIdKeyCertIsEmpty
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
+		if adminOrgIds != "" {
+			adminOrgs = strings.Split(adminOrgIds, ",")
 		}
 		if len(adminKeys) != len(adminOrgs) {
 			return fmt.Errorf(ADMIN_ORGID_KEY_LENGTH_NOT_EQUAL_FORMAT, len(adminKeys), len(adminOrgs))
 		}
 		adminKey = adminKeys[0]
 		adminOrg = adminOrgs[0]
+	} else {
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
+		if len(adminKeys) == 0 {
+			return fmt.Errorf(ADMIN_ORGID_KEY_LENGTH_NOT_EQUAL_FORMAT, len(adminKeys), len(adminOrgs))
+		}
+		adminKey = adminKeys[0]
 	}
 
 	result, err := client.GetTxByTxId(txId)
@@ -213,6 +223,13 @@ func multiSignVote() error {
 		if err != nil {
 			return fmt.Errorf("multi sign vote failed, %s", err.Error())
 		}
+	} else {
+		endorser, err = sdkutils.MakePkEndorserWithPath(adminKey, crypto.HashAlgoMap[client.GetHashType()],
+			"", payload)
+		if err != nil {
+			return fmt.Errorf("multi sign vote failed, %s", err.Error())
+		}
+
 	}
 
 	resp, err := client.MultiSignContractVote(payload, endorser)

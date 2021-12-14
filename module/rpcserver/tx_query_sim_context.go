@@ -31,10 +31,20 @@ type txQuerySimContextImpl struct {
 	currentDepth     int
 	currentResult    []byte
 	hisResult        []*callContractResult
-	sqlRowCache      map[int32]protocol.SqlRows
-	kvRowCache       map[int32]protocol.StateIterator
+	rowCache         map[int32]interface{}
 	blockVersion     uint32
 	keyIndex         int
+}
+
+func (s *txQuerySimContextImpl) PutIntoReadSet(contractName string, key []byte, value []byte) {
+	// do nothing
+}
+
+func (s *txQuerySimContextImpl) GetBlockTimestamp() int64 {
+	if lastBlock, err := s.blockchainStore.GetLastBlock(); err == nil {
+		return lastBlock.Header.BlockTimestamp
+	}
+	return 0
 }
 
 type callContractResult struct {
@@ -107,6 +117,11 @@ func (s *txQuerySimContextImpl) Select(contractName string, startKey []byte, lim
 	protocol.StateIterator, error) {
 
 	return s.blockchainStore.SelectObject(contractName, startKey, limit)
+}
+
+func (s *txQuerySimContextImpl) GetHistoryIterForKey(contractName string,
+	key []byte) (protocol.KeyHistoryIterator, error) {
+	return s.blockchainStore.GetHistoryForKey(contractName, key)
 }
 
 func (s *txQuerySimContextImpl) GetCreator(contractName string) *acPb.Member {
@@ -247,10 +262,9 @@ func constructKey(contractName string, key []byte) string {
 	return contractName + string(key)
 }
 
-func (s *txQuerySimContextImpl) CallContract(contract *commonPb.Contract, method string,
-	byteCode []byte, parameter map[string][]byte, gasUsed uint64,
-	refTxType commonPb.TxType) (*commonPb.ContractResult, commonPb.TxStatusCode) {
-
+func (s *txQuerySimContextImpl) CallContract(contract *commonPb.Contract, method string, byteCode []byte,
+	parameter map[string][]byte, gasUsed uint64, refTxType commonPb.TxType) (
+	*commonPb.ContractResult, protocol.ExecOrderTxType, commonPb.TxStatusCode) {
 	s.gasUsed = gasUsed
 	s.currentDepth = s.currentDepth + 1
 	if s.currentDepth > protocol.CallContractDepth {
@@ -259,7 +273,7 @@ func (s *txQuerySimContextImpl) CallContract(contract *commonPb.Contract, method
 			Result:  nil,
 			Message: fmt.Sprintf("CallContract too depth %d", s.currentDepth),
 		}
-		return contractResult, commonPb.TxStatusCode_CONTRACT_TOO_DEEP_FAILED
+		return contractResult, protocol.ExecOrderTxTypeNormal, commonPb.TxStatusCode_CONTRACT_TOO_DEEP_FAILED
 	}
 	if s.gasUsed > protocol.GasLimit {
 		contractResult := &commonPb.ContractResult{
@@ -267,16 +281,16 @@ func (s *txQuerySimContextImpl) CallContract(contract *commonPb.Contract, method
 			Result:  nil,
 			Message: fmt.Sprintf("There is not enough gas, gasUsed %d GasLimit %d ", gasUsed, int64(protocol.GasLimit)),
 		}
-		return contractResult, commonPb.TxStatusCode_CONTRACT_FAIL
+		return contractResult, protocol.ExecOrderTxTypeNormal, commonPb.TxStatusCode_CONTRACT_FAIL
 	}
 	if len(byteCode) == 0 {
 		dbByteCode, err := s.GetContractBytecode(contract.Name)
 		if err != nil {
-			return nil, commonPb.TxStatusCode_CONTRACT_FAIL
+			return nil, protocol.ExecOrderTxTypeNormal, commonPb.TxStatusCode_CONTRACT_FAIL
 		}
 		byteCode = dbByteCode
 	}
-	r, code := s.vmManager.RunContract(contract, method, byteCode, parameter, s, s.gasUsed, refTxType)
+	r, specialTxType, code := s.vmManager.RunContract(contract, method, byteCode, parameter, s, s.gasUsed, refTxType)
 
 	result := callContractResult{
 		depth:        s.currentDepth,
@@ -289,7 +303,7 @@ func (s *txQuerySimContextImpl) CallContract(contract *commonPb.Contract, method
 	s.hisResult = append(s.hisResult, &result)
 	s.currentResult = r.Result
 	s.currentDepth = s.currentDepth - 1
-	return r, code
+	return r, specialTxType, code
 }
 
 func (s *txQuerySimContextImpl) GetCurrentResult() []byte {
@@ -300,23 +314,15 @@ func (s *txQuerySimContextImpl) GetDepth() int {
 	return s.currentDepth
 }
 
-func (s *txQuerySimContextImpl) SetStateSqlHandle(index int32, rows protocol.SqlRows) {
-	s.sqlRowCache[index] = rows
+func (s *txQuerySimContextImpl) SetIterHandle(index int32, rows interface{}) {
+	s.rowCache[index] = rows
 }
 
-func (s *txQuerySimContextImpl) GetStateSqlHandle(index int32) (protocol.SqlRows, bool) {
-	data, ok := s.sqlRowCache[index]
+func (s *txQuerySimContextImpl) GetIterHandle(index int32) (interface{}, bool) {
+	data, ok := s.rowCache[index]
 	return data, ok
 }
 
-func (s *txQuerySimContextImpl) SetStateKvHandle(index int32, rows protocol.StateIterator) {
-	s.kvRowCache[index] = rows
-}
-
-func (s *txQuerySimContextImpl) GetStateKvHandle(index int32) (protocol.StateIterator, bool) {
-	data, ok := s.kvRowCache[index]
-	return data, ok
-}
 func (s *txQuerySimContextImpl) GetContractByName(name string) (*commonPb.Contract, error) {
 	return s.blockchainStore.GetContractByName(name)
 }

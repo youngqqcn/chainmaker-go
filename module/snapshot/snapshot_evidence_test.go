@@ -13,15 +13,18 @@ import (
 	"chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
+	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/protocol/v2/mock"
 	"chainmaker.org/chainmaker/protocol/v2/test"
 	"chainmaker.org/chainmaker/vm/v2"
 	"github.com/golang/mock/gomock"
+	uatomic "go.uber.org/atomic"
 )
 
 var snapshotEvidence = &SnapshotEvidence{
 	delegate: &SnapshotImpl{
 		blockchainStore: nil,
+		log:             &test.GoLogger{},
 	},
 	log: &test.GoLogger{},
 }
@@ -151,27 +154,27 @@ func TestApplyTxSimContext(t *testing.T) {
 	txSimContext := vm.NewTxSimContext(vmManager, snapshot, &common.Transaction{Payload: &common.Payload{ChainId: "12345"}}, block.Header.BlockVersion)
 
 	txSimContext.SetTxResult(&common.Result{Code: common.TxStatusCode_ARCHIVED_BLOCK})
-	res, tableLen := snapshot.ApplyTxSimContext(txSimContext, true)
+	res, tableLen := snapshot.ApplyTxSimContext(txSimContext, protocol.ExecOrderTxTypeNormal, true, false)
 	t.Logf("snapshot.ApplyTxSimContext res:%v,tableLen:%v", res, tableLen)
 
 	txSimContext.SetTxResult(&common.Result{Code: common.TxStatusCode_ARCHIVED_BLOCK})
-	res, tableLen = snapshot.ApplyTxSimContext(txSimContext, false)
+	res, tableLen = snapshot.ApplyTxSimContext(txSimContext, protocol.ExecOrderTxTypeNormal, false, false)
 	t.Logf("snapshot.ApplyTxSimContext res:%v,tableLen:%v", res, tableLen)
 
 	txSimContext.SetTxResult(&common.Result{Code: common.TxStatusCode_CONTRACT_FAIL})
-	res, tableLen = snapshot.ApplyTxSimContext(txSimContext, true)
+	res, tableLen = snapshot.ApplyTxSimContext(txSimContext, protocol.ExecOrderTxTypeNormal, true, false)
 	t.Logf("snapshot.ApplyTxSimContext res:%v,tableLen:%v", res, tableLen)
 
 	txSimContext.SetTxResult(&common.Result{Code: common.TxStatusCode_CONTRACT_FAIL})
-	res, tableLen = snapshot.ApplyTxSimContext(txSimContext, false)
+	res, tableLen = snapshot.ApplyTxSimContext(txSimContext, protocol.ExecOrderTxTypeNormal, false, false)
 	t.Logf("snapshot.ApplyTxSimContext res:%v,tableLen:%v", res, tableLen)
 
 	txSimContext.SetTxResult(&common.Result{Code: common.TxStatusCode_CONTRACT_REVOKE_FAILED})
-	res, tableLen = snapshot.ApplyTxSimContext(txSimContext, true)
+	res, tableLen = snapshot.ApplyTxSimContext(txSimContext, protocol.ExecOrderTxTypeNormal, true, false)
 	t.Logf("snapshot.ApplyTxSimContext res:%v,tableLen:%v", res, tableLen)
 
 	txSimContext.SetTxResult(&common.Result{Code: common.TxStatusCode_CONTRACT_REVOKE_FAILED})
-	res, tableLen = snapshot.ApplyTxSimContext(txSimContext, false)
+	res, tableLen = snapshot.ApplyTxSimContext(txSimContext, protocol.ExecOrderTxTypeNormal, false, false)
 	t.Logf("snapshot.ApplyTxSimContext res:%v,tableLen:%v", res, tableLen)
 
 }
@@ -215,6 +218,8 @@ func createSnapshotEvidenceList(t *testing.T) []*SnapshotEvidence {
 						Code: code,
 					},
 				},
+				log:    &test.GoLogger{},
+				sealed: uatomic.NewBool(false),
 			},
 			log: &test.GoLogger{},
 		}
