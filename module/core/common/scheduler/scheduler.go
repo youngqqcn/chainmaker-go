@@ -46,6 +46,7 @@ type TxScheduler struct {
 
 	metricVMRunTime *prometheus.HistogramVec
 	StoreHelper     conf.StoreHelper
+	keyReg          *regexp.Regexp
 }
 
 // Transaction dependency in adjacency table representation
@@ -94,7 +95,6 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 			}
 		}()
 	}
-
 	// Put the pending transaction into the running queue
 	go func() {
 		for {
@@ -287,14 +287,7 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 
 	// Construct the adjacency list of dag, which describes the subsequent adjacency transactions of all transactions
 	dag := block.Dag
-	dagRemain := make(map[int]dagNeighbors)
-	for txIndex, neighbors := range dag.Vertexes {
-		dn := make(dagNeighbors)
-		for _, neighbor := range neighbors.Neighbors {
-			dn[int(neighbor)] = true
-		}
-		dagRemain[txIndex] = dn
-	}
+	txIndexBatch, dagRemain, reverseDagRemain := ts.initSimulateDagGraph(dag)
 
 	txBatchSize := len(block.Dag.Vertexes)
 	if txBatchSize == 0 {
@@ -315,7 +308,6 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 	}
 	defer goRoutinePool.Release()
 
-	txIndexBatch := ts.popNextTxBatchFromDag(dagRemain)
 	ts.log.Debugf("block [%d] simulate with dag first batch size:%d, total batch size:%d",
 		block.Header.BlockHeight, len(txIndexBatch), txBatchSize)
 
@@ -324,7 +316,6 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 			runningTxC <- tx
 		}
 	}()
-
 	go func() {
 		for {
 			select {
@@ -356,9 +347,7 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 						tx.Payload.GetTxId(), err)
 				}
 			case doneTxIndex := <-doneTxC:
-				ts.shrinkDag(doneTxIndex, dagRemain)
-
-				txIndexBatchAfterShrink := ts.popNextTxBatchFromDag(dagRemain)
+				txIndexBatchAfterShrink := ts.shrinkDag(doneTxIndex, dagRemain, reverseDagRemain)
 				ts.log.Debugf("block [%d] schedule with dag, pop next tx index batch size:%d, dagRemain size:%d",
 					block.Header.BlockHeight, len(txIndexBatchAfterShrink), len(dagRemain))
 				for _, tx := range txIndexBatchAfterShrink {
@@ -390,6 +379,28 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 		ts.log.Debugf("rwset %v", txRWSetMap)
 	}
 	return txRWSetMap, snapshot.GetTxResultMap(), nil
+}
+
+func (ts *TxScheduler) initSimulateDagGraph(dag *commonPb.DAG) ([]int, map[int]dagNeighbors, map[int]dagNeighbors) {
+	dagRemain := make(map[int]dagNeighbors)
+	reverseDagRemain := make(map[int]dagNeighbors)
+	var txIndexBatch []int
+	for txIndex, neighbors := range dag.Vertexes {
+		if len(neighbors.Neighbors) == 0 {
+			txIndexBatch = append(txIndexBatch, txIndex)
+			continue
+		}
+		dn := make(dagNeighbors)
+		for _, neighbor := range neighbors.Neighbors {
+			dn[int(neighbor)] = true
+			if _, ok := reverseDagRemain[int(neighbor)]; !ok {
+				reverseDagRemain[int(neighbor)] = make(dagNeighbors)
+			}
+			reverseDagRemain[int(neighbor)][txIndex] = true
+		}
+		dagRemain[txIndex] = dn
+	}
+	return txIndexBatch, dagRemain, reverseDagRemain
 }
 
 func (ts *TxScheduler) adjustPoolSize(pool *ants.Pool, conflictsBitWindow *ConflictsBitWindow, txExecType TxExecType) {
@@ -479,20 +490,17 @@ func (ts *TxScheduler) simulateSpecialTxs(dag *commonPb.DAG, snapshot protocol.S
 	<-scheduleFinishC
 }
 
-func (ts *TxScheduler) shrinkDag(txIndex int, dagRemain map[int]dagNeighbors) {
-	for _, neighbors := range dagRemain {
-		delete(neighbors, txIndex)
-	}
-}
-
-func (ts *TxScheduler) popNextTxBatchFromDag(dagRemain map[int]dagNeighbors) []int {
+func (ts *TxScheduler) shrinkDag(txIndex int, dagRemain map[int]dagNeighbors,
+	reverseDagRemain map[int]dagNeighbors) []int {
 	var txIndexBatch []int
-	for checkIndex, neighbors := range dagRemain {
-		if len(neighbors) == 0 {
-			txIndexBatch = append(txIndexBatch, checkIndex)
-			delete(dagRemain, checkIndex)
+	for k := range reverseDagRemain[txIndex] {
+		delete(dagRemain[k], txIndex)
+		if len(dagRemain[k]) == 0 {
+			txIndexBatch = append(txIndexBatch, k)
+			delete(dagRemain, k)
 		}
 	}
+	delete(reverseDagRemain, txIndex)
 	return txIndexBatch
 }
 
@@ -615,10 +623,8 @@ func (ts *TxScheduler) parseParameter(parameterPairs []*commonPb.KeyValuePair) (
 				len(key),
 			)
 		}
-
-		re, err := regexp.Compile(protocol.DefaultStateRegex)
-		match := re.MatchString(key)
-		if err != nil || !match {
+		match := ts.keyReg.MatchString(key)
+		if !match {
 			return nil, fmt.Errorf(
 				"expect key no special characters, but got key:[%s]. letter, number, dot and underline are allowed",
 				key,
