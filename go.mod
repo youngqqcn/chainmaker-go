@@ -3,10 +3,10 @@ module chainmaker.org/chainmaker-go
 go 1.15
 
 require (
-	chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211214114856-83c398b3db30
+	chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211214123351-e021f6d8cb59
 	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211214041159-fe0b2240f08c
-	chainmaker.org/chainmaker/consensus-chainedbft/v2 v2.0.0-20211207134138-c082d96d81e8
-	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211214033908-a9183a7b963a
+	chainmaker.org/chainmaker/consensus-chainedbft/v2 v2.0.0-20211214032204-5f155aeeb5a2
+	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211214121831-4dd49113fb25
 	chainmaker.org/chainmaker/consensus-maxbft/v2 v2.0.0-20211210081411-5ef693cd806f
 	chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20211213100300-17d8e769f98e
 	chainmaker.org/chainmaker/consensus-solo/v2 v2.0.0-20211214030920-ea0e463ad738
@@ -20,10 +20,10 @@ require (
 	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211214073209-1288f39035e8
 	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211214120754-62a8fab32ce9
 	chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211214070956-cbd556d24c45
-	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211214064027-a3882620f281
+	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211214122914-2b1b06e513cb
 	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20211129022941-e7a476018d0c
 	chainmaker.org/chainmaker/txpool-single/v2 v2.1.1-0.20211109075506-aea78872cdc6
-	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211214041912-2ba2b0c9b83d
+	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211214122833-8d8805891d58
 	chainmaker.org/chainmaker/vm-docker-go v0.0.0-20211214063103-6f6b10d166d2
 	chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20211214063845-92b7c135504e
 	chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20211214075335-8b840f5c2760
