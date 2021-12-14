@@ -2,11 +2,12 @@ package native_test1
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 
 	"chainmaker.org/chainmaker-go/test/common"
 	"chainmaker.org/chainmaker/common/v2/crypto"
