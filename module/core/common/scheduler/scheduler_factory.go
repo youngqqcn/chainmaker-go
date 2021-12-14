@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package scheduler
 
 import (
+	"regexp"
 	"sync"
 
 	"chainmaker.org/chainmaker-go/module/core/provider/conf"
@@ -40,6 +41,11 @@ func newTxScheduler(vmMgr protocol.VmManager, chainConf protocol.ChainConf, stor
 		chainConf:       chainConf,
 		StoreHelper:     storeHelper,
 	}
+	var err error
+	txScheduler.keyReg, err = regexp.Compile(protocol.DefaultStateRegex)
+	if err != nil {
+		log.Fatalf("compile default state regex error %v", err)
+	}
 	if localconf.ChainMakerConfig.MonitorConfig.Enabled {
 		txScheduler.metricVMRunTime = monitor.NewHistogramVec(monitor.SUBSYSTEM_CORE_PROPOSER_SCHEDULER, "metric_vm_run_time",
 			"VM run time metric", []float64{0.005, 0.01, 0.015, 0.05, 0.1, 1, 10}, "chainId")
@@ -62,7 +68,11 @@ func newTxSchedulerEvidence(vmMgr protocol.VmManager, chainConf protocol.ChainCo
 			StoreHelper:     storeHelper,
 		},
 	}
-
+	var err error
+	txSchedulerEvidence.delegate.keyReg, err = regexp.Compile(protocol.DefaultStateRegex)
+	if err != nil {
+		log.Fatalf("compile default state regex error %v", err)
+	}
 	if localconf.ChainMakerConfig.MonitorConfig.Enabled {
 		txSchedulerEvidence.delegate.metricVMRunTime = monitor.NewHistogramVec(
 			monitor.SUBSYSTEM_CORE_PROPOSER_SCHEDULER,

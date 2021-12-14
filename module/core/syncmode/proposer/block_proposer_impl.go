@@ -255,17 +255,19 @@ func (bp *BlockProposerImpl) proposing(height uint64, preHash []byte) *commonpb.
 			// Repeat propose block if node has proposed before at the same height
 			bp.proposalCache.SetProposedAt(height)
 			_, txsRwSet, _ := bp.proposalCache.GetProposedBlock(selfProposedBlock)
-			bp.msgBus.Publish(msgbus.ProposedBlock, &consensuspb.ProposalBlock{Block: selfProposedBlock, TxsRwSet: txsRwSet})
+			bp.msgBus.Publish(msgbus.ProposedBlock, &consensuspb.ProposalBlock{Block: selfProposedBlock,
+				TxsRwSet: txsRwSet})
 			bp.log.Infof("proposer success repeat [%d](txs:%d,hash:%x)",
-				selfProposedBlock.Header.BlockHeight, selfProposedBlock.Header.TxCount, selfProposedBlock.Header.BlockHash)
+				selfProposedBlock.Header.BlockHeight, selfProposedBlock.Header.TxCount,
+				selfProposedBlock.Header.BlockHash)
 			return nil
 		}
 		bp.proposalCache.ClearTheBlock(selfProposedBlock)
-		// Note: It is not possible to re-add the transactions in the deleted block to txpool; because some transactions may
-		// be included in other blocks to be confirmed, and it is impossible to quickly exclude these pending transactions
-		// that have been entered into the block. Comprehensive considerations, directly discard this block is the optimal
-		// choice. This processing method may only cause partial transaction loss at the current node, but it can be solved
-		// by rebroadcasting on the client side.
+		// Note: It is not possible to re-add the transactions in the deleted block to txpool; because some
+		// transactions may be included in other blocks to be confirmed, and it is impossible to quickly exclude
+		// these pending transactions that have been entered into the block. Comprehensive considerations,
+		// directly discard this block is the optimal choice. This processing method may only cause partial
+		// transaction loss at the current node, but it can be solved by rebroadcasting on the client side.
 		bp.txPool.RetryAndRemoveTxs(nil, selfProposedBlock.Txs)
 	}
 
@@ -333,9 +335,9 @@ func (bp *BlockProposerImpl) proposing(height uint64, preHash []byte) *commonpb.
 	bp.msgBus.Publish(msgbus.ProposedBlock, &consensuspb.ProposalBlock{Block: newBlock, TxsRwSet: rwSetMap})
 	//bp.log.Debugf("finalized block \n%s", utils.FormatBlock(block))
 	elapsed := utils.CurrentTimeMillisSeconds() - startTick
-	bp.log.Infof("proposer success [%d](txs:%d), time used(fetch:%d,dup:%d,vm:%v,total:%d)",
-		block.Header.BlockHeight, block.Header.TxCount,
-		fetchLasts, dupLasts, timeLasts, elapsed)
+	bp.log.Infof("proposer success [%d](txs:%d), time used(fetch:%d,dup:%d, begin DB transaction:%v, "+
+		"new snapshort:%v, vm:%v, finalize block:%v,total:%d)", block.Header.BlockHeight, block.Header.TxCount,
+		fetchLasts, dupLasts, timeLasts[0], timeLasts[1], timeLasts[2], timeLasts[3], elapsed)
 	if localconf.ChainMakerConfig.MonitorConfig.Enabled {
 		bp.metricBlockPackageTime.WithLabelValues(bp.chainId).Observe(float64(elapsed) / 1000)
 	}

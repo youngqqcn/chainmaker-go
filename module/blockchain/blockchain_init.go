@@ -472,7 +472,7 @@ func (bc *Blockchain) initVM() (err error) {
 
 		for _, vmType := range chainConfig.Vm.SupportList {
 			vmInstancesManagerProvider := componentVm.GetVmProvider(vmType)
-			vmInstancesManager, err := vmInstancesManagerProvider(bc.chainId)
+			vmInstancesManager, err := vmInstancesManagerProvider(bc.chainId, localconf.ChainMakerConfig.VMConfig)
 			if err != nil {
 				bc.log.Errorf("")
 			}
@@ -519,7 +519,7 @@ func (bc *Blockchain) initVM() (err error) {
 
 		for _, vmType := range chainConfig.Vm.SupportList {
 			vmInstancesManagerProvider := componentVm.GetVmProvider(vmType)
-			vmInstancesManager, err := vmInstancesManagerProvider(bc.chainId)
+			vmInstancesManager, err := vmInstancesManagerProvider(bc.chainId, localconf.ChainMakerConfig.VMConfig)
 			if err != nil {
 				bc.log.Errorf("")
 			}
