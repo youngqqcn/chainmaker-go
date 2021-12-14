@@ -48,6 +48,14 @@ node:
   # By default the cache size is 1000.
   cert_cache_size:   1000
 
+  # fast sync settings
+  fast_sync:
+    # Enable it or not
+    enabled: false  # [*]
+
+    # The number of blocks that did not perform fast synchronization at the end
+    min_full_blocks: 10
+
   # PKCS#11 crypto settings
   pkcs11:
     # Enable it or not

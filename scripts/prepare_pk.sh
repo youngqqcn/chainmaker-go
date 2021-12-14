@@ -128,8 +128,6 @@ function generate_config() {
     MONITOR_PORT=14321
     PPROF_PORT=24321
     TRUSTED_PORT=13301
-    DOCKER_VM_CONTAINER_NAME_PREFIX="chainmaker-vm-docker-go-container"
-    ENABLE_DOCKERVM="false"
 
     read -p "input consensus type (1-TBFT(default),5-DPOS): " tmp
     if  [ ! -z "$tmp" ] ;then
@@ -158,14 +156,6 @@ function generate_config() {
       fi
     fi
 
-    read -p "enable docker vm (YES|NO(default))" enable_dockervm
-        if  [ ! -z "$enable_dockervm" ]; then
-          if  [ $enable_dockervm == "YES" ]; then
-              ENABLE_DOCKERVM="true"
-              echo "enable docker vm"
-          fi
-        fi
-
 
     cd "${BUILD_PATH}"
     if [ -d config ]; then
@@ -191,8 +181,6 @@ function generate_config() {
         xsed "s%{monitor_port}%$(($MONITOR_PORT+$i-1))%g" node$i/chainmaker.yml
         xsed "s%{pprof_port}%$(($PPROF_PORT+$i-1))%g" node$i/chainmaker.yml
         xsed "s%{trusted_port}%$(($TRUSTED_PORT+$i-1))%g" node$i/chainmaker.yml
-        xsed "s%{enable_dockervm}%$ENABLE_DOCKERVM%g" node$i/chainmaker.yml
-        xsed "s%{dockervm_container_name}%"${DOCKER_VM_CONTAINER_NAME_PREFIX}$i"%g" node$i/chainmaker.yml
 
         system=$(uname)
 

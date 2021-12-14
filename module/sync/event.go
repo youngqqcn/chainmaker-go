@@ -45,9 +45,19 @@ type ReceivedBlocks struct {
 	EqualLevel
 }
 
+type ReceivedBlocksWithRwSets struct {
+	blkinfos []*commonPb.BlockInfo
+	from     string
+	EqualLevel
+}
+
 // processor events
 
 type ProcessBlockMsg struct {
+	EqualLevel
+}
+
+type ProcessBlockWithRwSetMsg struct {
 	EqualLevel
 }
 
