@@ -20,6 +20,7 @@ import (
 	storePb "chainmaker.org/chainmaker/pb-go/v2/store"
 	syncPb "chainmaker.org/chainmaker/pb-go/v2/sync"
 	"chainmaker.org/chainmaker/protocol/v2"
+	"chainmaker.org/chainmaker/utils/v2"
 	"github.com/gogo/protobuf/proto"
 )
 
@@ -209,7 +210,7 @@ func (sync *BlockChainSyncServer) handleBlockReq(syncMsg *syncPb.SyncMsg, from s
 		return err
 	}
 	sync.log.Debugf("receive request to get block [height: %d, batch_size: %d] from "+
-		"node [%s]", req.BlockHeight, req.BatchSize, from)
+		"node [%s]"+"WithRwset [%v]", req.BlockHeight, req.BatchSize, from, req.WithRwset)
 	if req.WithRwset {
 		return sync.sendInfos(&req, from)
 	}
@@ -228,7 +229,8 @@ func (sync *BlockChainSyncServer) sendBlocks(req *syncPb.BlockSyncReq, from stri
 			return err
 		}
 		if bz, err = proto.Marshal(&syncPb.SyncBlockBatch{
-			Data: &syncPb.SyncBlockBatch_BlockBatch{BlockBatch: &syncPb.BlockBatch{Batches: []*commonPb.Block{blk}}},
+			Data: &syncPb.SyncBlockBatch_BlockBatch{BlockBatch: &syncPb.BlockBatch{
+				Batches: []*commonPb.Block{blk}}}, WithRwset: false,
 		}); err != nil {
 			return err
 		}
@@ -253,7 +255,7 @@ func (sync *BlockChainSyncServer) sendInfos(req *syncPb.BlockSyncReq, from strin
 		info := &commonPb.BlockInfo{Block: blkRwInfo.Block, RwsetList: blkRwInfo.TxRWSets}
 		if bz, err = proto.Marshal(&syncPb.SyncBlockBatch{
 			Data: &syncPb.SyncBlockBatch_BlockinfoBatch{BlockinfoBatch: &syncPb.BlockInfoBatch{
-				Batch: []*commonPb.BlockInfo{info}}},
+				Batch: []*commonPb.BlockInfo{info}}}, WithRwset: true,
 		}); err != nil {
 			return err
 		}
@@ -372,6 +374,7 @@ func (sync *BlockChainSyncServer) validateAndCommitBlock(block *commonPb.Block) 
 		sync.log.Infof("the block: %d has been committed in the blockChainStore ", block.Header.BlockHeight)
 		return hasProcessed
 	}
+	startTick := utils.CurrentTimeMillisSeconds()
 	if err := sync.blockVerifier.VerifyBlock(block, protocol.SYNC_VERIFY); err != nil {
 		if err == commonErrors.ErrBlockHadBeenCommited {
 			sync.log.Warnf("the block: %d has been committed in the blockChainStore ", block.Header.BlockHeight)
@@ -380,6 +383,37 @@ func (sync *BlockChainSyncServer) validateAndCommitBlock(block *commonPb.Block) 
 		sync.log.Warnf("fail to verify the block whose height is %d, err: %s", block.Header.BlockHeight, err)
 		return validateFailed
 	}
+	lastTime := utils.CurrentTimeMillisSeconds() - startTick
+	sync.log.Infof("block [%d] VerifyBlock spend %d", block.Header.BlockHeight, lastTime)
+	if err := sync.blockCommitter.AddBlock(block); err != nil {
+		if err == commonErrors.ErrBlockHadBeenCommited {
+			sync.log.Warnf("the block: %d has been committed in the blockChainStore ", block.Header.BlockHeight)
+			return hasProcessed
+		}
+		sync.log.Warnf("fail to commit the block whose height is %d, err: %s", block.Header.BlockHeight, err)
+		return addErr
+	}
+	return ok
+}
+
+func (sync *BlockChainSyncServer) validateAndCommitBlockWithRwSets(block *commonPb.Block,
+	rwsets []*commonPb.TxRWSet) processedBlockStatus {
+	if blk := sync.ledgerCache.GetLastCommittedBlock(); blk != nil && blk.Header.BlockHeight >= block.Header.BlockHeight {
+		sync.log.Infof("the block: %d has been committed in the blockChainStore ", block.Header.BlockHeight)
+		return hasProcessed
+	}
+	startTick := utils.CurrentTimeMillisSeconds()
+	if err := sync.blockVerifier.VerifyBlockWithRwSets(block, rwsets, protocol.SYNC_VERIFY); err != nil {
+		if err == commonErrors.ErrBlockHadBeenCommited {
+			sync.log.Warnf("the block: %d has been committed in the blockChainStore ", block.Header.BlockHeight)
+			return hasProcessed
+		}
+		sync.log.Warnf("fail to verify the block with Rwset whose height is %d, err: %s", block.Header.BlockHeight, err)
+		return validateFailed
+	}
+	lastTime := utils.CurrentTimeMillisSeconds() - startTick
+	sync.log.Infof("block [%d] VerifyBlockWithRwSets spend %d", block.Header.BlockHeight, lastTime)
+
 	if err := sync.blockCommitter.AddBlock(block); err != nil {
 		if err == commonErrors.ErrBlockHadBeenCommited {
 			sync.log.Warnf("the block: %d has been committed in the blockChainStore ", block.Header.BlockHeight)

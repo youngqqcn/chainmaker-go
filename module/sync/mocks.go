@@ -312,6 +312,11 @@ type MockVerifyAndCommit struct {
 	receiveItem []*commonPb.Block
 }
 
+func (m *MockVerifyAndCommit) validateAndCommitBlockWithRwSets(block *commonPb.Block,
+	rwsets []*commonPb.TxRWSet) processedBlockStatus {
+	panic("implement me")
+}
+
 func NewMockVerifyAndCommit(cache protocol.LedgerCache) *MockVerifyAndCommit {
 	return &MockVerifyAndCommit{cache: cache}
 }
