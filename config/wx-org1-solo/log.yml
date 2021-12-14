@@ -9,7 +9,7 @@ log:
   system:
     log_level_default: INFO
     log_levels:
-      core: DEBUG
+      core: INFO
       net: INFO
       vm: DEBUG
       storage: DEBUG
@@ -19,6 +19,7 @@ log:
     rotation_size: 100              # 日志滚动大小，单位：MB
     log_in_console: true         # 是否展示日志到终端，仅限于调试使用
     show_color: true              # 是否打印颜色日志
+    stack_trace_level: ERROR
   brief:
     log_level_default: INFO
     file_path: ../log/org1/brief.log
