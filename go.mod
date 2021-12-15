@@ -6,11 +6,11 @@ require (
 	chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211214131153-d5cc71404186
 	chainmaker.org/chainmaker/common/v2 v2.1.1-0.20211214041159-fe0b2240f08c
 	chainmaker.org/chainmaker/consensus-chainedbft/v2 v2.0.0-20211214032204-5f155aeeb5a2
-	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211214121831-4dd49113fb25
+	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211215083026-ebe98672d703
 	chainmaker.org/chainmaker/consensus-maxbft/v2 v2.0.0-20211210081411-5ef693cd806f
 	chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20211213100300-17d8e769f98e
 	chainmaker.org/chainmaker/consensus-solo/v2 v2.0.0-20211214030920-ea0e463ad738
-	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20211214120032-9eb483ea4ef5
+	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20211215082211-98788938d916
 	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211214095113-179cc53746eb
 	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211214124610-bb7620382194
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211214124250-621f11b35ab0
@@ -20,12 +20,12 @@ require (
 	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211215062821-d83f1382c35e
 	chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211214124103-9512460ad844
 	chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211214070956-cbd556d24c45
-	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211214163009-84e91bc54e58
+	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211215075010-53b8ec88ffc8
 	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20211214125718-bd38cc2cf4bf
 	chainmaker.org/chainmaker/txpool-single/v2 v2.1.1-0.20211214125452-9037b3ed764a
 	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211214124429-d110e27a8fa2
 	chainmaker.org/chainmaker/vm-docker-go v0.0.0-20211214135447-1bf06d1b1459
-	chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20211214063845-92b7c135504e
+	chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20211215040351-c7aa52c74d2a
 	chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20211215060236-d2b2e43aa066
 	chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211214132707-4ab8964bd865
 	chainmaker.org/chainmaker/vm-wasmer/v2 v2.1.1-0.20211215060329-82ccffe66c7c
