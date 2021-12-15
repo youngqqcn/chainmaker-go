@@ -10,8 +10,6 @@ package main
 import (
 	"strings"
 
-	"chainmaker.org/chainmaker-go/tools/cmc/pubkey"
-
 	"chainmaker.org/chainmaker-go/tools/cmc/archive"
 	"chainmaker.org/chainmaker-go/tools/cmc/bulletproofs"
 	"chainmaker.org/chainmaker-go/tools/cmc/cert"
@@ -20,7 +18,9 @@ import (
 	"chainmaker.org/chainmaker-go/tools/cmc/hibe"
 	"chainmaker.org/chainmaker-go/tools/cmc/key"
 	"chainmaker.org/chainmaker-go/tools/cmc/paillier"
+	"chainmaker.org/chainmaker-go/tools/cmc/parallel"
 	"chainmaker.org/chainmaker-go/tools/cmc/payload"
+	"chainmaker.org/chainmaker-go/tools/cmc/pubkey"
 	"chainmaker.org/chainmaker-go/tools/cmc/query"
 	"chainmaker.org/chainmaker-go/tools/cmc/tee"
 	"github.com/spf13/cobra"
@@ -47,6 +47,7 @@ For detailed logs, please see ./sdk.log
 	mainCmd.AddCommand(bulletproofs.BulletproofsCMD())
 	mainCmd.AddCommand(tee.NewTeeCMD())
 	mainCmd.AddCommand(pubkey.NewPubkeyCMD())
+	mainCmd.AddCommand(parallel.ParallelCMD())
 
 	// 后续改成go-sdk
 	//mainCmd.AddCommand(payload.PayloadCMD())
