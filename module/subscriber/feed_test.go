@@ -16,15 +16,15 @@ SPDX-License-Identifier: Apache-2.0
 const LEN = 3
 
 type eventSubTest struct {
-	wg sync.WaitGroup
-	bytesCh  chan []byte
-	bytesSub Subscription
-	bytesSubscribed  chan bool
-	bytesFeed Feed
-	stringCh  []chan string
-	stringSub []Subscription
-	strSubscribed  []chan bool
-	stringFeed Feed
+	wg              sync.WaitGroup
+	bytesCh         chan []byte
+	bytesSub        Subscription
+	bytesSubscribed chan bool
+	bytesFeed       Feed
+	stringCh        []chan string
+	stringSub       []Subscription
+	strSubscribed   []chan bool
+	stringFeed      Feed
 }
 
 func (s *eventSubTest) SendStrMsg(msg string) {
@@ -40,7 +40,7 @@ func (s *eventSubTest) SendBytesMsg(msg []byte) {
 func (s *eventSubTest) SubscribeStringEvent(ch chan<- string, index int) {
 	s.stringSub[index] = s.stringFeed.Subscribe(ch)
 	s.strSubscribed[index] <- true
-	fmt.Printf("subscribe string[%v] event: %v\n",index, s.stringSub)
+	fmt.Printf("subscribe string[%v] event: %v\n", index, s.stringSub)
 }
 
 func (s *eventSubTest) SubscribeBytesEvent(ch chan<- []byte) {
@@ -51,16 +51,16 @@ func (s *eventSubTest) SubscribeBytesEvent(ch chan<- []byte) {
 
 func TestFeed(t *testing.T) {
 	et := &eventSubTest{
-		stringFeed : Feed{},
-		bytesFeed  : Feed{},
-		stringCh  : make([]chan string, LEN),
-		bytesCh   : make(chan []byte),
-		strSubscribed : make([]chan bool, LEN),
-		bytesSubscribed : make(chan bool),
-		stringSub: make([]Subscription, LEN),
+		stringFeed:      Feed{},
+		bytesFeed:       Feed{},
+		stringCh:        make([]chan string, LEN),
+		bytesCh:         make(chan []byte),
+		strSubscribed:   make([]chan bool, LEN),
+		bytesSubscribed: make(chan bool),
+		stringSub:       make([]Subscription, LEN),
 	}
 
-	for i := 0; i < LEN; i++{
+	for i := 0; i < LEN; i++ {
 		et.stringCh[i] = make(chan string)
 		et.strSubscribed[i] = make(chan bool)
 	}
@@ -68,26 +68,26 @@ func TestFeed(t *testing.T) {
 	et.wg.Add(1)
 	go func() {
 		cnt := 0
-		for{
+		for {
 			select {
-			case x0 := <- et.stringCh[0]:
+			case x0 := <-et.stringCh[0]:
 				fmt.Printf("string chan0 read data[%s]\n", x0)
-				cnt += 1
-			case x1 := <- et.stringCh[1]:
+				cnt++
+			case x1 := <-et.stringCh[1]:
 				fmt.Printf("string chan1 read data[%s]\n", x1)
-				cnt += 1
-			case x2 := <- et.stringCh[2]:
+				cnt++
+			case x2 := <-et.stringCh[2]:
 				fmt.Printf("string chan2 read data[%s]\n", x2)
-				cnt += 1
-			case y0 := <- et.bytesCh:
+				cnt++
+			case y0 := <-et.bytesCh:
 				fmt.Printf("bytes chan read data[%s]\n", string(y0))
 				et.bytesSub.Unsubscribe()
-				cnt += 1
+				cnt++
 			default:
 
 			}
 
-			if cnt == LEN + 1 {
+			if cnt == LEN+1 {
 				for i := 0; i < LEN; i++ {
 					et.stringSub[i].Unsubscribe()
 				}
@@ -102,18 +102,18 @@ func TestFeed(t *testing.T) {
 	go func() {
 		cnt := 0
 		subedCnt := 0
-		for{
+		for {
 			select {
-			case <- et.strSubscribed[0]:
-				fmt.Println("recieved subscribed string chan0")
+			case <-et.strSubscribed[0]:
+				fmt.Println("receive subscribed string chan0")
 				subedCnt++
-			case <- et.strSubscribed[1]:
-				fmt.Println("recieved subscribed string chan1")
+			case <-et.strSubscribed[1]:
+				fmt.Println("receive subscribed string chan1")
 				subedCnt++
-			case <- et.strSubscribed[2]:
-				fmt.Println("recieved subscribed string chan2")
+			case <-et.strSubscribed[2]:
+				fmt.Println("receive subscribed string chan2")
 				subedCnt++
-			case <- et.bytesSubscribed:
+			case <-et.bytesSubscribed:
 				et.SendBytesMsg([]byte("test bytes feed"))
 				cnt++
 			default:

@@ -25,10 +25,9 @@ type Subscription interface {
 type subImpl struct {
 	feed    *Feed
 	channel reflect.Value //chan<-
-	once	sync.Once
+	once    sync.Once
 	err     chan error
 }
-
 
 func (s *subImpl) Unsubscribe() {
 	s.once.Do(func() {
@@ -40,7 +39,6 @@ func (s *subImpl) Unsubscribe() {
 func (s *subImpl) Err() <-chan error {
 	return s.err
 }
-
 
 type Feed struct {
 	lock    sync.Mutex
@@ -59,7 +57,7 @@ func (f *Feed) findSub(data interface{}) int {
 
 }
 
-func (f Feed) deactivateSub(list []reflect.SelectCase, index int) []reflect.SelectCase {
+func (f *Feed) deactivateSub(list []reflect.SelectCase, index int) []reflect.SelectCase {
 	last := len(list) - 1
 	list[index], list[last] = list[last], list[index]
 	return list[:last]
@@ -77,7 +75,7 @@ func (f *Feed) typeCheck(t reflect.Type) bool {
 func (f *Feed) Subscribe(channel interface{}) Subscription {
 	val := reflect.ValueOf(channel)
 	typ := val.Type()
-	if typ.Kind() != reflect.Chan || (typ.ChanDir() & reflect.SendDir == 0) {
+	if typ.Kind() != reflect.Chan || (typ.ChanDir()&reflect.SendDir == 0) {
 		panic(errors.New("parameter is not send channel type"))
 
 	}
@@ -97,17 +95,17 @@ func (f *Feed) Subscribe(channel interface{}) Subscription {
 	return sub
 }
 
-func (f *Feed) removeSub(sub *subImpl){
+func (f *Feed) removeSub(sub *subImpl) {
 	ch := sub.channel.Interface()
 
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
 	index := f.findSub(ch)
-	f.subList = append(f.subList[:index], f.subList[index + 1:]...)
+	f.subList = append(f.subList[:index], f.subList[index+1:]...)
 }
 
-func (f *Feed) Send(data interface{})(cnt int){
+func (f *Feed) Send(data interface{}) (cnt int) {
 	val := reflect.ValueOf(data)
 	if !f.typeCheck(val.Type()) {
 		panic(feedTypeErr{op: "Send", got: val.Type(), want: f.subType})
@@ -120,12 +118,12 @@ func (f *Feed) Send(data interface{})(cnt int){
 		if subs[i].Chan.TrySend(val) {
 			subs = f.deactivateSub(subs, i)
 			cnt++
-		}else{
+		} else {
 			i++
 		}
 	}
 
-	if len(subs) == 0{
+	if len(subs) == 0 {
 		return cnt
 	}
 
@@ -133,7 +131,7 @@ func (f *Feed) Send(data interface{})(cnt int){
 		subs[i].Send = val
 	}
 
-	for{
+	for {
 		index, _, _ := reflect.Select(subs)
 		subs = f.deactivateSub(subs, index)
 		cnt++
