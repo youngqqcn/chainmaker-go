@@ -13,8 +13,6 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"chainmaker.org/chainmaker/common/v2/crypto/engine"
-
 	bcx509 "chainmaker.org/chainmaker/common/v2/crypto/x509"
 
 	"chainmaker.org/chainmaker/common/v2/cert"
@@ -170,17 +168,15 @@ func InitPKSigningMember(ac protocol.AccessControlProvider,
 	return nil, nil
 }
 
-//cryptoEngineOption convert public key by crypto engine
+//cryptoEngineOption parse public key by CryptoEngine
 func cryptoEngineOption(cert *bcx509.Certificate) error {
 	pkPem, err := cert.PublicKey.String()
 	if err != nil {
-		return fmt.Errorf("failed to get cert.PublicKey string, err = %s", err)
+		return fmt.Errorf("failed to get public key pem, err = %s", err)
 	}
-	engine.InitCryptoEngine(localconf.ChainMakerConfig.CryptoEngine, false)
-	//fmt.Printf("ac crypto engine: %s\n", localconf.ChainMakerConfig.CryptoEngine)
 	cert.PublicKey, err = asym.PublicKeyFromPEM([]byte(pkPem))
 	if err != nil {
-		return fmt.Errorf("failed to convert instance, err = %s", err.Error())
+		return fmt.Errorf("failed to parse public key, err = %s", err.Error())
 	}
 	return nil
 }
