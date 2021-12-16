@@ -77,7 +77,7 @@ func createUserContractCMD() *cobra.Command {
 		flagUserTlsKeyFilePath, flagUserTlsCrtFilePath, flagUserSignKeyFilePath, flagUserSignCrtFilePath,
 		flagSdkConfPath, flagContractName, flagVersion, flagByteCodePath, flagOrgId, flagChainId, flagSendTimes,
 		flagRuntimeType, flagTimeout, flagParams, flagSyncResult, flagEnableCertHash,
-		flagAdminKeyFilePaths, flagAdminCrtFilePaths, flagAdminOrgIds,
+		flagAdminKeyFilePaths, flagAdminCrtFilePaths, flagAdminOrgIds, flagGasLimit,
 	})
 
 	cmd.MarkFlagRequired(flagSdkConfPath)
@@ -172,7 +172,7 @@ func upgradeUserContractCMD() *cobra.Command {
 		flagUserSignKeyFilePath, flagUserSignCrtFilePath, flagUserTlsKeyFilePath, flagUserTlsCrtFilePath,
 		flagSdkConfPath, flagContractName, flagVersion, flagByteCodePath, flagOrgId, flagChainId, flagSendTimes,
 		flagRuntimeType, flagTimeout, flagParams, flagSyncResult, flagEnableCertHash,
-		flagAdminCrtFilePaths, flagAdminKeyFilePaths, flagAdminOrgIds,
+		flagAdminCrtFilePaths, flagAdminKeyFilePaths, flagAdminOrgIds, flagGasLimit,
 	})
 
 	cmd.MarkFlagRequired(flagSdkConfPath)
@@ -329,6 +329,11 @@ func createUserContract() error {
 	)
 	if err != nil {
 		return err
+	}
+
+	if gasLimit > 0 {
+		var limit = &common.Limit{GasLimit: gasLimit}
+		payload = client.AttachGasLimit(payload, limit)
 	}
 
 	endorsementEntrys := make([]*common.EndorsementEntry, len(adminKeys))
@@ -584,6 +589,11 @@ func upgradeUserContract() error {
 		pairsKv)
 	if err != nil {
 		return err
+	}
+
+	if gasLimit > 0 {
+		var limit = &common.Limit{GasLimit: gasLimit}
+		payload = client.AttachGasLimit(payload, limit)
 	}
 
 	endorsementEntrys := make([]*common.EndorsementEntry, len(adminKeys))
