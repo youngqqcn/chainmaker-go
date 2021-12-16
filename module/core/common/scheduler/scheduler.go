@@ -522,8 +522,6 @@ func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxS
 		accountMangerContract *commonPb.Contract
 		contractResultPayload *commonPb.ContractResult
 		txStatusCode          commonPb.TxStatusCode
-		chargeGasResult       *commonPb.Result
-		refundGasResult       *commonPb.Result
 	)
 
 	result := &commonPb.Result{
@@ -578,9 +576,14 @@ func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxS
 	}
 
 	// charge gas limit
-	chargeGasResult, err = ts.chargeGasLimit(accountMangerContract, tx, txSimContext, contractName, method, pk, result)
+	_, err = ts.chargeGasLimit(accountMangerContract, tx, txSimContext, contractName, method, pk, result)
 	if err != nil {
-		return chargeGasResult, specialTxType, err
+		ts.log.Errorf("charge gas limit err is %v", err)
+		result.Code = commonPb.TxStatusCode_GAS_BALANCE_NOT_ENOUGH_FAILED
+		result.Message = err.Error()
+		result.ContractResult.Code = uint32(1)
+		result.ContractResult.Message = err.Error()
+		return result, specialTxType, err
 	}
 
 	contractResultPayload, specialTxType, txStatusCode = ts.VmManager.RunContract(contract, method, byteCode,
@@ -589,10 +592,15 @@ func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxS
 	result.ContractResult = contractResultPayload
 
 	// refund gas
-	refundGasResult, err = ts.refundGas(accountMangerContract, tx, txSimContext, contractName, method, pk, result,
+	_, err = ts.refundGas(accountMangerContract, tx, txSimContext, contractName, method, pk, result,
 		contractResultPayload)
 	if err != nil {
-		return refundGasResult, specialTxType, err
+		ts.log.Errorf("refund gas err is %v", err)
+		result.Code = commonPb.TxStatusCode_INTERNAL_ERROR
+		result.Message = err.Error()
+		result.ContractResult.Code = uint32(1)
+		result.ContractResult.Message = err.Error()
+		return result, specialTxType, err
 	}
 
 	if txStatusCode == commonPb.TxStatusCode_SUCCESS {

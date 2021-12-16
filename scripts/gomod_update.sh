@@ -8,11 +8,11 @@
 
 set -x
 BRANCH=develop
+ALPHA=v2.2.0_alpha_qc
 cd ..
 
 go get chainmaker.org/chainmaker/chainconf/v2@${BRANCH}
 go get chainmaker.org/chainmaker/common/v2@${BRANCH}
-go get chainmaker.org/chainmaker/consensus-chainedbft/v2@${BRANCH}
 go get chainmaker.org/chainmaker/consensus-maxbft/v2@${BRANCH}
 go get chainmaker.org/chainmaker/consensus-dpos/v2@${BRANCH}
 go get chainmaker.org/chainmaker/consensus-raft/v2@${BRANCH}
