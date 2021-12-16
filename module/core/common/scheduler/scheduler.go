@@ -169,8 +169,9 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 	}
 
 	timeCostB := time.Since(startTime)
-	ts.log.Infof("schedule tx batch finished, success %d, txs execution cost %v, dag building cost %v, total cost %v\n",
-		len(block.Dag.Vertexes), timeCostA, timeCostB-timeCostA, timeCostB)
+	ts.log.Infof("schedule tx batch finished, success %d, txs execution cost %v, "+
+		"dag building cost %v, total used %v, tps %v\n", len(block.Dag.Vertexes), timeCostA,
+		timeCostB-timeCostA, timeCostB, float64(len(block.Dag.Vertexes))/(float64(timeCostB)/1e9))
 
 	txRWSetMap := ts.getTxRWSetTable(snapshot, block)
 	contractEventMap := ts.getContractEventMap(block)
@@ -367,7 +368,9 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 
 	<-ts.scheduleFinishC
 	snapshot.Seal()
-	ts.log.Infof("simulate with dag finished, size %d, time used %+v", len(block.Txs), time.Since(startTime))
+	timeUsed := time.Since(startTime)
+	ts.log.Infof("simulate with dag finished, size %d, time used %v, tps %v\n", len(block.Txs),
+		timeUsed, float64(len(block.Txs))/(float64(timeUsed)/1e9))
 
 	// Return the read and write set after the scheduled execution
 	for _, txRWSet := range snapshot.GetTxRWSetTable() {
