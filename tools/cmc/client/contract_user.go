@@ -103,6 +103,7 @@ func invokeUserContractCMD() *cobra.Command {
 		flagUserSignKeyFilePath, flagUserSignCrtFilePath, flagUserTlsKeyFilePath, flagUserTlsCrtFilePath,
 		flagConcurrency, flagTotalCountPerGoroutine, flagSdkConfPath, flagOrgId, flagChainId, flagSendTimes,
 		flagEnableCertHash, flagContractName, flagMethod, flagParams, flagTimeout, flagSyncResult, flagAbiFilePath,
+		flagGasLimit,
 	})
 
 	cmd.MarkFlagRequired(flagSdkConfPath)
@@ -427,7 +428,12 @@ func invokeUserContract() error {
 		}
 	}
 
-	Dispatch(client, contractName, method, kvs, evmMethod)
+	var limit *common.Limit
+	if gasLimit > 0 {
+		limit = &common.Limit{GasLimit: gasLimit}
+	}
+
+	Dispatch(client, contractName, method, kvs, evmMethod, limit)
 	return nil
 }
 

@@ -75,6 +75,8 @@ var (
 	trustMemberInfoPath string
 	trustMemberRole     string
 	trustMemberNodeId   string
+
+	gasLimit uint64
 )
 
 const (
@@ -124,6 +126,7 @@ const (
 	flagEpochID                = "epoch-id"
 	flagGrantContractList      = "grant-contract-list"
 	flagRevokeContractList     = "revoke-contract-list"
+	flagGasLimit               = "gas-limit"
 )
 
 func ClientCMD() *cobra.Command {
@@ -217,6 +220,9 @@ func init() {
 	flags.StringVar(&epochID, flagEpochID, "", "specify epoch id")
 	flags.StringSliceVar(&grantContractList, flagGrantContractList, nil, "specify grant list")
 	flags.StringSliceVar(&revokeContractList, flagRevokeContractList, nil, "specify revoke list")
+
+	// gas limit
+	flags.Uint64Var(&gasLimit, flagGasLimit, 0, "gas limit in uint64 type, default value is 0, unlimited")
 }
 
 func attachFlags(cmd *cobra.Command, names []string) {
