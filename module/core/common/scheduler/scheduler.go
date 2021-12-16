@@ -169,7 +169,7 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 	}
 
 	timeCostB := time.Since(startTime)
-	ts.log.Infof("schedule tx batch finished, success %d, txs execution cost %v, " +
+	ts.log.Infof("schedule tx batch finished, success %d, txs execution cost %v, "+
 		"dag building cost %v, total used %v, tps %v\n", len(block.Dag.Vertexes), timeCostA,
 		timeCostB-timeCostA, timeCostB, float64(len(block.Dag.Vertexes))/float64(timeCostB))
 
