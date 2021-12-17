@@ -43,7 +43,7 @@ func VerifyBlockSignatures(
 	case consensuspb.ConsensusType_HOTSTUFF:
 		return maxbft.VerifyBlockSignatures(chainConf, ac, store, block, ledger)
 	case consensuspb.ConsensusType_SOLO:
-		fallthrough
+		return nil //for rebuild-dbs
 	default:
 	}
 	return fmt.Errorf("error consensusType: %s", consensusType)
