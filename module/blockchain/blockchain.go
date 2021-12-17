@@ -20,6 +20,7 @@ import (
 const (
 	moduleNameSubscriber    = "Subscriber"
 	moduleNameStore         = "Store"
+	moduleNameOldStore      = "OldStore"
 	moduleNameLedger        = "Ledger"
 	moduleNameChainConf     = "ChainConf"
 	moduleNameAccessControl = "AccessControl"
@@ -50,6 +51,8 @@ type Blockchain struct {
 
 	// store
 	store protocol.BlockchainStore
+	// oldStore
+	oldStore protocol.BlockchainStore
 
 	// consensus
 	consensus protocol.ConsensusEngine

@@ -218,6 +218,12 @@ func (v *BlockVerifierImpl) VerifyBlock(block *commonpb.Block, mode protocol.Ver
 		if err = v.proposalCache.SetProposedBlock(newBlock, txRWSetMap, contractEventMap, false); err != nil {
 			return err
 		}
+	} else {
+		// [for rebuild-dbs]verify success, cache block and read write set
+		v.log.Debugf("[for rebuild-dbs]set proposed block(%d,%x)", newBlock.Header.BlockHeight, newBlock.Header.BlockHash)
+		if err = v.proposalCache.SetProposedBlock(newBlock, txRWSetMap, contractEventMap, false); err != nil {
+			return err
+		}
 	}
 
 	// mark transactions in block as pending status in txpool
