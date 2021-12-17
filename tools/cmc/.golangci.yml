@@ -38,7 +38,7 @@ linters-settings:
     min-len: 2
     min-occurrences: 2
   gocyclo:
-    min-complexity: 25
+    min-complexity: 30
   goimports:
   #local-prefixes: git.code.oa.com
   golint:
