@@ -7,9 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 package blockchain
 
 import (
-	commonErrors "chainmaker.org/chainmaker/common/v2/errors"
 	"os"
 	"time"
+
+	commonErrors "chainmaker.org/chainmaker/common/v2/errors"
 )
 
 // Start all the modules.

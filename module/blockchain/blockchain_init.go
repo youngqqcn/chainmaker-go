@@ -260,11 +260,16 @@ func (bc *Blockchain) initOldStore() (err error) {
 	config := &conf.StorageConfig{}
 	err = mapstructure.Decode(localconf.ChainMakerConfig.StorageConfig, config)
 	config.StorePath = config.StorePath + "-old"
-	config.BlockDbConfig.LevelDbConfig["store_path"] = config.BlockDbConfig.LevelDbConfig["store_path"].(string) + "-old"
-	config.StateDbConfig.LevelDbConfig["store_path"] = config.StateDbConfig.LevelDbConfig["store_path"].(string) + "-old"
-	config.ResultDbConfig.LevelDbConfig["store_path"] = config.ResultDbConfig.LevelDbConfig["store_path"].(string) + "-old"
-	config.HistoryDbConfig.LevelDbConfig["store_path"] = config.HistoryDbConfig.LevelDbConfig["store_path"].(string) + "-old"
-	config.TxExistDbConfig.LevelDbConfig["store_path"] = config.TxExistDbConfig.LevelDbConfig["store_path"].(string) + "-old"
+	config.BlockDbConfig.LevelDbConfig["store_path"] =
+		config.BlockDbConfig.LevelDbConfig["store_path"].(string) + "-old"
+	config.StateDbConfig.LevelDbConfig["store_path"] =
+		config.StateDbConfig.LevelDbConfig["store_path"].(string) + "-old"
+	config.ResultDbConfig.LevelDbConfig["store_path"] =
+		config.ResultDbConfig.LevelDbConfig["store_path"].(string) + "-old"
+	config.HistoryDbConfig.LevelDbConfig["store_path"] =
+		config.HistoryDbConfig.LevelDbConfig["store_path"].(string) + "-old"
+	config.TxExistDbConfig.LevelDbConfig["store_path"] =
+		config.TxExistDbConfig.LevelDbConfig["store_path"].(string) + "-old"
 	if err != nil {
 		return err
 	}
