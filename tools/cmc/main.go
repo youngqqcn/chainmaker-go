@@ -15,6 +15,7 @@ import (
 	"chainmaker.org/chainmaker-go/tools/cmc/cert"
 	"chainmaker.org/chainmaker-go/tools/cmc/client"
 	"chainmaker.org/chainmaker-go/tools/cmc/console"
+	"chainmaker.org/chainmaker-go/tools/cmc/gas"
 	"chainmaker.org/chainmaker-go/tools/cmc/hibe"
 	"chainmaker.org/chainmaker-go/tools/cmc/key"
 	"chainmaker.org/chainmaker-go/tools/cmc/paillier"
@@ -23,6 +24,7 @@ import (
 	"chainmaker.org/chainmaker-go/tools/cmc/pubkey"
 	"chainmaker.org/chainmaker-go/tools/cmc/query"
 	"chainmaker.org/chainmaker-go/tools/cmc/tee"
+	"chainmaker.org/chainmaker-go/tools/cmc/zxl"
 	"github.com/spf13/cobra"
 )
 
@@ -48,6 +50,8 @@ For detailed logs, please see ./sdk.log
 	mainCmd.AddCommand(tee.NewTeeCMD())
 	mainCmd.AddCommand(pubkey.NewPubkeyCMD())
 	mainCmd.AddCommand(parallel.ParallelCMD())
+	mainCmd.AddCommand(zxl.NewZXLCMD())
+	mainCmd.AddCommand(gas.NewGasManageCMD())
 
 	// 后续改成go-sdk
 	//mainCmd.AddCommand(payload.PayloadCMD())
