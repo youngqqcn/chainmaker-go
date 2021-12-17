@@ -6,8 +6,13 @@ contract LedgerBalance {
     function updateMyBalance(uint newBalance) public {
         balances[msg.sender] = newBalance;
     }
+
     function updateBalance(uint _newBalance, address _to) public {
         balances[_to] = _newBalance;
+    }
+
+    function increaseBalance(address _to) public {
+        balances[_to] += 1;
     }
 
     function transfer(address _to, uint256 _value) public  returns (bool success) {

@@ -28,5 +28,5 @@ chain_client:
     secret_key: xxx
 
   rpc_client:
-    # grpc客户端最大接受容量(MB)
-    max_receive_mesage_size: 16
+    max_receive_message_size: 16 # grpc客户端接收消息时，允许单条message大小的最大值(MB)
+    max_send_message_size: 16 # grpc客户端发送消息时，允许单条message大小的最大值(MB)

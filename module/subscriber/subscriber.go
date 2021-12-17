@@ -11,13 +11,12 @@ import (
 	"chainmaker.org/chainmaker-go/module/subscriber/model"
 	"chainmaker.org/chainmaker/common/v2/msgbus"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
-	feed "github.com/ethereum/go-ethereum/event"
 )
 
 // EventSubscriber - new EventSubscriber struct
 type EventSubscriber struct {
-	blockFeed         feed.Feed
-	contractEventFeed feed.Feed
+	blockFeed         Feed
+	contractEventFeed Feed
 }
 
 // OnMessage - deal msgbus.BlockInfo message
@@ -45,11 +44,11 @@ func NewSubscriber(msgBus msgbus.MessageBus) *EventSubscriber {
 }
 
 // SubscribeBlockEvent - subscribe block event
-func (s *EventSubscriber) SubscribeBlockEvent(ch chan<- model.NewBlockEvent) feed.Subscription {
+func (s *EventSubscriber) SubscribeBlockEvent(ch chan<- model.NewBlockEvent) Subscription {
 	return s.blockFeed.Subscribe(ch)
 }
 
 // SubscribeContractEvent - subscribe contract event
-func (s *EventSubscriber) SubscribeContractEvent(ch chan<- model.NewContractEvent) feed.Subscription {
+func (s *EventSubscriber) SubscribeContractEvent(ch chan<- model.NewContractEvent) Subscription {
 	return s.contractEventFeed.Subscribe(ch)
 }

@@ -920,8 +920,10 @@ func (chain *BlockCommitterImpl) AddBlock(block *commonPb.Block) (err error) {
 	} else if IfOpenConsensusMessageTurbo(chain.chainConf) {
 		// recover the block for proposer when enable the conensus message turbo function.
 		lastProposed.Header = block.Header
-		lastProposed.AdditionalData = block.AdditionalData
 	}
+
+	// put consensus qc into block
+	lastProposed.AdditionalData = block.AdditionalData
 
 	checkLasts := utils.CurrentTimeMillisSeconds() - startTick
 	dbLasts, snapshotLasts, confLasts, otherLasts, pubEvent, blockInfo, err := chain.commonCommit.CommitBlock(

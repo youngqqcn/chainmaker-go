@@ -32,3 +32,8 @@ cover.out
 test/send_proposal_request_ci/data/
 test/send_proposal_request_ci/chainmaker
 /tools/chainmaker-cryptogen/
+
+# cmc testdata crypto-config stuff
+tools/cmc/testdata/crypto-config/
+tools/cmc/testdata/crypto-config-middle-cert/
+tools/cmc/testdata/crypto-config-pk/
