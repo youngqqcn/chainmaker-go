@@ -11,8 +11,8 @@ import (
 func NewZXLCMD() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "zxl",
-		Short: "zhi xin lian command",
-		Long:  "zhi xin lian command",
+		Short: "zhixinlian command",
+		Long:  "zhixinlian command",
 	}
 
 	cmd.AddCommand(newPK2AddrCMD())

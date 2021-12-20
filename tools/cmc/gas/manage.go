@@ -210,6 +210,9 @@ func newGetGasBalanceCMD() *cobra.Command {
 					return err
 				}
 				address, err = sdk.GetZXAddressFromPKPEM(pk)
+				if err != nil {
+					return err
+				}
 			}
 
 			balance, err := cc.GetGasBalance(address)
@@ -402,6 +405,9 @@ func newGetGasAccountStatusCMD() *cobra.Command {
 					return err
 				}
 				address, err = sdk.GetZXAddressFromPKPEM(pk)
+				if err != nil {
+					return err
+				}
 			}
 
 			status, err := cc.GetGasAccountStatus(address)
