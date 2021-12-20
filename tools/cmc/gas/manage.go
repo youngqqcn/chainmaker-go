@@ -58,6 +58,8 @@ func newSetGasAdminCMD() *cobra.Command {
 				if err != nil {
 					return err
 				}
+			} else {
+				adminAddr = args[0]
 			}
 
 			payload, err := cc.CreateSetGasAdminPayload(adminAddr)
