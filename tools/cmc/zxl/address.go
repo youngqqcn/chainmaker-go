@@ -17,8 +17,8 @@ import (
 func newPK2AddrCMD() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "pk-to-addr [public key file path / pem string]",
-		Short: "get zhi xin lian address from public key file or pem string",
-		Long:  "get zhi xin lian address from public key file or pem string",
+		Short: "get zhixinlian address from public key file or pem string",
+		Long:  "get zhixinlian address from public key file or pem string",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var keyPemStr string
@@ -52,8 +52,8 @@ func newPK2AddrCMD() *cobra.Command {
 func newHex2AddrCMD() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "hex-to-addr [hex string]",
-		Short: "get zhi xin lian address from hex string",
-		Long:  "get zhi xin lian address from hex string",
+		Short: "get zhixinlian address from hex string",
+		Long:  "get zhixinlian address from hex string",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			addr, err := sdk.GetZXAddressFromPKHex(args[0])
@@ -75,8 +75,8 @@ func newHex2AddrCMD() *cobra.Command {
 func newCert2AddrCMD() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "cert-to-addr [hex string]",
-		Short: "get zhi xin lian address from cert file or pem string",
-		Long:  "get zhi xin lian address from cert file or pem string",
+		Short: "get zhixinlian address from cert file or pem string",
+		Long:  "get zhixinlian address from cert file or pem string",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var addr string
