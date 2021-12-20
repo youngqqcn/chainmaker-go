@@ -41,11 +41,32 @@ func CreateChainClient(sdkConfPath, chainId, orgId, userTlsCrtPath, userTlsKeyPa
 	return cc, nil
 }
 
+func CreateChainClientWithConfPath(sdkConfPath string, enableCertHash bool) (*sdk.ChainClient, error) {
+	cc, err := sdk.NewChainClient(
+		sdk.WithConfPath(sdkConfPath),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Enable certificate compression
+	if cc.GetAuthType() == sdk.PermissionedWithCert {
+		if enableCertHash {
+			err = cc.EnableCertHash()
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return cc, nil
+}
+
 func AttachAndRequiredFlags(cmd *cobra.Command, flags *pflag.FlagSet, names []string) {
 	cmdFlags := cmd.Flags()
 	for _, name := range names {
 		if flag := flags.Lookup(name); flag != nil {
-			cmdFlags.AddFlag(flag)
+			flagCopied := *flag
+			cmdFlags.AddFlag(&flagCopied)
 		}
 		cmd.MarkFlagRequired(name)
 	}
@@ -55,7 +76,8 @@ func AttachFlags(cmd *cobra.Command, flags *pflag.FlagSet, names []string) {
 	cmdFlags := cmd.Flags()
 	for _, name := range names {
 		if flag := flags.Lookup(name); flag != nil {
-			cmdFlags.AddFlag(flag)
+			flagCopied := *flag
+			cmdFlags.AddFlag(&flagCopied)
 		}
 	}
 }
