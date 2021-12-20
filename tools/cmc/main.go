@@ -10,6 +10,7 @@ package main
 import (
 	"strings"
 
+	"chainmaker.org/chainmaker-go/tools/cmc/address"
 	"chainmaker.org/chainmaker-go/tools/cmc/archive"
 	"chainmaker.org/chainmaker-go/tools/cmc/bulletproofs"
 	"chainmaker.org/chainmaker-go/tools/cmc/cert"
@@ -24,7 +25,6 @@ import (
 	"chainmaker.org/chainmaker-go/tools/cmc/pubkey"
 	"chainmaker.org/chainmaker-go/tools/cmc/query"
 	"chainmaker.org/chainmaker-go/tools/cmc/tee"
-	"chainmaker.org/chainmaker-go/tools/cmc/zxl"
 	"github.com/spf13/cobra"
 )
 
@@ -50,7 +50,7 @@ For detailed logs, please see ./sdk.log
 	mainCmd.AddCommand(tee.NewTeeCMD())
 	mainCmd.AddCommand(pubkey.NewPubkeyCMD())
 	mainCmd.AddCommand(parallel.ParallelCMD())
-	mainCmd.AddCommand(zxl.NewZXLCMD())
+	mainCmd.AddCommand(address.NewAddressCMD())
 	mainCmd.AddCommand(gas.NewGasManageCMD())
 
 	// 后续改成go-sdk
