@@ -67,7 +67,6 @@ chainmaker.org/chainmaker/store-badgerdb/v2 v2.1.1-0.20211214130222-5e9dc704e9bc
 chainmaker.org/chainmaker/store-badgerdb/v2 v2.1.1-0.20211214130222-5e9dc704e9bc/go.mod h1:z9zurgCovyjnuPQK8sALeAiBa5jCjNTkINOPLhb2SyE=
 chainmaker.org/chainmaker/store-leveldb/v2 v2.1.1-0.20211214130047-b87efabd33f0 h1:iWtKhQC12qLZi3uDU9dAmiJpy+iLmP9dsW6ytIeZY54=
 chainmaker.org/chainmaker/store-leveldb/v2 v2.1.1-0.20211214130047-b87efabd33f0/go.mod h1:hWvttpVNivHkcOb9WbT/u+BbKT8wa7dy8yXtxvc+4yI=
-chainmaker.org/chainmaker/store-sqldb/v2 v2.1.1-0.20211214130635-f474b108e7c9 h1:R/RtXLIKOiP3/0N9ybK23xBvYipemAH1ZSzu0deNl5s=
 chainmaker.org/chainmaker/store-sqldb/v2 v2.1.1-0.20211214130635-f474b108e7c9/go.mod h1:eM0k1sNQ7GEu5bwd5qYA4Gg71iHKsikV4PHHFhjj8yA=
 chainmaker.org/chainmaker/store-sqldb/v2 v2.1.1-0.20211220062300-4f0944b1fb26 h1:P4JcdOZ0vqWSH8oXtWOfETA8jA9xjQCTzcSU8xrDCqc=
 chainmaker.org/chainmaker/store-sqldb/v2 v2.1.1-0.20211220062300-4f0944b1fb26/go.mod h1:eM0k1sNQ7GEu5bwd5qYA4Gg71iHKsikV4PHHFhjj8yA=
@@ -88,8 +87,8 @@ chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211117144316-3f4a940e94f0/go.mod h
 chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211214041912-2ba2b0c9b83d/go.mod h1:GVJLk74fBUT1GusbJ6dvV11R8bGN56JCby4WkxXStDk=
 chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211214124429-d110e27a8fa2 h1:CCZAJuiCyNBYAUxP9aNcOX0Rk1xlT8HHC9FDqTcNJj8=
 chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211214124429-d110e27a8fa2/go.mod h1:9NY1ny1bnuad/txY/bPUKOtDQp0s4j+cMdJxR5K16X8=
-chainmaker.org/chainmaker/vm-docker-go v0.0.0-20211214135447-1bf06d1b1459 h1:XGx3201w93Ticlo4Zal4Ck1a3N7j7Zf6g8MUQe/4bFI=
-chainmaker.org/chainmaker/vm-docker-go v0.0.0-20211214135447-1bf06d1b1459/go.mod h1:Y02603hr79l4Yv2DNtwvrTG13tbnqG0pXgPH+6LW3/o=
+chainmaker.org/chainmaker/vm-docker-go v0.0.0-20211220031950-78e251dd5ac4 h1:dSZxB7K/08svdgIpjtmR9cTN02TH+yP/gjyFDToYXqc=
+chainmaker.org/chainmaker/vm-docker-go v0.0.0-20211220031950-78e251dd5ac4/go.mod h1:Y02603hr79l4Yv2DNtwvrTG13tbnqG0pXgPH+6LW3/o=
 chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20211215040351-c7aa52c74d2a h1:wycMe+23UQTKRCmF7SqctzoM2thwusRYzQs6JttuN14=
 chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20211215040351-c7aa52c74d2a/go.mod h1:deUAC76HMuNJ8kMrYQIPRMAthYrOWRD4oMcIGvDC3ZA=
 chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20211215060236-d2b2e43aa066 h1:GNxenE2vsOLCVbfSjb8OM0kn8JPFJ9W0SFDgDrBVRwE=

@@ -23,9 +23,9 @@ import (
 func newSetGasAdminCMD() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "set-admin [address]",
-		Short: "set gas admin",
-		Long:  "set gas admin",
-		Args:  cobra.ExactArgs(1),
+		Short: "set gas admin, set self as a admin if [address] not set",
+		Long:  "set gas admin, set self as a admin if [address] not set",
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			//// 1.Chain Client
 			cc, err := util.CreateChainClientWithConfPath(sdkConfPath, false)
@@ -48,7 +48,21 @@ func newSetGasAdminCMD() *cobra.Command {
 				return errors.New("admin key list is empty")
 			}
 
-			payload, err := cc.CreateSetGasAdminPayload(args[0])
+			var adminAddr string
+			if len(args) == 0 {
+				pk, err := cc.GetPublicKey().String()
+				if err != nil {
+					return err
+				}
+				adminAddr, err = sdk.GetZXAddressFromPKPEM(pk)
+				if err != nil {
+					return err
+				}
+			} else {
+				adminAddr = args[0]
+			}
+
+			payload, err := cc.CreateSetGasAdminPayload(adminAddr)
 			if err != nil {
 				return err
 			}
