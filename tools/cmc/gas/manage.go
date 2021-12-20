@@ -28,7 +28,7 @@ func newSetGasAdminCMD() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			//// 1.Chain Client
-			cc, err := util.CreateChainClient(sdkConfPath, "", "", "", "", "", "")
+			cc, err := util.CreateChainClientWithConfPath(sdkConfPath, false)
 			if err != nil {
 				return err
 			}
@@ -100,7 +100,7 @@ func newGetGasAdminCMD() *cobra.Command {
 		Long:  "get gas admin",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			//// 1.Chain Client
-			cc, err := util.CreateChainClient(sdkConfPath, "", "", "", "", "", "")
+			cc, err := util.CreateChainClientWithConfPath(sdkConfPath, false)
 			if err != nil {
 				return err
 			}
@@ -139,7 +139,7 @@ func newRechargeGasCMD() *cobra.Command {
 		Long:  "recharge gas for account",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			//// 1.Chain Client
-			cc, err := util.CreateChainClient(sdkConfPath, "", "", "", "", "", "")
+			cc, err := util.CreateChainClientWithConfPath(sdkConfPath, false)
 			if err != nil {
 				return err
 			}
@@ -192,7 +192,7 @@ func newGetGasBalanceCMD() *cobra.Command {
 		Long:  "get gas balance of account, get self balance if --address not set",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			//// 1.Chain Client
-			cc, err := util.CreateChainClient(sdkConfPath, "", "", "", "", "", "")
+			cc, err := util.CreateChainClientWithConfPath(sdkConfPath, false)
 			if err != nil {
 				return err
 			}
@@ -246,7 +246,7 @@ func newRefundGasCMD() *cobra.Command {
 		Long:  "refund gas for account",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			//// 1.Chain Client
-			cc, err := util.CreateChainClient(sdkConfPath, "", "", "", "", "", "")
+			cc, err := util.CreateChainClientWithConfPath(sdkConfPath, false)
 			if err != nil {
 				return err
 			}
@@ -293,7 +293,7 @@ func newFrozenGasAccountCMD() *cobra.Command {
 		Long:  "frozen gas account",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			//// 1.Chain Client
-			cc, err := util.CreateChainClient(sdkConfPath, "", "", "", "", "", "")
+			cc, err := util.CreateChainClientWithConfPath(sdkConfPath, false)
 			if err != nil {
 				return err
 			}
@@ -340,7 +340,7 @@ func newUnfrozenGasAccountCMD() *cobra.Command {
 		Long:  "unfrozen gas account",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			//// 1.Chain Client
-			cc, err := util.CreateChainClient(sdkConfPath, "", "", "", "", "", "")
+			cc, err := util.CreateChainClientWithConfPath(sdkConfPath, false)
 			if err != nil {
 				return err
 			}
@@ -387,7 +387,7 @@ func newGetGasAccountStatusCMD() *cobra.Command {
 		Long:  "get gas account status, get self gas account status if --address not set",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			//// 1.Chain Client
-			cc, err := util.CreateChainClient(sdkConfPath, "", "", "", "", "", "")
+			cc, err := util.CreateChainClientWithConfPath(sdkConfPath, false)
 			if err != nil {
 				return err
 			}
