@@ -253,23 +253,25 @@ func (bc *Blockchain) initOldStore() (err error) {
 	}
 	var storeFactory store.Factory // nolint: typecheck
 	storeLogger := logger.GetLoggerByChain(logger.MODULE_STORAGE, bc.chainId)
-	err = container.Register(func() protocol.Logger { return storeLogger }, container.Name("oldStore"))
+	err = container.Register(func() protocol.Logger { return storeLogger },
+		container.Name("oldStore"))
 	if err != nil {
 		return err
 	}
 	config := &conf.StorageConfig{}
 	err = mapstructure.Decode(localconf.ChainMakerConfig.StorageConfig, config)
-	config.StorePath = config.StorePath + "-old"
+	timeS, _ := localconf.ChainMakerConfig.StorageConfig["back_path"].(string)
+	config.StorePath = config.StorePath + "-" + timeS
 	config.BlockDbConfig.LevelDbConfig["store_path"] =
-		config.BlockDbConfig.LevelDbConfig["store_path"].(string) + "-old"
+		config.BlockDbConfig.LevelDbConfig["store_path"].(string) + "-" + timeS
 	config.StateDbConfig.LevelDbConfig["store_path"] =
-		config.StateDbConfig.LevelDbConfig["store_path"].(string) + "-old"
+		config.StateDbConfig.LevelDbConfig["store_path"].(string) + "-" + timeS
 	config.ResultDbConfig.LevelDbConfig["store_path"] =
-		config.ResultDbConfig.LevelDbConfig["store_path"].(string) + "-old"
+		config.ResultDbConfig.LevelDbConfig["store_path"].(string) + "-" + timeS
 	config.HistoryDbConfig.LevelDbConfig["store_path"] =
-		config.HistoryDbConfig.LevelDbConfig["store_path"].(string) + "-old"
+		config.HistoryDbConfig.LevelDbConfig["store_path"].(string) + "-" + timeS
 	config.TxExistDbConfig.LevelDbConfig["store_path"] =
-		config.TxExistDbConfig.LevelDbConfig["store_path"].(string) + "-old"
+		config.TxExistDbConfig.LevelDbConfig["store_path"].(string) + "-" + timeS
 	if err != nil {
 		return err
 	}

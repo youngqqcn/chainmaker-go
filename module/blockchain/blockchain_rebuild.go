@@ -10,6 +10,8 @@ import (
 	"os"
 	"time"
 
+	"chainmaker.org/chainmaker/localconf/v2"
+
 	commonErrors "chainmaker.org/chainmaker/common/v2/errors"
 )
 
@@ -22,9 +24,20 @@ func (bc *Blockchain) RebuildDbs() {
 	} else {
 		bc.log.Infof("lastBlock=%d", lastBlock.Header.BlockHeight)
 	}
-	var i uint64
+	var i, height uint64
 	var preHash []byte
-	for i = 1; i <= lastBlock.GetHeader().BlockHeight; i++ {
+	bHeight, _ := localconf.ChainMakerConfig.StorageConfig["rebuild_block_height"].(int)
+	if bHeight <= 1 {
+		bc.log.Errorf("error block_height!")
+		bc.Stop()
+		os.Exit(0)
+	}
+	if uint64(bHeight) <= lastBlock.GetHeader().BlockHeight {
+		height = uint64(bHeight)
+	} else {
+		height = lastBlock.GetHeader().BlockHeight
+	}
+	for i = 1; i <= height; i++ {
 		block, err := bc.oldStore.GetBlock(uint64(i))
 		if err != nil {
 			bc.log.Errorf("get block %d err(%s)", i, err.Error())
