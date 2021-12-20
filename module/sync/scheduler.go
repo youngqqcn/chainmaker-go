@@ -118,6 +118,7 @@ func (sch *scheduler) handleNodeStatus(msg NodeStatusMsg) {
 }
 
 func (sch *scheduler) addPendingBlocksAndUpdatePendingHeight(peerHeight uint64) {
+	// 收集节点状态阶段 `handleNodeStatus` 添加 `blockStates` 长度检查和状态检查，保证最多发出 `bufferSize` 个区块数据请求
 	// change '>' to '>=' indicate full range check
 	if uint64(len(sch.blockStates)) >= sch.maxPendingBlocks {
 		return
@@ -148,6 +149,7 @@ func (sch *scheduler) handleDataDetection() {
 		}
 	}
 	sch.pendingRecvHeight = blk.Header.BlockHeight + 1
+	// `DataDetection` 中不对 `pendingRecvHeight` 高度的状态做状态重置，防止发起重复的数据请求，这部分逻辑由活性检查处理
 	// match pendingRecvHeight to (local commit block height + 1)
 	if _, exists := sch.blockStates[sch.pendingRecvHeight]; !exists {
 		sch.blockStates[sch.pendingRecvHeight] = newBlock
@@ -172,7 +174,6 @@ func (sch *scheduler) handleLivinessMsg() {
 func (sch *scheduler) handleScheduleMsg() (queue.Item, error) {
 	var (
 		err           error
-		isFast        bool
 		bz            []byte
 		peer          string
 		pendingHeight uint64
@@ -186,27 +187,19 @@ func (sch *scheduler) handleScheduleMsg() (queue.Item, error) {
 		sch.log.Debugf("pendingHeight: %d, block status %v", pendingHeight, sch.blockStates)
 		return nil, nil
 	}
-	isFastSync := localconf.ChainMakerConfig.NodeConfig.FastSyncConfig.Enable
-	minFullBlocks := localconf.ChainMakerConfig.NodeConfig.FastSyncConfig.MinFullBlocks
-	peer = sch.selectPeer(pendingHeight + uint64(minFullBlocks))
-	// len(peer) != 0 indicates that there is still a block at position minFullBlocks afterwards, perform fast sync;
-	//otherwise, perform normal sync
-	if len(peer) != 0 && isFastSync {
-		isFast = true
-	} else {
-		isFast = false
+	if peer = sch.selectPeer(pendingHeight); len(peer) == 0 {
+		sch.log.Debugf("no peers have block [%d] ", pendingHeight)
+		return nil, nil
 	}
 	var bsr = syncPb.BlockSyncReq{
-		BlockHeight: pendingHeight, BatchSize: sch.BatchesizeInEachReq, WithRwset: isFast,
+		BlockHeight: pendingHeight,
+		BatchSize:   sch.BatchesizeInEachReq,
+		WithRwset:   localconf.ChainMakerConfig.NodeConfig.FastSyncConfig.Enable,
 	}
 	if bz, err = proto.Marshal(&bsr); err != nil {
 		return nil, err
 	}
 
-	if peer = sch.selectPeer(pendingHeight); len(peer) == 0 {
-		sch.log.Debugf("no peers have block [%d] ", pendingHeight)
-		return nil, nil
-	}
 	sch.lastRequest = time.Now()
 	for i := pendingHeight; i <= sch.peers[peer] && i < sch.BatchesizeInEachReq+pendingHeight; i++ {
 		sch.blockStates[i] = pendingBlock
@@ -299,6 +292,8 @@ func (sch *scheduler) getPendingReqInPeer(peer string) int {
 }
 
 func (sch *scheduler) handleSyncedBlockMsg(msg *SyncedBlockMsg) (queue.Item, error) {
+	// 针对 `SyncMsg_BLOCK_SYNC_RESP` 消息处理函数，添加接收区块数量检查，超过 `bufferSize` 的额外信息会被暂时丢弃，
+	//保证缓存的数据量可控
 	// if len(receivedBlocks) > maxPendingBlocks, do not handle the msg
 	if len(sch.receivedBlocks) > int(sch.maxPendingBlocks) {
 		return nil, nil
@@ -320,6 +315,8 @@ func (sch *scheduler) handleSyncedBlockMsg(msg *SyncedBlockMsg) (queue.Item, err
 			delete(sch.pendingBlocks, blkinfo.Block.Header.BlockHeight)
 			delete(sch.pendingTime, blkinfo.Block.Header.BlockHeight)
 			if state, exist := sch.blockStates[blkinfo.Block.Header.BlockHeight]; exist {
+				// 添加重复区块的检查，重复的区块不会被放入优先级队列中，
+				//不做检查会将收到重复的区块返回数据放入优先级队列（该队列没有长度检查），这部分有内存泄漏的风险
 				// if state == receivedBlock do not put into the msg queue, maintain needToProcess = false
 				if state != receivedBlock {
 					needToProcess = true

@@ -392,6 +392,71 @@ func IsRWSetHashValid(block *commonPb.Block, hashType string) error {
 	return nil
 }
 
+// IsRWSetRootValid, to check tx RWSetRoot is valid
+func IsRWSetRootValid(block *commonPb.Block, hashType string) error {
+	var (
+		err       error
+		rwSetRoot []byte
+	)
+	if rwSetRoot, err = utils.CalcRWSetRoot(hashType, block.Txs); err != nil {
+		return err
+	}
+	if !bytes.Equal(rwSetRoot, block.Header.RwSetRoot) {
+		return fmt.Errorf("RwSetRoot verify failed, block height: %d, expect: %x, get: %x",
+			block.Header.BlockHeight, block.Header.RwSetRoot, rwSetRoot)
+	}
+	return nil
+}
+
+// IsRWSetValid, to check every tx RWSetHash is valid
+func IsRWSetValid(block *commonPb.Block, txRWSetMap map[string]*commonPb.TxRWSet, hashType string) error {
+	var (
+		err       error
+		rwSetHash []byte
+	)
+	for _, tx := range block.Txs {
+		rwSet := txRWSetMap[tx.Payload.TxId]
+		if rwSet.Size() == 0 {
+			return fmt.Errorf("missing tx in txRWSetMap, block heught: %d, txID: %x",
+				block.Header.BlockHeight, tx.Payload.TxId)
+		}
+		if rwSetHash, err = utils.CalcRWSetHash(hashType, rwSet); err != nil {
+			return fmt.Errorf("calculate tx read-write set hash failed, %s", err)
+		}
+		if !bytes.Equal(rwSetHash, tx.Result.RwSetHash) {
+			return fmt.Errorf("verify tx read-write set hash failed, %s", err)
+		}
+	}
+	return nil
+}
+
+// IsTxResultValid, to check every tx Result with TxRoot is valid
+func IsTxResultValid(block *commonPb.Block, hashType string) error {
+	// calculate complete tx hash, include tx.Header, tx.Payload, tx.Result
+	var (
+		err      error
+		txHash   []byte
+		txHashes = make([][]byte, len(block.Txs))
+		txRoot   []byte
+	)
+	for i, tx := range block.Txs {
+		if txHash, err = utils.CalcTxHash(hashType, tx); err != nil {
+			return err
+		}
+		txHashes[i] = txHash
+	}
+
+	txRoot, err = hash.GetMerkleRoot(hashType, txHashes)
+	if err != nil {
+		return err
+	}
+	if !bytes.Equal(txRoot, block.Header.TxRoot) {
+		return fmt.Errorf("TxRoot verify failed, block height: %d, expect: %x, get: %x",
+			block.Header.BlockHeight, block.Header.TxRoot, txRoot)
+	}
+	return nil
+}
+
 // getChainVersion, get chain version from config.
 // If not access from config, use default value.
 // @Deprecated
@@ -667,6 +732,19 @@ func (vb *VerifierBlock) ValidateBlockWithRWSets(
 	//if err != nil {
 	//	return nil, nil, timeLasts, fmt.Errorf("simulate %s", err)
 	//}
+
+	// 1.1 verify txRWSetMap with block.Header.RwSetRoot, verify txRWSet to it's txRWSetHash
+	if err = IsRWSetRootValid(block, hashType); err != nil {
+		return nil, timeLasts, err
+	}
+	if err = IsRWSetValid(block, txRWSetMap, hashType); err != nil {
+		return nil, timeLasts, err
+	}
+
+	// 1.2 verity tx result with block.Header.TxRoot
+	if err = IsTxResultValid(block, hashType); err != nil {
+		return nil, timeLasts, err
+	}
 
 	vmLasts := utils.CurrentTimeMillisSeconds() - startVMTick
 	timeLasts = append(timeLasts, vmLasts)

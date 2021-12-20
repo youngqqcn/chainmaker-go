@@ -254,3 +254,38 @@ func TestSchedulerFlow(t *testing.T) {
 	require.NoError(t, err)
 	require.EqualValues(t, 98, len(sch.blockStates))
 }
+
+func TestAddPendingBlocksAndUpdatePendingHeight(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSender := NewMockSender()
+	mockLedger := newMockLedgerCache(ctrl, &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 0}})
+	sch := newScheduler(mockSender, mockLedger, 128, time.Second, time.Second*3, 1, &test.GoLogger{})
+
+	// init sch
+	_, _ = sch.handler(NodeStatusMsg{from: "node1", msg: syncPb.BlockHeightBCM{BlockHeight: 256}})
+	require.EqualValues(t, 1, len(sch.peers))
+	require.EqualValues(t, 128, len(sch.blockStates))
+
+	// set state
+	for i := range sch.blockStates {
+		sch.blockStates[i] = pendingBlock
+	}
+
+	// test length 127 newBlock
+	sch.blockStates[127] = newBlock
+	delete(sch.blockStates, 128)
+	sch.addPendingBlocksAndUpdatePendingHeight(128)
+	require.EqualValues(t, 128, len(sch.blockStates))
+
+	// test length 128 newBlock
+	sch.blockStates[127] = pendingBlock
+	sch.blockStates[128] = newBlock
+	sch.addPendingBlocksAndUpdatePendingHeight(128)
+	require.EqualValues(t, 128, len(sch.blockStates))
+
+	// test length 128 pendingBlock
+	sch.blockStates[128] = pendingBlock
+	sch.addPendingBlocksAndUpdatePendingHeight(128)
+	require.EqualValues(t, 128, len(sch.blockStates))
+}
