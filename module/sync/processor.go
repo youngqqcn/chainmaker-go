@@ -51,15 +51,15 @@ func newProcessor(verify verifyAndAddBlock, ledgerCache protocol.LedgerCache, lo
 func (pro *processor) handler(event queue.Item) (queue.Item, error) {
 	switch msg := event.(type) {
 	case *ReceivedBlocks:
-		pro.log.Infof("receive [ReceivedBlocks] msg, height: %d, start handle...", msg.blks[0].Header.BlockHeight)
+		pro.log.Debugf("receive [ReceivedBlocks] msg, height: %d, start handle...", msg.blks[0].Header.BlockHeight)
 		pro.handleReceivedBlocks(msg)
 	case *ReceivedBlocksWithRwSets:
 		pro.handleReceivedBlocksWithRwSets(msg)
 	case ProcessBlockMsg:
-		//pro.log.Info("receive [ProcessBlockMsg] msg, start handle...")
+		//pro.log.Debugf("receive [ProcessBlockMsg] msg, start handle...")
 		return pro.handleProcessBlockMsg()
 	case DataDetection:
-		pro.log.Info("receive [DataDetection] msg, start handle...")
+		pro.log.Debugf("receive [DataDetection] msg, start handle...")
 		pro.handleDataDetection()
 	}
 	return nil, nil
@@ -109,7 +109,7 @@ func (pro *processor) handleProcessBlockMsg() (queue.Item, error) {
 		//pro.log.Debugf("block [%d] not find in queue.", pendingBlockHeight)
 		return nil, nil
 	}
-	pro.log.Infof("process block [height: %d] start, status [%d]", info.blk.Header.BlockHeight, status)
+	pro.log.Debugf("process block [height: %d] start, status [%d]", info.blk.Header.BlockHeight, status)
 	if info.withRWSets && isFastSync {
 		if status = pro.validateAndCommitBlockWithRwSets(info.blk, info.rwsets); status == ok || status == hasProcessed {
 			pro.hasCommitBlock++
@@ -121,7 +121,7 @@ func (pro *processor) handleProcessBlockMsg() (queue.Item, error) {
 	}
 	delete(pro.queue, pendingBlockHeight)
 	pro.log.Infof("process block [height: %d] success, status [%d]", info.blk.Header.BlockHeight, status)
-	pro.log.Infof("current processor status is:  %s", pro.getServiceState())
+	pro.log.Debugf("current processor status is:  %s", pro.getServiceState())
 	return ProcessedBlockResp{
 		status: status,
 		height: info.blk.Header.BlockHeight,

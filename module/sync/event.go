@@ -126,6 +126,14 @@ type ReceivedBlocksWithRwSets struct {
 	EqualLevel
 }
 
+func (m ReceivedBlocksWithRwSets) Level() int {
+	return priorityTop
+}
+
+func (m ReceivedBlocksWithRwSets) Compare(other queue.Item) int {
+	return Compare(m, other)
+}
+
 // processor events
 
 type ProcessBlockMsg struct {

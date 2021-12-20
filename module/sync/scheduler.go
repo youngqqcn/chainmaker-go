@@ -76,22 +76,22 @@ func newScheduler(sender syncSender, ledger protocol.LedgerCache,
 func (sch *scheduler) handler(event queue.Item) (queue.Item, error) {
 	switch msg := event.(type) {
 	case NodeStatusMsg:
-		sch.log.Info("receive [NodeStatusMsg] msg, start handle...")
+		sch.log.Debug("receive [NodeStatusMsg] msg, start handle...")
 		sch.handleNodeStatus(msg)
 	case LivenessMsg:
-		sch.log.Info("receive [LivenessMsg] msg, start handle...")
+		sch.log.Debug("receive [LivenessMsg] msg, start handle...")
 		sch.handleLivinessMsg()
 	case SchedulerMsg:
-		//sch.log.Info("receive [SchedulerMsg] msg, start handle...")
+		//sch.log.Debug("receive [SchedulerMsg] msg, start handle...")
 		return sch.handleScheduleMsg()
 	case *SyncedBlockMsg:
-		sch.log.Info("receive [SyncedBlockMsg] msg, start handle...")
+		sch.log.Debug("receive [SyncedBlockMsg] msg, start handle...")
 		return sch.handleSyncedBlockMsg(msg)
 	case ProcessedBlockResp:
-		sch.log.Info("receive [ProcessedBlockResp] msg, start handle...")
+		sch.log.Debug("receive [ProcessedBlockResp] msg, start handle...")
 		return sch.handleProcessedBlockResp(msg)
 	case DataDetection:
-		sch.log.Info("receive [DataDetection] msg, start handle...")
+		sch.log.Debug("receive [DataDetection] msg, start handle...")
 		sch.handleDataDetection()
 	}
 	return nil, nil
@@ -118,6 +118,7 @@ func (sch *scheduler) handleNodeStatus(msg NodeStatusMsg) {
 }
 
 func (sch *scheduler) addPendingBlocksAndUpdatePendingHeight(peerHeight uint64) {
+	// change '>' to '>=' indicate full range check
 	if uint64(len(sch.blockStates)) >= sch.maxPendingBlocks {
 		return
 	}
@@ -127,7 +128,8 @@ func (sch *scheduler) addPendingBlocksAndUpdatePendingHeight(peerHeight uint64) 
 	}
 	for i := sch.pendingRecvHeight; i <= peerHeight && i < sch.pendingRecvHeight+sch.maxPendingBlocks; i++ {
 		if _, exist := sch.blockStates[i]; !exist {
-			if len(sch.blockStates) > bufferSize {
+			// add blockState length check
+			if len(sch.blockStates) > int(sch.maxPendingBlocks) {
 				break
 			}
 			sch.blockStates[i] = newBlock
@@ -146,10 +148,10 @@ func (sch *scheduler) handleDataDetection() {
 		}
 	}
 	sch.pendingRecvHeight = blk.Header.BlockHeight + 1
-	if _, exists := sch.blockStates[sch.pendingRecvHeight]; exists {
-		return
+	// match pendingRecvHeight to (local commit block height + 1)
+	if _, exists := sch.blockStates[sch.pendingRecvHeight]; !exists {
+		sch.blockStates[sch.pendingRecvHeight] = newBlock
 	}
-	sch.blockStates[sch.pendingRecvHeight] = newBlock
 }
 
 func (sch *scheduler) handleLivinessMsg() {
@@ -297,7 +299,8 @@ func (sch *scheduler) getPendingReqInPeer(peer string) int {
 }
 
 func (sch *scheduler) handleSyncedBlockMsg(msg *SyncedBlockMsg) (queue.Item, error) {
-	if len(sch.receivedBlocks) > bufferSize {
+	// if len(receivedBlocks) > maxPendingBlocks, do not handle the msg
+	if len(sch.receivedBlocks) > int(sch.maxPendingBlocks) {
 		return nil, nil
 	}
 	blkBatch := syncPb.SyncBlockBatch{}
@@ -317,6 +320,7 @@ func (sch *scheduler) handleSyncedBlockMsg(msg *SyncedBlockMsg) (queue.Item, err
 			delete(sch.pendingBlocks, blkinfo.Block.Header.BlockHeight)
 			delete(sch.pendingTime, blkinfo.Block.Header.BlockHeight)
 			if state, exist := sch.blockStates[blkinfo.Block.Header.BlockHeight]; exist {
+				// if state == receivedBlock do not put into the msg queue, maintain needToProcess = false
 				if state != receivedBlock {
 					needToProcess = true
 					sch.blockStates[blkinfo.Block.Header.BlockHeight] = receivedBlock

@@ -221,6 +221,7 @@ func (sync *BlockChainSyncServer) handleBlockReq(syncMsg *syncPb.SyncMsg, from s
 		return err
 	}
 
+	// create a key-value pair when receive block request, ignore repeat request
 	processKey := fmt.Sprintf("%s_%d", from, req.BlockHeight)
 	if _, loaded = sync.requestCache.LoadOrStore(processKey, nil); loaded {
 		return nil
@@ -389,6 +390,7 @@ func (sync *BlockChainSyncServer) loop() {
 	}
 }
 
+// auto check block request from other node
 func (sync *BlockChainSyncServer) blockRequestEntrance() {
 	ticker := time.NewTicker(sync.conf.blockRequestTime)
 	dealFunc := func(key, value interface{}) bool {
