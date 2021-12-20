@@ -11,7 +11,6 @@ BRANCH=develop
 NEW_BRANCH=v2.2.0_alpha_qc
 PRE_LOG="【log】 "
 
-
 projects=("pb-go"
   "common"
   "protocol"
@@ -46,14 +45,14 @@ projects=("pb-go"
   "consensus-tbft"
   "chainmaker-go"
 )
-BRANCH=develop
-BRANCH_NEW=v2.2.0_alpha_qc
 
 cd ../..
+mkdir -p chainmaker
+cd chainmaker
 for project in ${projects[*]}; do
   #如果文件夹不存在，则克隆
   if [ ! -d ${project} ]; then
-    git clone chainmaker.org/chainmaker/${project}.git
+    git clone git@git.code.tencent.com:ChainMaker/${project}.git
   fi
 
   cd $project
