@@ -103,7 +103,7 @@ lint:
 	cd tools/scanner && golangci-lint run ./...
 
 gomod:
-	cd scripts && ./gomod_update.sh
+	cd scripts && ./gomod_update.sh ${VERSION}
 
 test-deploy:
 	cd scripts/test/ && ./quick_deploy.sh

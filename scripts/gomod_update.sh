@@ -7,8 +7,10 @@
 #
 
 set -x
-BRANCH=develop
-ALPHA=v2.2.0_alpha_qc
+BRANCH=$1
+if [[ ! -n $BRANCH ]]; then
+  BRANCH="v2.2.0_alpha_qc"
+fi
 cd ..
 
 go get chainmaker.org/chainmaker/chainconf/v2@${BRANCH}
