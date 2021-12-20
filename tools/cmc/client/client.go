@@ -76,7 +76,8 @@ var (
 	trustMemberRole     string
 	trustMemberNodeId   string
 
-	gasLimit uint64
+	gasLimit  uint64
+	gasEnable bool
 )
 
 const (
@@ -127,6 +128,7 @@ const (
 	flagGrantContractList      = "grant-contract-list"
 	flagRevokeContractList     = "revoke-contract-list"
 	flagGasLimit               = "gas-limit"
+	flagGasEnable              = "gas-enable"
 )
 
 func ClientCMD() *cobra.Command {
@@ -141,6 +143,7 @@ func ClientCMD() *cobra.Command {
 	clientCmd.AddCommand(getChainMakerServerVersionCMD())
 	clientCmd.AddCommand(certManageCMD())
 	clientCmd.AddCommand(blockChainsCMD())
+	clientCmd.AddCommand(enableOrDisableGasCMD())
 
 	return clientCmd
 }
@@ -223,6 +226,7 @@ func init() {
 
 	// gas limit
 	flags.Uint64Var(&gasLimit, flagGasLimit, 0, "gas limit in uint64 type, default value is 0, unlimited")
+	flags.BoolVar(&gasEnable, flagGasEnable, false, "enable or disable gas feature")
 }
 
 func attachFlags(cmd *cobra.Command, names []string) {
