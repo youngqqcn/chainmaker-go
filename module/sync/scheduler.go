@@ -75,29 +75,29 @@ func newScheduler(sender syncSender, ledger protocol.LedgerCache,
 
 func (sch *scheduler) handler(event queue.Item) (queue.Item, error) {
 	switch msg := event.(type) {
-	case NodeStatusMsg:
+	case *NodeStatusMsg:
 		sch.log.Debug("receive [NodeStatusMsg] msg, start handle...")
 		sch.handleNodeStatus(msg)
-	case LivenessMsg:
+	case *LivenessMsg:
 		sch.log.Debug("receive [LivenessMsg] msg, start handle...")
 		sch.handleLivinessMsg()
-	case SchedulerMsg:
+	case *SchedulerMsg:
 		//sch.log.Debug("receive [SchedulerMsg] msg, start handle...")
 		return sch.handleScheduleMsg()
 	case *SyncedBlockMsg:
 		sch.log.Debug("receive [SyncedBlockMsg] msg, start handle...")
 		return sch.handleSyncedBlockMsg(msg)
-	case ProcessedBlockResp:
+	case *ProcessedBlockResp:
 		sch.log.Debug("receive [ProcessedBlockResp] msg, start handle...")
 		return sch.handleProcessedBlockResp(msg)
-	case DataDetection:
+	case *DataDetection:
 		sch.log.Debug("receive [DataDetection] msg, start handle...")
 		sch.handleDataDetection()
 	}
 	return nil, nil
 }
 
-func (sch *scheduler) handleNodeStatus(msg NodeStatusMsg) {
+func (sch *scheduler) handleNodeStatus(msg *NodeStatusMsg) {
 	localCurrBlk := sch.ledger.GetLastCommittedBlock()
 	if old, exist := sch.peers[msg.from]; exist {
 		if old > msg.msg.BlockHeight || sch.isPeerArchivedTooHeight(localCurrBlk.Header.BlockHeight,
@@ -244,9 +244,7 @@ func (sch *scheduler) isNeedSync() bool {
 		panic(err)
 	}
 	max := sch.maxHeight()
-	// The reason for the interval of 1 block is that the block to
-	// be synchronized is being processed by the consensus module.
-	return currHeight+1 < max || (currHeight+1 == max && time.Since(sch.lastRequest) > sch.reqTimeThreshold)
+	return currHeight <= max
 }
 
 func (sch *scheduler) selectPeer(pendingHeight uint64) string {
@@ -306,61 +304,38 @@ func (sch *scheduler) handleSyncedBlockMsg(msg *SyncedBlockMsg) (queue.Item, err
 	isFastSync := localconf.ChainMakerConfig.NodeConfig.FastSyncConfig.Enable
 	withRWSet := blkBatch.WithRwset
 	sch.log.Debugf("isFastSync: %v ,withRWSet: %v", isFastSync, withRWSet)
-	if isFastSync && withRWSet {
-		if len(blkBatch.GetBlockinfoBatch().Batch) == 0 {
-			sch.log.Info("GetBlockinfoBatch null")
-			return nil, nil
-		}
-		for _, blkinfo := range blkBatch.GetBlockinfoBatch().GetBatch() {
-			delete(sch.pendingBlocks, blkinfo.Block.Header.BlockHeight)
-			delete(sch.pendingTime, blkinfo.Block.Header.BlockHeight)
-			if state, exist := sch.blockStates[blkinfo.Block.Header.BlockHeight]; exist {
-				// 添加重复区块的检查，重复的区块不会被放入优先级队列中，
-				//不做检查会将收到重复的区块返回数据放入优先级队列（该队列没有长度检查），这部分有内存泄漏的风险
-				// if state == receivedBlock do not put into the msg queue, maintain needToProcess = false
-				if state != receivedBlock {
-					needToProcess = true
-					sch.blockStates[blkinfo.Block.Header.BlockHeight] = receivedBlock
-					sch.receivedBlocks[blkinfo.Block.Header.BlockHeight] = msg.from
-				}
-			}
-			sch.log.Debugf("received block [height:%d:%x] needToProcess: %v from "+
-				"node [%s]", blkinfo.Block.Header.BlockHeight, blkinfo.Block.Header.BlockHash, needToProcess, msg.from)
-		}
-	} else {
-		if len(blkBatch.GetBlockBatch().Batches) == 0 {
-			sch.log.Info("GetBlockBatch null")
-			return nil, nil
-		}
-		for _, blk := range blkBatch.GetBlockBatch().Batches {
-			delete(sch.pendingBlocks, blk.Header.BlockHeight)
-			delete(sch.pendingTime, blk.Header.BlockHeight)
-			if state, exist := sch.blockStates[blk.Header.BlockHeight]; exist {
-				if state != receivedBlock {
-					needToProcess = true
-					sch.blockStates[blk.Header.BlockHeight] = receivedBlock
-					sch.receivedBlocks[blk.Header.BlockHeight] = msg.from
-				}
-			}
-			sch.log.Debugf("received block [height:%d:%x] needToProcess: %v from "+
-				"node [%s]", blk.Header.BlockHeight, blk.Header.BlockHash, needToProcess, msg.from)
-		}
+	if len(blkBatch.GetBlockinfoBatch().Batch) == 0 {
+		sch.log.Info("GetBlockinfoBatch null")
+		return nil, nil
 	}
-	if needToProcess {
-
-		if isFastSync && withRWSet {
-			return &ReceivedBlocksWithRwSets{
-				blkinfos: blkBatch.GetBlockinfoBatch().Batch,
-				from:     msg.from}, nil
+	for _, blkInfo := range blkBatch.GetBlockinfoBatch().GetBatch() {
+		delete(sch.pendingBlocks, blkInfo.Block.Header.BlockHeight)
+		delete(sch.pendingTime, blkInfo.Block.Header.BlockHeight)
+		if state, exist := sch.blockStates[blkInfo.Block.Header.BlockHeight]; exist {
+			// 添加重复区块的检查，重复的区块不会被放入优先级队列中，
+			//不做检查会将收到重复的区块返回数据放入优先级队列（该队列没有长度检查），这部分有内存泄漏的风险
+			// if state == receivedBlock do not put into the msg queue, maintain needToProcess = false
+			if state != receivedBlock {
+				needToProcess = true
+				sch.blockStates[blkInfo.Block.Header.BlockHeight] = receivedBlock
+				sch.receivedBlocks[blkInfo.Block.Header.BlockHeight] = msg.from
+			}
 		}
-		return &ReceivedBlocks{
-			blks: blkBatch.GetBlockBatch().Batches,
-			from: msg.from}, nil
+		sch.log.Debugf("received block [height:%d:%x] needToProcess: %v from "+
+			"node [%s]", blkInfo.Block.Header.BlockHeight, blkInfo.Block.Header.BlockHash, needToProcess, msg.from)
+	}
+
+	if needToProcess {
+		return &ReceivedBlockInfos{
+			blkinfos:  blkBatch.GetBlockinfoBatch().Batch,
+			from:      msg.from,
+			withRWSet: blkBatch.WithRwset,
+		}, nil
 	}
 	return nil, nil
 }
 
-func (sch *scheduler) handleProcessedBlockResp(msg ProcessedBlockResp) (queue.Item, error) {
+func (sch *scheduler) handleProcessedBlockResp(msg *ProcessedBlockResp) (queue.Item, error) {
 	sch.log.Debugf("process block [height:%d] status[%d] from node"+
 		" [%s], pendingHeight: %d", msg.height, msg.status, msg.from, sch.pendingRecvHeight)
 	delete(sch.receivedBlocks, msg.height)

@@ -75,13 +75,7 @@ func (r *Routine) loop() {
 			return
 		default:
 			if ret != nil {
-				if blks, ok := ret.(*ReceivedBlocks); ok {
-					r.log.Debugf("receive [ReceivedBlocks] return, put into r.out, height is: %d", blks.blks[0].Header.BlockHeight)
-				}
 				r.out <- ret
-				if _, ok := ret.(*ReceivedBlocks); ok {
-					r.log.Debugf("receive [ReceivedBlocks] return, put into r.out success")
-				}
 			}
 		}
 	}

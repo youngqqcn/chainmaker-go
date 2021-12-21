@@ -206,7 +206,7 @@ func (sync *BlockChainSyncServer) handleNodeStatusResp(syncMsg *syncPb.SyncMsg, 
 	}
 	sync.log.Debugf("receive node[%s] status, height [%d], archived height [%d]", from, msg.BlockHeight,
 		msg.ArchivedHeight)
-	return sync.scheduler.addTask(NodeStatusMsg{msg: msg, from: from})
+	return sync.scheduler.addTask(&NodeStatusMsg{msg: msg, from: from})
 }
 
 func (sync *BlockChainSyncServer) handleBlockReq(syncMsg *syncPb.SyncMsg, from string) error {
@@ -230,51 +230,35 @@ func (sync *BlockChainSyncServer) handleBlockReq(syncMsg *syncPb.SyncMsg, from s
 
 	sync.log.Debugf("receive request to get block [height: %d, batch_size: %d] from "+
 		"node [%s]"+"WithRwset [%v]", req.BlockHeight, req.BatchSize, from, req.WithRwset)
-	if req.WithRwset {
-		return sync.sendInfos(&req, from)
-	}
-	return sync.sendBlocks(&req, from)
-}
-
-func (sync *BlockChainSyncServer) sendBlocks(req *syncPb.BlockSyncReq, from string) error {
-	var (
-		bz  []byte
-		err error
-		blk *commonPb.Block
-	)
-
-	for i := uint64(0); i < req.BatchSize; i++ {
-		if blk, err = sync.blockChainStore.GetBlock(req.BlockHeight + i); err != nil || blk == nil {
-			return err
-		}
-		if bz, err = proto.Marshal(&syncPb.SyncBlockBatch{
-			Data: &syncPb.SyncBlockBatch_BlockBatch{BlockBatch: &syncPb.BlockBatch{
-				Batches: []*commonPb.Block{blk}}}, WithRwset: false,
-		}); err != nil {
-			return err
-		}
-		if err := sync.sendMsg(syncPb.SyncMsg_BLOCK_SYNC_RESP, bz, from); err != nil {
-			return err
-		}
-	}
-	return nil
+	return sync.sendInfos(&req, from)
 }
 
 func (sync *BlockChainSyncServer) sendInfos(req *syncPb.BlockSyncReq, from string) error {
 	var (
 		bz        []byte
 		err       error
+		blk       *commonPb.Block
 		blkRwInfo *storePb.BlockWithRWSet
 	)
 
 	for i := uint64(0); i < req.BatchSize; i++ {
-		if blkRwInfo, err = sync.blockChainStore.GetBlockWithRWSets(req.BlockHeight + i); err != nil || blkRwInfo == nil {
-			return err
+		if req.WithRwset {
+			if blkRwInfo, err = sync.blockChainStore.GetBlockWithRWSets(req.BlockHeight + i); err != nil || blkRwInfo == nil {
+				return err
+			}
+		} else {
+			if blk, err = sync.blockChainStore.GetBlock(req.BlockHeight + i); err != nil || blkRwInfo == nil {
+				return err
+			}
+			blkRwInfo = &storePb.BlockWithRWSet{
+				Block:    blk,
+				TxRWSets: nil,
+			}
 		}
 		info := &commonPb.BlockInfo{Block: blkRwInfo.Block, RwsetList: blkRwInfo.TxRWSets}
 		if bz, err = proto.Marshal(&syncPb.SyncBlockBatch{
 			Data: &syncPb.SyncBlockBatch_BlockinfoBatch{BlockinfoBatch: &syncPb.BlockInfoBatch{
-				Batch: []*commonPb.BlockInfo{info}}}, WithRwset: true,
+				Batch: []*commonPb.BlockInfo{info}}}, WithRwset: req.WithRwset,
 		}); err != nil {
 			return err
 		}
@@ -351,15 +335,15 @@ func (sync *BlockChainSyncServer) loop() {
 
 			// Timing task
 		case <-doProcessBlockTk.C:
-			if err := sync.processor.addTask(ProcessBlockMsg{}); err != nil {
+			if err := sync.processor.addTask(&ProcessBlockMsg{}); err != nil {
 				sync.log.Errorf("add process block task to processor failed, reason: %s", err)
 			}
 		case <-doScheduleTk.C:
-			if err := sync.scheduler.addTask(SchedulerMsg{}); err != nil {
+			if err := sync.scheduler.addTask(&SchedulerMsg{}); err != nil {
 				sync.log.Errorf("add scheduler task to scheduler failed, reason: %s", err)
 			}
 		case <-doLivenessTk.C:
-			if err := sync.scheduler.addTask(LivenessMsg{}); err != nil {
+			if err := sync.scheduler.addTask(&LivenessMsg{}); err != nil {
 				sync.log.Errorf("add livenessMsg task to scheduler failed, reason: %s", err)
 			}
 		case <-doNodeStatusTk.C:
@@ -368,10 +352,10 @@ func (sync *BlockChainSyncServer) loop() {
 				sync.log.Errorf("request node status failed by broadcast", err)
 			}
 		case <-doDataDetect.C:
-			if err := sync.processor.addTask(DataDetection{}); err != nil {
+			if err := sync.processor.addTask(&DataDetection{}); err != nil {
 				sync.log.Errorf("add data detection task to processor failed, reason: %s", err)
 			}
-			if err := sync.scheduler.addTask(DataDetection{}); err != nil {
+			if err := sync.scheduler.addTask(&DataDetection{}); err != nil {
 				sync.log.Errorf("add data detection task to scheduler failed, reason: %s", err)
 			}
 

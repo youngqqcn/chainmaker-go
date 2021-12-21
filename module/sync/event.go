@@ -17,7 +17,7 @@ const (
 	priorityTop    = 3
 	priorityMiddle = 2
 	priorityLow    = 1
-	priorityBase   = 0
+	//priorityBase   = 0
 )
 
 type Priority interface {
@@ -44,123 +44,85 @@ func Compare(parent, other queue.Item) int {
 	return 0
 }
 
-type EqualLevel struct{}
-
-func (e EqualLevel) Level() int {
-	return priorityBase
-}
-
-func (e EqualLevel) Compare(other queue.Item) int {
-	return Compare(e, other)
-}
-
 type SyncedBlockMsg struct {
-	EqualLevel
 	msg  []byte
 	from string
 }
 
-func (m SyncedBlockMsg) Level() int {
+func (m *SyncedBlockMsg) Level() int {
 	return priorityMiddle
 }
 
-func (m SyncedBlockMsg) Compare(other queue.Item) int {
+func (m *SyncedBlockMsg) Compare(other queue.Item) int {
 	return Compare(m, other)
 }
 
 type NodeStatusMsg struct {
-	EqualLevel
 	msg  syncPb.BlockHeightBCM
 	from string
 }
 
-func (m NodeStatusMsg) Level() int {
+func (m *NodeStatusMsg) Level() int {
 	return priorityLow
 }
 
-func (m NodeStatusMsg) Compare(other queue.Item) int {
+func (m *NodeStatusMsg) Compare(other queue.Item) int {
 	return Compare(m, other)
 }
 
-type SchedulerMsg struct {
-	EqualLevel
-}
+type SchedulerMsg struct{}
 
-func (m SchedulerMsg) Level() int {
+func (m *SchedulerMsg) Level() int {
 	return priorityLow
 }
 
-func (m SchedulerMsg) Compare(other queue.Item) int {
+func (m *SchedulerMsg) Compare(other queue.Item) int {
 	return Compare(m, other)
 }
 
-type LivenessMsg struct {
-	EqualLevel
-}
+type LivenessMsg struct{}
 
-func (m LivenessMsg) Level() int {
+func (m *LivenessMsg) Level() int {
 	return priorityLow
 }
 
-func (m LivenessMsg) Compare(other queue.Item) int {
+func (m *LivenessMsg) Compare(other queue.Item) int {
 	return Compare(m, other)
 }
 
-type ReceivedBlocks struct {
-	blks []*commonPb.Block
-	from string
-	EqualLevel
+type ReceivedBlockInfos struct {
+	blkinfos  []*commonPb.BlockInfo
+	from      string
+	withRWSet bool
 }
 
-func (m ReceivedBlocks) Level() int {
+func (m *ReceivedBlockInfos) Level() int {
 	return priorityTop
 }
 
-func (m ReceivedBlocks) Compare(other queue.Item) int {
-	return Compare(m, other)
-}
-
-type ReceivedBlocksWithRwSets struct {
-	blkinfos []*commonPb.BlockInfo
-	from     string
-	EqualLevel
-}
-
-func (m ReceivedBlocksWithRwSets) Level() int {
-	return priorityTop
-}
-
-func (m ReceivedBlocksWithRwSets) Compare(other queue.Item) int {
+func (m *ReceivedBlockInfos) Compare(other queue.Item) int {
 	return Compare(m, other)
 }
 
 // processor events
 
-type ProcessBlockMsg struct {
-	EqualLevel
-}
+type ProcessBlockMsg struct{}
 
-func (m ProcessBlockMsg) Level() int {
+func (m *ProcessBlockMsg) Level() int {
 	return priorityTop
 }
 
-func (m ProcessBlockMsg) Compare(other queue.Item) int {
+func (m *ProcessBlockMsg) Compare(other queue.Item) int {
 	return Compare(m, other)
 }
 
-type ProcessBlockWithRwSetMsg struct {
-	EqualLevel
-}
+type DataDetection struct{}
 
-type DataDetection struct {
-	EqualLevel
-}
-
-func (m DataDetection) Level() int {
+func (m *DataDetection) Level() int {
 	return priorityLow
 }
 
-func (m DataDetection) Compare(other queue.Item) int {
+func (m *DataDetection) Compare(other queue.Item) int {
 	return Compare(m, other)
 }
 
@@ -178,13 +140,12 @@ type ProcessedBlockResp struct {
 	height uint64
 	status processedBlockStatus
 	from   string
-	EqualLevel
 }
 
-func (m ProcessedBlockResp) Level() int {
+func (m *ProcessedBlockResp) Level() int {
 	return priorityTop
 }
 
-func (m ProcessedBlockResp) Compare(other queue.Item) int {
+func (m *ProcessedBlockResp) Compare(other queue.Item) int {
 	return Compare(m, other)
 }
