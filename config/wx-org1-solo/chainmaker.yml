@@ -73,6 +73,7 @@ pprof:
   port: 24321
 
 storage:
+#  rebuild_block_height: 5
   store_path: ../data/org1/ledgerData1
   encryptor: sm4    # sm4/aes
   encrypt_key: "1234567890123456" #16 bytes key
