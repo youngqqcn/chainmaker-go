@@ -78,6 +78,8 @@ var (
 
 	gasLimit  uint64
 	gasEnable bool
+
+	addressType int32
 )
 
 const (
@@ -129,6 +131,7 @@ const (
 	flagRevokeContractList     = "revoke-contract-list"
 	flagGasLimit               = "gas-limit"
 	flagGasEnable              = "gas-enable"
+	flagAddressType            = "address-type"
 )
 
 func ClientCMD() *cobra.Command {
@@ -227,6 +230,8 @@ func init() {
 	// gas limit
 	flags.Uint64Var(&gasLimit, flagGasLimit, 0, "gas limit in uint64 type, default value is 0, unlimited")
 	flags.BoolVar(&gasEnable, flagGasEnable, false, "enable or disable gas feature")
+
+	flags.Int32Var(&addressType, flagAddressType, 0, "address type, eg. ChainMaker:0, ZXL:1")
 }
 
 func attachFlags(cmd *cobra.Command, names []string) {
