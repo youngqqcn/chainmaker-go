@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 package scheduler
 
 import (
+	"chainmaker.org/chainmaker/localconf/v2"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -60,7 +61,7 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 	txBatchSize := len(txBatch)
 	if txBatchSize == 0 {
 		ts.log.Error("there are no txs to schedule")
-		return nil, nil, fmt.Errorf("there are no txs to schedule")
+		return make(map[string]*commonPb.TxRWSet, 0), make(map[string][]*commonPb.ContractEvent, 0), nil
 	}
 	ts.log.Infof("schedule tx batch start, size %d", txBatchSize)
 
