@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"chainmaker.org/chainmaker-go/module/core/provider/conf"
-	"chainmaker.org/chainmaker/localconf/v2"
 	"chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
@@ -33,7 +32,7 @@ import (
 
 const (
 	ScheduleTimeout        = 10
-	ScheduleWithDagTimeout = 10
+	ScheduleWithDagTimeout = 20
 )
 
 // TxScheduler transaction scheduler structure
