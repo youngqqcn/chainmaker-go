@@ -389,7 +389,6 @@ func (sync *BlockChainSyncServer) blockRequestEntrance() {
 		}
 		return true
 	}
-
 	for {
 		select {
 		case <-sync.close:

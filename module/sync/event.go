@@ -40,8 +40,10 @@ func Compare(parent, other queue.Item) int {
 	}
 	if p.Level() < o.Level() {
 		return 1
+	} else if p.Level() == o.Level() {
+		return 0
 	}
-	return 0
+	return -1
 }
 
 type SyncedBlockMsg struct {

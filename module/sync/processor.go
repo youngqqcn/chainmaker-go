@@ -105,7 +105,7 @@ func (pro *processor) handleProcessBlockMsg() (queue.Item, error) {
 	}
 	delete(pro.queue, pendingBlockHeight)
 	pro.log.Infof("process block [height: %d] success, status [%d]", info.blk.Header.BlockHeight, status)
-	pro.log.Debugf("current processor status is:  %s", pro.getServiceState())
+	pro.log.DebugDynamic(pro.getServiceState)
 	return &ProcessedBlockResp{
 		status: status,
 		height: info.blk.Header.BlockHeight,
