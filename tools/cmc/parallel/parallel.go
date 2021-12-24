@@ -823,8 +823,6 @@ func sendRequest(sk3 crypto.PrivateKey, client apiPb.RpcNodeClient, msg *Invoker
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Duration(time.Duration(requestTimeout)*time.Second)))
 	defer cancel()
 
-	file := fileCache.Read(userCrtPath)
-
 	// 构造Sender
 	var sender *acPb.Member
 	if authType == sdk.Public {
@@ -850,6 +848,7 @@ func sendRequest(sk3 crypto.PrivateKey, client apiPb.RpcNodeClient, msg *Invoker
 			MemberType: acPb.MemberType_PUBLIC_KEY,
 		}
 	} else {
+		file := fileCache.Read(userCrtPath)
 		if useShortCrt {
 			certId, err := certCache.Read(userCrtPath, *file, hashAlgo)
 			if err != nil {
