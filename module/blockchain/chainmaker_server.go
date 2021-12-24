@@ -182,12 +182,17 @@ func (server *ChainMakerServer) initNet() error {
 
 func (server *ChainMakerServer) initBlockchains() error {
 	server.blockchains = sync.Map{}
+	ok := false
 	for _, chain := range localconf.ChainMakerConfig.GetBlockChains() {
 		chainId := chain.ChainId
 		if err := server.initBlockchain(chainId, chain.Genesis); err != nil {
 			log.Error(err.Error())
-			return err
+			continue
 		}
+		ok = true
+	}
+	if !ok {
+		return fmt.Errorf("init all blockchains fail")
 	}
 	go server.newBlockchainTaskListener()
 	return nil
@@ -195,12 +200,17 @@ func (server *ChainMakerServer) initBlockchains() error {
 
 func (server *ChainMakerServer) initBlockchainsForRebuildDbs() error {
 	server.blockchains = sync.Map{}
+	ok := false
 	for _, chain := range localconf.ChainMakerConfig.GetBlockChains() {
 		chainId := chain.ChainId
 		if err := server.initBlockchainForRebuildDbs(chainId, chain.Genesis); err != nil {
 			log.Error(err.Error())
-			return err
+			continue
 		}
+		ok = true
+	}
+	if !ok {
+		return fmt.Errorf("init all blockchains fail")
 	}
 	go server.newBlockchainTaskListener()
 	return nil
