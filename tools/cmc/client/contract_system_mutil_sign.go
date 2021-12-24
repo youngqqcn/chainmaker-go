@@ -70,7 +70,7 @@ func multiSignVoteCMD() *cobra.Command {
 	attachFlags(cmd, []string{
 		flagUserSignKeyFilePath, flagUserSignCrtFilePath,
 		flagConcurrency, flagTotalCountPerGoroutine, flagSdkConfPath, flagOrgId, flagChainId, flagTxId,
-		flagTimeout, flagUserTlsCrtFilePath, flagUserTlsKeyFilePath, flagEnableCertHash,
+		flagTimeout, flagUserTlsCrtFilePath, flagUserTlsKeyFilePath, flagEnableCertHash, flagIsAgree,
 		flagAdminCrtFilePaths, flagAdminKeyFilePaths, flagSyncResult, flagAdminOrgIds,
 	})
 
@@ -232,7 +232,7 @@ func multiSignVote() error {
 
 	}
 
-	resp, err := client.MultiSignContractVote(payload, endorser)
+	resp, err := client.MultiSignContractVote(payload, endorser, isAgree)
 	if err != nil {
 		return fmt.Errorf("multi sign vote failed, %s", err.Error())
 	}

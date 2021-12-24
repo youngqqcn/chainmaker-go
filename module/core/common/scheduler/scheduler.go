@@ -18,8 +18,9 @@ import (
 	"sync"
 	"time"
 
-	"chainmaker.org/chainmaker-go/module/core/provider/conf"
 	"chainmaker.org/chainmaker/localconf/v2"
+
+	"chainmaker.org/chainmaker-go/module/core/provider/conf"
 	"chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
@@ -33,7 +34,7 @@ import (
 
 const (
 	ScheduleTimeout        = 10
-	ScheduleWithDagTimeout = 10
+	ScheduleWithDagTimeout = 20
 )
 
 // TxScheduler transaction scheduler structure
@@ -59,10 +60,6 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 	ts.lock.Lock()
 	defer ts.lock.Unlock()
 	txBatchSize := len(txBatch)
-	//if txBatchSize == 0 {
-	//	ts.log.Error("there are no txs to schedule")
-	//	ts.log	return nil, nil, fmt.Errorf("there are no txs to schedule")
-	//	ts.log}
 	ts.log.Infof("schedule tx batch start, size %d", txBatchSize)
 
 	var goRoutinePool *ants.Pool

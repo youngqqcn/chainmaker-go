@@ -27,6 +27,7 @@ func chainConfigCMD() *cobra.Command {
 	chainConfigCmd.AddCommand(configConsensueNodeIdCMD())
 	chainConfigCmd.AddCommand(configConsensueNodeOrgCMD())
 	chainConfigCmd.AddCommand(configTrustMemberCMD())
+	chainConfigCmd.AddCommand(alterAddrTypeCMD())
 	return chainConfigCmd
 }
 
