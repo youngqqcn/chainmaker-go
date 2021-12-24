@@ -186,7 +186,7 @@ func (server *ChainMakerServer) initBlockchains() error {
 		chainId := chain.ChainId
 		if err := server.initBlockchain(chainId, chain.Genesis); err != nil {
 			log.Error(err.Error())
-			continue
+			return err
 		}
 	}
 	go server.newBlockchainTaskListener()
@@ -199,12 +199,13 @@ func (server *ChainMakerServer) initBlockchainsForRebuildDbs() error {
 		chainId := chain.ChainId
 		if err := server.initBlockchainForRebuildDbs(chainId, chain.Genesis); err != nil {
 			log.Error(err.Error())
-			continue
+			return err
 		}
 	}
 	go server.newBlockchainTaskListener()
 	return nil
 }
+
 func (server *ChainMakerServer) newBlockchainTaskListener() {
 	for newChainId := range localconf.FindNewBlockChainNotifyC {
 		_, ok := server.blockchains.Load(newChainId)

@@ -166,7 +166,7 @@ func (bc *Blockchain) initBaseModules(baseModules []map[string]func() error) (er
 	for idx, baseModule := range baseModules {
 		for name, initFunc := range baseModule {
 			if err := initFunc(); err != nil {
-				bc.log.Errorf("init module[%s] failed, %s", name, err)
+				bc.log.Errorf("init base module[%s] failed, %s", name, err)
 				return err
 			}
 			bc.log.Infof("BASE INIT STEP (%d/%d) => init base[%s] success :)", idx+1, moduleNum, name)
@@ -180,10 +180,10 @@ func (bc *Blockchain) initExtModules(extModules []map[string]func() error) (err 
 	for idx, initModule := range extModules {
 		for name, initFunc := range initModule {
 			if err := initFunc(); err != nil {
-				bc.log.Errorf("init module[%s] failed, %s", name, err)
+				bc.log.Errorf("init ext module[%s] failed, %s", name, err)
 				return err
 			}
-			bc.log.Infof("MODULE INIT STEP (%d/%d) => init module[%s] success :)", idx+1, moduleNum, name)
+			bc.log.Infof("MODULE INIT STEP (%d/%d) => init ext module[%s] success :)", idx+1, moduleNum, name)
 		}
 	}
 	return
