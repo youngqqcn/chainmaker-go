@@ -189,7 +189,7 @@ func ParallelCMD() *cobra.Command {
 	flags.StringVarP(&contractName, "contract-name", "n", "contract1", "specify contract name")
 	flags.BoolVar(&useShortCrt, "use-short-crt", false, "use compressed certificate in transactions")
 	flags.IntVar(&requestTimeout, "requestTimeout", 5, "specify request timeout(unit: s)")
-	flags.Uint32Var(&authTypeUint32, "auth-type", 0, "chainmaker auth type. PermissionedWithCert:0,PermissionedWithKey:1,Public:2")
+	flags.Uint32Var(&authTypeUint32, "auth-type", 1, "chainmaker auth type. PermissionedWithCert:1,PermissionedWithKey:2,Public:3")
 
 	cmd.AddCommand(invokeCMD())
 	cmd.AddCommand(queryCMD())
