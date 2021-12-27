@@ -258,7 +258,12 @@ func multiSignQuery() error {
 	if err != nil {
 		return fmt.Errorf("multi sign query failed, %s", err.Error())
 	}
-
+	if resp.Code == 0 {
+		if resp.ContractResult.Code == 0 {
+			fmt.Printf("multi sign query resp: %+v\n", resp.ContractResult.Result)
+			return nil
+		}
+	}
 	fmt.Printf("multi sign query resp: %+v\n", resp)
 
 	return nil
