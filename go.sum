@@ -52,8 +52,9 @@ chainmaker.org/chainmaker/pb-go/v2 v2.1.0/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNi
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211117140137-9095a7ab7a69/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211213122854-44c0d0a3df53/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211214073209-1288f39035e8/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
-chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211215062821-d83f1382c35e h1:mcfOdLbFFci8QmegxJcw+AfXYe1qQm+PXRFoHYfL/vs=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211215062821-d83f1382c35e/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
+chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211227100918-2d67d7baebcc h1:X77mDuXB4Zc6sx8kilCAgz6w8lBJ4Siv1Fc6Cx47vs4=
+chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211227100918-2d67d7baebcc/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
 chainmaker.org/chainmaker/protocol/v2 v2.0.1-0.20211109074216-fc2674ef6e22/go.mod h1:HfUAVSphtyXjvk0vVJSQCLYBocUuxxZxMDrrIc72vic=
 chainmaker.org/chainmaker/protocol/v2 v2.1.0/go.mod h1:jlMaZq/AcwWOxYsehh+R0Qx99AIRLMLQyKEXYx5Bu4o=
 chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211119081550-ff85fecc318d/go.mod h1:HfUAVSphtyXjvk0vVJSQCLYBocUuxxZxMDrrIc72vic=
@@ -87,8 +88,9 @@ chainmaker.org/chainmaker/utils/v2 v2.1.0/go.mod h1:GppORTQ5PexKKU/vX+PQrnjCvl1u
 chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211109074701-81d58330e787/go.mod h1:T5NlH7sZCyMX4nYumi2Xj8z1kE1MUr9bljnfkfrum+U=
 chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211117141112-236ce9c3ffe9/go.mod h1:Mfcc74hjD7hS/wqibf9NoDRbqdUsbnBHXi3FH96sx3o=
 chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211117144316-3f4a940e94f0/go.mod h1:Mfcc74hjD7hS/wqibf9NoDRbqdUsbnBHXi3FH96sx3o=
-chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211214124429-d110e27a8fa2 h1:CCZAJuiCyNBYAUxP9aNcOX0Rk1xlT8HHC9FDqTcNJj8=
 chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211214124429-d110e27a8fa2/go.mod h1:9NY1ny1bnuad/txY/bPUKOtDQp0s4j+cMdJxR5K16X8=
+chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211227024950-ed5b7932dbe2 h1:E4YY0sVs3qyw2Ew3hguhe8zfsjiWNAnZmcMtNc2hhPM=
+chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211227024950-ed5b7932dbe2/go.mod h1:3YX46GuLB9uJtW3aM4NIoY5SilHB0/5xxWktQuyJ0Pg=
 chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20211227092117-5a72b4d2f99a h1:aMJeubJRCH6aEZxv+KQhhRbTHJ0aR7GEpEThH+ZkM2g=
 chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20211227092117-5a72b4d2f99a/go.mod h1:gk82SXpdIhIOvdSGkrUBOLRAWDIPEktq7P5nDQzgoKI=
 chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20211215040351-c7aa52c74d2a h1:wycMe+23UQTKRCmF7SqctzoM2thwusRYzQs6JttuN14=
@@ -97,8 +99,8 @@ chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20211221065927-2b2979cbe7ae h1:9Hd
 chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20211221065927-2b2979cbe7ae/go.mod h1:h5tzt3/8WvMkOvBGQYH6V/IDIQiFIaibCvyqcsbXOiM=
 chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211203151445-3e9efc3f8ad6/go.mod h1:qh0QJ2ZQuMnItJn0l9vOSPscgD3fdv0IteAniiOfpqY=
 chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211214132707-4ab8964bd865/go.mod h1:RokdcVZic01QhX6PyM0RN1kmFs4EtizLxmfz+VCs71Q=
-chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20211223130333-f6849d44eea8 h1:a7nencQZlQsY8t9KcRtcDoTOJAFsSOqbp7pOvWit1JQ=
-chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20211223130333-f6849d44eea8/go.mod h1:3sxRDrINx9nPnfg1mn0Y4nSx2nLtScCEUD0JNfUJqzQ=
+chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20211227124522-bdc5378a8763 h1:2AaQ8rn4rqvbx0RXTYLer3UbGhMB/aW8W70ltDQKvS0=
+chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20211227124522-bdc5378a8763/go.mod h1:7Qwr3AgyTA9e8EE03dik7++f1rd58lN1TXwMTT+ydeM=
 chainmaker.org/chainmaker/vm-wasmer/v2 v2.1.1-0.20211215060329-82ccffe66c7c h1:BCdWCa35pC7oYTFuHIpE4D3APiaUO4BVETmpltjVb+U=
 chainmaker.org/chainmaker/vm-wasmer/v2 v2.1.1-0.20211215060329-82ccffe66c7c/go.mod h1:3l/gNYgcXfj44CmyOgJU4zMlBKDSjc52p9zvYvBFLI8=
 chainmaker.org/chainmaker/vm-wxvm/v2 v2.1.1-0.20211214134406-08ea2c6a3639 h1:mNAbFARA1anGTzwZV8Tbn+bxMmFtYR8xwOjJ/zZ/NKY=
