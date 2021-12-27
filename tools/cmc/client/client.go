@@ -41,6 +41,7 @@ var (
 	enableCertHash bool
 	blockHeight    uint64
 	withRWSet      bool
+	isAgree        bool
 	txId           string
 
 	adminKeyFilePaths string
@@ -96,6 +97,7 @@ const (
 	flagEnableCertHash         = "enable-cert-hash"
 	flagBlockHeight            = "block-height"
 	flagWithRWSet              = "with-rw-set"
+	flagIsAgree                = "is-agree"
 	flagTxId                   = "tx-id"
 	flagByteCodePath           = "byte-code-path"
 	flagRuntimeType            = "runtime-type"
@@ -182,6 +184,7 @@ func init() {
 	flags.BoolVar(&withRWSet, flagWithRWSet, true, "whether with RWSet, default true")
 	flags.Uint64Var(&blockHeight, flagBlockHeight, 0, "specify block height, default 0")
 	flags.StringVar(&txId, flagTxId, "", "specify tx id")
+	flags.BoolVar(&isAgree, flagIsAgree, true, "specify multi sign vote choice")
 
 	// Admin秘钥和证书列表
 	//    - 使用逗号','分割
