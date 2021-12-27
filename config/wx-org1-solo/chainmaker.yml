@@ -116,15 +116,15 @@ debug:
 
 
 vm:
-  enable_dockervm: false
+  enable_dockervm: true
   dockervm_container_name: chainmaker-vm-docker-go-container
   dockervm_mount_path: ../data/org1/docker-go     # mount point in chain maker
   dockervm_log_path: ../log/org1/dockervm
   log_in_console: true
   log_level: INFO
   uds_open: true                             # default is unix domain socket connection
-  tx_size: 1000
   user_num: 100
-  time_limit: 20
+  time_limit: 2
+  max_concurrency: 50
 
 
