@@ -337,9 +337,9 @@ vm:
   log_level: INFO
   # Unix domain socket open, used for chainmaker and docker manager communication
   uds_open: true
-  # The size of the channel where transactions are stored in docker manager
-  tx_size: 1000
   # Number of user Ids
   user_num: 100
   # Timeout per transaction, Unit: second
   time_limit: 2
+  # Max process for contract
+  max_concurrency: 50
