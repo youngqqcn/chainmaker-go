@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 package parallel
 
 import (
-	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
+	"chainmaker.org/chainmaker/pb-go/v2/common"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +24,7 @@ func upgradeContractCMD() *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.StringVarP(&wasmPath, "wasm-path", "w", "../wasm/counter-go.wasm", "specify wasm path")
-	flags.Int32VarP(&runTime, "run-time", "R", int32(commonPb.RuntimeType_GASM), "specify run time")
+	flags.Int32VarP(&runTime, "run-time", "R", int32(common.RuntimeType_GASM), "specify run time")
 	flags.StringVarP(&version, "version", "v", "2.0.0", "specify contract version")
 
 	return cmd
