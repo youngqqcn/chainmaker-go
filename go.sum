@@ -2,7 +2,7 @@ bazil.org/fuse v0.0.0-20160811212531-371fbbdaa898/go.mod h1:Xbm+BRKSBEpa4q4hTSxo
 chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211109075405-cc95de741f5e/go.mod h1:WZvaza49nJxtJNNbkh+v0t9KdYNKWR/Ph2LDzEuzC4Y=
 chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211129064036-3ae6487c7770/go.mod h1:WZvaza49nJxtJNNbkh+v0t9KdYNKWR/Ph2LDzEuzC4Y=
 chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211214131153-d5cc71404186/go.mod h1:OFuguIK8T2MKQshwJRfSSD7owbwb0loQp83W/b4d1+I=
-chainmaker.org/chainmaker/chainconf/v2 v2.1.1/go.mod h1:vodn7YM9CjwSTR/45sr4oflpEGfubu+s1dSj3ZcVFV8=
+chainmaker.org/chainmaker/chainconf/v2 v2.1.1/go.mod h1:N8wS+6jJ+4uLO8V+dlKyAcZ7q340HsWhJqJcgGFhB1w=
 chainmaker.org/chainmaker/chainconf/v2 v2.1.2-0.20211223092052-6428ac46204c h1:pMclJeHNVJMOPnnUj+MvNCbc8Mi2kWsoTwKF7fMH9gQ=
 chainmaker.org/chainmaker/chainconf/v2 v2.1.2-0.20211223092052-6428ac46204c/go.mod h1:bxlqh3CNXBbaFWwP0cH0vCvaG82D/lyqNJ4zr9CVIV8=
 chainmaker.org/chainmaker/common/v2 v2.1.0/go.mod h1:moutWpXQGfyrFcXozw60ZXjpwj1Jfg6N5kkJdtwOxFM=
