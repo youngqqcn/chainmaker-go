@@ -1,8 +1,11 @@
 package client
 
 import (
+	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
 	"encoding/json"
 	"fmt"
+	"github.com/gogo/protobuf/proto"
+	"github.com/hokaccha/go-prettyjson"
 	"io/ioutil"
 	"strings"
 
@@ -260,7 +263,16 @@ func multiSignQuery() error {
 	}
 	if resp.Code == 0 {
 		if resp.ContractResult.Code == 0 {
-			fmt.Printf("multi sign query resp: %+v\n", resp.ContractResult.Result)
+			result := &syscontract.MultiSignInfo{}
+			err = proto.Unmarshal(resp.ContractResult.Result, result)
+			if err != nil {
+				return err
+			}
+			output, err := prettyjson.Marshal(result)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("multi sign query resp: %s\n", string(output))
 			return nil
 		}
 	}
