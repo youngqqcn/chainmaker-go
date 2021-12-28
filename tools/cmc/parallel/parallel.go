@@ -27,6 +27,7 @@ import (
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
 	sdk "chainmaker.org/chainmaker/sdk-go/v2"
+	sdkutils "chainmaker.org/chainmaker/sdk-go/v2/utils"
 	"chainmaker.org/chainmaker/utils/v2"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
@@ -885,11 +886,7 @@ func sendRequest(sk3 crypto.PrivateKey, client apiPb.RpcNodeClient, msg *Invoker
 		return nil, err
 	}
 
-	signer, err := getSigner(sk3, sender)
-	if err != nil {
-		return nil, err
-	}
-	signBytes, err := signer.Sign("SHA256", rawTxBytes)
+	signBytes, err := sdkutils.SignPayloadBytesWithHashType(sk3, crypto.HASH_TYPE_SHA256, rawTxBytes)
 	if err != nil {
 		return nil, err
 	}

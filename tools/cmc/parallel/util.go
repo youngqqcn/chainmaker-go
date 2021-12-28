@@ -12,11 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"chainmaker.org/chainmaker-go/module/accesscontrol"
 	"chainmaker.org/chainmaker/common/v2/crypto"
-	acPb "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
-	"chainmaker.org/chainmaker/protocol/v2"
 	sdk "chainmaker.org/chainmaker/sdk-go/v2"
 	sdkutils "chainmaker.org/chainmaker/sdk-go/v2/utils"
 	"chainmaker.org/chainmaker/utils/v2"
@@ -49,20 +46,6 @@ func constructInvokePayload(chainId, contractName, method string, pairs []*commo
 	}
 
 	return payload, nil
-}
-
-func getSigner(sk3 crypto.PrivateKey, sender *acPb.Member) (protocol.SigningMember, error) {
-	skPEM, err := sk3.String()
-	if err != nil {
-		return nil, err
-	}
-	//fmt.Printf("skPEM: %s\n", skPEM)
-
-	signer, err := accesscontrol.NewCertSigningMember(hashAlgo, sender, skPEM, "")
-	if err != nil {
-		return nil, err
-	}
-	return signer, nil
 }
 
 //func initGRPCConnect(useTLS bool) (*grpc.ClientConn, error) {
