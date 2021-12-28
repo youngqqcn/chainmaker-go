@@ -559,13 +559,13 @@ func initPKOrgMember(t *testing.T, info *testPkOrgMemberInfo) *testPkOrgMember {
 	err = ioutil.WriteFile(localPrivKeyFile, []byte(info.consensus.sk), os.ModePerm)
 	require.Nil(t, err)
 
-	consensus, err := InitPKSigningMember(ppkProvider, info.orgId, localPrivKeyFile, "")
+	consensus, err := InitPKSigningMember(ppkProvider.GetHashAlg(), info.orgId, localPrivKeyFile, "")
 	require.Nil(t, err)
 
 	err = ioutil.WriteFile(localPrivKeyFile, []byte(info.admin.sk), os.ModePerm)
 	require.Nil(t, err)
 
-	admin, err := InitPKSigningMember(ppkProvider, info.orgId, localPrivKeyFile, "")
+	admin, err := InitPKSigningMember(ppkProvider.GetHashAlg(), info.orgId, localPrivKeyFile, "")
 	require.Nil(t, err)
 
 	return &testPkOrgMember{
@@ -697,13 +697,13 @@ func initPKMember(t *testing.T, info *testPkMemberInfo) *testPkMember {
 	err = ioutil.WriteFile(localPrivKeyFile, []byte(info.consensus.sk), os.ModePerm)
 	require.Nil(t, err)
 
-	consensus, err := InitPKSigningMember(pkProvider, "", localPrivKeyFile, "")
+	consensus, err := InitPKSigningMember(pkProvider.GetHashAlg(), "", localPrivKeyFile, "")
 	require.Nil(t, err)
 
 	err = ioutil.WriteFile(localPrivKeyFile, []byte(info.admin.sk), os.ModePerm)
 	require.Nil(t, err)
 
-	admin, err := InitPKSigningMember(pkProvider, "", localPrivKeyFile, "")
+	admin, err := InitPKSigningMember(pkProvider.GetHashAlg(), "", localPrivKeyFile, "")
 	require.Nil(t, err)
 
 	return &testPkMember{
