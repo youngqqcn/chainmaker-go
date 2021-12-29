@@ -260,15 +260,24 @@ storage:
   # Symmetric encryption algorithm for writing data to disk. can be sm4 or aes
   # encryptor: sm4    # [*]
 
+  # Disable block file db, default: false
+  disable_block_file_db: false
+
+  # async write block in file block db to disk, default: false, so default is sync write disk
+  logdb_segment_async: false
+
+  # file size of .fdb, MB, default: 20
+  logdb_segment_size: 128
+
   # Symmetric encryption key:16 bytes key
   # If pkcs11 is enabled, it is the keyID
   # encrypt_key: "1234567890123456"
-  write_block_type: 0  # 0普通写模式，1快速写模式
+  write_block_type: 0  # 0 common write，1 quick write
   state_cache_config:
-    life_window: 3000000000000   #key/value ttl 时间，单位 ns
+    life_window: 3000000000000   #key/value ttl time, ns
     clean_window: 1000000000
     max_entry_size: 500
-    hard_max_cache_size: 10240   #缓存大小，单位MB
+    hard_max_cache_size: 10240   #cache size MB
   txexistdb_config:
     provider: leveldb
     leveldb_config:
