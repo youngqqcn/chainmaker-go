@@ -478,7 +478,7 @@ func (bc *Blockchain) initAC() (err error) {
 			return
 		}
 	case protocol.PermissionedWithKey, protocol.Public:
-		bc.identity, err = accesscontrol.InitPKSigningMember(bc.ac, nodeConfig.OrgId,
+		bc.identity, err = accesscontrol.InitPKSigningMember(bc.ac.GetHashAlg(), nodeConfig.OrgId,
 			nodeConfig.PrivKeyFile, nodeConfig.PrivKeyPassword)
 		if err != nil {
 			bc.log.Errorf("initialize identity failed, %s", err.Error())

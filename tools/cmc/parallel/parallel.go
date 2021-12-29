@@ -26,6 +26,8 @@ import (
 	apiPb "chainmaker.org/chainmaker/pb-go/v2/api"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
+	sdk "chainmaker.org/chainmaker/sdk-go/v2"
+	sdkutils "chainmaker.org/chainmaker/sdk-go/v2/utils"
 	"chainmaker.org/chainmaker/utils/v2"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
@@ -81,6 +83,9 @@ var (
 
 	abiCache     = NewFileCacheReader()
 	outputResult bool
+
+	authTypeUint32 uint32
+	authType       sdk.AuthType
 )
 
 type KeyValuePair struct {
@@ -125,15 +130,29 @@ func ParallelCMD() *cobra.Command {
 		Short: "Parallel",
 		Long:  "Parallel",
 		PersistentPreRun: func(_ *cobra.Command, _ []string) {
+			authType = sdk.AuthType(authTypeUint32)
 			caPaths = strings.Split(caPathsString, ",")
 			hosts = strings.Split(hostsString, ",")
 			userCrtPaths = strings.Split(userCrtPathsString, ",")
 			userKeyPaths = strings.Split(userKeyPathsString, ",")
 			orgIDs = strings.Split(orgIDsString, ",")
-			if len(hosts) != len(userCrtPaths) || len(hosts) != len(userKeyPaths) || len(hosts) != len(caPaths) || len(hosts) != len(orgIDs) {
-				panic(fmt.Sprintf("hosts[%d], user-crts[%d], user-keys[%d], ca-path[%d], orgIDs[%d] length invalid",
-					len(hosts), len(userCrtPaths), len(userKeyPaths), len(caPaths), len(orgIDs)))
+
+			if authType == sdk.Public {
+				if len(hosts) != len(userKeyPaths) {
+					panic(fmt.Sprintf("hosts[%d], user-keys[%d] length invalid", len(hosts), len(userKeyPaths)))
+				}
+			} else if authType == sdk.PermissionedWithKey {
+				if len(hosts) != len(userKeyPaths) || len(hosts) != len(orgIDs) {
+					panic(fmt.Sprintf("hosts[%d], user-keys[%d], orgIDs[%d] length invalid",
+						len(hosts), len(userKeyPaths), len(orgIDs)))
+				}
+			} else {
+				if len(hosts) != len(userCrtPaths) || len(hosts) != len(userKeyPaths) || len(hosts) != len(caPaths) || len(hosts) != len(orgIDs) {
+					panic(fmt.Sprintf("hosts[%d], user-crts[%d], user-keys[%d], ca-path[%d], orgIDs[%d] length invalid",
+						len(hosts), len(userCrtPaths), len(userKeyPaths), len(caPaths), len(orgIDs)))
+				}
 			}
+
 			nodeNum = len(hosts)
 			if len(pairsFile) != 0 {
 				bytes, err := ioutil.ReadFile(pairsFile)
@@ -171,6 +190,7 @@ func ParallelCMD() *cobra.Command {
 	flags.StringVarP(&contractName, "contract-name", "n", "contract1", "specify contract name")
 	flags.BoolVar(&useShortCrt, "use-short-crt", false, "use compressed certificate in transactions")
 	flags.IntVar(&requestTimeout, "requestTimeout", 5, "specify request timeout(unit: s)")
+	flags.Uint32Var(&authTypeUint32, "auth-type", 1, "chainmaker auth type. PermissionedWithCert:1,PermissionedWithKey:2,Public:3")
 
 	cmd.AddCommand(invokeCMD())
 	cmd.AddCommand(queryCMD())
@@ -389,15 +409,15 @@ func (s *Statistician) statisticsResults(ret *numberResults, all bool, nowTime t
 		}
 	}
 	if all {
-		detail.StartTime = s.startTime.Format("2006-01-04 15:04:05.000")
-		detail.EndTime = s.endTime.Format("2006-01-03 15:04:05.000")
+		detail.StartTime = s.startTime.Format("2006-01-02 15:04:05.000")
+		detail.EndTime = s.endTime.Format("2006-01-02 15:04:05.000")
 		detail.Elapsed = float32(s.endTime.Sub(s.startTime).Milliseconds()) / 1000
 		detail.TPS = float32(ret.successCount) / float32(s.endTime.Sub(s.startTime).Seconds())
 		for i := 0; i < nodeNum; i++ {
 			detail.Nodes[fmt.Sprintf("node%d_tps", i)] = float32(ret.nodeSuccessCount[i]) / float32(s.endTime.Sub(s.startTime).Seconds())
 		}
 	} else {
-		detail.StartTime = s.lastStartTime.Format("2006-02-02 15:04:05.000")
+		detail.StartTime = s.lastStartTime.Format("2006-01-02 15:04:05.000")
 		detail.EndTime = nowTime.Format("2006-01-02 15:04:05.000")
 		detail.Elapsed = float32(nowTime.Sub(s.lastStartTime).Milliseconds()) / 1000
 		detail.TPS = float32(ret.successCount) / float32(nowTime.Sub(s.lastStartTime).Seconds())
@@ -459,7 +479,15 @@ func (t *Thread) Start() {
 			return
 		default:
 			start := time.Now()
-			err := t.handler.handle(t.client, t.sk3, orgIDs[t.index], userCrtPaths[t.index], i, infos)
+			var err error
+			if authType == sdk.Public {
+				err = t.handler.handle(t.client, t.sk3, "", "", i, infos)
+			} else if authType == sdk.PermissionedWithKey {
+				err = t.handler.handle(t.client, t.sk3, orgIDs[t.index], "", i, infos)
+			} else {
+				err = t.handler.handle(t.client, t.sk3, orgIDs[t.index], userCrtPaths[t.index], i, infos)
+			}
+
 			elapsed := time.Since(start)
 
 			index := atomic.AddInt32(&t.statistician.completedCount, 1)
@@ -796,28 +824,49 @@ func sendRequest(sk3 crypto.PrivateKey, client apiPb.RpcNodeClient, msg *Invoker
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Duration(time.Duration(requestTimeout)*time.Second)))
 	defer cancel()
 
-	file := fileCache.Read(userCrtPath)
-
 	// 构造Sender
-	senderFull := &acPb.Member{
-		OrgId:      orgId,
-		MemberInfo: *file,
-		//IsFullCert: true,
-	}
-
 	var sender *acPb.Member
-	if useShortCrt {
-		certId, err := certCache.Read(userCrtPath, senderFull.MemberInfo, hashAlgo)
+	if authType == sdk.Public {
+		pubKey := sk3.PublicKey()
+		memberInfo, err := pubKey.String()
 		if err != nil {
-			return nil, fmt.Errorf("fail to compute the identity for certificate [%v]", err)
+			return nil, err
 		}
 		sender = &acPb.Member{
-			OrgId:      senderFull.OrgId,
-			MemberInfo: *certId,
-			MemberType: acPb.MemberType_CERT_HASH,
+			OrgId:      "",
+			MemberInfo: []byte(memberInfo),
+			MemberType: acPb.MemberType_PUBLIC_KEY,
+		}
+	} else if authType == sdk.PermissionedWithKey {
+		pubKey := sk3.PublicKey()
+		memberInfo, err := pubKey.String()
+		if err != nil {
+			return nil, err
+		}
+		sender = &acPb.Member{
+			OrgId:      orgId,
+			MemberInfo: []byte(memberInfo),
+			MemberType: acPb.MemberType_PUBLIC_KEY,
 		}
 	} else {
-		sender = senderFull
+		file := fileCache.Read(userCrtPath)
+		if useShortCrt {
+			certId, err := certCache.Read(userCrtPath, *file, hashAlgo)
+			if err != nil {
+				return nil, fmt.Errorf("fail to compute the identity for certificate [%v]", err)
+			}
+			sender = &acPb.Member{
+				OrgId:      orgId,
+				MemberInfo: *certId,
+				MemberType: acPb.MemberType_CERT_HASH,
+			}
+		} else {
+			sender = &acPb.Member{
+				OrgId:      orgId,
+				MemberInfo: *file,
+				//IsFullCert: true,
+			}
+		}
 	}
 
 	// 构造Header
@@ -837,11 +886,7 @@ func sendRequest(sk3 crypto.PrivateKey, client apiPb.RpcNodeClient, msg *Invoker
 		return nil, err
 	}
 
-	signer, err := getSigner(sk3, senderFull)
-	if err != nil {
-		return nil, err
-	}
-	signBytes, err := signer.Sign("SHA256", rawTxBytes)
+	signBytes, err := sdkutils.SignPayloadBytesWithHashType(sk3, crypto.HASH_TYPE_SHA256, rawTxBytes)
 	if err != nil {
 		return nil, err
 	}

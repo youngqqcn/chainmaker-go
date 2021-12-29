@@ -9,9 +9,13 @@ import (
 	"chainmaker.org/chainmaker-go/tools/cmc/util"
 	"chainmaker.org/chainmaker/common/v2/crypto"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
+	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
 	"chainmaker.org/chainmaker/protocol/v2"
 	sdk "chainmaker.org/chainmaker/sdk-go/v2"
 	sdkutils "chainmaker.org/chainmaker/sdk-go/v2/utils"
+
+	"github.com/gogo/protobuf/proto"
+	"github.com/hokaccha/go-prettyjson"
 	"github.com/spf13/cobra"
 )
 
@@ -258,7 +262,21 @@ func multiSignQuery() error {
 	if err != nil {
 		return fmt.Errorf("multi sign query failed, %s", err.Error())
 	}
-
+	if resp.Code == 0 {
+		if resp.ContractResult.Code == 0 {
+			result := &syscontract.MultiSignInfo{}
+			err = proto.Unmarshal(resp.ContractResult.Result, result)
+			if err != nil {
+				return err
+			}
+			output, err := prettyjson.Marshal(result)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("multi sign query resp: %s\n", string(output))
+			return nil
+		}
+	}
 	fmt.Printf("multi sign query resp: %+v\n", resp)
 
 	return nil
