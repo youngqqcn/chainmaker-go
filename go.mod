@@ -18,7 +18,7 @@ require (
 	chainmaker.org/chainmaker/net-libp2p v1.0.1-0.20211214135817-253d0a70250a
 	chainmaker.org/chainmaker/net-liquid v1.0.1-0.20211214135953-619e26ee9681
 	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211229071450-1c7d4fea5fea
-	chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211214124103-9512460ad844
+	chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211230020837-c0e89736a070
 	chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211221063611-57df88d749c3
 	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211229100510-34b9e739d2d5
 	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20211216101020-14c306c8cc06
@@ -36,7 +36,6 @@ require (
 	github.com/Workiva/go-datastructures v1.0.53
 	github.com/c-bata/go-prompt v0.2.2
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
-	github.com/emirpasic/gods v1.12.0 // indirect
 	github.com/ethereum/go-ethereum v1.10.4
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/mock v1.6.0

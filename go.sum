@@ -53,8 +53,7 @@ chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211117140137-9095a7ab7a69/go.mod h
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211213122854-44c0d0a3df53/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211214073209-1288f39035e8/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211215062821-d83f1382c35e/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
-chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211228072928-3586fea0d387/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
-chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211229023105-e80fb114ea89 h1:YQALPS6xLEQ77JU+ilg4dqntmmQUmtBLkG4nfidSSYw=
+chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211220101140-c03e16f7185a/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211229023105-e80fb114ea89/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211229071450-1c7d4fea5fea h1:wVEdmc7riIWsWe5FnMQeE7ar3GH/lEaxeoesBovG6H4=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211229071450-1c7d4fea5fea/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
@@ -64,8 +63,9 @@ chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211119081550-ff85fecc318d/go.mo
 chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211213131053-f33b74e6a760/go.mod h1:HfUAVSphtyXjvk0vVJSQCLYBocUuxxZxMDrrIc72vic=
 chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211214124103-9512460ad844/go.mod h1:D3B4Ss0Ii1ga1TWBteOuxtOeDZkh4ccExvzZsGK1Mj0=
 chainmaker.org/chainmaker/protocol/v2 v2.1.1/go.mod h1:jlMaZq/AcwWOxYsehh+R0Qx99AIRLMLQyKEXYx5Bu4o=
-chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211214124103-9512460ad844 h1:PxG5qZ+0oIx3eQbyzasSe5YqEWBY9swqYgILHRCqbhg=
 chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211214124103-9512460ad844/go.mod h1:D3B4Ss0Ii1ga1TWBteOuxtOeDZkh4ccExvzZsGK1Mj0=
+chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211230020837-c0e89736a070 h1:mAycOnwQCuViPUuYHIyDL5Cm9LUzhgV9DOpTRK+PsVQ=
+chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211230020837-c0e89736a070/go.mod h1:9OlaR+bT/PL1JjsGRm77eeRBNycUsYYRI7Kht3PP0Cc=
 chainmaker.org/chainmaker/raftwal/v2 v2.0.3 h1:YBlJs2yj7B+YhGFEejlxFEp4KOuxnVtaZSoUDUsaVDc=
 chainmaker.org/chainmaker/raftwal/v2 v2.0.3/go.mod h1:19ulESU/EH/OxbMpo1PJMsRoJDM91BPrvXCyQhkHWpk=
 chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211221063611-57df88d749c3 h1:MaejP7fYMS3oFN6r3vh8W57C/8opHN2tfTQOpBtPJWE=
@@ -82,8 +82,6 @@ chainmaker.org/chainmaker/store-tikv/v2 v2.0.0-20211214130942-fb36ba911676 h1:bc
 chainmaker.org/chainmaker/store-tikv/v2 v2.0.0-20211214130942-fb36ba911676/go.mod h1:9IK+ew7w1kPn2D8JP95N2/JnTt4Ac6240DiK3fxr8d0=
 chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211214163009-84e91bc54e58/go.mod h1:lQ0yZk18IQQZQBS4abSkbPlHasoxtGfBBGG3yxBIhjI=
 chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211215100542-687b7f288c65/go.mod h1:lQ0yZk18IQQZQBS4abSkbPlHasoxtGfBBGG3yxBIhjI=
-chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211229032719-5d7274ab539a h1:7LFV4HFYUbk2XzZpfiLfCr8xmg6VnTTy4u9muXW+TKQ=
-chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211229032719-5d7274ab539a/go.mod h1:fcsC9ccLv5is46C84l159CgOf5A9dnaPtjAxUeHtSL4=
 chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211229100510-34b9e739d2d5 h1:g4pkrM15exs6VhQ9HX5KrAg3yQwJzXFzLMEUGJZ6W0E=
 chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211229100510-34b9e739d2d5/go.mod h1:ackHRochEXeuf92t+Nnep8KuQAgsAwWFPKfnx5W9coE=
 chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20211216101020-14c306c8cc06 h1:dqnDxtTkK4M9rCzJ+6fIGf20U3nsbQ9wj0rglz7nty8=
@@ -545,7 +543,6 @@ github.com/elazarl/go-bindata-assetfs v1.0.0/go.mod h1:v+YaWX3bdea5J/mo8dSETolEo
 github.com/elazarl/goproxy v0.0.0-20180725130230-947c36da3153/go.mod h1:/Zj4wYkgs4iZTTu3o/KG3Itv/qCCa8VVMlb3i9OVuzc=
 github.com/emicklei/go-restful v0.0.0-20170410110728-ff4f55a20633/go.mod h1:otzb+WCGbkyDHkqmQmT5YD2WR4BBwUdeQoFo8l/7tVs=
 github.com/emicklei/go-restful v2.9.5+incompatible/go.mod h1:otzb+WCGbkyDHkqmQmT5YD2WR4BBwUdeQoFo8l/7tVs=
-github.com/emirpasic/gods v1.12.0/go.mod h1:YfzfFFoVP/catgzJb4IKIqXjX78Ha8FMSDh3ymbK86o=
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
 github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5/go.mod h1:a2zkGnVExMxdzMo3M0Hi/3sEU+cWnZpSni0O6/Yb/P0=
@@ -1496,7 +1493,6 @@ github.com/pingcap/tidb v1.1.0-beta.0.20200509133407-a9dc72cf2558/go.mod h1:cXNb
 github.com/pingcap/tidb v1.1.0-beta.0.20200606093724-b5b4da0e6a90/go.mod h1:aaBBi3OJmYjENWY31YYOY8K6UoZZYgjZVZH56D0QIdE=
 github.com/pingcap/tidb v1.1.0-beta.0.20200630082100-328b6d0a955c h1:l30VSRmrTC7+mTBFeexTKtrACZn5x0uMA18aXIhcAqI=
 github.com/pingcap/tidb v1.1.0-beta.0.20200630082100-328b6d0a955c/go.mod h1:E2QWmROq7fUwvyxKoy0Bu8rfqV8ZlZDlZwBwOuesyKw=
-github.com/pingcap/tidb v4.0.9+incompatible/go.mod h1:uVSPAHTXrxjFBt+VqcyMCB7n0kQccVh5cb7E8UF2kYY=
 github.com/pingcap/tidb-tools v4.0.0-beta.1.0.20200306084441-875bd09aa3d5+incompatible/go.mod h1:XGdcy9+yqlDSEMTpOXnwf3hiTeqrV6MN/u1se9N8yIM=
 github.com/pingcap/tidb-tools v4.0.0-rc.1.0.20200421113014-507d2bb3a15e+incompatible/go.mod h1:XGdcy9+yqlDSEMTpOXnwf3hiTeqrV6MN/u1se9N8yIM=
 github.com/pingcap/tidb-tools v4.0.0-rc.1.0.20200514040632-f76b3e428e19+incompatible/go.mod h1:XGdcy9+yqlDSEMTpOXnwf3hiTeqrV6MN/u1se9N8yIM=
