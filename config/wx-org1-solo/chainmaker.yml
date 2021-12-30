@@ -116,7 +116,7 @@ debug:
 
 
 vm:
-  enable_dockervm: true
+  enable_dockervm: false
   dockervm_container_name: chainmaker-vm-docker-go-container
   dockervm_mount_path: ../data/org1/docker-go     # mount point in chain maker
   dockervm_log_path: ../log/org1/dockervm

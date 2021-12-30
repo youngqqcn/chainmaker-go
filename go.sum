@@ -53,10 +53,9 @@ chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211117140137-9095a7ab7a69/go.mod h
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211213122854-44c0d0a3df53/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211214073209-1288f39035e8/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211215062821-d83f1382c35e/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
-chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211220101140-c03e16f7185a/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211229023105-e80fb114ea89/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
-chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211229071450-1c7d4fea5fea h1:wVEdmc7riIWsWe5FnMQeE7ar3GH/lEaxeoesBovG6H4=
-chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211229071450-1c7d4fea5fea/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
+chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211230035615-3d074e0887c6 h1:Wj2qREFNb193hfppBaOpm7GKvFBG/YlTuTG3alHKE14=
+chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211230035615-3d074e0887c6/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
 chainmaker.org/chainmaker/protocol/v2 v2.0.1-0.20211109074216-fc2674ef6e22/go.mod h1:HfUAVSphtyXjvk0vVJSQCLYBocUuxxZxMDrrIc72vic=
 chainmaker.org/chainmaker/protocol/v2 v2.1.0/go.mod h1:jlMaZq/AcwWOxYsehh+R0Qx99AIRLMLQyKEXYx5Bu4o=
 chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211119081550-ff85fecc318d/go.mod h1:HfUAVSphtyXjvk0vVJSQCLYBocUuxxZxMDrrIc72vic=
@@ -64,8 +63,8 @@ chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211213131053-f33b74e6a760/go.mo
 chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211214124103-9512460ad844/go.mod h1:D3B4Ss0Ii1ga1TWBteOuxtOeDZkh4ccExvzZsGK1Mj0=
 chainmaker.org/chainmaker/protocol/v2 v2.1.1/go.mod h1:jlMaZq/AcwWOxYsehh+R0Qx99AIRLMLQyKEXYx5Bu4o=
 chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211214124103-9512460ad844/go.mod h1:D3B4Ss0Ii1ga1TWBteOuxtOeDZkh4ccExvzZsGK1Mj0=
-chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211230020837-c0e89736a070 h1:mAycOnwQCuViPUuYHIyDL5Cm9LUzhgV9DOpTRK+PsVQ=
-chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211230020837-c0e89736a070/go.mod h1:9OlaR+bT/PL1JjsGRm77eeRBNycUsYYRI7Kht3PP0Cc=
+chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211230040054-b41fe1f95750 h1:bbbH7LAuYHQ/5kvEwfJ3lv6d+pBzbIGjpOACTPN2sHQ=
+chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211230040054-b41fe1f95750/go.mod h1:XlQl2U9qpB9mRj2i1Q8i/14XI13Clt31paUkxwphN4w=
 chainmaker.org/chainmaker/raftwal/v2 v2.0.3 h1:YBlJs2yj7B+YhGFEejlxFEp4KOuxnVtaZSoUDUsaVDc=
 chainmaker.org/chainmaker/raftwal/v2 v2.0.3/go.mod h1:19ulESU/EH/OxbMpo1PJMsRoJDM91BPrvXCyQhkHWpk=
 chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211221063611-57df88d749c3 h1:MaejP7fYMS3oFN6r3vh8W57C/8opHN2tfTQOpBtPJWE=
@@ -82,8 +81,8 @@ chainmaker.org/chainmaker/store-tikv/v2 v2.0.0-20211214130942-fb36ba911676 h1:bc
 chainmaker.org/chainmaker/store-tikv/v2 v2.0.0-20211214130942-fb36ba911676/go.mod h1:9IK+ew7w1kPn2D8JP95N2/JnTt4Ac6240DiK3fxr8d0=
 chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211214163009-84e91bc54e58/go.mod h1:lQ0yZk18IQQZQBS4abSkbPlHasoxtGfBBGG3yxBIhjI=
 chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211215100542-687b7f288c65/go.mod h1:lQ0yZk18IQQZQBS4abSkbPlHasoxtGfBBGG3yxBIhjI=
-chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211229100510-34b9e739d2d5 h1:g4pkrM15exs6VhQ9HX5KrAg3yQwJzXFzLMEUGJZ6W0E=
-chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211229100510-34b9e739d2d5/go.mod h1:ackHRochEXeuf92t+Nnep8KuQAgsAwWFPKfnx5W9coE=
+chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211230041817-380b346a112d h1:zAtgYf7d2Wk1p4g/bszNp/hk9pUNneYrj7hiqKO+xJM=
+chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211230041817-380b346a112d/go.mod h1:KSsV4EOtdCEMDxRJ62JePpCGojHybHLa3OVIZEYMrho=
 chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20211216101020-14c306c8cc06 h1:dqnDxtTkK4M9rCzJ+6fIGf20U3nsbQ9wj0rglz7nty8=
 chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20211216101020-14c306c8cc06/go.mod h1:zIgz0ssn5uV2QVV5ve1Vf3zG6VCmyftdRcF+QPF7Bx0=
 chainmaker.org/chainmaker/txpool-single/v2 v2.1.1-0.20211214125452-9037b3ed764a h1:JsUezGckMPDKSWaRFP5vaZunejQ2URMOUR5X2V7UAaY=
