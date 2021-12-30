@@ -49,7 +49,8 @@ type BlockChainSyncServer struct {
 	requestCache sync.Map // ignore repeat block sync request when in process
 }
 
-func NewBlockChainSyncServer(chainId string,
+func NewBlockChainSyncServer(
+	chainId string,
 	net protocol.NetService,
 	msgBus msgbus.MessageBus,
 	blockchainStore protocol.BlockchainStore,
@@ -228,7 +229,7 @@ func (sync *BlockChainSyncServer) handleBlockReq(syncMsg *syncPb.SyncMsg, from s
 	}
 	defer sync.requestCache.Store(processKey, time.Now())
 
-	sync.log.Debugf("receive request to get block [height: %d, batch_size: %d] from "+
+	sync.log.Infof("receive request to get block [height: %d, batch_size: %d] from "+
 		"node [%s]"+"WithRwset [%v]", req.BlockHeight, req.BatchSize, from, req.WithRwset)
 	return sync.sendInfos(&req, from)
 }

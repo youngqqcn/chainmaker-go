@@ -85,7 +85,7 @@ func (sch *scheduler) handler(event queue.Item) (queue.Item, error) {
 		//sch.log.Debug("receive [SchedulerMsg] msg, start handle...")
 		return sch.handleScheduleMsg()
 	case *SyncedBlockMsg:
-		sch.log.Debug("receive [SyncedBlockMsg] msg, start handle...")
+		sch.log.Info("receive [SyncedBlockMsg] msg, start handle...")
 		return sch.handleSyncedBlockMsg(msg)
 	case *ProcessedBlockResp:
 		sch.log.Debug("receive [ProcessedBlockResp] msg, start handle...")
@@ -321,7 +321,7 @@ func (sch *scheduler) handleSyncedBlockMsg(msg *SyncedBlockMsg) (queue.Item, err
 				sch.receivedBlocks[blkInfo.Block.Header.BlockHeight] = msg.from
 			}
 		}
-		sch.log.Debugf("received block [height:%d:%x] needToProcess: %v from "+
+		sch.log.Infof("received block [height:%d:%x] needToProcess: %v from "+
 			"node [%s]", blkInfo.Block.Header.BlockHeight, blkInfo.Block.Header.BlockHash, needToProcess, msg.from)
 	}
 

@@ -8,8 +8,6 @@ SPDX-License-Identifier: Apache-2.0
 package sync
 
 import (
-	"fmt"
-	"sync"
 	"testing"
 	"time"
 
@@ -161,7 +159,8 @@ func TestSyncMsg_BLOCK_SYNC_RESP(t *testing.T) {
 	service, fn := initTestSync(t)
 	defer fn()
 	implSync := service.(*BlockChainSyncServer)
-
+	// modify config for a stable unit test result
+	implSync.conf.livenessTick = 5 * time.Second
 	// 1. add peer status
 	bz := getNodeStatusResp(t, 120)
 	require.NoError(t, implSync.blockSyncMsgHandler("node2", bz, netPb.NetMsg_SYNC_BLOCK_MSG))
@@ -173,75 +172,4 @@ func TestSyncMsg_BLOCK_SYNC_RESP(t *testing.T) {
 	require.EqualValues(t, "pendingRecvHeight: 12, peers num: 1, blockStates num: 109, "+
 		"pendingBlocks num: 109, receivedBlocks num: 0", implSync.scheduler.getServiceState())
 	require.EqualValues(t, "pendingBlockHeight: 12, queue num: 0", implSync.processor.getServiceState())
-}
-
-func TestSyncMapReadWriteInForRange(t *testing.T) {
-	count := 0
-	loopNum := 0
-	m := sync.Map{}
-
-	if v, loaded := m.LoadOrStore("test0", nil); loaded {
-		t.Log("loaded")
-	} else {
-		t.Log("v is: ", v)
-	}
-
-	m.Store("test1", nil)
-	m.Store("test2", time.Now())
-
-	go func() {
-		tm := time.NewTicker(100 * time.Millisecond)
-		for {
-			select {
-			case <-time.After(1 * time.Second):
-				return
-			case <-tm.C:
-				m.Store("test1", time.Now())
-				t.Log(fmt.Sprintf("change test1 to %s", time.Now().String()))
-				return
-			}
-		}
-	}()
-
-	ticker := time.NewTicker(100 * time.Millisecond)
-	dealFunc := func(key, value interface{}) bool {
-		count++
-		t.Log(fmt.Sprintf("deal key: %s", key))
-		if key == "test1" {
-			t.Log("get test 1")
-			time.Sleep(300 * time.Millisecond)
-		}
-		if value == nil {
-			return true
-		}
-		if t, ok := value.(time.Time); ok {
-			if time.Since(t) > 100*time.Millisecond {
-				m.Delete(key)
-			}
-			return true
-		}
-		return true
-	}
-
-	for {
-		select {
-		case <-time.After(1 * time.Second):
-			return
-		case <-ticker.C:
-			t.Log("Enter range...")
-			count = 0
-			m.Range(dealFunc)
-			// test sync map concurrent read and write while in for range
-			if loopNum == 0 {
-				require.Equal(t, count, 3)
-			}
-			if loopNum == 1 {
-				require.Equal(t, count, 1)
-			}
-			if loopNum > 1 {
-				require.Equal(t, count, 1)
-			}
-			loopNum++
-		}
-	}
 }

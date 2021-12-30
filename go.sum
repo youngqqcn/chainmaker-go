@@ -54,29 +54,15 @@ chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211117140137-9095a7ab7a69/go.mod h
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211213122854-44c0d0a3df53/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211214073209-1288f39035e8/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211215062821-d83f1382c35e/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
-<<<<<<< HEAD
-<<<<<<< HEAD
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211229023105-e80fb114ea89/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211230035615-3d074e0887c6 h1:Wj2qREFNb193hfppBaOpm7GKvFBG/YlTuTG3alHKE14=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211230035615-3d074e0887c6/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
-=======
-chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211221040047-d380bc820bb5 h1:j7IhFK4VrIUKvzBOru1WDxYOs+X8N3+p58732ZimH9k=
-chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211221040047-d380bc820bb5/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
->>>>>>> fix: rebase 2.2.0
-=======
-chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211227100918-2d67d7baebcc h1:X77mDuXB4Zc6sx8kilCAgz6w8lBJ4Siv1Fc6Cx47vs4=
-chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211227100918-2d67d7baebcc/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
->>>>>>> fix: update dependence
 chainmaker.org/chainmaker/protocol/v2 v2.0.1-0.20211109074216-fc2674ef6e22/go.mod h1:HfUAVSphtyXjvk0vVJSQCLYBocUuxxZxMDrrIc72vic=
 chainmaker.org/chainmaker/protocol/v2 v2.1.0/go.mod h1:jlMaZq/AcwWOxYsehh+R0Qx99AIRLMLQyKEXYx5Bu4o=
 chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211119081550-ff85fecc318d/go.mod h1:HfUAVSphtyXjvk0vVJSQCLYBocUuxxZxMDrrIc72vic=
 chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211213131053-f33b74e6a760/go.mod h1:HfUAVSphtyXjvk0vVJSQCLYBocUuxxZxMDrrIc72vic=
 chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211214124103-9512460ad844/go.mod h1:D3B4Ss0Ii1ga1TWBteOuxtOeDZkh4ccExvzZsGK1Mj0=
 chainmaker.org/chainmaker/protocol/v2 v2.1.1/go.mod h1:jlMaZq/AcwWOxYsehh+R0Qx99AIRLMLQyKEXYx5Bu4o=
-<<<<<<< HEAD
-=======
-chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211214124103-9512460ad844 h1:PxG5qZ+0oIx3eQbyzasSe5YqEWBY9swqYgILHRCqbhg=
->>>>>>> fix: update dependence
 chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211214124103-9512460ad844/go.mod h1:D3B4Ss0Ii1ga1TWBteOuxtOeDZkh4ccExvzZsGK1Mj0=
 chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211230040054-b41fe1f95750 h1:bbbH7LAuYHQ/5kvEwfJ3lv6d+pBzbIGjpOACTPN2sHQ=
 chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211230040054-b41fe1f95750/go.mod h1:XlQl2U9qpB9mRj2i1Q8i/14XI13Clt31paUkxwphN4w=
@@ -84,10 +70,6 @@ chainmaker.org/chainmaker/raftwal/v2 v2.0.3 h1:YBlJs2yj7B+YhGFEejlxFEp4KOuxnVtaZ
 chainmaker.org/chainmaker/raftwal/v2 v2.0.3/go.mod h1:19ulESU/EH/OxbMpo1PJMsRoJDM91BPrvXCyQhkHWpk=
 chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211221063611-57df88d749c3 h1:MaejP7fYMS3oFN6r3vh8W57C/8opHN2tfTQOpBtPJWE=
 chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211221063611-57df88d749c3/go.mod h1:SuHoA/k3ArIAgqVVw0+RHxX7IBMzXaHdkv2kGUjeQFA=
-<<<<<<< HEAD
-=======
-chainmaker.org/chainmaker/store-badgerdb/v2 v2.1.1-0.20211214130222-5e9dc704e9bc h1:AIA57scYsZ6Mz1XKUIUlhlawDxLrgpPEt4/eRYDoJwY=
->>>>>>> fix: update dependence
 chainmaker.org/chainmaker/store-badgerdb/v2 v2.1.1-0.20211214130222-5e9dc704e9bc/go.mod h1:z9zurgCovyjnuPQK8sALeAiBa5jCjNTkINOPLhb2SyE=
 chainmaker.org/chainmaker/store-badgerdb/v2 v2.1.2-0.20211214130222-5e9dc704e9bc h1:5LSiRuzlOFSzN0/FzCBAWroOjIQJw8JHd9227uYPAS4=
 chainmaker.org/chainmaker/store-badgerdb/v2 v2.1.2-0.20211214130222-5e9dc704e9bc/go.mod h1:z9zurgCovyjnuPQK8sALeAiBa5jCjNTkINOPLhb2SyE=
@@ -111,31 +93,19 @@ chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211109074701-81d58330e787/go.mod h
 chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211117141112-236ce9c3ffe9/go.mod h1:Mfcc74hjD7hS/wqibf9NoDRbqdUsbnBHXi3FH96sx3o=
 chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211117144316-3f4a940e94f0/go.mod h1:Mfcc74hjD7hS/wqibf9NoDRbqdUsbnBHXi3FH96sx3o=
 chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211214124429-d110e27a8fa2/go.mod h1:9NY1ny1bnuad/txY/bPUKOtDQp0s4j+cMdJxR5K16X8=
-<<<<<<< HEAD
 chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211227024950-ed5b7932dbe2/go.mod h1:3YX46GuLB9uJtW3aM4NIoY5SilHB0/5xxWktQuyJ0Pg=
 chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211227141113-d43218ac2f9e h1:5GO4yhPurf+ezvRe+uWCHGD55qFg+BnWOtphwQxgZak=
 chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211227141113-d43218ac2f9e/go.mod h1:3YX46GuLB9uJtW3aM4NIoY5SilHB0/5xxWktQuyJ0Pg=
 chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20211229023847-64896d8afdc3 h1:QZ85mtGdysyi6k3IK78kWx9KUzPgdcXZnf7tMfSAnqg=
 chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20211229023847-64896d8afdc3/go.mod h1:gk82SXpdIhIOvdSGkrUBOLRAWDIPEktq7P5nDQzgoKI=
-=======
-chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211227024950-ed5b7932dbe2 h1:E4YY0sVs3qyw2Ew3hguhe8zfsjiWNAnZmcMtNc2hhPM=
-chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211227024950-ed5b7932dbe2/go.mod h1:3YX46GuLB9uJtW3aM4NIoY5SilHB0/5xxWktQuyJ0Pg=
-chainmaker.org/chainmaker/vm-docker-go v0.0.0-20211220112556-d50a626a15b7 h1:N85UXJ1AJ7crrwDT6vSzmEDHnt83M88ACjSacw1yn1M=
-chainmaker.org/chainmaker/vm-docker-go v0.0.0-20211220112556-d50a626a15b7/go.mod h1:0uY5HaO4ZMulJHS7AXA6WqkSu19HRX+m7FPSwwC42j4=
->>>>>>> fix: update dependence
 chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20211215040351-c7aa52c74d2a h1:wycMe+23UQTKRCmF7SqctzoM2thwusRYzQs6JttuN14=
 chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20211215040351-c7aa52c74d2a/go.mod h1:deUAC76HMuNJ8kMrYQIPRMAthYrOWRD4oMcIGvDC3ZA=
 chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20211221065927-2b2979cbe7ae h1:9HdnXcJtNKzKEX7o+oSEO0DaAfDxq/95o8S4zelySag=
 chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20211221065927-2b2979cbe7ae/go.mod h1:h5tzt3/8WvMkOvBGQYH6V/IDIQiFIaibCvyqcsbXOiM=
 chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211203151445-3e9efc3f8ad6/go.mod h1:qh0QJ2ZQuMnItJn0l9vOSPscgD3fdv0IteAniiOfpqY=
 chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211214132707-4ab8964bd865/go.mod h1:RokdcVZic01QhX6PyM0RN1kmFs4EtizLxmfz+VCs71Q=
-<<<<<<< HEAD
 chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20211229032604-b000395e6842 h1:axhwnTxJ3YYmSoRtAcVuEBi7B4deY3KTS9QCbH+SWjo=
 chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20211229032604-b000395e6842/go.mod h1:ArkIVVKUG9whTn5lD4xui/fNdzAdD5bqaS/m/B2wSTQ=
-=======
-chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20211228034527-e70dd4a925d1 h1:mOaOhn68PcbLtlQszk7bRFkC5Hd6gFUTZjS9b7DUBTw=
-chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20211228034527-e70dd4a925d1/go.mod h1:7Qwr3AgyTA9e8EE03dik7++f1rd58lN1TXwMTT+ydeM=
->>>>>>> fix: update dependence
 chainmaker.org/chainmaker/vm-wasmer/v2 v2.1.1-0.20211215060329-82ccffe66c7c h1:BCdWCa35pC7oYTFuHIpE4D3APiaUO4BVETmpltjVb+U=
 chainmaker.org/chainmaker/vm-wasmer/v2 v2.1.1-0.20211215060329-82ccffe66c7c/go.mod h1:3l/gNYgcXfj44CmyOgJU4zMlBKDSjc52p9zvYvBFLI8=
 chainmaker.org/chainmaker/vm-wxvm/v2 v2.1.1-0.20211214134406-08ea2c6a3639 h1:mNAbFARA1anGTzwZV8Tbn+bxMmFtYR8xwOjJ/zZ/NKY=

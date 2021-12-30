@@ -14,7 +14,6 @@ import (
 	"chainmaker.org/chainmaker/localconf/v2"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/protocol/v2"
-
 	"github.com/Workiva/go-datastructures/queue"
 )
 
