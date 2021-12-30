@@ -21,7 +21,8 @@ type (
 	handleFunc      func(event queue.Item) (queue.Item, error)
 )
 
-const bufferSize = 1024
+//const bufferSize = 1024
+const bufferSize = 128
 
 // Routine Provide hosting of the service in goroutine
 type Routine struct {
@@ -74,7 +75,13 @@ func (r *Routine) loop() {
 			return
 		default:
 			if ret != nil {
+				if blks, ok := ret.(*ReceivedBlocks); ok {
+					r.log.Debugf("receive [ReceivedBlocks] return, put into r.out, height is: %d", blks.blks[0].Header.BlockHeight)
+				}
 				r.out <- ret
+				if _, ok := ret.(*ReceivedBlocks); ok {
+					r.log.Debugf("receive [ReceivedBlocks] return, put into r.out success")
+				}
 			}
 		}
 	}

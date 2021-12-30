@@ -76,16 +76,22 @@ func newScheduler(sender syncSender, ledger protocol.LedgerCache,
 func (sch *scheduler) handler(event queue.Item) (queue.Item, error) {
 	switch msg := event.(type) {
 	case NodeStatusMsg:
+		sch.log.Info("receive [NodeStatusMsg] msg, start handle...")
 		sch.handleNodeStatus(msg)
 	case LivenessMsg:
+		sch.log.Info("receive [LivenessMsg] msg, start handle...")
 		sch.handleLivinessMsg()
 	case SchedulerMsg:
+		//sch.log.Info("receive [SchedulerMsg] msg, start handle...")
 		return sch.handleScheduleMsg()
 	case *SyncedBlockMsg:
+		sch.log.Info("receive [SyncedBlockMsg] msg, start handle...")
 		return sch.handleSyncedBlockMsg(msg)
 	case ProcessedBlockResp:
+		sch.log.Info("receive [ProcessedBlockResp] msg, start handle...")
 		return sch.handleProcessedBlockResp(msg)
 	case DataDetection:
+		sch.log.Info("receive [DataDetection] msg, start handle...")
 		sch.handleDataDetection()
 	}
 	return nil, nil
@@ -112,7 +118,7 @@ func (sch *scheduler) handleNodeStatus(msg NodeStatusMsg) {
 }
 
 func (sch *scheduler) addPendingBlocksAndUpdatePendingHeight(peerHeight uint64) {
-	if uint64(len(sch.blockStates)) > sch.maxPendingBlocks {
+	if uint64(len(sch.blockStates)) >= sch.maxPendingBlocks {
 		return
 	}
 	blk := sch.ledger.GetLastCommittedBlock()
@@ -121,6 +127,9 @@ func (sch *scheduler) addPendingBlocksAndUpdatePendingHeight(peerHeight uint64) 
 	}
 	for i := sch.pendingRecvHeight; i <= peerHeight && i < sch.pendingRecvHeight+sch.maxPendingBlocks; i++ {
 		if _, exist := sch.blockStates[i]; !exist {
+			if len(sch.blockStates) > bufferSize {
+				break
+			}
 			sch.blockStates[i] = newBlock
 		}
 	}
@@ -134,10 +143,12 @@ func (sch *scheduler) handleDataDetection() {
 			delete(sch.pendingBlocks, height)
 			delete(sch.receivedBlocks, height)
 			delete(sch.pendingTime, height)
-			delete(sch.receivedBlocks, height)
 		}
 	}
 	sch.pendingRecvHeight = blk.Header.BlockHeight + 1
+	if _, exists := sch.blockStates[sch.pendingRecvHeight]; exists {
+		return
+	}
 	sch.blockStates[sch.pendingRecvHeight] = newBlock
 }
 
@@ -286,6 +297,9 @@ func (sch *scheduler) getPendingReqInPeer(peer string) int {
 }
 
 func (sch *scheduler) handleSyncedBlockMsg(msg *SyncedBlockMsg) (queue.Item, error) {
+	if len(sch.receivedBlocks) > bufferSize {
+		return nil, nil
+	}
 	blkBatch := syncPb.SyncBlockBatch{}
 	if err := proto.Unmarshal(msg.msg, &blkBatch); err != nil {
 		return nil, err
@@ -302,10 +316,12 @@ func (sch *scheduler) handleSyncedBlockMsg(msg *SyncedBlockMsg) (queue.Item, err
 		for _, blkinfo := range blkBatch.GetBlockinfoBatch().GetBatch() {
 			delete(sch.pendingBlocks, blkinfo.Block.Header.BlockHeight)
 			delete(sch.pendingTime, blkinfo.Block.Header.BlockHeight)
-			if _, exist := sch.blockStates[blkinfo.Block.Header.BlockHeight]; exist {
-				needToProcess = true
-				sch.blockStates[blkinfo.Block.Header.BlockHeight] = receivedBlock
-				sch.receivedBlocks[blkinfo.Block.Header.BlockHeight] = msg.from
+			if state, exist := sch.blockStates[blkinfo.Block.Header.BlockHeight]; exist {
+				if state != receivedBlock {
+					needToProcess = true
+					sch.blockStates[blkinfo.Block.Header.BlockHeight] = receivedBlock
+					sch.receivedBlocks[blkinfo.Block.Header.BlockHeight] = msg.from
+				}
 			}
 			sch.log.Debugf("received block [height:%d:%x] needToProcess: %v from "+
 				"node [%s]", blkinfo.Block.Header.BlockHeight, blkinfo.Block.Header.BlockHash, needToProcess, msg.from)
@@ -318,10 +334,12 @@ func (sch *scheduler) handleSyncedBlockMsg(msg *SyncedBlockMsg) (queue.Item, err
 		for _, blk := range blkBatch.GetBlockBatch().Batches {
 			delete(sch.pendingBlocks, blk.Header.BlockHeight)
 			delete(sch.pendingTime, blk.Header.BlockHeight)
-			if _, exist := sch.blockStates[blk.Header.BlockHeight]; exist {
-				needToProcess = true
-				sch.blockStates[blk.Header.BlockHeight] = receivedBlock
-				sch.receivedBlocks[blk.Header.BlockHeight] = msg.from
+			if state, exist := sch.blockStates[blk.Header.BlockHeight]; exist {
+				if state != receivedBlock {
+					needToProcess = true
+					sch.blockStates[blk.Header.BlockHeight] = receivedBlock
+					sch.receivedBlocks[blk.Header.BlockHeight] = msg.from
+				}
 			}
 			sch.log.Debugf("received block [height:%d:%x] needToProcess: %v from "+
 				"node [%s]", blk.Header.BlockHeight, blk.Header.BlockHash, needToProcess, msg.from)

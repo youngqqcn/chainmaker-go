@@ -8,6 +8,8 @@ SPDX-License-Identifier: Apache-2.0
 package sync
 
 import (
+	"fmt"
+	"sync"
 	"testing"
 	"time"
 
@@ -166,4 +168,61 @@ func TestSyncMsg_BLOCK_SYNC_RESP(t *testing.T) {
 	require.EqualValues(t, "pendingRecvHeight: 12, peers num: 1, blockStates num: 109, "+
 		"pendingBlocks num: 109, receivedBlocks num: 0", implSync.scheduler.getServiceState())
 	require.EqualValues(t, "pendingBlockHeight: 12, queue num: 0", implSync.processor.getServiceState())
+}
+
+func TestSyncMap(t *testing.T) {
+	m := sync.Map{}
+
+	if v, loaded := m.LoadOrStore("test0", nil); loaded {
+		t.Log("loaded")
+	} else {
+		t.Log("v is: ", v)
+	}
+
+	m.Store("test1", nil)
+	m.Store("test2", time.Now())
+
+	closeTicker := time.NewTimer(1 * time.Second)
+	go func() {
+		tm := time.NewTicker(100 * time.Millisecond)
+		for {
+			select {
+			case <-closeTicker.C:
+				return
+			case <-tm.C:
+				m.Store("test1", time.Now())
+				t.Log(fmt.Sprintf("change test1 to %s", time.Now().String()))
+				return
+			}
+		}
+	}()
+
+	ticker := time.NewTicker(100 * time.Millisecond)
+	dealFunc := func(key, value interface{}) bool {
+		t.Log(fmt.Sprintf("deal key: %s", key))
+		if key == "test1" {
+			t.Log("get test 1")
+			time.Sleep(300 * time.Millisecond)
+		}
+		if value == nil {
+			return true
+		}
+		if t, ok := value.(time.Time); ok {
+			if time.Since(t) > 100*time.Millisecond {
+				m.Delete(key)
+			}
+			return true
+		}
+		return true
+	}
+
+	for {
+		select {
+		case <-closeTicker.C:
+			return
+		case <-ticker.C:
+			t.Log("Enter range...")
+			m.Range(dealFunc)
+		}
+	}
 }

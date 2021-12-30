@@ -11,10 +11,12 @@ import (
 	"fmt"
 	"testing"
 
-	"chainmaker.org/chainmaker/protocol/v2/test"
-	"github.com/stretchr/testify/require"
+	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
+	syncPb "chainmaker.org/chainmaker/pb-go/v2/sync"
 
+	"chainmaker.org/chainmaker/protocol/v2/test"
 	"github.com/Workiva/go-datastructures/queue"
+	"github.com/stretchr/testify/require"
 )
 
 type MockHandler struct {
@@ -47,4 +49,50 @@ func TestAddTask(t *testing.T) {
 		require.EqualValues(t, fmt.Sprintf("node%d", i+1), item.from)
 	}
 	routine.end()
+}
+
+func TestPriority(t *testing.T) {
+	//var ok bool
+	var err error
+	//var item []queue.Item
+	q := queue.NewPriorityQueue(bufferSize, true)
+	err = q.Put(EqualLevel{})
+	require.NoError(t, err)
+	err = q.Put(SyncedBlockMsg{msg: []byte("msg"), from: "node1"})
+	require.NoError(t, err)
+	err = q.Put(NodeStatusMsg{msg: syncPb.BlockHeightBCM{BlockHeight: 1}, from: "node1"})
+	require.NoError(t, err)
+	err = q.Put(SchedulerMsg{})
+	require.NoError(t, err)
+	err = q.Put(LivenessMsg{})
+	require.NoError(t, err)
+	err = q.Put(ReceivedBlocks{
+		blks: []*commonPb.Block{
+			{Header: &commonPb.BlockHeader{BlockHeight: 9}},
+			{Header: &commonPb.BlockHeader{BlockHeight: 11}},
+			{Header: &commonPb.BlockHeader{BlockHeight: 12}},
+		}, from: "node1"})
+	require.NoError(t, err)
+	err = q.Put(ReceivedBlocksWithRwSets{})
+	require.NoError(t, err)
+	err = q.Put(ProcessBlockMsg{})
+	require.NoError(t, err)
+	err = q.Put(ProcessBlockWithRwSetMsg{})
+	require.NoError(t, err)
+	err = q.Put(DataDetection{})
+	require.NoError(t, err)
+	err = q.Put(ProcessedBlockResp{})
+	require.NoError(t, err)
+
+	require.Equal(t, q.Len(), 11)
+	//item, err = q.Get(1)
+	//require.NoError(t, err)
+	//_, ok = item[0].(NodeStatusMsg)
+	//require.Equal(t, ok, true)
+	//item, err = q.Get(1)
+	//_, ok = item[0].(SyncedBlockMsg)
+	//require.Equal(t, ok, true)
+	//item, err = q.Get(1)
+	//_, ok = item[0].(ReceivedBlocks)
+	//require.Equal(t, ok, true)
 }

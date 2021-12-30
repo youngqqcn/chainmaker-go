@@ -9,6 +9,8 @@ package sync
 
 import (
 	"fmt"
+	"reflect"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -43,6 +45,8 @@ type BlockChainSyncServer struct {
 
 	scheduler *Routine // Service that get blocks from other nodes
 	processor *Routine // Service that processes block data, adding valid blocks to the chain
+
+	requestCache sync.Map // ignore repeat block sync request when in process
 }
 
 func NewBlockChainSyncServer(chainId string,
@@ -64,6 +68,7 @@ func NewBlockChainSyncServer(chainId string,
 		blockCommitter:  blockCommitter,
 		close:           make(chan bool),
 		log:             log, //logger.GetLoggerByChain(logger.MODULE_SYNC, chainId),
+		requestCache:    sync.Map{},
 	}
 	return syncServer
 }
@@ -103,6 +108,7 @@ func (sync *BlockChainSyncServer) Start() error {
 		return err
 	}
 	go sync.loop()
+	go sync.blockRequestEntrance()
 	return nil
 }
 
@@ -140,6 +146,9 @@ func (sync *BlockChainSyncServer) initSyncConfIfRequire() {
 	}
 	if localconf.ChainMakerConfig.SyncConfig.ReqTimeThreshold > 0 {
 		sync.conf.SetReqTimeThreshold(localconf.ChainMakerConfig.SyncConfig.ReqTimeThreshold)
+	}
+	if localconf.ChainMakerConfig.SyncConfig.BlockRequestTime > 0 {
+		sync.conf.SetBlockRequestTime(localconf.ChainMakerConfig.SyncConfig.BlockRequestTime)
 	}
 }
 
@@ -202,13 +211,22 @@ func (sync *BlockChainSyncServer) handleNodeStatusResp(syncMsg *syncPb.SyncMsg, 
 
 func (sync *BlockChainSyncServer) handleBlockReq(syncMsg *syncPb.SyncMsg, from string) error {
 	var (
-		err error
-		req syncPb.BlockSyncReq
+		err    error
+		loaded bool
+		req    syncPb.BlockSyncReq
 	)
+
 	if err = proto.Unmarshal(syncMsg.Payload, &req); err != nil {
 		sync.log.Errorf("fail to proto.Unmarshal the syncPb.SyncMsg:%s", err.Error())
 		return err
 	}
+
+	processKey := fmt.Sprintf("%s_%d", from, req.BlockHeight)
+	if _, loaded = sync.requestCache.LoadOrStore(processKey, nil); loaded {
+		return nil
+	}
+	defer sync.requestCache.Store(processKey, time.Now())
+
 	sync.log.Debugf("receive request to get block [height: %d, batch_size: %d] from "+
 		"node [%s]"+"WithRwset [%v]", req.BlockHeight, req.BatchSize, from, req.WithRwset)
 	if req.WithRwset {
@@ -358,13 +376,41 @@ func (sync *BlockChainSyncServer) loop() {
 
 		// State processing results in state machine
 		case resp := <-sync.scheduler.out:
+			sync.log.Debugf("sync.processor add task, type: %v", reflect.TypeOf(resp))
 			if err := sync.processor.addTask(resp); err != nil {
 				sync.log.Errorf("add scheduler task to processor failed, reason: %s", err)
 			}
 		case resp := <-sync.processor.out:
+			sync.log.Debugf("sync.scheduler add task, type: %v", reflect.TypeOf(resp))
 			if err := sync.scheduler.addTask(resp); err != nil {
 				sync.log.Errorf("add processor task to scheduler failed, reason: %s", err)
 			}
+		}
+	}
+}
+
+func (sync *BlockChainSyncServer) blockRequestEntrance() {
+	ticker := time.NewTicker(sync.conf.blockRequestTime)
+	dealFunc := func(key, value interface{}) bool {
+		if value == nil {
+			return true
+		}
+		if t, ok := value.(time.Time); ok {
+			if time.Since(t) > sync.conf.blockRequestTime {
+				sync.requestCache.Delete(key)
+			}
+			return true
+		}
+		return true
+	}
+
+	for {
+		select {
+		case <-sync.close:
+			return
+
+		case <-ticker.C:
+			sync.requestCache.Range(dealFunc)
 		}
 	}
 }
@@ -375,6 +421,7 @@ func (sync *BlockChainSyncServer) validateAndCommitBlock(block *commonPb.Block) 
 		return hasProcessed
 	}
 	startTick := utils.CurrentTimeMillisSeconds()
+	sync.log.Debugf("VerifyBlock start, height is: %d ....", block.Header.BlockHeight)
 	if err := sync.blockVerifier.VerifyBlock(block, protocol.SYNC_VERIFY); err != nil {
 		if err == commonErrors.ErrBlockHadBeenCommited {
 			sync.log.Warnf("the block: %d has been committed in the blockChainStore ", block.Header.BlockHeight)
@@ -414,6 +461,8 @@ func (sync *BlockChainSyncServer) validateAndCommitBlockWithRwSets(block *common
 	lastTime := utils.CurrentTimeMillisSeconds() - startTick
 	sync.log.Infof("block [%d] VerifyBlockWithRwSets spend %d", block.Header.BlockHeight, lastTime)
 
+	sync.log.Debugf("VerifyBlock end, height is: %d ....", block.Header.BlockHeight)
+	sync.log.Debugf("AddBlock start, height is: %d ....", block.Header.BlockHeight)
 	if err := sync.blockCommitter.AddBlock(block); err != nil {
 		if err == commonErrors.ErrBlockHadBeenCommited {
 			sync.log.Warnf("the block: %d has been committed in the blockChainStore ", block.Header.BlockHeight)
@@ -422,6 +471,7 @@ func (sync *BlockChainSyncServer) validateAndCommitBlockWithRwSets(block *common
 		sync.log.Warnf("fail to commit the block whose height is %d, err: %s", block.Header.BlockHeight, err)
 		return addErr
 	}
+	sync.log.Debugf("AddBlock end, height is: %d ....", block.Header.BlockHeight)
 	return ok
 }
 

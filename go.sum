@@ -38,6 +38,8 @@ chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211110030026-ce2a7f3760cd/go.m
 chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211213123219-8e2e0cdcd628/go.mod h1:Z0blGHIcK2ui9e4xc0jUd04RFwZWRo/lYuwrtdHAfok=
 chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211214124610-bb7620382194 h1:dAJ7ZvgbReH7KzzFLkOnN4cbHzijXR2QiqFJzg0Uj4s=
 chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211214124610-bb7620382194/go.mod h1:ylpW9ir14psujTtKb6qQW81aKhnhjzWW3n9XpjD9S0A=
+chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211221043113-fb262e6f198a h1:5WH2zEE/TdmJVkzb6DSFgghaJvtlYQviDO1R4AqGbe4=
+chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211221043113-fb262e6f198a/go.mod h1:jxrIBjtkIXvZxGAylMieycKEw62JRswKKiYoAO+QEUg=
 chainmaker.org/chainmaker/logger/v2 v2.1.0/go.mod h1:1K4BUf7X2a1hBZQ3T/SuvtkOAAzvBCY8tUerCO4aOpQ=
 chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211109074349-f79af5e1892d/go.mod h1:cm5B1cYOwYjeCx/yjMFIObw8M1jko+iSbxK32HJppvc=
 chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211214124250-621f11b35ab0 h1:62Lqj463DA9D9g+B8Ciy9RgVf9KmP+4Ayyu0MHiGIJs=
@@ -53,9 +55,14 @@ chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211117140137-9095a7ab7a69/go.mod h
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211213122854-44c0d0a3df53/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211214073209-1288f39035e8/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211215062821-d83f1382c35e/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
+<<<<<<< HEAD
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211229023105-e80fb114ea89/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211230035615-3d074e0887c6 h1:Wj2qREFNb193hfppBaOpm7GKvFBG/YlTuTG3alHKE14=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211230035615-3d074e0887c6/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
+=======
+chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211221040047-d380bc820bb5 h1:j7IhFK4VrIUKvzBOru1WDxYOs+X8N3+p58732ZimH9k=
+chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211221040047-d380bc820bb5/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
+>>>>>>> fix: rebase 2.2.0
 chainmaker.org/chainmaker/protocol/v2 v2.0.1-0.20211109074216-fc2674ef6e22/go.mod h1:HfUAVSphtyXjvk0vVJSQCLYBocUuxxZxMDrrIc72vic=
 chainmaker.org/chainmaker/protocol/v2 v2.1.0/go.mod h1:jlMaZq/AcwWOxYsehh+R0Qx99AIRLMLQyKEXYx5Bu4o=
 chainmaker.org/chainmaker/protocol/v2 v2.1.1-0.20211119081550-ff85fecc318d/go.mod h1:HfUAVSphtyXjvk0vVJSQCLYBocUuxxZxMDrrIc72vic=
