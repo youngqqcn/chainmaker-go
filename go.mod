@@ -12,7 +12,7 @@ require (
 	chainmaker.org/chainmaker/consensus-solo/v2 v2.0.0-20211220120848-36f05d90fd9c
 	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20211222120803-81e4ae9ef0fb
 	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211222120147-e0b37ef1e800
-	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211221043113-fb262e6f198a
+	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211216112331-2bee015483d0
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211214124250-621f11b35ab0
 	chainmaker.org/chainmaker/net-common v0.0.7-0.20211214135701-e366adf2f12c
 	chainmaker.org/chainmaker/net-libp2p v1.0.1-0.20211214135817-253d0a70250a
