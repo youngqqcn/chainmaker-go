@@ -4,19 +4,19 @@ Copyright (C) BABEC. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 */
 
-package hotstuffmode
+package maxbftmode
 
 import (
 	"chainmaker.org/chainmaker-go/module/core/common"
 	"chainmaker.org/chainmaker-go/module/core/common/scheduler"
-	"chainmaker.org/chainmaker-go/module/core/hotstuffmode/helper"
-	"chainmaker.org/chainmaker-go/module/core/hotstuffmode/proposer"
-	"chainmaker.org/chainmaker-go/module/core/hotstuffmode/verifier"
+	"chainmaker.org/chainmaker-go/module/core/maxbftmode/helper"
+	"chainmaker.org/chainmaker-go/module/core/maxbftmode/proposer"
+	"chainmaker.org/chainmaker-go/module/core/maxbftmode/verifier"
 	"chainmaker.org/chainmaker-go/module/core/provider/conf"
 	"chainmaker.org/chainmaker-go/module/subscriber"
 	"chainmaker.org/chainmaker/common/v2/msgbus"
 	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
-	"chainmaker.org/chainmaker/pb-go/v2/consensus/chainedbft"
+	"chainmaker.org/chainmaker/pb-go/v2/consensus/maxbft"
 	txpoolpb "chainmaker.org/chainmaker/pb-go/v2/txpool"
 	"chainmaker.org/chainmaker/protocol/v2"
 )
@@ -33,7 +33,7 @@ type CoreEngine struct {
 	BlockVerifier  protocol.BlockVerifier  // block verifier, to verify block that proposer generated
 	BlockCommitter protocol.BlockCommitter // block committer, to commit block to store after consensus
 	txScheduler    protocol.TxScheduler    // transaction scheduler, schedule transactions run in vm
-	HotStuffHelper protocol.HotStuffHelper
+	MaxbftHelper   protocol.MaxbftHelper
 
 	txPool          protocol.TxPool          // transaction pool, cache transactions to be pack in block
 	vmMgr           protocol.VmManager       // vm manager
@@ -122,7 +122,7 @@ func NewCoreEngine(cf *conf.CoreEngineConfig) (*CoreEngine, error) {
 		return nil, err
 	}
 
-	core.HotStuffHelper = helper.NewHotStuffHelper(cf.TxPool, cf.ChainConf, cf.ProposalCache)
+	core.MaxbftHelper = helper.NewMaxbftHelper(cf.TxPool, cf.ChainConf, cf.ProposalCache)
 
 	return core, nil
 }
@@ -138,7 +138,7 @@ func (c *CoreEngine) OnMessage(message *msgbus.Message) {
 	// 2. receive verify block from consensus
 	// 3. receive commit block message from consensus
 	// 4. receive propose signal from txpool
-	// 5. receive build proposal signal from chained bft consensus
+	// 5. receive build proposal signal from maxbft consensus
 
 	switch message.Topic {
 	case msgbus.ProposeState:
@@ -163,8 +163,8 @@ func (c *CoreEngine) OnMessage(message *msgbus.Message) {
 			c.blockProposer.OnReceiveTxPoolSignal(signal)
 		}
 	case msgbus.BuildProposal:
-		if proposal, ok := message.Payload.(*chainedbft.BuildProposal); ok {
-			c.blockProposer.OnReceiveChainedBFTProposal(proposal)
+		if proposal, ok := message.Payload.(*maxbft.BuildProposal); ok {
+			c.blockProposer.OnReceiveMaxBFTProposal(proposal)
 		}
 	}
 }
@@ -196,6 +196,6 @@ func (c *CoreEngine) GetBlockVerifier() protocol.BlockVerifier {
 func (c *CoreEngine) DiscardAboveHeight(baseHeight int64) {
 }
 
-func (c *CoreEngine) GetHotStuffHelper() protocol.HotStuffHelper {
-	return c.HotStuffHelper
+func (c *CoreEngine) GetMaxbftHelper() protocol.MaxbftHelper {
+	return c.MaxbftHelper
 }

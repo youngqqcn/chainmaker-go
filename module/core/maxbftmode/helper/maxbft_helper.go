@@ -12,19 +12,19 @@ import (
 	"chainmaker.org/chainmaker/protocol/v2"
 )
 
-type hotStuffHelper struct {
+type maxBftHelper struct {
 	txPool        protocol.TxPool
 	chainConf     protocol.ChainConf
 	proposalCache protocol.ProposalCache
 }
 
-func NewHotStuffHelper(txPool protocol.TxPool,
-	chainConf protocol.ChainConf, proposalCache protocol.ProposalCache) protocol.HotStuffHelper {
-	return &hotStuffHelper{txPool: txPool, chainConf: chainConf, proposalCache: proposalCache}
+func NewMaxbftHelper(txPool protocol.TxPool,
+	chainConf protocol.ChainConf, proposalCache protocol.ProposalCache) protocol.MaxbftHelper {
+	return &maxBftHelper{txPool: txPool, chainConf: chainConf, proposalCache: proposalCache}
 }
 
-func (hp *hotStuffHelper) DiscardAboveHeight(baseHeight uint64) {
-	if hp.chainConf.ChainConfig().Consensus.Type != consensusPb.ConsensusType_HOTSTUFF {
+func (hp *maxBftHelper) DiscardAboveHeight(baseHeight uint64) {
+	if hp.chainConf.ChainConfig().Consensus.Type != consensusPb.ConsensusType_MAXBFT {
 		return
 	}
 	delBlocks := hp.proposalCache.DiscardAboveHeight(baseHeight)

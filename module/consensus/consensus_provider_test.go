@@ -15,8 +15,8 @@ import (
 	"time"
 
 	"chainmaker.org/chainmaker/common/v2/msgbus"
-	hotstuff "chainmaker.org/chainmaker/consensus-chainedbft/v2"
 	dpos "chainmaker.org/chainmaker/consensus-dpos/v2"
+	maxbft "chainmaker.org/chainmaker/consensus-maxbft/v2"
 	raft "chainmaker.org/chainmaker/consensus-raft/v2"
 	solo "chainmaker.org/chainmaker/consensus-solo/v2"
 	tbft "chainmaker.org/chainmaker/consensus-tbft/v2"
@@ -25,7 +25,7 @@ import (
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	configpb "chainmaker.org/chainmaker/pb-go/v2/config"
 	consensuspb "chainmaker.org/chainmaker/pb-go/v2/consensus"
-	chainedbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/chainedbft"
+	maxbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/maxbft"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/protocol/v2/mock"
 	"github.com/gogo/protobuf/proto"
@@ -54,7 +54,7 @@ func (bc *TestBlockchain) MockInit(ctrl *gomock.Controller, consensusType consen
 	bc.identity = mock.NewMockSigningMember(ctrl)
 	ledgerCache := mock.NewMockLedgerCache(ctrl)
 	ledgerCache.EXPECT().CurrentHeight().AnyTimes().Return(uint64(1), nil)
-	qc := &chainedbftpb.QuorumCert{
+	qc := &maxbftpb.QuorumCert{
 		BlockId: []byte("32c8b26"),
 		Level:   0,
 		Height:  0,
@@ -90,7 +90,7 @@ func (bc *TestBlockchain) MockInit(ctrl *gomock.Controller, consensusType consen
 	coreEngine := mock.NewMockCoreEngine(ctrl)
 	coreEngine.EXPECT().GetBlockVerifier().AnyTimes().Return(nil)
 	coreEngine.EXPECT().GetBlockCommitter().AnyTimes().Return(nil)
-	coreEngine.EXPECT().GetHotStuffHelper().AnyTimes().Return(nil)
+	coreEngine.EXPECT().GetMaxbftHelper().AnyTimes().Return(nil)
 	bc.coreEngine = coreEngine
 	store := mock.NewMockBlockchainStore(ctrl)
 	store.EXPECT().ReadObject("GOVERNANCE", []byte{71, 79, 86, 69, 82, 78, 65, 78, 67, 69}).AnyTimes().Return(
@@ -134,9 +134,9 @@ func TestNewConsensusEngine(t *testing.T) {
 			&dpos.DPoSImpl{},
 			false,
 		},
-		{"new HOTSTUFF consensus engine",
-			consensuspb.ConsensusType_HOTSTUFF,
-			&hotstuff.ConsensusChainedBftImpl{},
+		{"new MAXBFT consensus engine",
+			consensuspb.ConsensusType_MAXBFT,
+			&maxbft.ConsensusMaxBftImpl{},
 			false,
 		},
 	}
@@ -206,9 +206,9 @@ func registerConsensuses() {
 	)
 
 	RegisterConsensusProvider(
-		consensuspb.ConsensusType_HOTSTUFF,
+		consensuspb.ConsensusType_MAXBFT,
 		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
-			return hotstuff.New(config)
+			return maxbft.New(config)
 		},
 	)
 }

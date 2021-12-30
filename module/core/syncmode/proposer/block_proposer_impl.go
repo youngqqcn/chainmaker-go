@@ -19,7 +19,7 @@ import (
 	pbac "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
 	consensuspb "chainmaker.org/chainmaker/pb-go/v2/consensus"
-	"chainmaker.org/chainmaker/pb-go/v2/consensus/chainedbft"
+	"chainmaker.org/chainmaker/pb-go/v2/consensus/maxbft"
 	txpoolpb "chainmaker.org/chainmaker/pb-go/v2/txpool"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/utils/v2"
@@ -404,12 +404,12 @@ func (bp *BlockProposerImpl) OnReceiveProposeStatusChange(proposeStatus bool) {
 	bp.log.Debugf("current node is proposer, timeout period is %v", bp.getDuration())
 }
 
-// OnReceiveChainedBFTProposal, to check if this proposer should propose a new block
-// Only for chained bft consensus
-func (bp *BlockProposerImpl) OnReceiveChainedBFTProposal(proposal *chainedbft.BuildProposal) {
+// OnReceiveMaxBFTProposal, to check if this proposer should propose a new block
+// Only for maxbft consensus
+func (bp *BlockProposerImpl) OnReceiveMaxBFTProposal(proposal *maxbft.BuildProposal) {
 	proposingHeight := proposal.Height
 	preHash := proposal.PreHash
-	if !bp.shouldProposeByChainedBFT(proposingHeight, preHash) {
+	if !bp.shouldProposeByMaxBFT(proposingHeight, preHash) {
 		bp.log.Infof("not a legal proposal request [%d](%x)", proposingHeight, preHash)
 		return
 	}
@@ -420,7 +420,7 @@ func (bp *BlockProposerImpl) OnReceiveChainedBFTProposal(proposal *chainedbft.Bu
 	}
 	defer bp.setIdle()
 
-	bp.log.Infof("trigger proposal from chainedBFT, height[%d]", proposal.Height)
+	bp.log.Infof("trigger proposal from maxBFT, height[%d]", proposal.Height)
 	go bp.proposing(proposingHeight, preHash)
 	<-bp.finishProposeC
 }
@@ -521,10 +521,10 @@ func (bp *BlockProposerImpl) isSelfProposer() bool {
 }
 
 /*
- * shouldProposeByChainedBFT, check if node should propose new block
- * Only for chained bft consensus
+ * shouldProposeByMaxBFT, check if node should propose new block
+ * Only for maxbft consensus
  */
-func (bp *BlockProposerImpl) shouldProposeByChainedBFT(height uint64, preHash []byte) bool {
+func (bp *BlockProposerImpl) shouldProposeByMaxBFT(height uint64, preHash []byte) bool {
 	committedBlock := bp.ledgerCache.GetLastCommittedBlock()
 	if committedBlock == nil {
 		bp.log.Errorf("no committed block found")
