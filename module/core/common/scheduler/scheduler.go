@@ -88,12 +88,12 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 	} else {
 		go func() {
 			if len(txBatch) > 0 {
-			for _, tx := range txBatch {
-				runningTxC <- tx
+				for _, tx := range txBatch {
+					runningTxC <- tx
+				}
+			} else {
+				finishC <- true
 			}
-		} else {
-			finishC <- true
-		}
 		}()
 	}
 	// Put the pending transaction into the running queue
