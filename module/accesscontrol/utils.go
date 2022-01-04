@@ -121,7 +121,7 @@ func InitCertSigningMember(chainConfig *config.ChainConfig, localOrgId,
 	return nil, nil
 }
 
-func InitPKSigningMember(ac protocol.AccessControlProvider,
+func InitPKSigningMember(hashType,
 	localOrgId, localPrivKeyFile, localPrivKeyPwd string) (protocol.SigningMember, error) {
 
 	if localPrivKeyFile != "" {
@@ -155,7 +155,7 @@ func InitPKSigningMember(ac protocol.AccessControlProvider,
 			return nil, fmt.Errorf("fail to initialize identity management service: [%s]", err.Error())
 		}
 
-		member, err := newPkMemberFromParam(localOrgId, publicKeyBytes, protocol.Role(""), ac.GetHashAlg())
+		member, err := newPkMemberFromParam(localOrgId, publicKeyBytes, protocol.Role(""), hashType)
 		if err != nil {
 			return nil, fmt.Errorf("fail to initialize identity management service: [%s]", err.Error())
 		}

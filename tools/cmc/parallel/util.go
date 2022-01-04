@@ -9,18 +9,14 @@ package parallel
 
 import (
 	"errors"
-	"io/ioutil"
 	"strings"
 	"time"
 
-	"chainmaker.org/chainmaker-go/module/accesscontrol"
 	"chainmaker.org/chainmaker/common/v2/crypto"
-	"chainmaker.org/chainmaker/common/v2/crypto/asym"
-	acPb "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
-	"chainmaker.org/chainmaker/protocol/v2"
+	sdk "chainmaker.org/chainmaker/sdk-go/v2"
+	sdkutils "chainmaker.org/chainmaker/sdk-go/v2/utils"
 	"chainmaker.org/chainmaker/utils/v2"
-	"github.com/gogo/protobuf/proto"
 )
 
 const GRPCMaxCallRecvMsgSize = 16 * 1024 * 1024
@@ -52,20 +48,6 @@ func constructInvokePayload(chainId, contractName, method string, pairs []*commo
 	return payload, nil
 }
 
-func getSigner(sk3 crypto.PrivateKey, sender *acPb.Member) (protocol.SigningMember, error) {
-	skPEM, err := sk3.String()
-	if err != nil {
-		return nil, err
-	}
-	//fmt.Printf("skPEM: %s\n", skPEM)
-
-	signer, err := accesscontrol.NewCertSigningMember(hashAlgo, sender, skPEM, "")
-	if err != nil {
-		return nil, err
-	}
-	return signer, nil
-}
-
 //func initGRPCConnect(useTLS bool) (*grpc.ClientConn, error) {
 //	url := fmt.Sprintf("%s:%d", ip, port)
 //
@@ -90,54 +72,63 @@ func getSigner(sk3 crypto.PrivateKey, sender *acPb.Member) (protocol.SigningMemb
 //}
 
 func acSign(msg *commonPb.Payload) ([]*commonPb.EndorsementEntry, error) {
-	//msg.Endorsement = nil
-	bytes, _ := proto.Marshal(msg)
-
-	signers := make([]protocol.SigningMember, 0)
-	orgIdArray := strings.Split(orgIds, ",")
-	adminSignKeyArray := strings.Split(adminSignKeys, ",")
-	adminSignCrtArray := strings.Split(adminSignCrts, ",")
-
-	if len(adminSignKeyArray) != len(adminSignCrtArray) {
-		return nil, errors.New("admin key len is not equal to crt len")
+	var adminKeys []string
+	var adminCrts []string
+	var adminOrgs []string
+	if authType == sdk.Public {
+		if adminSignKeys != "" {
+			adminKeys = strings.Split(adminSignKeys, ",")
+		}
+		if len(adminKeys) == 0 {
+			return nil, errors.New("admin keys is empty")
+		}
+	} else if authType == sdk.PermissionedWithKey {
+		if adminSignKeys != "" {
+			adminKeys = strings.Split(adminSignKeys, ",")
+		}
+		if orgIds != "" {
+			adminOrgs = strings.Split(orgIds, ",")
+		}
+		if len(adminKeys) != len(adminOrgs) {
+			return nil, errors.New("admin key len is not equal to orgId len")
+		}
+	} else {
+		if adminSignKeys != "" {
+			adminKeys = strings.Split(adminSignKeys, ",")
+		}
+		if adminSignCrts != "" {
+			adminCrts = strings.Split(adminSignCrts, ",")
+		}
+		if len(adminKeys) != len(adminCrts) {
+			return nil, errors.New("admin key len is not equal to crt len")
+		}
 	}
-	if len(adminSignKeyArray) != len(orgIdArray) {
-		return nil, errors.New("admin key len is not equal to orgId len")
-	}
 
-	for i, key := range adminSignKeyArray {
-
-		file, err := ioutil.ReadFile(key)
+	endorsers := make([]*commonPb.EndorsementEntry, len(adminKeys))
+	for i := range adminKeys {
+		var e *commonPb.EndorsementEntry
+		var err error
+		if authType == sdk.PermissionedWithCert {
+			e, err = sdkutils.MakeEndorserWithPath(adminKeys[i], adminCrts[i], msg)
+		} else if authType == sdk.PermissionedWithKey {
+			e, err = sdkutils.MakePkEndorserWithPath(
+				adminKeys[i],
+				crypto.HASH_TYPE_SHA256,
+				adminOrgs[i],
+				msg,
+			)
+		} else {
+			e, err = sdkutils.MakePkEndorserWithPath(
+				adminKeys[i],
+				crypto.HASH_TYPE_SHA256,
+				"",
+				msg,
+			)
+		}
 		if err != nil {
 			return nil, err
 		}
-		sk, err := asym.PrivateKeyFromPEM(file, nil)
-		if err != nil {
-			return nil, err
-		}
-
-		file2, err := ioutil.ReadFile(adminSignCrtArray[i])
-		if err != nil {
-			return nil, err
-		}
-
-		// 构造Sender
-		sender1 := &acPb.Member{
-			OrgId:      orgIdArray[i],
-			MemberInfo: file2,
-			//IsFullCert: true,
-		}
-
-		signer, err := getSigner(sk, sender1)
-		if err != nil {
-			return nil, err
-		}
-		signers = append(signers, signer)
+		endorsers[i] = e
 	}
-	endorsements, err := accesscontrol.MockSignWithMultipleNodes(bytes, signers, hashAlgo)
-	if err != nil {
-		return nil, err
-	}
-	//fmt.Printf("endorsements:\n%v\n", endorsements)
-	return endorsements, nil
+	return endorsers, nil
 }

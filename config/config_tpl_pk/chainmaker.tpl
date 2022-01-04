@@ -244,6 +244,15 @@ storage:
   # Symmetric encryption algorithm for writing data to disk. can be sm4 or aes
   # encryptor: sm4    # [*]
 
+  # Disable block file db, default: false
+  disable_block_file_db: false
+
+  # async write block in file block db to disk, default: false, so default is sync write disk
+  logdb_segment_async: false
+
+  # file size of .fdb, MB, default: 20
+  logdb_segment_size: 128
+
   # Symmetric encryption key:16 bytes key
   # If pkcs11 is enabled, it is the keyID
   # encrypt_key: "1234567890123456"
