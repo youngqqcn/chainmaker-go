@@ -9,7 +9,6 @@ package verifier
 import (
 	"encoding/hex"
 	"fmt"
-	"sync"
 
 	"chainmaker.org/chainmaker-go/module/consensus"
 	"chainmaker.org/chainmaker-go/module/core/common"
@@ -19,11 +18,15 @@ import (
 	"chainmaker.org/chainmaker/common/v2/msgbus"
 	"chainmaker.org/chainmaker/localconf/v2"
 	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
+	chainConfConfig "chainmaker.org/chainmaker/pb-go/v2/config"
 	consensuspb "chainmaker.org/chainmaker/pb-go/v2/consensus"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/utils/v2"
+
 	"github.com/prometheus/client_golang/prometheus"
 )
+
+var ModuleNameCore = "Core"
 
 // BlockVerifierImpl implements BlockVerifier interface.
 // Verify block and transactions.
@@ -42,9 +45,9 @@ type BlockVerifierImpl struct {
 	ac             protocol.AccessControlProvider // access control manager
 	log            protocol.Logger                // logger
 	txPool         protocol.TxPool                // tx pool to check if tx is duplicate
-	mu             sync.Mutex                     // to avoid concurrent map modify
-	verifierBlock  *common.VerifierBlock
-	storeHelper    conf.StoreHelper
+	//mu             sync.Mutex                     // to avoid concurrent map modify
+	verifierBlock *common.VerifierBlock
+	storeHelper   conf.StoreHelper
 
 	metricBlockVerifyTime *prometheus.HistogramVec // metrics monitor
 }
@@ -102,6 +105,8 @@ func NewBlockVerifier(config BlockVerifierConfig, log protocol.Logger) (protocol
 		v.metricBlockVerifyTime = monitor.NewHistogramVec(monitor.SUBSYSTEM_CORE_VERIFIER, "metric_block_verify_time",
 			"block verify time metric", []float64{0.005, 0.01, 0.015, 0.05, 0.1, 1, 10}, "chainId")
 	}
+
+	config.ChainConf.AddWatch(v)
 
 	return v, nil
 }
@@ -332,6 +337,16 @@ func (v *BlockVerifierImpl) VerifyBlockWithRwSets(block *commonpb.Block,
 	if localconf.ChainMakerConfig.MonitorConfig.Enabled {
 		v.metricBlockVerifyTime.WithLabelValues(v.chainId).Observe(float64(elapsed) / 1000)
 	}
+	return nil
+}
+
+func (v *BlockVerifierImpl) Module() string {
+	return ModuleNameCore
+}
+
+func (v *BlockVerifierImpl) Watch(chainConfig *chainConfConfig.ChainConfig) error {
+	v.chainConf.ChainConfig().Block = chainConfig.Block
+	v.log.Infof("update chainconf,blockverify[%v]", v.chainConf.ChainConfig().Block)
 	return nil
 }
 
