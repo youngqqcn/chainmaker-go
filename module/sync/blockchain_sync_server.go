@@ -178,6 +178,7 @@ func (sync *BlockChainSyncServer) blockSyncMsgHandler(from string, msg []byte, m
 	case syncPb.SyncMsg_BLOCK_SYNC_REQ:
 		return sync.handleBlockReq(&syncMsg, from)
 	case syncPb.SyncMsg_BLOCK_SYNC_RESP:
+		sync.log.Debug("receive [SyncMsg_BLOCK_SYNC_RESP] msg, put into scheduler...")
 		return sync.scheduler.addTask(&SyncedBlockMsg{msg: syncMsg.Payload, from: from})
 	}
 	return fmt.Errorf("not support the syncPb.SyncMsg.Type as %d", syncMsg.Type)
@@ -267,6 +268,7 @@ func (sync *BlockChainSyncServer) sendInfos(req *syncPb.BlockSyncReq, from strin
 			return err
 		}
 	}
+	sync.log.Debugf("send [SyncMsg_BLOCK_SYNC_RESP] msg to [%s]", from)
 	return nil
 }
 
