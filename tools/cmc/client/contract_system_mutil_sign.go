@@ -236,7 +236,7 @@ func multiSignVote() error {
 
 	}
 
-	resp, err := client.MultiSignContractVote(payload, endorser, isAgree)
+	resp, err := client.MultiSignContractVote(payload, endorser)
 	if err != nil {
 		return fmt.Errorf("multi sign vote failed, %s", err.Error())
 	}
