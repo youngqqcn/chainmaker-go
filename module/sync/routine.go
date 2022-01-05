@@ -21,7 +21,8 @@ type (
 	handleFunc      func(event queue.Item) (queue.Item, error)
 )
 
-const bufferSize = 1024
+//const bufferSize = 1024
+const bufferSize = 128
 
 // Routine Provide hosting of the service in goroutine
 type Routine struct {
@@ -82,7 +83,8 @@ func (r *Routine) loop() {
 
 func (r *Routine) addTask(event queue.Item) error {
 	if atomic.LoadInt32(&r.start) != 1 {
-		return commonErrors.ErrSyncServiceHasStoped
+		r.log.Warn("add task to Routine failed, the sync service has been stopped")
+		return nil
 	}
 	if err := r.queue.Put(event); err != nil {
 		return fmt.Errorf("add task to the queue failed, reason: %s", err)

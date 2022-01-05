@@ -11,10 +11,13 @@ import (
 	"fmt"
 	"testing"
 
-	"chainmaker.org/chainmaker/protocol/v2/test"
-	"github.com/stretchr/testify/require"
+	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 
+	syncPb "chainmaker.org/chainmaker/pb-go/v2/sync"
+
+	"chainmaker.org/chainmaker/protocol/v2/test"
 	"github.com/Workiva/go-datastructures/queue"
+	"github.com/stretchr/testify/require"
 )
 
 type MockHandler struct {
@@ -38,13 +41,69 @@ func TestAddTask(t *testing.T) {
 	routine := NewRoutine("mock", mock.handler, mock.getState, &test.GoLogger{})
 	require.NoError(t, routine.begin())
 
-	require.NoError(t, routine.addTask(NodeStatusMsg{from: "node1"}))
-	require.NoError(t, routine.addTask(NodeStatusMsg{from: "node2"}))
-	require.NoError(t, routine.addTask(NodeStatusMsg{from: "node3"}))
+	require.NoError(t, routine.addTask(&NodeStatusMsg{from: "node1"}))
+	require.NoError(t, routine.addTask(&NodeStatusMsg{from: "node2"}))
+	require.NoError(t, routine.addTask(&NodeStatusMsg{from: "node3"}))
 
 	for i := range mock.receiveItems {
-		item := mock.receiveItems[i].(NodeStatusMsg)
+		item := mock.receiveItems[i].(*NodeStatusMsg)
 		require.EqualValues(t, fmt.Sprintf("node%d", i+1), item.from)
 	}
 	routine.end()
+}
+
+func TestPriority(t *testing.T) {
+	q := queue.NewPriorityQueue(bufferSize, true)
+	require.NoError(t, q.Put(&SyncedBlockMsg{msg: []byte("msg"), from: "node1"}))
+	require.NoError(t, q.Put(&NodeStatusMsg{msg: syncPb.BlockHeightBCM{BlockHeight: 1}, from: "node1"}))
+	require.NoError(t, q.Put(&SchedulerMsg{}))
+	require.NoError(t, q.Put(&LivenessMsg{}))
+	err := q.Put(&ReceivedBlockInfos{
+		blkinfos: []*commonPb.BlockInfo{
+			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 103}}},
+			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 104}}},
+			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 105}}},
+		},
+		from:      "node1",
+		withRWSet: false,
+	})
+	require.NoError(t, err)
+	require.NoError(t, q.Put(&ProcessBlockMsg{}))
+	require.NoError(t, q.Put(&DataDetection{}))
+	require.NoError(t, q.Put(&ProcessedBlockResp{}))
+
+	require.Equal(t, q.Len(), 8)
+	item, err := q.Get(1)
+	require.NoError(t, err)
+	_, ok := item[0].(*ReceivedBlockInfos)
+	require.Equal(t, ok, true)
+	item, err = q.Get(1)
+	require.NoError(t, err)
+	_, ok = item[0].(*ProcessedBlockResp)
+	require.Equal(t, ok, true)
+	item, err = q.Get(1)
+	require.NoError(t, err)
+	_, ok = item[0].(*ProcessBlockMsg)
+	require.Equal(t, ok, true)
+	item, err = q.Get(1)
+	require.NoError(t, err)
+	_, ok = item[0].(*SyncedBlockMsg)
+	require.Equal(t, ok, true)
+	item, err = q.Get(1)
+	require.NoError(t, err)
+	_, ok = item[0].(*NodeStatusMsg)
+	require.Equal(t, ok, true)
+	item, err = q.Get(1)
+	require.NoError(t, err)
+	_, ok = item[0].(*LivenessMsg)
+	require.Equal(t, ok, true)
+	item, err = q.Get(1)
+	require.NoError(t, err)
+	_, ok = item[0].(*DataDetection)
+	require.Equal(t, ok, true)
+	item, err = q.Get(1)
+	require.NoError(t, err)
+	_, ok = item[0].(*SchedulerMsg)
+	require.Equal(t, ok, true)
+	require.Equal(t, q.Len(), 0)
 }

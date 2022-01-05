@@ -50,9 +50,14 @@ func getBlockReq(t *testing.T, height, batchSize uint64) []byte {
 
 func getBlockResp(t *testing.T, height uint64) []byte {
 	msg := &syncPb.SyncBlockBatch{
-		Data: &syncPb.SyncBlockBatch_BlockBatch{BlockBatch: &syncPb.BlockBatch{Batches: []*commonPb.Block{
-			{Header: &commonPb.BlockHeader{BlockHeight: height}},
-		}}},
+		Data: &syncPb.SyncBlockBatch_BlockinfoBatch{
+			BlockinfoBatch: &syncPb.BlockInfoBatch{
+				Batch: []*commonPb.BlockInfo{
+					{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: height}}},
+				},
+			},
+		},
+		WithRwset: false,
 	}
 	bz, err := msg.Marshal()
 	require.NoError(t, err)
@@ -71,20 +76,20 @@ func initTestSync(t *testing.T) (protocol.SyncService, func()) {
 	mockLedger := newMockLedgerCache(ctrl, &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 10}})
 	mockCommit := newMockCommitter(ctrl, mockLedger)
 	log := &test.GoLogger{}
-	sync := NewBlockChainSyncServer("chain1", mockNet, mockMsgBus, mockStore, mockLedger, mockVerify, mockCommit, log)
-	require.NoError(t, sync.Start())
-	return sync, func() {
-		sync.Stop()
+	service := NewBlockChainSyncServer("chain1", mockNet, mockMsgBus, mockStore, mockLedger, mockVerify, mockCommit, log)
+	require.NoError(t, service.Start())
+	return service, func() {
+		service.Stop()
 		ctrl.Finish()
 	}
 }
 
 func TestBlockChainSyncServer_Start(t *testing.T) {
-	sync, fn := initTestSync(t)
+	service, fn := initTestSync(t)
 	defer fn()
 
 	// consume message
-	implSync := sync.(*BlockChainSyncServer)
+	implSync := service.(*BlockChainSyncServer)
 	bz := getNodeStatusResp(t, 110)
 	require.NoError(t, implSync.blockSyncMsgHandler("node1", bz, netPb.NetMsg_SYNC_BLOCK_MSG))
 	bz = getNodeStatusResp(t, 120)
@@ -95,7 +100,7 @@ func TestBlockChainSyncServer_Start(t *testing.T) {
 	require.EqualValues(t, "pendingBlockHeight: 11, queue num: 0", implSync.processor.getServiceState())
 
 	bz = getBlockResp(t, 11)
-	require.NoError(t, implSync.blockSyncMsgHandler("node2", bz, netPb.NetMsg_SYNC_BLOCK_MSG))
+	require.NoError(t, implSync.blockSyncMsgHandler("node2", bz, netPb.NetMsg_SYNC_BLOCK_MSG)) // TODO
 	//require.EqualValues(t, "pendingRecvHeight: 11, peers num: 2, blockStates num: 110, pendingBlocks num: 0, receivedBlocks num: 1",
 	//	implSync.scheduler.getServiceState())
 	//time.Sleep(time.Second)
@@ -103,9 +108,9 @@ func TestBlockChainSyncServer_Start(t *testing.T) {
 }
 
 func TestSyncMsg_NODE_STATUS_REQ(t *testing.T) {
-	sync, fn := initTestSync(t)
+	service, fn := initTestSync(t)
 	defer fn()
-	implSync := sync.(*BlockChainSyncServer)
+	implSync := service.(*BlockChainSyncServer)
 
 	// 1. req node status
 	require.NoError(t, implSync.blockSyncMsgHandler("node1", getNodeStatusReq(t), netPb.NetMsg_SYNC_BLOCK_MSG))
@@ -118,9 +123,9 @@ func TestSyncMsg_NODE_STATUS_REQ(t *testing.T) {
 }
 
 func TestSyncBlock_Req(t *testing.T) {
-	sync, fn := initTestSync(t)
+	service, fn := initTestSync(t)
 	defer fn()
-	implSync := sync.(*BlockChainSyncServer)
+	implSync := service.(*BlockChainSyncServer)
 
 	_ = implSync.blockChainStore.PutBlock(&commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 99}}, nil)
 	_ = implSync.blockChainStore.PutBlock(&commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 100}}, nil)
@@ -138,9 +143,9 @@ func TestSyncBlock_Req(t *testing.T) {
 }
 
 func TestSyncMsg_NODE_STATUS_RESP(t *testing.T) {
-	sync, fn := initTestSync(t)
+	service, fn := initTestSync(t)
 	defer fn()
-	implSync := sync.(*BlockChainSyncServer)
+	implSync := service.(*BlockChainSyncServer)
 
 	bz := getNodeStatusResp(t, 120)
 	require.NoError(t, implSync.blockSyncMsgHandler("node2", bz, netPb.NetMsg_SYNC_BLOCK_MSG))
@@ -151,18 +156,19 @@ func TestSyncMsg_NODE_STATUS_RESP(t *testing.T) {
 }
 
 func TestSyncMsg_BLOCK_SYNC_RESP(t *testing.T) {
-	sync, fn := initTestSync(t)
+	service, fn := initTestSync(t)
 	defer fn()
-	implSync := sync.(*BlockChainSyncServer)
-
+	implSync := service.(*BlockChainSyncServer)
+	// modify config for a stable unit test result
+	implSync.conf.livenessTick = 5 * time.Second
 	// 1. add peer status
 	bz := getNodeStatusResp(t, 120)
 	require.NoError(t, implSync.blockSyncMsgHandler("node2", bz, netPb.NetMsg_SYNC_BLOCK_MSG))
 
 	// 2. receive block
-	bz = getBlockResp(t, 11)
-	require.NoError(t, implSync.blockSyncMsgHandler("node2", bz, netPb.NetMsg_SYNC_BLOCK_MSG))
-	time.Sleep(time.Second * 3)
+	blkBz := getBlockResp(t, 11)
+	require.NoError(t, implSync.blockSyncMsgHandler("node2", blkBz, netPb.NetMsg_SYNC_BLOCK_MSG))
+	time.Sleep(3 * time.Second)
 	require.EqualValues(t, "pendingRecvHeight: 12, peers num: 1, blockStates num: 109, "+
 		"pendingBlocks num: 109, receivedBlocks num: 0", implSync.scheduler.getServiceState())
 	require.EqualValues(t, "pendingBlockHeight: 12, queue num: 0", implSync.processor.getServiceState())

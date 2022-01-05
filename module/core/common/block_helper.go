@@ -623,7 +623,7 @@ func (vb *VerifierBlock) ValidateBlock(
 func (vb *VerifierBlock) ValidateBlockWithRWSets(
 	block, lastBlock *commonPb.Block, hashType string, timeLasts []int64, txRWSetMap map[string]*commonPb.TxRWSet) (
 	map[string][]*commonPb.ContractEvent, []int64, error) {
-
+	// 1.block verify
 	if err := IsBlockHashValid(block, vb.chainConf.ChainConfig().Crypto.Hash); err != nil {
 		return nil, timeLasts, err
 	}

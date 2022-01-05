@@ -14,7 +14,6 @@ import (
 	"chainmaker.org/chainmaker/localconf/v2"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/protocol/v2"
-
 	"github.com/Workiva/go-datastructures/queue"
 )
 
@@ -50,35 +49,22 @@ func newProcessor(verify verifyAndAddBlock, ledgerCache protocol.LedgerCache, lo
 
 func (pro *processor) handler(event queue.Item) (queue.Item, error) {
 	switch msg := event.(type) {
-	case *ReceivedBlocks:
-		pro.handleReceivedBlocks(msg)
-	case *ReceivedBlocksWithRwSets:
-		pro.handleReceivedBlocksWithRwSets(msg)
-	case ProcessBlockMsg:
+	case *ReceivedBlockInfos:
+		pro.log.Debugf("receive [ReceivedBlockInfos] msg, height: %d, start handle...",
+			msg.blkinfos[0].Block.Header.BlockHeight)
+		pro.handleReceivedBlockInfos(msg)
+	case *ProcessBlockMsg:
+		//pro.log.Debugf("receive [ProcessBlockMsg] msg, start handle...")
 		return pro.handleProcessBlockMsg()
-	case DataDetection:
+	case *DataDetection:
+		pro.log.Debugf("receive [DataDetection] msg, start handle...")
 		pro.handleDataDetection()
 	}
 	return nil, nil
 }
 
-func (pro *processor) handleReceivedBlocks(msg *ReceivedBlocks) {
-	lastCommitBlockHeight := pro.lastCommitBlockHeight()
-	for _, blk := range msg.blks {
-		if blk.Header.BlockHeight <= lastCommitBlockHeight {
-			continue
-		}
-		if _, exist := pro.queue[blk.Header.BlockHeight]; !exist {
-			pro.queue[blk.Header.BlockHeight] = blockWithPeerInfo{
-				blk: blk, id: msg.from, withRWSets: false,
-			}
-			pro.log.Debugf("received block [height: %d] from node [%s]", blk.Header.BlockHeight, msg.from)
-		}
-	}
-}
-
-func (pro *processor) handleReceivedBlocksWithRwSets(msg *ReceivedBlocksWithRwSets) {
-	pro.log.Info("handleReceivedBlocksWithRwSets start")
+func (pro *processor) handleReceivedBlockInfos(msg *ReceivedBlockInfos) {
+	pro.log.Info("handleReceivedBlockInfos start")
 	lastCommitBlockHeight := pro.lastCommitBlockHeight()
 	for _, blkinfo := range msg.blkinfos {
 		if blkinfo.Block.Header.BlockHeight <= lastCommitBlockHeight {
@@ -86,9 +72,11 @@ func (pro *processor) handleReceivedBlocksWithRwSets(msg *ReceivedBlocksWithRwSe
 		}
 		if _, exist := pro.queue[blkinfo.Block.Header.BlockHeight]; !exist {
 			pro.queue[blkinfo.Block.Header.BlockHeight] = blockWithPeerInfo{
-				blk: blkinfo.Block, rwsets: blkinfo.RwsetList, id: msg.from, withRWSets: true,
+				blk: blkinfo.Block, rwsets: blkinfo.RwsetList, id: msg.from, withRWSets: msg.withRWSet,
 			}
-			pro.log.Debugf("received block with rwsets [height: %d] from node [%s]", blkinfo.Block.Header.BlockHeight, msg.from)
+			pro.log.Debugf("received block with rwsets [height: %d] from node [%s]",
+				blkinfo.Block.Header.BlockHeight, msg.from)
+			pro.log.Debugf("current length of processor queue is: [%d]", len(pro.queue))
 		}
 	}
 }
@@ -100,12 +88,12 @@ func (pro *processor) handleProcessBlockMsg() (queue.Item, error) {
 		status processedBlockStatus
 	)
 	pendingBlockHeight := pro.lastCommitBlockHeight() + 1
-	isFastSync := localconf.ChainMakerConfig.NodeConfig.FastSyncConfig.Enable
 	if info, exist = pro.queue[pendingBlockHeight]; !exist {
 		//pro.log.Debugf("block [%d] not find in queue.", pendingBlockHeight)
 		return nil, nil
 	}
-	if info.withRWSets && isFastSync {
+	pro.log.Debugf("process block [height: %d] start, status [%d]", info.blk.Header.BlockHeight, status)
+	if info.withRWSets && localconf.ChainMakerConfig.NodeConfig.FastSyncConfig.Enable {
 		if status = pro.validateAndCommitBlockWithRwSets(info.blk, info.rwsets); status == ok || status == hasProcessed {
 			pro.hasCommitBlock++
 		}
@@ -115,8 +103,9 @@ func (pro *processor) handleProcessBlockMsg() (queue.Item, error) {
 		}
 	}
 	delete(pro.queue, pendingBlockHeight)
-	pro.log.Infof("process block [height: %d], status [%d]", info.blk.Header.BlockHeight, status)
-	return ProcessedBlockResp{
+	pro.log.Infof("process block [height: %d] success, status [%d]", info.blk.Header.BlockHeight, status)
+	pro.log.DebugDynamic(pro.getServiceState)
+	return &ProcessedBlockResp{
 		status: status,
 		height: info.blk.Header.BlockHeight,
 		from:   info.id,

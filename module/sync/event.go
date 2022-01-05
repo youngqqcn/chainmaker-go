@@ -13,56 +13,119 @@ import (
 	"github.com/Workiva/go-datastructures/queue"
 )
 
-type EqualLevel struct{}
+const (
+	priorityTop    = 3
+	priorityMiddle = 2
+	priorityLow    = 1
+	//priorityBase   = 0
+)
 
-func (e EqualLevel) Compare(other queue.Item) int {
-	return 0
+type Priority interface {
+	Level() int
+}
+
+func Compare(parent, other queue.Item) int {
+	//doProcessBlockTk 	-> ... priority first
+	//doScheduleTk 		-> ... priority second
+	//doNodeStatusTk 	-> ... priority third
+	var (
+		ok   bool
+		p, o Priority
+	)
+	if p, ok = parent.(Priority); !ok {
+		return 0
+	}
+	if o, ok = other.(Priority); !ok {
+		return 0
+	}
+	if p.Level() < o.Level() {
+		return 1
+	} else if p.Level() == o.Level() {
+		return 0
+	}
+	return -1
 }
 
 type SyncedBlockMsg struct {
-	EqualLevel
 	msg  []byte
 	from string
 }
 
+func (m *SyncedBlockMsg) Level() int {
+	return priorityMiddle
+}
+
+func (m *SyncedBlockMsg) Compare(other queue.Item) int {
+	return Compare(m, other)
+}
+
 type NodeStatusMsg struct {
-	EqualLevel
 	msg  syncPb.BlockHeightBCM
 	from string
 }
 
-type SchedulerMsg struct {
-	EqualLevel
+func (m *NodeStatusMsg) Level() int {
+	return priorityLow
 }
 
-type LivenessMsg struct {
-	EqualLevel
+func (m *NodeStatusMsg) Compare(other queue.Item) int {
+	return Compare(m, other)
 }
 
-type ReceivedBlocks struct {
-	blks []*commonPb.Block
-	from string
-	EqualLevel
+type SchedulerMsg struct{}
+
+func (m *SchedulerMsg) Level() int {
+	return priorityLow
 }
 
-type ReceivedBlocksWithRwSets struct {
-	blkinfos []*commonPb.BlockInfo
-	from     string
-	EqualLevel
+func (m *SchedulerMsg) Compare(other queue.Item) int {
+	return Compare(m, other)
+}
+
+type LivenessMsg struct{}
+
+func (m *LivenessMsg) Level() int {
+	return priorityLow
+}
+
+func (m *LivenessMsg) Compare(other queue.Item) int {
+	return Compare(m, other)
+}
+
+type ReceivedBlockInfos struct {
+	blkinfos  []*commonPb.BlockInfo
+	from      string
+	withRWSet bool
+}
+
+func (m *ReceivedBlockInfos) Level() int {
+	return priorityTop
+}
+
+func (m *ReceivedBlockInfos) Compare(other queue.Item) int {
+	return Compare(m, other)
 }
 
 // processor events
 
-type ProcessBlockMsg struct {
-	EqualLevel
+type ProcessBlockMsg struct{}
+
+func (m *ProcessBlockMsg) Level() int {
+	return priorityTop
 }
 
-type ProcessBlockWithRwSetMsg struct {
-	EqualLevel
+func (m *ProcessBlockMsg) Compare(other queue.Item) int {
+	return Compare(m, other)
 }
 
-type DataDetection struct {
-	EqualLevel
+type DataDetection struct{}
+
+func (m *DataDetection) Level() int {
+	return priorityLow
+}
+
+func (m *DataDetection) Compare(other queue.Item) int {
+	return Compare(m, other)
 }
 
 type processedBlockStatus int64
@@ -79,5 +142,12 @@ type ProcessedBlockResp struct {
 	height uint64
 	status processedBlockStatus
 	from   string
-	EqualLevel
+}
+
+func (m *ProcessedBlockResp) Level() int {
+	return priorityTop
+}
+
+func (m *ProcessedBlockResp) Compare(other queue.Item) int {
+	return Compare(m, other)
 }

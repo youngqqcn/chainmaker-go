@@ -9,6 +9,8 @@ package sync
 
 import (
 	"fmt"
+	"reflect"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -43,9 +45,12 @@ type BlockChainSyncServer struct {
 
 	scheduler *Routine // Service that get blocks from other nodes
 	processor *Routine // Service that processes block data, adding valid blocks to the chain
+
+	requestCache sync.Map // ignore repeat block sync request when in process
 }
 
-func NewBlockChainSyncServer(chainId string,
+func NewBlockChainSyncServer(
+	chainId string,
 	net protocol.NetService,
 	msgBus msgbus.MessageBus,
 	blockchainStore protocol.BlockchainStore,
@@ -64,6 +69,7 @@ func NewBlockChainSyncServer(chainId string,
 		blockCommitter:  blockCommitter,
 		close:           make(chan bool),
 		log:             log, //logger.GetLoggerByChain(logger.MODULE_SYNC, chainId),
+		requestCache:    sync.Map{},
 	}
 	return syncServer
 }
@@ -103,6 +109,7 @@ func (sync *BlockChainSyncServer) Start() error {
 		return err
 	}
 	go sync.loop()
+	go sync.blockRequestEntrance()
 	return nil
 }
 
@@ -141,6 +148,9 @@ func (sync *BlockChainSyncServer) initSyncConfIfRequire() {
 	if localconf.ChainMakerConfig.SyncConfig.ReqTimeThreshold > 0 {
 		sync.conf.SetReqTimeThreshold(localconf.ChainMakerConfig.SyncConfig.ReqTimeThreshold)
 	}
+	if localconf.ChainMakerConfig.SyncConfig.BlockRequestTime > 0 {
+		sync.conf.SetBlockRequestTime(localconf.ChainMakerConfig.SyncConfig.BlockRequestTime)
+	}
 }
 
 func (sync *BlockChainSyncServer) blockSyncMsgHandler(from string, msg []byte, msgType netPb.NetMsg_MsgType) error {
@@ -168,6 +178,7 @@ func (sync *BlockChainSyncServer) blockSyncMsgHandler(from string, msg []byte, m
 	case syncPb.SyncMsg_BLOCK_SYNC_REQ:
 		return sync.handleBlockReq(&syncMsg, from)
 	case syncPb.SyncMsg_BLOCK_SYNC_RESP:
+		sync.log.Debug("receive [SyncMsg_BLOCK_SYNC_RESP] msg, put into scheduler...")
 		return sync.scheduler.addTask(&SyncedBlockMsg{msg: syncMsg.Payload, from: from})
 	}
 	return fmt.Errorf("not support the syncPb.SyncMsg.Type as %d", syncMsg.Type)
@@ -197,65 +208,63 @@ func (sync *BlockChainSyncServer) handleNodeStatusResp(syncMsg *syncPb.SyncMsg, 
 	}
 	sync.log.Debugf("receive node[%s] status, height [%d], archived height [%d]", from, msg.BlockHeight,
 		msg.ArchivedHeight)
-	return sync.scheduler.addTask(NodeStatusMsg{msg: msg, from: from})
+	return sync.scheduler.addTask(&NodeStatusMsg{msg: msg, from: from})
 }
 
 func (sync *BlockChainSyncServer) handleBlockReq(syncMsg *syncPb.SyncMsg, from string) error {
 	var (
-		err error
-		req syncPb.BlockSyncReq
+		err    error
+		loaded bool
+		req    syncPb.BlockSyncReq
 	)
+
 	if err = proto.Unmarshal(syncMsg.Payload, &req); err != nil {
 		sync.log.Errorf("fail to proto.Unmarshal the syncPb.SyncMsg:%s", err.Error())
 		return err
 	}
-	sync.log.Debugf("receive request to get block [height: %d, batch_size: %d] from "+
+	// 针对 `SyncMsg_BLOCK_SYNC_REQ` 消息处理函数，添加处理状态检查，要求同一个 `请求来源 + 高度` 不会重复返回多次数据
+	// create a key-value pair when receive block request, ignore repeat request
+	processKey := fmt.Sprintf("%s_%d", from, req.BlockHeight)
+	if _, loaded = sync.requestCache.LoadOrStore(processKey, nil); loaded {
+		return nil
+	}
+	defer sync.requestCache.Store(processKey, time.Now())
+
+	sync.log.Infof("receive request to get block [height: %d, batch_size: %d] from "+
 		"node [%s]"+"WithRwset [%v]", req.BlockHeight, req.BatchSize, from, req.WithRwset)
-	if req.WithRwset {
-		return sync.sendInfos(&req, from)
-	}
-	return sync.sendBlocks(&req, from)
-}
-
-func (sync *BlockChainSyncServer) sendBlocks(req *syncPb.BlockSyncReq, from string) error {
-	var (
-		bz  []byte
-		err error
-		blk *commonPb.Block
-	)
-
-	for i := uint64(0); i < req.BatchSize; i++ {
-		if blk, err = sync.blockChainStore.GetBlock(req.BlockHeight + i); err != nil || blk == nil {
-			return err
-		}
-		if bz, err = proto.Marshal(&syncPb.SyncBlockBatch{
-			Data: &syncPb.SyncBlockBatch_BlockBatch{BlockBatch: &syncPb.BlockBatch{
-				Batches: []*commonPb.Block{blk}}}, WithRwset: false,
-		}); err != nil {
-			return err
-		}
-		if err := sync.sendMsg(syncPb.SyncMsg_BLOCK_SYNC_RESP, bz, from); err != nil {
-			return err
-		}
-	}
-	return nil
+	return sync.sendInfos(&req, from)
 }
 
 func (sync *BlockChainSyncServer) sendInfos(req *syncPb.BlockSyncReq, from string) error {
 	var (
 		bz        []byte
 		err       error
+		blk       *commonPb.Block
 		blkRwInfo *storePb.BlockWithRWSet
 	)
-
 	for i := uint64(0); i < req.BatchSize; i++ {
-		if blkRwInfo, err = sync.blockChainStore.GetBlockWithRWSets(req.BlockHeight + i); err != nil || blkRwInfo == nil {
-			return err
+		if req.WithRwset {
+			if blkRwInfo, err = sync.blockChainStore.GetBlockWithRWSets(req.BlockHeight + i); err != nil {
+				return err
+			}
+			if blkRwInfo == nil {
+				return fmt.Errorf("GetBlockWithRWSets get block height: [%d] is nil", req.BlockHeight+i)
+			}
+		} else {
+			if blk, err = sync.blockChainStore.GetBlock(req.BlockHeight + i); err != nil {
+				sync.log.Debugf("[SyncMsg_BLOCK_SYNC_RESP] get block without reset with err: %s", err.Error())
+				return err
+			}
+
+			blkRwInfo = &storePb.BlockWithRWSet{
+				Block:    blk,
+				TxRWSets: nil,
+			}
 		}
 		info := &commonPb.BlockInfo{Block: blkRwInfo.Block, RwsetList: blkRwInfo.TxRWSets}
 		if bz, err = proto.Marshal(&syncPb.SyncBlockBatch{
 			Data: &syncPb.SyncBlockBatch_BlockinfoBatch{BlockinfoBatch: &syncPb.BlockInfoBatch{
-				Batch: []*commonPb.BlockInfo{info}}}, WithRwset: true,
+				Batch: []*commonPb.BlockInfo{info}}}, WithRwset: req.WithRwset,
 		}); err != nil {
 			return err
 		}
@@ -332,15 +341,15 @@ func (sync *BlockChainSyncServer) loop() {
 
 			// Timing task
 		case <-doProcessBlockTk.C:
-			if err := sync.processor.addTask(ProcessBlockMsg{}); err != nil {
+			if err := sync.processor.addTask(&ProcessBlockMsg{}); err != nil {
 				sync.log.Errorf("add process block task to processor failed, reason: %s", err)
 			}
 		case <-doScheduleTk.C:
-			if err := sync.scheduler.addTask(SchedulerMsg{}); err != nil {
+			if err := sync.scheduler.addTask(&SchedulerMsg{}); err != nil {
 				sync.log.Errorf("add scheduler task to scheduler failed, reason: %s", err)
 			}
 		case <-doLivenessTk.C:
-			if err := sync.scheduler.addTask(LivenessMsg{}); err != nil {
+			if err := sync.scheduler.addTask(&LivenessMsg{}); err != nil {
 				sync.log.Errorf("add livenessMsg task to scheduler failed, reason: %s", err)
 			}
 		case <-doNodeStatusTk.C:
@@ -349,22 +358,50 @@ func (sync *BlockChainSyncServer) loop() {
 				sync.log.Errorf("request node status failed by broadcast", err)
 			}
 		case <-doDataDetect.C:
-			if err := sync.processor.addTask(DataDetection{}); err != nil {
+			if err := sync.processor.addTask(&DataDetection{}); err != nil {
 				sync.log.Errorf("add data detection task to processor failed, reason: %s", err)
 			}
-			if err := sync.scheduler.addTask(DataDetection{}); err != nil {
+			if err := sync.scheduler.addTask(&DataDetection{}); err != nil {
 				sync.log.Errorf("add data detection task to scheduler failed, reason: %s", err)
 			}
 
 		// State processing results in state machine
 		case resp := <-sync.scheduler.out:
+			sync.log.Debugf("sync.processor add task, type: %v", reflect.TypeOf(resp))
 			if err := sync.processor.addTask(resp); err != nil {
 				sync.log.Errorf("add scheduler task to processor failed, reason: %s", err)
 			}
 		case resp := <-sync.processor.out:
+			sync.log.Debugf("sync.scheduler add task, type: %v", reflect.TypeOf(resp))
 			if err := sync.scheduler.addTask(resp); err != nil {
 				sync.log.Errorf("add processor task to scheduler failed, reason: %s", err)
 			}
+		}
+	}
+}
+
+// auto check block request from other node
+func (sync *BlockChainSyncServer) blockRequestEntrance() {
+	ticker := time.NewTicker(sync.conf.blockRequestTime)
+	dealFunc := func(key, value interface{}) bool {
+		if value == nil {
+			return true
+		}
+		if t, ok := value.(time.Time); ok {
+			if time.Since(t) > sync.conf.blockRequestTime {
+				sync.requestCache.Delete(key)
+			}
+			return true
+		}
+		return true
+	}
+	for {
+		select {
+		case <-sync.close:
+			return
+
+		case <-ticker.C:
+			sync.requestCache.Range(dealFunc)
 		}
 	}
 }
@@ -375,6 +412,7 @@ func (sync *BlockChainSyncServer) validateAndCommitBlock(block *commonPb.Block) 
 		return hasProcessed
 	}
 	startTick := utils.CurrentTimeMillisSeconds()
+	sync.log.Debugf("VerifyBlock start, height is: %d ....", block.Header.BlockHeight)
 	if err := sync.blockVerifier.VerifyBlock(block, protocol.SYNC_VERIFY); err != nil {
 		if err == commonErrors.ErrBlockHadBeenCommited {
 			sync.log.Warnf("the block: %d has been committed in the blockChainStore ", block.Header.BlockHeight)
@@ -414,6 +452,8 @@ func (sync *BlockChainSyncServer) validateAndCommitBlockWithRwSets(block *common
 	lastTime := utils.CurrentTimeMillisSeconds() - startTick
 	sync.log.Infof("block [%d] VerifyBlockWithRwSets spend %d", block.Header.BlockHeight, lastTime)
 
+	sync.log.Debugf("VerifyBlock end, height is: %d ....", block.Header.BlockHeight)
+	sync.log.Debugf("AddBlock start, height is: %d ....", block.Header.BlockHeight)
 	if err := sync.blockCommitter.AddBlock(block); err != nil {
 		if err == commonErrors.ErrBlockHadBeenCommited {
 			sync.log.Warnf("the block: %d has been committed in the blockChainStore ", block.Header.BlockHeight)
@@ -422,6 +462,7 @@ func (sync *BlockChainSyncServer) validateAndCommitBlockWithRwSets(block *common
 		sync.log.Warnf("fail to commit the block whose height is %d, err: %s", block.Header.BlockHeight, err)
 		return addErr
 	}
+	sync.log.Debugf("AddBlock end, height is: %d ....", block.Header.BlockHeight)
 	return ok
 }
 
