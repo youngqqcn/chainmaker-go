@@ -3,14 +3,14 @@ module chainmaker.org/chainmaker-go
 go 1.15
 
 require (
-	chainmaker.org/chainmaker/chainconf/v2 v2.1.1
+	chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20211214131153-d5cc71404186
 	chainmaker.org/chainmaker/common/v2 v2.1.2-0.20211223085411-e4d0e79b2fb7
 	chainmaker.org/chainmaker/consensus-chainedbft/v2 v2.0.0-20211214032204-5f155aeeb5a2
 	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211220115802-ad63e1565a38
 	chainmaker.org/chainmaker/consensus-maxbft/v2 v2.0.0-20211220120509-ffe11f1c1a25
 	chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20211220120732-c7a669f0bdeb
 	chainmaker.org/chainmaker/consensus-solo/v2 v2.0.0-20211220120848-36f05d90fd9c
-	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20211222120803-81e4ae9ef0fb
+	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20220104130207-7c07f5dbff53
 	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211222120147-e0b37ef1e800
 	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211216112331-2bee015483d0
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211214124250-621f11b35ab0
@@ -18,18 +18,18 @@ require (
 	chainmaker.org/chainmaker/net-libp2p v1.0.1-0.20211214135817-253d0a70250a
 	chainmaker.org/chainmaker/net-liquid v1.0.1-0.20211214135953-619e26ee9681
 	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211230035615-3d074e0887c6
-	chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211230040054-b41fe1f95750
+	chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211230130206-933dddf33257
 	chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211221063611-57df88d749c3
-	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211230041817-380b346a112d
+	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20211231125023-d6e2e628cb59
 	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20211216101020-14c306c8cc06
 	chainmaker.org/chainmaker/txpool-single/v2 v2.1.1-0.20211214125452-9037b3ed764a
 	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211227141113-d43218ac2f9e
-	chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20211229023847-64896d8afdc3
+	chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20211230112054-20b916b596f5
 	chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20211215040351-c7aa52c74d2a
 	chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20211221065927-2b2979cbe7ae
-	chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20211229032604-b000395e6842
+	chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211214132707-4ab8964bd865
 	chainmaker.org/chainmaker/vm-wasmer/v2 v2.1.1-0.20211215060329-82ccffe66c7c
-	chainmaker.org/chainmaker/vm-wxvm/v2 v2.1.1-0.20211214134406-08ea2c6a3639
+	chainmaker.org/chainmaker/vm-wxvm/v2 v2.1.1-0.20211231084643-5795c9963327
 	chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211215035257-059dbafc381f
 	code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5
 	github.com/Rican7/retry v0.1.0
@@ -54,7 +54,7 @@ require (
 	github.com/rcrowley/go-metrics v0.0.0-20190826022208-cac0b30c2563
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5
-	github.com/spf13/viper v1.9.0
+	github.com/spf13/viper v1.10.1
 	github.com/stretchr/testify v1.7.0
 	github.com/syndtr/goleveldb v1.0.1-0.20210305035536-64b5b1c73954
 	github.com/tidwall/pretty v1.0.2
