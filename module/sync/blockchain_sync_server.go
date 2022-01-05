@@ -242,21 +242,29 @@ func (sync *BlockChainSyncServer) sendInfos(req *syncPb.BlockSyncReq, from strin
 		blk       *commonPb.Block
 		blkRwInfo *storePb.BlockWithRWSet
 	)
-
+	sync.log.Debugf("[SyncMsg_BLOCK_SYNC_RESP] entry for loop, size: [%d]", req.BatchSize)
 	for i := uint64(0); i < req.BatchSize; i++ {
 		if req.WithRwset {
-			if blkRwInfo, err = sync.blockChainStore.GetBlockWithRWSets(req.BlockHeight + i); err != nil || blkRwInfo == nil {
+			sync.log.Debugf("[SyncMsg_BLOCK_SYNC_RESP] get block with reset")
+			if blkRwInfo, err = sync.blockChainStore.GetBlockWithRWSets(req.BlockHeight + i); err != nil {
 				return err
+			}
+			if blkRwInfo == nil {
+				return fmt.Errorf("GetBlockWithRWSets get block is nil")
 			}
 		} else {
-			if blk, err = sync.blockChainStore.GetBlock(req.BlockHeight + i); err != nil || blkRwInfo == nil {
+			sync.log.Debugf("[SyncMsg_BLOCK_SYNC_RESP] get block height: [%d] without reset", req.BlockHeight + i)
+			if blk, err = sync.blockChainStore.GetBlock(req.BlockHeight + i); err != nil {
+				sync.log.Debugf("[SyncMsg_BLOCK_SYNC_RESP] get block without reset with err: %s", err.Error())
 				return err
 			}
+
 			blkRwInfo = &storePb.BlockWithRWSet{
 				Block:    blk,
 				TxRWSets: nil,
 			}
 		}
+		sync.log.Debugf("[SyncMsg_BLOCK_SYNC_RESP] construct BlockInfo")
 		info := &commonPb.BlockInfo{Block: blkRwInfo.Block, RwsetList: blkRwInfo.TxRWSets}
 		if bz, err = proto.Marshal(&syncPb.SyncBlockBatch{
 			Data: &syncPb.SyncBlockBatch_BlockinfoBatch{BlockinfoBatch: &syncPb.BlockInfoBatch{
@@ -264,9 +272,11 @@ func (sync *BlockChainSyncServer) sendInfos(req *syncPb.BlockSyncReq, from strin
 		}); err != nil {
 			return err
 		}
+		sync.log.Debugf("try to send [SyncMsg_BLOCK_SYNC_RESP] msg to [%s]", from)
 		if err := sync.sendMsg(syncPb.SyncMsg_BLOCK_SYNC_RESP, bz, from); err != nil {
 			return err
 		}
+		sync.log.Debugf("send [SyncMsg_BLOCK_SYNC_RESP] msg to [%s] finished", from)
 	}
 	sync.log.Debugf("send [SyncMsg_BLOCK_SYNC_RESP] msg to [%s]", from)
 	return nil
