@@ -64,6 +64,12 @@ core:
   # [0, 60]
   tx_scheduler_validate_timeout: 10
 
+  # Used for handling txs with sender conflicts efficiently
+  enable_sender_group: false
+
+  # Used for dynamic tuning the capacity of tx execution goroutine pool
+  enable_conflicts_bit_window: true
+
     # Consensus message compression related settings
     # consensus_turbo_config:
     # If consensus message compression is enabled or not.

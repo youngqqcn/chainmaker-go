@@ -29,6 +29,8 @@ block:
 core:
   tx_scheduler_timeout: 10 #  [0, 60] 交易调度器从交易池拿到交易后, 进行调度的时间
   tx_scheduler_validate_timeout: 10 # [0, 60] 交易调度器从区块中拿到交易后, 进行验证的超时时间
+  enable_sender_group: false # 用于高效处理交易发送者冲突的情况（如发送者扣除gas）
+  enable_conflicts_bit_window: true # 用于在运行时根据冲突率动态调整协程池大小
   consensus_turbo_config:
     consensus_message_turbo: true # 是否开启共识报文压缩
     retry_time: 500 # 根据交易ID列表从交易池获取交易的重试次数
