@@ -100,10 +100,10 @@ account_config:
 
 # Consensus settings
 consensus:
-  # Consensus type 5-DPOS
+  # Consensus type: 1-TBFT, 5-DPOS
   type: {consensus_type}
 
-  # Consensus node list
+  # Consensus node list start
   nodes:
     - org_id: "{public_org_id}"
       node_id:
@@ -120,7 +120,8 @@ consensus:
 #        - "{org11_peerid}"
 #        - "{org12_peerid}"
 #        - "{org13_peerid}"
-
+  # Consensus node list end
+  # DPOS config start
   dpos_config: # DPoS
     # ERC20 contract config
     - key: erc20.total
@@ -192,6 +193,7 @@ consensus:
 #      value: "{org12_peerid}"
 #    - key: stake.nodeID:{org13_peeraddr}
 #      value: "{org13_peerid}"
+  # DPOS config end
 
   # We can specify other consensus config here in key-value format.
   ext_config:
