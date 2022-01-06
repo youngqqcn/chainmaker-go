@@ -223,34 +223,22 @@ function generate_config() {
 
             if  [ $NODE_CNT -eq 4 ] || [ $NODE_CNT -eq 7 ]; then
                 cp $CONFIG_TPL_PATH/chainconfig/bc_4_7.tpl node$i/chainconfig/bc$j.yml
-                xsed "s%{consensus_type}%$CONSENSUS_TYPE%g" node$i/chainconfig/bc$j.yml
-
-                if  [ $CONSENSUS_TYPE -eq 1 ]; then
-                    xsed '111,158d' node$i/chainconfig/bc$j.yml
-                    xsed "s%{public_org_id}%$CONSENSUS_ORGID%g" node$i/chainconfig/bc$j.yml
-                elif  [ $CONSENSUS_TYPE -eq 5 ]; then
-                    xsed '99,110d' node$i/chainconfig/bc$j.yml
-                fi
             elif [ $NODE_CNT -eq 16 ]; then
                 cp $CONFIG_TPL_PATH/chainconfig/bc_16.tpl node$i/chainconfig/bc$j.yml
-                xsed "s%{consensus_type}%$CONSENSUS_TYPE%g" node$i/chainconfig/bc$j.yml
-
-                if  [ $CONSENSUS_TYPE -eq 1 ]; then
-                    xsed '120,203d' node$i/chainconfig/bc$j.yml
-                    xsed "s%{public_org_id}%$CONSENSUS_ORGID%g" node$i/chainconfig/bc$j.yml
-                elif  [ $CONSENSUS_TYPE -eq 5 ]; then
-                    xsed '99,119d' node$i/chainconfig/bc$j.yml
-                fi
             else
                 cp $CONFIG_TPL_PATH/chainconfig/bc_10_13.tpl node$i/chainconfig/bc$j.yml
-                xsed "s%{consensus_type}%$CONSENSUS_TYPE%g" node$i/chainconfig/bc$j.yml
+            fi
 
-                if  [ $CONSENSUS_TYPE -eq 1 ]; then
-                    xsed '117,188d' node$i/chainconfig/bc$j.yml
-                    xsed "s%{public_org_id}%$CONSENSUS_ORGID%g" node$i/chainconfig/bc$j.yml
-                elif  [ $CONSENSUS_TYPE -eq 5 ]; then
-                    xsed '99,116d' node$i/chainconfig/bc$j.yml
-                fi
+            DPOS_LINE_START=$(awk '/DPOS config start/{print NR}' node$i/chainconfig/bc$j.yml)
+            DPOS_LINE_END=$(awk '/DPOS config end/{print NR}' node$i/chainconfig/bc$j.yml)
+            NODES_LINE_START=$(awk '/Consensus node list start/{print NR}' node$i/chainconfig/bc$j.yml)
+            NODES_LINE_END=$(awk '/Consensus node list end/{print NR}' node$i/chainconfig/bc$j.yml)
+            xsed "s%{consensus_type}%$CONSENSUS_TYPE%g" node$i/chainconfig/bc$j.yml
+            if  [ $CONSENSUS_TYPE -eq 1 ]; then
+                xsed "${DPOS_LINE_START},${DPOS_LINE_END}d" node$i/chainconfig/bc$j.yml
+                xsed "s%{public_org_id}%$CONSENSUS_ORGID%g" node$i/chainconfig/bc$j.yml
+            elif  [ $CONSENSUS_TYPE -eq 5 ]; then
+                xsed "${NODES_LINE_START},${NODES_LINE_END}d" node$i/chainconfig/bc$j.yml
             fi
 
             xsed "s%{chain_id}%chain$j%g" node$i/chainconfig/bc$j.yml
