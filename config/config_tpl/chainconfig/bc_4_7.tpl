@@ -130,6 +130,7 @@ consensus:
 # Trust roots is used to specify the organizations' root certificates in permessionedWithCert mode.
 # When in permessionedWithKey mode or public mode, it represents the admin users.
 trust_roots:
+  # trust roots list start
   # org id and root file path list.
   - org_id: "{org1_id}"
     root:
@@ -152,6 +153,7 @@ trust_roots:
 #  - org_id: "{org7_id}"
 #    root:
 #      - "../config/{org_path}/certs/ca/{org7_id}/ca.crt"
+# trust roots list end
 
 # Trust members are members that do not need to be verified against trust roots.
 # trust_members:
