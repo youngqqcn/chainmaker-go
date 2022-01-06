@@ -26,8 +26,8 @@ CRYPTOGEN_TOOL_PKCS11_KEYS=${CRYPTOGEN_TOOL_PATH}/config/pkcs11_keys.yml
 
 VERSION=v2.2.0_alpha
 
-BC_YML_TRUST_ROOT_LINE=128
-BC_YML_TRUST_ROOT_LINE_END=148
+BC_YML_TRUST_ROOT_LINE=$(awk '/trust roots list start/{print NR}' ${CONFIG_TPL_PATH}/chainconfig/bc_4_7.tpl)
+BC_YML_TRUST_ROOT_LINE_END=$(awk '/trust roots list end/{print NR}' ${CONFIG_TPL_PATH}/chainconfig/bc_4_7.tpl)
 
 function show_help() {
     echo "Usage:  "
