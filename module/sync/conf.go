@@ -38,7 +38,7 @@ func NewBlockSyncServerConf() *BlockSyncServerConf {
 		nodeStatusTick:       5 * time.Second,
 		schedulerTick:        20 * time.Millisecond,
 		dataDetectionTick:    time.Minute,
-		reqTimeThreshold:     3 * time.Second,
+		reqTimeThreshold:     5 * time.Second,
 		blockRequestTime:     5 * time.Second,
 	}
 }
