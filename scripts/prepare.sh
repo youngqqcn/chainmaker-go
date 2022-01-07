@@ -311,12 +311,22 @@ function generate_config() {
 
         echo "begin node$i trust config..."
         if  [ $NODE_CNT -eq 4 ] || [ $NODE_CNT -eq 7 ]; then
+          trust_path=""
+          c=0
+          for file in `ls -tr $BUILD_CRYPTO_CONFIG_PATH`
+          do
+            c=$(($c+1))
+            if  [ $c -eq $i ]; then
+              trust_path=$file
+              break
+            fi
+          done
           for ((k = 1; k < $CHAIN_CNT + 1; k = k + 1)); do
             for file in `ls -tr $BUILD_CRYPTO_CONFIG_PATH`
             do
                 org_id_tmp="\ - org_id: \"${file}\""
                 org_root="\ \ \ root:"
-                org_root_tmp="\ \ \ \ \ - \"../config/wx-org${i}.chainmaker.org/certs/ca/${file}/ca.crt\""
+                org_root_tmp="\ \ \ \ \ - \"../config/${trust_path}/certs/ca/${file}/ca.crt\""
                 if [ "${system}" = "Linux" ]; then
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\ ${org_root_tmp}" node$i/chainconfig/bc$k.yml
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\ ${org_root}" node$i/chainconfig/bc$k.yml
@@ -335,6 +345,7 @@ function generate_config() {
             done
           done
         fi
+
     done
 }
 
