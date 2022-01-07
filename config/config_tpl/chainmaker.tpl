@@ -278,10 +278,6 @@ storage:
     clean_window: 1000000000
     max_entry_size: 500
     hard_max_cache_size: 10240   #cache size MB
-  txexistdb_config:
-    provider: leveldb
-    leveldb_config:
-      store_path: ../data/{org_id}/txexist
   # Block db config
   blockdb_config:
     # Databases type support leveldb, sql, badgerdb
@@ -315,6 +311,17 @@ storage:
       # Number of key value pairs written in batch. default is 128
       # write_batch_size: 1024
 
+    # Example for tikv provider
+    # provider: tikvdb
+    # If provider is tikvdb, tikvdb_config should not be null.
+    # tikvdb_config:
+      # db_prefix: "node1_" #default is ""
+      # endpoints: "127.0.0.1:2379" # tikv pd server url，support multi url, example :"192.168.1.2:2379,192.168.1.3:2379"
+      # max_batch_count: 128  # max tikv commit batch size, default: 128
+      # grpc_connection_count: 16 # chainmaker and tikv connect count, default: 4
+      # grpc_keep_alive_time: 10 # keep connnet alive count, default: 10
+      # grpc_keep_alive_timeout: 3  # keep connnect alive time, default: 3
+      # write_batch_size: 128 # commit tikv bacth size each time, default: 128
   # State db config
   statedb_config:
     provider: leveldb
@@ -324,6 +331,9 @@ storage:
   # History db config
   historydb_config:
     provider: leveldb
+    disable_key_history: false
+    disable_contract_history: true
+    disable_account_history: true
     leveldb_config:
       store_path: ../data/{org_id}/history
 
