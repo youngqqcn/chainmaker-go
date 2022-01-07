@@ -3,15 +3,15 @@ module chainmaker.org/chainmaker-go
 go 1.15
 
 require (
-	chainmaker.org/chainmaker/chainconf/v2 v2.1.1-0.20220105125746-8db327fca32a
+	chainmaker.org/chainmaker/chainconf/v2 v2.1.2-0.20220105094659-53b31f1ad2bc
 	chainmaker.org/chainmaker/common/v2 v2.1.2-0.20220102143903-cc96a7c51ff4
 	chainmaker.org/chainmaker/consensus-chainedbft/v2 v2.0.0-20211214032204-5f155aeeb5a2
 	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211220115802-ad63e1565a38
 	chainmaker.org/chainmaker/consensus-maxbft/v2 v2.0.0-20211220120509-ffe11f1c1a25
 	chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20211231065915-33ec8814372a
 	chainmaker.org/chainmaker/consensus-solo/v2 v2.0.0-20211220120848-36f05d90fd9c
-	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20220104130207-7c07f5dbff53
-	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211222120147-e0b37ef1e800
+	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20220107032334-51c9afabe837
+	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20220106130814-c0ad4f98d881
 	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211230035526-c3c28e290ca4
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211214124250-621f11b35ab0
 	chainmaker.org/chainmaker/net-common v0.0.7-0.20211214135701-e366adf2f12c
@@ -20,14 +20,14 @@ require (
 	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211230035615-3d074e0887c6
 	chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211230130206-933dddf33257
 	chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211215093913-d1edc3f9299e
-	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20220101173121-21e621d6a407
-	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20220106040327-b365b4617714
+	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20220107030357-68b64381f852
+	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20220106022746-135766e27954
 	chainmaker.org/chainmaker/txpool-single/v2 v2.1.1-0.20211214125452-9037b3ed764a
 	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20211228112739-5947a1f28658
 	chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20211230112054-20b916b596f5
 	chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20211222085520-073bb7401465
 	chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20211221065927-2b2979cbe7ae
-	chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20220106025102-60370c7b67a2
+	chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20220106080644-19ea27fd7007
 	chainmaker.org/chainmaker/vm-wasmer/v2 v2.1.1-0.20211228150309-955bc04b6557
 	chainmaker.org/chainmaker/vm-wxvm/v2 v2.1.1-0.20211223061926-78b8d34d3aa3
 	chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211215035257-059dbafc381f

@@ -223,10 +223,10 @@ scheduler:
 # Storage config settings
 # Contains blockDb, stateDb, historyDb, resultDb, contractEventDb
 #
-# blockDb: block transaction data,                          support leveldb, mysql, badgerdb
-# stateDb: world state data,                                support leveldb, mysql, badgerdb
-# historyDb: world state change history of transactions,    support leveldb, mysql, badgerdb
-# resultDb: transaction execution results data,             support leveldb, mysql, badgerdb
+# blockDb: block transaction data,                          support leveldb, mysql, badgerdb, tikvdb
+# stateDb: world state data,                                support leveldb, mysql, badgerdb, tikvdb
+# historyDb: world state change history of transactions,    support leveldb, mysql, badgerdb, tikvdb
+# resultDb: transaction execution results data,             support leveldb, mysql, badgerdb, tikvdb
 # contractEventDb: contract emit event data,                support mysql
 #
 # provider, sqldb_type cannot be changed after startup.
@@ -265,7 +265,7 @@ storage:
 
   # Block db config
   blockdb_config:
-    # Databases type support leveldb, sql, badgerdb
+    # Databases type support leveldb, sql, badgerdb, tikvdb
     provider: leveldb # [*]
     # If provider is leveldb, leveldb_config should not be null.
     leveldb_config:
@@ -273,7 +273,7 @@ storage:
       store_path: ../data/{org_id}/block
 
     # Example for sql provider
-    # Databases type support leveldb, sql, badgerdb
+    # Databases type support leveldb, sql, badgerdb, tikvdb
     # provider: sql # [*]
     # If provider is sql, sqldb_config should not be null.
     # sqldb_config:
@@ -283,7 +283,7 @@ storage:
       # dsn: root:password@tcp(127.0.0.1:3306)/
 
     # Example for badgerdb provider
-    # Databases type support leveldb, sql, badgerdb
+    # Databases type support leveldb, sql, badgerdb, tikvdb
     # provider: badgerdb
     # If provider is badgerdb, badgerdb_config should not be null.
     # badgerdb_config:
