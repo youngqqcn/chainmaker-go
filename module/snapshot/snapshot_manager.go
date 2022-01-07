@@ -38,8 +38,8 @@ func (m *ManagerImpl) NewSnapshot(prevBlock *commonPb.Block, block *commonPb.Blo
 	snapshotImpl := m.delegate.makeSnapshotImpl(block, blockHeight)
 
 	// 计算前序指纹, 和当前指纹
-	prevFingerPrint := utils.CalcBlockFingerPrint(prevBlock)
-	fingerPrint := utils.CalcBlockFingerPrint(block)
+	prevFingerPrint := utils.CalcBlockFingerPrintWithoutTx(prevBlock)
+	fingerPrint := utils.CalcBlockFingerPrintWithoutTx(block)
 	m.storeAndLinkSnapshotImpl(snapshotImpl, &prevFingerPrint, &fingerPrint)
 
 	m.log.Infof(
@@ -59,13 +59,13 @@ func (m *ManagerImpl) NotifyBlockCommitted(block *commonPb.Block) error {
 	m.log.Infof("commit snapshot@%s at height %d", block.Header.ChainId, block.Header.BlockHeight)
 
 	// 计算刚落块的区块指纹
-	deleteFp := utils.CalcBlockFingerPrint(block)
+	deleteFp := utils.CalcBlockFingerPrintWithoutTx(block)
 	// 如果有snapshot对应的前序snapshot的指纹, 等于刚落块的区块指纹
 	for _, snapshot := range m.snapshots {
 		if snapshot == nil || snapshot.GetPreSnapshot() == nil {
 			continue
 		}
-		prevFp := m.delegate.calcSnapshotFingerPrint(snapshot.GetPreSnapshot().(*SnapshotImpl))
+		prevFp := m.delegate.calcSnapshotFingerPrintWithoutTx(snapshot.GetPreSnapshot().(*SnapshotImpl))
 		if deleteFp == prevFp {
 			snapshot.SetPreSnapshot(nil)
 		}
@@ -73,19 +73,21 @@ func (m *ManagerImpl) NotifyBlockCommitted(block *commonPb.Block) error {
 
 	m.log.Infof("delete snapshot@%s %v at height %d", block.Header.ChainId, deleteFp, block.Header.BlockHeight)
 	delete(m.snapshots, deleteFp)
-
+	snapshotCount := 0
 	// in case of switch-fork, gc too old snapshot
 	for _, snapshot := range m.snapshots {
+		snapshotCount++
 		if snapshot == nil || snapshot.GetPreSnapshot() == nil {
 			continue
 		}
 		preSnapshot, _ := snapshot.GetPreSnapshot().(*SnapshotImpl)
 		if block.Header.BlockHeight-preSnapshot.GetBlockHeight() > 8 {
-			deleteOldFp := m.delegate.calcSnapshotFingerPrint(preSnapshot)
+			deleteOldFp := m.delegate.calcSnapshotFingerPrintWithoutTx(preSnapshot)
 			delete(m.snapshots, deleteOldFp)
 			m.log.Infof("delete snapshot %v at height %d while gc", deleteFp, preSnapshot.blockHeight)
 			snapshot.SetPreSnapshot(nil)
 		}
 	}
+	m.log.Debugf("current snapshot count:%d", snapshotCount)
 	return nil
 }
