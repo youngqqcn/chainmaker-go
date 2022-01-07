@@ -109,7 +109,7 @@ func TestIsNeedSync(t *testing.T) {
 	// 4. modify peer status to the next neighbour height with node's
 	sch.peers["node1"] = 101
 	sch.lastRequest = time.Now()
-	require.True(t, sch.isNeedSync())
+	require.False(t, sch.isNeedSync())
 
 	time.Sleep(3 * time.Second)
 	require.True(t, sch.isNeedSync())

@@ -244,7 +244,9 @@ func (sch *scheduler) isNeedSync() bool {
 		panic(err)
 	}
 	max := sch.maxHeight()
-	return currHeight <= max
+	// The reason for the interval of 1 block is that the block to
+	// be synchronized is being processed by the consensus module.
+	return currHeight+1 < max || (currHeight+1 == max && time.Since(sch.lastRequest) > sch.reqTimeThreshold)
 }
 
 func (sch *scheduler) selectPeer(pendingHeight uint64) string {
