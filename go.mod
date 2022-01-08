@@ -14,20 +14,20 @@ require (
 	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20220106130814-c0ad4f98d881
 	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211230035526-c3c28e290ca4
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211214124250-621f11b35ab0
-	chainmaker.org/chainmaker/net-common v1.0.1
-	chainmaker.org/chainmaker/net-libp2p v1.0.2-0.20220107085327-8fbe1cd0d391
+	chainmaker.org/chainmaker/net-common v0.0.7-0.20211214135701-e366adf2f12c
+	chainmaker.org/chainmaker/net-libp2p v1.0.1-0.20211214135817-253d0a70250a
 	chainmaker.org/chainmaker/net-liquid v1.0.1-0.20211214135953-619e26ee9681
-	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211230035615-3d074e0887c6
-	chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20211230130206-933dddf33257
+	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20220107183321-db2282e902c5
+	chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20220107184221-3b7ad20fc480
 	chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211215093913-d1edc3f9299e
-	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20220107080206-397a0e0ff2aa
+	chainmaker.org/chainmaker/store/v2 v2.1.1-0.20220108060225-a192d836d1a2
 	chainmaker.org/chainmaker/txpool-batch/v2 v2.1.1-0.20220107091903-40e9e6dc62ad
-	chainmaker.org/chainmaker/txpool-single/v2 v2.1.1-0.20211214125452-9037b3ed764a
+	chainmaker.org/chainmaker/txpool-single/v2 v2.1.1-0.20220107193840-1d9cfc4c305f
 	chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20220107161104-2478c2170e16
 	chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20211230112054-20b916b596f5
 	chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20211222085520-073bb7401465
 	chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20211221065927-2b2979cbe7ae
-	chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20220106080644-19ea27fd7007
+	chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20220108063631-fc861fc9b031
 	chainmaker.org/chainmaker/vm-wasmer/v2 v2.1.1-0.20211228150309-955bc04b6557
 	chainmaker.org/chainmaker/vm-wxvm/v2 v2.1.1-0.20211223061926-78b8d34d3aa3
 	chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211215035257-059dbafc381f

@@ -28,12 +28,12 @@ go get chainmaker.org/chainmaker/net-common@${BRANCH}
 go get chainmaker.org/chainmaker/net-libp2p@${BRANCH}
 go get chainmaker.org/chainmaker/net-liquid@${BRANCH}
 go get chainmaker.org/chainmaker/pb-go/v2@${QC}
-go get chainmaker.org/chainmaker/protocol/v2@${BRANCH}
+go get chainmaker.org/chainmaker/protocol/v2@${QC}
 go get chainmaker.org/chainmaker/sdk-go/v2@${QC}
 go get chainmaker.org/chainmaker/store/v2@${QC}
-go get chainmaker.org/chainmaker/txpool-batch/v2@${BRANCH}
-go get chainmaker.org/chainmaker/txpool-single/v2@${BRANCH}
-go get chainmaker.org/chainmaker/utils/v2@${BRANCH}
+go get chainmaker.org/chainmaker/txpool-batch/v2@${QC}
+go get chainmaker.org/chainmaker/txpool-single/v2@${QC}
+go get chainmaker.org/chainmaker/utils/v2@${QC}
 go get chainmaker.org/chainmaker/vm-docker-go/v2@${QC}
 go get chainmaker.org/chainmaker/vm-evm/v2@${BRANCH}
 go get chainmaker.org/chainmaker/vm-gasm/v2@${BRANCH}
