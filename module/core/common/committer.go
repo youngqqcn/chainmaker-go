@@ -8,7 +8,6 @@ package common
 import (
 	"fmt"
 
-	"chainmaker.org/chainmaker/chainconf/v2"
 	"chainmaker.org/chainmaker/common/v2/msgbus"
 	"chainmaker.org/chainmaker/localconf/v2"
 	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
@@ -157,7 +156,7 @@ func (cb *CommitBlock) MonitorCommit(bi *commonpb.BlockInfo) error {
 
 func NotifyChainConf(block *commonpb.Block, chainConf protocol.ChainConf) (err error) {
 	if block != nil && block.GetTxs() != nil && len(block.GetTxs()) > 0 {
-		if _, ok := chainconf.IsNativeTx(block.GetTxs()[0]); ok || utils.HasDPosTxWritesInHeader(block, chainConf) {
+		if ok, _ := utils.IsNativeTx(block.GetTxs()[0]); ok || utils.HasDPosTxWritesInHeader(block, chainConf) {
 			if err = chainConf.CompleteBlock(block); err != nil {
 				return fmt.Errorf("chainconf block complete, %s", err)
 			}

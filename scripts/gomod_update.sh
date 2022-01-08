@@ -14,7 +14,7 @@ fi
 QC="v2.2.0_alpha_qc"
 cd ..
 
-go get chainmaker.org/chainmaker/chainconf/v2@${BRANCH}
+go get chainmaker.org/chainmaker/chainconf/v2@${QC}
 go get chainmaker.org/chainmaker/common/v2@${BRANCH}
 go get chainmaker.org/chainmaker/consensus-maxbft/v2@${BRANCH}
 go get chainmaker.org/chainmaker/consensus-dpos/v2@${BRANCH}
@@ -40,7 +40,7 @@ go get chainmaker.org/chainmaker/vm-gasm/v2@${BRANCH}
 go get chainmaker.org/chainmaker/vm-native/v2@${QC}
 go get chainmaker.org/chainmaker/vm-wasmer/v2@${BRANCH}
 go get chainmaker.org/chainmaker/vm-wxvm/v2@${BRANCH}
-go get chainmaker.org/chainmaker/vm/v2@${BRANCH}
+go get chainmaker.org/chainmaker/vm/v2@${QC}
 
 go mod tidy
 
