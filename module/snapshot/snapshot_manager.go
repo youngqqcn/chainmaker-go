@@ -60,6 +60,7 @@ func (m *ManagerImpl) NotifyBlockCommitted(block *commonPb.Block) error {
 
 	// 计算刚落块的区块指纹
 	deleteFp := utils.CalcBlockFingerPrintWithoutTx(block)
+	deleteFpEx := calcNotConsensusFingerPrint(block)
 	// 如果有snapshot对应的前序snapshot的指纹, 等于刚落块的区块指纹
 	for _, snapshot := range m.snapshots {
 		if snapshot == nil || snapshot.GetPreSnapshot() == nil {
@@ -71,23 +72,50 @@ func (m *ManagerImpl) NotifyBlockCommitted(block *commonPb.Block) error {
 		}
 	}
 
-	m.log.Infof("delete snapshot@%s %v at height %d", block.Header.ChainId, deleteFp, block.Header.BlockHeight)
 	delete(m.snapshots, deleteFp)
+
+	// 删除未共识的区块指纹
+	if _, ok := m.snapshots[deleteFpEx]; ok {
+		delete(m.snapshots, deleteFpEx)
+		m.log.Infof("delete snapshot@%s %v & %v at height %d",
+			block.Header.ChainId, deleteFp, deleteFpEx, block.Header.BlockHeight)
+	} else {
+		m.log.Infof("delete snapshot@%s %v at height %d",
+			block.Header.ChainId, deleteFp, block.Header.BlockHeight)
+	}
+
 	snapshotCount := 0
 	// in case of switch-fork, gc too old snapshot
-	for _, snapshot := range m.snapshots {
+	for finger, snapshot := range m.snapshots {
 		snapshotCount++
-		if snapshot == nil || snapshot.GetPreSnapshot() == nil {
+		if snapshot == nil {
 			continue
 		}
-		preSnapshot, _ := snapshot.GetPreSnapshot().(*SnapshotImpl)
-		if block.Header.BlockHeight-preSnapshot.GetBlockHeight() > 8 {
-			deleteOldFp := m.delegate.calcSnapshotFingerPrintWithoutTx(preSnapshot)
-			delete(m.snapshots, deleteOldFp)
-			m.log.Infof("delete snapshot %v at height %d while gc", deleteFp, preSnapshot.blockHeight)
+
+		if block.Header.BlockHeight-snapshot.GetBlockHeight() > 8 {
+			delete(m.snapshots, finger)
+			m.log.Infof("delete snapshot %v at height %d while gc", deleteFp, snapshot.blockHeight)
 			snapshot.SetPreSnapshot(nil)
 		}
 	}
 	m.log.Debugf("current snapshot count:%d", snapshotCount)
 	return nil
+}
+
+func calcNotConsensusFingerPrint(block *commonPb.Block) utils.BlockFingerPrint {
+	if block == nil {
+		return ""
+	}
+
+	newBlock := &commonPb.Block{
+		Header: &commonPb.BlockHeader{
+			ChainId:        block.Header.ChainId,
+			BlockHeight:    block.Header.BlockHeight,
+			PreBlockHash:   block.Header.PreBlockHash,
+			BlockTimestamp: block.Header.BlockTimestamp,
+			Proposer:       block.Header.Proposer,
+		},
+	}
+
+	return utils.CalcBlockFingerPrintWithoutTx(newBlock)
 }
