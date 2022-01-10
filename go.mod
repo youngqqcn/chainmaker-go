@@ -14,9 +14,9 @@ require (
 	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20220106130814-c0ad4f98d881
 	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211230035526-c3c28e290ca4
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211214124250-621f11b35ab0
-	chainmaker.org/chainmaker/net-common v0.0.7-0.20211214135701-e366adf2f12c
-	chainmaker.org/chainmaker/net-libp2p v1.0.1-0.20211214135817-253d0a70250a
-	chainmaker.org/chainmaker/net-liquid v1.0.1-0.20211214135953-619e26ee9681
+	chainmaker.org/chainmaker/net-common v1.0.1
+	chainmaker.org/chainmaker/net-libp2p v1.0.2-0.20220110113508-f82b0b7d88af
+	chainmaker.org/chainmaker/net-liquid v1.0.1
 	chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20220107183321-db2282e902c5
 	chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20220107184221-3b7ad20fc480
 	chainmaker.org/chainmaker/sdk-go/v2 v2.0.1-0.20211215093913-d1edc3f9299e
@@ -39,7 +39,6 @@ require (
 	github.com/ethereum/go-ethereum v1.10.4
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/mock v1.6.0
-	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/shlex v0.0.0-20181106134648-c34317bd91bf
 	github.com/gosuri/uilive v0.0.4 // indirect
 	github.com/gosuri/uiprogress v0.0.1
