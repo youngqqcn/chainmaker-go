@@ -4,7 +4,7 @@ Copyright (C) BABEC. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 */
 
-package hotstuffmode
+package maxbftmode
 
 import (
 	"chainmaker.org/chainmaker-go/module/core/provider"
@@ -12,13 +12,13 @@ import (
 	"chainmaker.org/chainmaker/protocol/v2"
 )
 
-const ConsensusTypeHOTSTUFF = "HOTSTUFF"
+const ConsensusTypeMAXBFT = "MAXBFT"
 
-var NilTHOTSTUFFProvider provider.CoreProvider = (*hotstuffProvider)(nil)
+var NilTMAXBFTProvider provider.CoreProvider = (*maxbftProvider)(nil)
 
-type hotstuffProvider struct {
+type maxbftProvider struct {
 }
 
-func (hp *hotstuffProvider) NewCoreEngine(config *conf.CoreEngineConfig) (protocol.CoreEngine, error) {
+func (hp *maxbftProvider) NewCoreEngine(config *conf.CoreEngineConfig) (protocol.CoreEngine, error) {
 	return NewCoreEngine(config)
 }

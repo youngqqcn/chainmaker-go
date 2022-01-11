@@ -60,10 +60,6 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 	ts.lock.Lock()
 	defer ts.lock.Unlock()
 	txBatchSize := len(txBatch)
-	if txBatchSize == 0 {
-		ts.log.Error("there are no txs to schedule")
-		return make(map[string]*commonPb.TxRWSet), make(map[string][]*commonPb.ContractEvent), nil
-	}
 	ts.log.Infof("schedule tx batch start, size %d", txBatchSize)
 
 	var goRoutinePool *ants.Pool
@@ -91,8 +87,12 @@ func (ts *TxScheduler) Schedule(block *commonPb.Block, txBatch []*commonPb.Trans
 		}()
 	} else {
 		go func() {
-			for _, tx := range txBatch {
-				runningTxC <- tx
+			if len(txBatch) > 0 {
+				for _, tx := range txBatch {
+					runningTxC <- tx
+				}
+			} else {
+				finishC <- true
 			}
 		}()
 	}

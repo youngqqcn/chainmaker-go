@@ -40,7 +40,7 @@ func VerifyBlockSignatures(
 		return tbft.VerifyBlockSignatures(chainConf, ac, block, store, dpos.GetValidatorList)
 	case consensuspb.ConsensusType_RAFT:
 		return raft.VerifyBlockSignatures(block)
-	case consensuspb.ConsensusType_HOTSTUFF:
+	case consensuspb.ConsensusType_MAXBFT:
 		return maxbft.VerifyBlockSignatures(chainConf, ac, store, block, ledger)
 	case consensuspb.ConsensusType_SOLO:
 		return nil //for rebuild-dbs
