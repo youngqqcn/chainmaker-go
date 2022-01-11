@@ -131,7 +131,7 @@ function generate_config() {
     DOCKER_VM_CONTAINER_NAME_PREFIX="chainmaker-vm-docker-go-container"
     ENABLE_DOCKERVM="false"
 
-    read -p "input consensus type (0-SOLO,1-TBFT(default),3-HOTSTUFF,4-RAFT): " tmp
+    read -p "input consensus type (0-SOLO,1-TBFT(default),3-MAXBFT,4-RAFT): " tmp
     if  [ ! -z "$tmp" ] ;then
       if  [ $tmp -eq 0 ] || [ $tmp -eq 1 ] || [ $tmp -eq 3 ] || [ $tmp -eq 4 ] ;then
           CONSENSUS_TYPE=$tmp

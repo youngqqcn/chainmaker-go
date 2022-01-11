@@ -347,7 +347,7 @@ func (v *BlockVerifierImpl) validateBlock(block, lastBlock *commonpb.Block) (map
 	proposedHeight := lastBlock.Header.BlockHeight
 	// check if this block height is 1 bigger than last block height
 	lastBlockHash := lastBlock.Header.BlockHash
-	err = v.checkPreBlock_HOTSTUFF(block, lastBlock, err, lastBlockHash, proposedHeight)
+	err = v.checkPreBlock_MAXBFT(block, lastBlock, err, lastBlockHash, proposedHeight)
 	if err != nil {
 		return nil, nil, timeLasts, err
 	}
@@ -382,7 +382,7 @@ func (v *BlockVerifierImpl) validateBlockWithRWSets(block, lastBlock *commonpb.B
 	return v.verifierBlock.ValidateBlockWithRWSets(block, lastBlock, hashType, timeLasts, txRWSetMap)
 }
 
-func (v *BlockVerifierImpl) checkPreBlock_HOTSTUFF(block *commonpb.Block, lastBlock *commonpb.Block, err error,
+func (v *BlockVerifierImpl) checkPreBlock_MAXBFT(block *commonpb.Block, lastBlock *commonpb.Block, err error,
 	lastBlockHash []byte, proposedHeight uint64) error {
 
 	if block.Header.BlockHeight == lastBlock.Header.BlockHeight+1 {
@@ -390,7 +390,7 @@ func (v *BlockVerifierImpl) checkPreBlock_HOTSTUFF(block *commonpb.Block, lastBl
 			return err
 		}
 	} else {
-		// for chained bft consensus type
+		// for maxbft consensus type
 		proposedBlock, _ := v.proposalCache.GetProposedBlockByHashAndHeight(
 			block.Header.PreBlockHash, block.Header.BlockHeight-1)
 		if proposedBlock == nil {

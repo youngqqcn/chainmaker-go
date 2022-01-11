@@ -45,7 +45,7 @@ func ValidateTx(txsRet map[string]*commonpb.Transaction, tx *commonpb.Transactio
 	chainId string, ac protocol.AccessControlProvider) error {
 	txInPool, existTx := txsRet[tx.Payload.TxId]
 	if existTx {
-		if consensuspb.ConsensusType_HOTSTUFF == consensusType &&
+		if consensuspb.ConsensusType_MAXBFT == consensusType &&
 			blockHeight != block.Header.BlockHeight && blockHeight > 0 {
 
 			err := fmt.Errorf("tx duplicate in pending (tx:%s), txInPoolHeight:%d, txInBlockHeight:%d",

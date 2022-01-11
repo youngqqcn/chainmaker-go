@@ -47,7 +47,7 @@ var (
 
 const (
 	CHAIN1         = "chain1"
-	certPathPrefix = "/big_space/chainmaker/chainmaker-go/build/crypto-config/"
+	certPathPrefix = "../../build/crypto-config/"
 
 	contractNameFact = "ex_fact"
 	addContractName  = "add"

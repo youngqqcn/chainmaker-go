@@ -96,7 +96,7 @@ func init() {
 	)
 
 	consensus.RegisterConsensusProvider(
-		consensusPb.ConsensusType_HOTSTUFF,
+		consensusPb.ConsensusType_MAXBFT,
 		func(config *utils.ConsensusImplConfig) (protocol.ConsensusEngine, error) {
 			return maxbft.New(config)
 		},
