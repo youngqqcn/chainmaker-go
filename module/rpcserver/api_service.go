@@ -382,7 +382,6 @@ func (s *ApiService) dealTransact(tx *commonPb.Transaction, source protocol.TxSo
 
 		errCode = commonErr.ERR_CODE_TX_ADD_FAILED
 		errMsg = s.getErrMsg(errCode, err)
-		s.log.Error(errMsg)
 		resp.Code = commonPb.TxStatusCode_INTERNAL_ERROR
 		resp.Message = errMsg
 		resp.TxId = tx.Payload.TxId
