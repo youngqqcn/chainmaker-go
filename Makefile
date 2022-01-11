@@ -122,7 +122,7 @@ qta:
 	echo "clear environment"
 	cd test/send_proposal_request_ci && ./stop_solo.sh
 	cd test/send_proposal_request_ci && ./clean_data_log.sh
-	echo "start new sql-qta test"
+	echo "start new qta test"
 	cd test/send_proposal_request_ci && ./build.sh
 	cd test/send_proposal_request_ci && ./start_solo.sh
 	cd test/send_proposal_request_ci && go run main.go

@@ -77,6 +77,7 @@ storage:
   store_path: ../data/org1/ledgerData1
   encryptor: sm4    # sm4/aes
   encrypt_key: "1234567890123456" #16 bytes key
+  disable_block_file_db: false
 #  write_block_type: 0  # 0普通写模式，1快速写模式
 #  state_cache_config:
 #    life_window: 3000000000000   #key/value ttl 时间，单位 ns

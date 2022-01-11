@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"strings"
 
+	"chainmaker.org/chainmaker/chainconf/v2"
 	"chainmaker.org/chainmaker/common/v2/crypto/engine"
 
 	"chainmaker.org/chainmaker-go/module/accesscontrol"
@@ -26,7 +27,6 @@ import (
 	blockSync "chainmaker.org/chainmaker-go/module/sync"
 	"chainmaker.org/chainmaker-go/module/txpool"
 	componentVm "chainmaker.org/chainmaker-go/module/vm"
-	"chainmaker.org/chainmaker/chainconf/v2"
 	"chainmaker.org/chainmaker/common/v2/container"
 	consensusUtils "chainmaker.org/chainmaker/consensus-utils/v2"
 	"chainmaker.org/chainmaker/localconf/v2"
@@ -217,8 +217,8 @@ func (bc *Blockchain) initStore() (err error) {
 	if err != nil {
 		return err
 	}
-	config := &conf.StorageConfig{}
-	err = mapstructure.Decode(localconf.ChainMakerConfig.StorageConfig, config)
+	config, err := conf.NewStorageConfig(localconf.ChainMakerConfig.StorageConfig)
+	//err = mapstructure.Decode(localconf.ChainMakerConfig.StorageConfig, config)
 	if err != nil {
 		return err
 	}
