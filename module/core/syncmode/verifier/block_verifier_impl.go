@@ -135,7 +135,7 @@ func (v *BlockVerifierImpl) VerifyBlock(block *commonpb.Block, mode protocol.Ver
 	var isValid bool
 	var contractEventMap map[string][]*commonpb.ContractEvent
 	// to check if the block has verified before
-	b, txRwSet, eventMap := v.proposalCache.GetProposedBlock(block)
+	b, txRwSet, _ := v.proposalCache.GetProposedBlock(block)
 	// contractEventMap = eventMap
 
 	notSolo := consensuspb.ConsensusType_SOLO != v.chainConf.ChainConfig().Consensus.Type
@@ -169,12 +169,8 @@ func (v *BlockVerifierImpl) VerifyBlock(block *commonpb.Block, mode protocol.Ver
 				)
 				v.cutBlocks(cutBlocks, lastBlock)
 			}
-			err = v.proposalCache.SetProposedBlock(
-				block, txRwSet,
-				eventMap,
-				v.proposalCache.IsProposedAt(block.Header.BlockHeight),
-			)
-			return err
+
+			return nil
 		}
 	}
 

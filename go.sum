@@ -24,8 +24,8 @@ chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20211231065915-33ec8814372a h
 chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20211231065915-33ec8814372a/go.mod h1:6bqUdSlhWK8I0An41Re7jWGj+GuO3z2lJAdLGpE56eU=
 chainmaker.org/chainmaker/consensus-solo/v2 v2.0.0-20211220120848-36f05d90fd9c h1:ER+D2tqHFkQy/RzzATrdfiQ44b9uVPshQrw96xUdvgo=
 chainmaker.org/chainmaker/consensus-solo/v2 v2.0.0-20211220120848-36f05d90fd9c/go.mod h1:YBDcMpLPqAH2uLM3LZEKOtKjX6sIH+Jhd2xP0c4GfWM=
-chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20220107054455-20db25508ea6 h1:xhdoSqos/GrNS0z1XA/LMvalXItFK7bEsMabSRUvKI8=
-chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20220107054455-20db25508ea6/go.mod h1:sviGK4RLHi7n38v92F27YIzohJfBK9P1qOHC+J2UYNo=
+chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20220111100749-02365fea8179 h1:TNVw3lbzBc8B+NAF1+5CZR/8LmLZl+x7BNekyR5zgWY=
+chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20220111100749-02365fea8179/go.mod h1:sviGK4RLHi7n38v92F27YIzohJfBK9P1qOHC+J2UYNo=
 chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211210075517-b641978ff2fc/go.mod h1:8v560qevRKODR3L8gV/U/Kq7G1+HnasXNgpD9S1DhTU=
 chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211214030031-b32e4c55dea0/go.mod h1:RGKUrn8zLcw8KR2CWpnqsW0/xFrrlyD9Bz755sEnQXU=
 chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20211214031755-6278356b70be/go.mod h1:RGKUrn8zLcw8KR2CWpnqsW0/xFrrlyD9Bz755sEnQXU=
@@ -61,7 +61,6 @@ chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211221071542-96940769d8c0/go.mod h
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211229023105-e80fb114ea89/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211230035615-3d074e0887c6/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20220107183321-db2282e902c5/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
-chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20220110032709-5947499a1a6d h1:RX98AMdh2swq3oAkTHbkVADJtxcdkHteyzqUwJDWPQY=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20220110032709-5947499a1a6d/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20220111065457-38aa34ce86a3 h1:JL3CCDFV4jdTSAG4Yzr7Rghr0XXX48hp/5qcShSS/7I=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20220111065457-38aa34ce86a3/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=

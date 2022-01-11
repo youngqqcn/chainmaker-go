@@ -1057,5 +1057,11 @@ func RecoverBlock(
 		return newBlock, nil
 	}
 
-	return block, nil
+	// new a block to avoid use the same pointer with consensus.
+	return &commonPb.Block{
+		Header:         block.Header,
+		Dag:            block.Dag,
+		Txs:            block.Txs,
+		AdditionalData: block.AdditionalData,
+	}, nil
 }
