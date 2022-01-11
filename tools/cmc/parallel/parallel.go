@@ -92,7 +92,7 @@ type KeyValuePair struct {
 	Key        string `json:"key,omitempty"`
 	Value      string `json:"value,omitempty"`
 	Unique     bool   `json:"unique,omitempty"`
-	RandomRate int    `json:"randomRate,omitempty"`
+	RandomRate int64  `json:"randomRate,omitempty"`
 }
 
 type Detail struct {
@@ -559,9 +559,9 @@ var (
 	resultStr   = "exec result, orgid: %s, loop_id: %d, method1: %s, txid: %s, resp: %+v"
 )
 
-var randomRate = 0
-var totalSentTxs = 1
-var totalRandomSentTxs = 1
+var randomRate int64
+var totalSentTxs int64 = 1
+var totalRandomSentTxs int64 = 1
 var resp *commonPb.TxResponse
 
 type InvokerMsg struct {
@@ -579,7 +579,8 @@ func (h *invokeHandler) handle(client apiPb.RpcNodeClient, sk3 crypto.PrivateKey
 
 	// 构造Payload
 	pairs := make([]*commonPb.KeyValuePair, 0)
-	randomRateTmp := 0
+	var randomRateTmp int64
+	atomic.AddInt64(&totalSentTxs, 1)
 	for _, p := range ps {
 		if p.RandomRate > 100 || p.RandomRate < 0 {
 			panic("randomRate must int in [0,100]")
@@ -595,11 +596,10 @@ func (h *invokeHandler) handle(client apiPb.RpcNodeClient, sk3 crypto.PrivateKey
 
 		key := p.Key
 		val := []byte(p.Value)
-		totalSentTxs += 1
 		if randomRate > 0 && p.RandomRate > 0 {
 			if randomRate > (totalRandomSentTxs * 100 / totalSentTxs) {
 				val = []byte(fmt.Sprintf(templateStr, p.Value, h.threadId, loopId, time.Now().UnixNano()))
-				totalRandomSentTxs += 1
+				atomic.AddInt64(&totalRandomSentTxs, 1)
 			}
 		} else if p.Unique {
 			val = []byte(fmt.Sprintf(templateStr, p.Value, h.threadId, loopId, time.Now().UnixNano()))
