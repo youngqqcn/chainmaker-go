@@ -239,7 +239,7 @@ func init() {
 	flags.StringSliceVar(&revokeContractList, flagRevokeContractList, nil, "specify revoke list")
 
 	// gas limit
-	flags.Uint64Var(&gasLimit, flagGasLimit, 0, "gas limit in uint64 type, default value is 0, unlimited")
+	flags.Uint64Var(&gasLimit, flagGasLimit, 0, "gas limit in uint64 type")
 	flags.BoolVar(&gasEnable, flagGasEnable, false, "enable or disable gas feature")
 
 	flags.Int32Var(&addressType, flagAddressType, 0, "address type, eg. ChainMaker:0, ZXL:1")

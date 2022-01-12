@@ -22,7 +22,7 @@ import (
 
 const GRPCMaxCallRecvMsgSize = 16 * 1024 * 1024
 
-func constructQueryPayload(chainId, contractName, method string, pairs []*commonPb.KeyValuePair) (*commonPb.Payload, error) {
+func constructQueryPayload(chainId, contractName, method string, pairs []*commonPb.KeyValuePair, gasLimit uint64) (*commonPb.Payload, error) {
 	payload := &commonPb.Payload{
 		ContractName: contractName,
 		Method:       method,
@@ -31,10 +31,15 @@ func constructQueryPayload(chainId, contractName, method string, pairs []*common
 		TxType:       commonPb.TxType_QUERY_CONTRACT,
 		ChainId:      chainId,
 	}
+	// gas limit
+	if gasLimit > 0 {
+		var limit = &commonPb.Limit{GasLimit: gasLimit}
+		payload.Limit = limit
+	}
 
 	return payload, nil
 }
-func constructInvokePayload(chainId, contractName, method string, pairs []*commonPb.KeyValuePair) (*commonPb.Payload, error) {
+func constructInvokePayload(chainId, contractName, method string, pairs []*commonPb.KeyValuePair, gasLimit uint64) (*commonPb.Payload, error) {
 	payload := &commonPb.Payload{
 		ContractName:   contractName,
 		Method:         method,
@@ -44,6 +49,11 @@ func constructInvokePayload(chainId, contractName, method string, pairs []*commo
 		ChainId:        chainId,
 		Timestamp:      time.Now().Unix(),
 		ExpirationTime: 0,
+	}
+	// gas limit
+	if gasLimit > 0 {
+		var limit = &commonPb.Limit{GasLimit: gasLimit}
+		payload.Limit = limit
 	}
 
 	return payload, nil

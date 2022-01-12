@@ -86,6 +86,7 @@ var (
 
 	authTypeUint32 uint32
 	authType       sdk.AuthType
+	gasLimit       uint64
 )
 
 type KeyValuePair struct {
@@ -191,6 +192,7 @@ func ParallelCMD() *cobra.Command {
 	flags.BoolVar(&useShortCrt, "use-short-crt", false, "use compressed certificate in transactions")
 	flags.IntVar(&requestTimeout, "requestTimeout", 5, "specify request timeout(unit: s)")
 	flags.Uint32Var(&authTypeUint32, "auth-type", 1, "chainmaker auth type. PermissionedWithCert:1,PermissionedWithKey:2,Public:3")
+	flags.Uint64Var(&gasLimit, "gas-limit", 0, "gas limit in uint64 type")
 
 	cmd.AddCommand(invokeCMD())
 	cmd.AddCommand(queryCMD())
@@ -632,7 +634,7 @@ func (h *invokeHandler) handle(client apiPb.RpcNodeClient, sk3 crypto.PrivateKey
 	method1, pairs1, err := makePairs(method, abiPath, pairs, commonPb.RuntimeType(runTime), abiData)
 
 	//fmt.Println("[exec_handle]orgId: ", orgId, ", userCrtPath: ", userCrtPath, ", loopId: ", loopId, ", method1: ", method1, ", pairs1: ", pairs1, ", method: ", method, ", pairs: ", pairs)
-	payloadBytes, err := constructInvokePayload(chainId, contractName, method1, pairs1)
+	payloadBytes, err := constructInvokePayload(chainId, contractName, method1, pairs1, gasLimit)
 	if err != nil {
 		return err
 	}
@@ -684,7 +686,7 @@ func (h *queryHandler) handle(client apiPb.RpcNodeClient, sk3 crypto.PrivateKey,
 		}
 	}
 
-	payloadBytes, err := constructQueryPayload(chainId, contractName, method, pairs)
+	payloadBytes, err := constructQueryPayload(chainId, contractName, method, pairs, gasLimit)
 	if err != nil {
 		return err
 	}
@@ -716,6 +718,11 @@ func (h *createContractHandler) handle(client apiPb.RpcNodeClient, sk3 crypto.Pr
 	var pairs []*commonPb.KeyValuePair
 	payload, _ := utils.GenerateInstallContractPayload(fmt.Sprintf(templateStr, contractName, h.threadId, loopId, time.Now().Unix()),
 		"1.0.0", commonPb.RuntimeType(runTime), wasmBin, pairs)
+	// gas limit
+	if gasLimit > 0 {
+		var limit = &commonPb.Limit{GasLimit: gasLimit}
+		payload.Limit = limit
+	}
 
 	//
 	//method := syscontract.ContractManageFunction_INIT_CONTRACT.String()
@@ -772,6 +779,11 @@ func (h *upgradeContractHandler) handle(client apiPb.RpcNodeClient, sk3 crypto.P
 	endorsement, err := acSign(payload)
 	if err != nil {
 		return err
+	}
+	// gas limit
+	if gasLimit > 0 {
+		var limit = &commonPb.Limit{GasLimit: gasLimit}
+		payload.Limit = limit
 	}
 
 	resp, err = sendRequest(sk3, client, &InvokerMsg{txType: commonPb.TxType_INVOKE_CONTRACT,
