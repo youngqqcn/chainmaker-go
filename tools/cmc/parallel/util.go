@@ -9,6 +9,7 @@ package parallel
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -104,6 +105,10 @@ func acSign(msg *commonPb.Payload) ([]*commonPb.EndorsementEntry, error) {
 		}
 	}
 
+	hashType, err := getHashType(hashAlgo)
+	if err != nil {
+		return nil, err
+	}
 	endorsers := make([]*commonPb.EndorsementEntry, len(adminKeys))
 	for i := range adminKeys {
 		var e *commonPb.EndorsementEntry
@@ -113,14 +118,14 @@ func acSign(msg *commonPb.Payload) ([]*commonPb.EndorsementEntry, error) {
 		} else if authType == sdk.PermissionedWithKey {
 			e, err = sdkutils.MakePkEndorserWithPath(
 				adminKeys[i],
-				crypto.HASH_TYPE_SHA256,
+				hashType,
 				adminOrgs[i],
 				msg,
 			)
 		} else {
 			e, err = sdkutils.MakePkEndorserWithPath(
 				adminKeys[i],
-				crypto.HASH_TYPE_SHA256,
+				hashType,
 				"",
 				msg,
 			)
@@ -131,4 +136,11 @@ func acSign(msg *commonPb.Payload) ([]*commonPb.EndorsementEntry, error) {
 		endorsers[i] = e
 	}
 	return endorsers, nil
+}
+
+func getHashType(hashType string) (crypto.HashType, error) {
+	if t, ok := crypto.HashAlgoMap[hashType]; ok {
+		return t, nil
+	}
+	return 0, fmt.Errorf("unknown hash algo %s", hashType)
 }

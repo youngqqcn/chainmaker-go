@@ -886,7 +886,12 @@ func sendRequest(sk3 crypto.PrivateKey, client apiPb.RpcNodeClient, msg *Invoker
 		return nil, err
 	}
 
-	signBytes, err := sdkutils.SignPayloadBytesWithHashType(sk3, crypto.HASH_TYPE_SHA256, rawTxBytes)
+	hashType, err := getHashType(hashAlgo)
+	if err != nil {
+		return nil, err
+	}
+
+	signBytes, err := sdkutils.SignPayloadBytesWithHashType(sk3, hashType, rawTxBytes)
 	if err != nil {
 		return nil, err
 	}
