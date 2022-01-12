@@ -59,13 +59,19 @@ func TestPriority(t *testing.T) {
 	require.NoError(t, q.Put(&SchedulerMsg{}))
 	require.NoError(t, q.Put(&LivenessMsg{}))
 	err := q.Put(&ReceivedBlockInfos{
-		blkinfos: []*commonPb.BlockInfo{
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 103}}},
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 104}}},
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 105}}},
+		SyncBlockBatch: &syncPb.SyncBlockBatch{
+			Data: &syncPb.SyncBlockBatch_BlockinfoBatch{
+				BlockinfoBatch: &syncPb.BlockInfoBatch{
+					Batch: []*commonPb.BlockInfo{
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 103}}},
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 104}}},
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 105}}},
+					},
+				},
+			},
+			WithRwset: false,
 		},
-		from:      "node1",
-		withRWSet: false,
+		from: "node1",
 	})
 	require.NoError(t, err)
 	require.NoError(t, q.Put(&ProcessBlockMsg{}))

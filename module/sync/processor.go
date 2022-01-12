@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"sync/atomic"
 
+	syncPb "chainmaker.org/chainmaker/pb-go/v2/sync"
+
 	"chainmaker.org/chainmaker/localconf/v2"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/protocol/v2"
@@ -50,8 +52,7 @@ func newProcessor(verify verifyAndAddBlock, ledgerCache protocol.LedgerCache, lo
 func (pro *processor) handler(event queue.Item) (queue.Item, error) {
 	switch msg := event.(type) {
 	case *ReceivedBlockInfos:
-		pro.log.Debugf("receive [ReceivedBlockInfos] msg, height: %d, start handle...",
-			msg.blkinfos[0].Block.Header.BlockHeight)
+		pro.log.Debugf("receive [ReceivedBlockInfos] msg, start handle...", msg.Data)
 		pro.handleReceivedBlockInfos(msg)
 	case *ProcessBlockMsg:
 		//pro.log.Debugf("receive [ProcessBlockMsg] msg, start handle...")
@@ -66,18 +67,39 @@ func (pro *processor) handler(event queue.Item) (queue.Item, error) {
 func (pro *processor) handleReceivedBlockInfos(msg *ReceivedBlockInfos) {
 	pro.log.Info("handleReceivedBlockInfos start")
 	lastCommitBlockHeight := pro.lastCommitBlockHeight()
-	for _, blkinfo := range msg.blkinfos {
-		if blkinfo.Block.Header.BlockHeight <= lastCommitBlockHeight {
-			continue
-		}
-		if _, exist := pro.queue[blkinfo.Block.Header.BlockHeight]; !exist {
-			pro.queue[blkinfo.Block.Header.BlockHeight] = blockWithPeerInfo{
-				blk: blkinfo.Block, rwsets: blkinfo.RwsetList, id: msg.from, withRWSets: msg.withRWSet,
+	switch ty := msg.Data.(type) {
+	// block message implied in chainmaker version <= 2.1.x
+	case *syncPb.SyncBlockBatch_BlockBatch:
+		for _, blk := range ty.BlockBatch.Batches {
+			if blk.Header.BlockHeight <= lastCommitBlockHeight {
+				continue
 			}
-			pro.log.Debugf("received block with rwsets [height: %d] from node [%s]",
-				blkinfo.Block.Header.BlockHeight, msg.from)
-			pro.log.Debugf("current length of processor queue is: [%d]", len(pro.queue))
+			if _, exist := pro.queue[blk.Header.BlockHeight]; !exist {
+				pro.queue[blk.Header.BlockHeight] = blockWithPeerInfo{
+					blk: blk, rwsets: nil, id: msg.from, withRWSets: msg.WithRwset,
+				}
+				pro.log.Debugf("received block [height: %d] from node [%s]",
+					blk.Header.BlockHeight, msg.from)
+				pro.log.Debugf("current length of processor queue is: [%d]", len(pro.queue))
+			}
 		}
+	// block message implied in chainmaker version == 2.2.x
+	case *syncPb.SyncBlockBatch_BlockinfoBatch:
+		for _, blkinfo := range ty.BlockinfoBatch.Batch {
+			if blkinfo.Block.Header.BlockHeight <= lastCommitBlockHeight {
+				continue
+			}
+			if _, exist := pro.queue[blkinfo.Block.Header.BlockHeight]; !exist {
+				pro.queue[blkinfo.Block.Header.BlockHeight] = blockWithPeerInfo{
+					blk: blkinfo.Block, rwsets: blkinfo.RwsetList, id: msg.from, withRWSets: msg.WithRwset,
+				}
+				pro.log.Debugf("received block with rwsets [height: %d] from node [%s]",
+					blkinfo.Block.Header.BlockHeight, msg.from)
+				pro.log.Debugf("current length of processor queue is: [%d]", len(pro.queue))
+			}
+		}
+	default:
+		pro.log.Errorf("handleReceivedBlockInfos get unrecognized msg, type: %t", msg.Data)
 	}
 }
 

@@ -10,6 +10,8 @@ package sync
 import (
 	"testing"
 
+	syncPb "chainmaker.org/chainmaker/pb-go/v2/sync"
+
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/protocol/v2/test"
 
@@ -26,13 +28,19 @@ func TestProcessorReceivedBlocks(t *testing.T) {
 
 	// 1. Receive the blocks which has been confirmed
 	result, err := processor.handler(&ReceivedBlockInfos{
-		blkinfos: []*commonPb.BlockInfo{
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 10}}},
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 11}}},
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 12}}},
+		SyncBlockBatch: &syncPb.SyncBlockBatch{
+			Data: &syncPb.SyncBlockBatch_BlockinfoBatch{
+				BlockinfoBatch: &syncPb.BlockInfoBatch{
+					Batch: []*commonPb.BlockInfo{
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 10}}},
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 11}}},
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 12}}},
+					},
+				},
+			},
+			WithRwset: false,
 		},
-		from:      "node1",
-		withRWSet: false,
+		from: "node1",
 	})
 	require.Nil(t, result)
 	require.NoError(t, err)
@@ -40,12 +48,18 @@ func TestProcessorReceivedBlocks(t *testing.T) {
 
 	// 2. Receive the blocks which part of has been confirmed
 	result, err = processor.handler(&ReceivedBlockInfos{
-		blkinfos: []*commonPb.BlockInfo{
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 101}}},
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 102}}},
+		SyncBlockBatch: &syncPb.SyncBlockBatch{
+			Data: &syncPb.SyncBlockBatch_BlockinfoBatch{
+				BlockinfoBatch: &syncPb.BlockInfoBatch{
+					Batch: []*commonPb.BlockInfo{
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 101}}},
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 102}}},
+					},
+				},
+			},
+			WithRwset: false,
 		},
-		from:      "node1",
-		withRWSet: false,
+		from: "node1",
 	})
 	require.Nil(t, result)
 	require.NoError(t, err)
@@ -53,13 +67,19 @@ func TestProcessorReceivedBlocks(t *testing.T) {
 
 	// 3. Receive the blocks which not been confirmed
 	result, err = processor.handler(&ReceivedBlockInfos{
-		blkinfos: []*commonPb.BlockInfo{
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 103}}},
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 104}}},
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 105}}},
+		SyncBlockBatch: &syncPb.SyncBlockBatch{
+			Data: &syncPb.SyncBlockBatch_BlockinfoBatch{
+				BlockinfoBatch: &syncPb.BlockInfoBatch{
+					Batch: []*commonPb.BlockInfo{
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 103}}},
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 104}}},
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 105}}},
+					},
+				},
+			},
+			WithRwset: false,
 		},
-		from:      "node1",
-		withRWSet: false,
+		from: "node1",
 	})
 	require.Nil(t, result)
 	require.NoError(t, err)
@@ -67,13 +87,19 @@ func TestProcessorReceivedBlocks(t *testing.T) {
 
 	// 4. Repeat receive the blocks which not been confirmed
 	result, err = processor.handler(&ReceivedBlockInfos{
-		blkinfos: []*commonPb.BlockInfo{
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 103}}},
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 104}}},
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 105}}},
+		SyncBlockBatch: &syncPb.SyncBlockBatch{
+			Data: &syncPb.SyncBlockBatch_BlockinfoBatch{
+				BlockinfoBatch: &syncPb.BlockInfoBatch{
+					Batch: []*commonPb.BlockInfo{
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 103}}},
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 104}}},
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 105}}},
+					},
+				},
+			},
+			WithRwset: false,
 		},
-		from:      "node1",
-		withRWSet: false,
+		from: "node1",
 	})
 	require.Nil(t, result)
 	require.NoError(t, err)
@@ -89,13 +115,19 @@ func TestProcessorProcessBlockMsg(t *testing.T) {
 
 	// 1. Receive the blocks which has not been confirmed
 	_, _ = processor.handler(&ReceivedBlockInfos{
-		blkinfos: []*commonPb.BlockInfo{
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 102}}},
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 103}}},
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 104}}},
+		SyncBlockBatch: &syncPb.SyncBlockBatch{
+			Data: &syncPb.SyncBlockBatch_BlockinfoBatch{
+				BlockinfoBatch: &syncPb.BlockInfoBatch{
+					Batch: []*commonPb.BlockInfo{
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 102}}},
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 103}}},
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 104}}},
+					},
+				},
+			},
+			WithRwset: false,
 		},
-		from:      "node1",
-		withRWSet: false,
+		from: "node1",
 	})
 
 	// 2. process block, but not have the block which the height is 101
@@ -106,11 +138,17 @@ func TestProcessorProcessBlockMsg(t *testing.T) {
 
 	// 3. Add the block which height is 101
 	_, _ = processor.handler(&ReceivedBlockInfos{
-		blkinfos: []*commonPb.BlockInfo{
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 101}}},
+		SyncBlockBatch: &syncPb.SyncBlockBatch{
+			Data: &syncPb.SyncBlockBatch_BlockinfoBatch{
+				BlockinfoBatch: &syncPb.BlockInfoBatch{
+					Batch: []*commonPb.BlockInfo{
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 101}}},
+					},
+				},
+			},
+			WithRwset: false,
 		},
-		from:      "node1",
-		withRWSet: false,
+		from: "node1",
 	})
 	ret, err = processor.handler(&ProcessBlockMsg{})
 	require.NoError(t, err)
@@ -140,13 +178,19 @@ func TestDataDetection(t *testing.T) {
 
 	// 1. Receive the blocks which has not been confirmed
 	_, _ = processor.handler(&ReceivedBlockInfos{
-		blkinfos: []*commonPb.BlockInfo{
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 102}}},
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 103}}},
-			{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 104}}},
+		SyncBlockBatch: &syncPb.SyncBlockBatch{
+			Data: &syncPb.SyncBlockBatch_BlockinfoBatch{
+				BlockinfoBatch: &syncPb.BlockInfoBatch{
+					Batch: []*commonPb.BlockInfo{
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 102}}},
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 103}}},
+						{Block: &commonPb.Block{Header: &commonPb.BlockHeader{BlockHeight: 104}}},
+					},
+				},
+			},
+			WithRwset: false,
 		},
-		from:      "node1",
-		withRWSet: false,
+		from: "node1",
 	})
 
 	// 2. no blocks will be deleted

@@ -13,6 +13,8 @@ import (
 	"sort"
 	"time"
 
+	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
+
 	"chainmaker.org/chainmaker/localconf/v2"
 	syncPb "chainmaker.org/chainmaker/pb-go/v2/sync"
 	"chainmaker.org/chainmaker/protocol/v2"
@@ -303,35 +305,25 @@ func (sch *scheduler) handleSyncedBlockMsg(msg *SyncedBlockMsg) (queue.Item, err
 		return nil, err
 	}
 	needToProcess := false
-	isFastSync := localconf.ChainMakerConfig.NodeConfig.FastSyncConfig.Enable
-	withRWSet := blkBatch.WithRwset
-	sch.log.Debugf("isFastSync: %v ,withRWSet: %v", isFastSync, withRWSet)
-	if len(blkBatch.GetBlockinfoBatch().Batch) == 0 {
-		sch.log.Info("GetBlockinfoBatch null")
+	sch.log.Debugf(
+		"isFastSync: %v ,withRWSet: %v",
+		localconf.ChainMakerConfig.NodeConfig.FastSyncConfig.Enable,
+		blkBatch.WithRwset,
+	)
+	if blkBatch.GetBlockinfoBatch().Size() == 0 && blkBatch.GetBlockBatch().Size() == 0 {
+		sch.log.Info("Get blocks is null")
 		return nil, nil
+	} else if blkBatch.GetBlockBatch().Size() != 0 {
+		needToProcess = sch.updateSchedulerBySyncBlockBatch(
+			msg.from, blkBatch.GetBlockBatch().GetBatches(), len(blkBatch.GetBlockBatch().GetBatches()))
+	} else if blkBatch.GetBlockinfoBatch().Size() != 0 {
+		needToProcess = sch.updateSchedulerBySyncBlockBatch(
+			msg.from, blkBatch.GetBlockinfoBatch().GetBatch(), len(blkBatch.GetBlockinfoBatch().GetBatch()))
 	}
-	for _, blkInfo := range blkBatch.GetBlockinfoBatch().GetBatch() {
-		delete(sch.pendingBlocks, blkInfo.Block.Header.BlockHeight)
-		delete(sch.pendingTime, blkInfo.Block.Header.BlockHeight)
-		if state, exist := sch.blockStates[blkInfo.Block.Header.BlockHeight]; exist {
-			// 添加重复区块的检查，重复的区块不会被放入优先级队列中，
-			//不做检查会将收到重复的区块返回数据放入优先级队列（该队列没有长度检查），这部分有内存泄漏的风险
-			// if state == receivedBlock do not put into the msg queue, maintain needToProcess = false
-			if state != receivedBlock {
-				needToProcess = true
-				sch.blockStates[blkInfo.Block.Header.BlockHeight] = receivedBlock
-				sch.receivedBlocks[blkInfo.Block.Header.BlockHeight] = msg.from
-			}
-		}
-		sch.log.Infof("received block [height:%d:%x] needToProcess: %v from "+
-			"node [%s]", blkInfo.Block.Header.BlockHeight, blkInfo.Block.Header.BlockHash, needToProcess, msg.from)
-	}
-
 	if needToProcess {
 		return &ReceivedBlockInfos{
-			blkinfos:  blkBatch.GetBlockinfoBatch().Batch,
-			from:      msg.from,
-			withRWSet: blkBatch.WithRwset,
+			SyncBlockBatch: &blkBatch,
+			from:           msg.from,
 		}, nil
 	}
 	return nil, nil
@@ -371,4 +363,38 @@ func (sch *scheduler) getServiceState() string {
 
 func (sch *scheduler) isPeerArchivedTooHeight(localHeight, peerArchivedHeight uint64) bool {
 	return peerArchivedHeight != 0 && localHeight <= peerArchivedHeight
+}
+
+func (sch *scheduler) updateSchedulerBySyncBlockBatch(msgFrom string, o interface{}, size int) bool {
+	var height uint64
+	var hash []byte
+	needToProcess := false
+	for i := 0; i < size; i++ {
+		switch ty := o.(type) {
+		case []*commonPb.Block:
+			height = ty[i].Header.BlockHeight
+			hash = ty[i].Header.BlockHash
+		case []*commonPb.BlockInfo:
+			height = ty[i].Block.Header.BlockHeight
+			hash = ty[i].Block.Header.BlockHash
+		default:
+			sch.log.Errorf("received unrecognized block type: [%t]", ty)
+			continue
+		}
+		delete(sch.pendingBlocks, height)
+		delete(sch.pendingTime, height)
+		if state, exist := sch.blockStates[height]; exist {
+			// 添加重复区块的检查，重复的区块不会被放入优先级队列中，
+			//不做检查会将收到重复的区块返回数据放入优先级队列（该队列没有长度检查），这部分有内存泄漏的风险
+			// if state == receivedBlock do not put into the msg queue, maintain needToProcess = false
+			if state != receivedBlock {
+				sch.log.Infof("received block [height:%d:%x] needToProcess: %v from "+
+					"node [%s]", height, hash, true, msgFrom)
+				sch.blockStates[height] = receivedBlock
+				sch.receivedBlocks[height] = msgFrom
+				needToProcess = true
+			}
+		}
+	}
+	return needToProcess
 }

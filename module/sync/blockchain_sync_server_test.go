@@ -160,7 +160,7 @@ func TestSyncMsg_BLOCK_SYNC_RESP(t *testing.T) {
 	defer fn()
 	implSync := service.(*BlockChainSyncServer)
 	// modify config for a stable unit test result
-	implSync.conf.livenessTick = 5 * time.Second
+	implSync.conf.livenessTick = 10 * time.Second
 	// 1. add peer status
 	bz := getNodeStatusResp(t, 120)
 	require.NoError(t, implSync.blockSyncMsgHandler("node2", bz, netPb.NetMsg_SYNC_BLOCK_MSG))
@@ -168,7 +168,7 @@ func TestSyncMsg_BLOCK_SYNC_RESP(t *testing.T) {
 	// 2. receive block
 	blkBz := getBlockResp(t, 11)
 	require.NoError(t, implSync.blockSyncMsgHandler("node2", blkBz, netPb.NetMsg_SYNC_BLOCK_MSG))
-	time.Sleep(3 * time.Second)
+	time.Sleep(4 * time.Second)
 	require.EqualValues(t, "pendingRecvHeight: 12, peers num: 1, blockStates num: 109, "+
 		"pendingBlocks num: 109, receivedBlocks num: 0", implSync.scheduler.getServiceState())
 	require.EqualValues(t, "pendingBlockHeight: 12, queue num: 0", implSync.processor.getServiceState())

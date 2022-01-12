@@ -8,7 +8,6 @@ SPDX-License-Identifier: Apache-2.0
 package sync
 
 import (
-	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	syncPb "chainmaker.org/chainmaker/pb-go/v2/sync"
 	"github.com/Workiva/go-datastructures/queue"
 )
@@ -93,9 +92,8 @@ func (m *LivenessMsg) Compare(other queue.Item) int {
 }
 
 type ReceivedBlockInfos struct {
-	blkinfos  []*commonPb.BlockInfo
-	from      string
-	withRWSet bool
+	*syncPb.SyncBlockBatch
+	from string
 }
 
 func (m *ReceivedBlockInfos) Level() int {
