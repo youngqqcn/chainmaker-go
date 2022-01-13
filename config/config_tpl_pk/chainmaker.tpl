@@ -186,6 +186,10 @@ rpc:
     addresses:
       # - "127.0.0.1"
 
+  # RPC server max send/receive message size in MB
+  max_send_msg_size: 10
+  max_recv_msg_size: 10
+
 # Monitor related settings
 monitor:
   # Monitor service switch, default is false.
