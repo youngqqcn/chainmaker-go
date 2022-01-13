@@ -9,6 +9,7 @@ package parallel
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -21,7 +22,7 @@ import (
 
 const GRPCMaxCallRecvMsgSize = 16 * 1024 * 1024
 
-func constructQueryPayload(chainId, contractName, method string, pairs []*commonPb.KeyValuePair) (*commonPb.Payload, error) {
+func constructQueryPayload(chainId, contractName, method string, pairs []*commonPb.KeyValuePair, gasLimit uint64) (*commonPb.Payload, error) {
 	payload := &commonPb.Payload{
 		ContractName: contractName,
 		Method:       method,
@@ -30,10 +31,15 @@ func constructQueryPayload(chainId, contractName, method string, pairs []*common
 		TxType:       commonPb.TxType_QUERY_CONTRACT,
 		ChainId:      chainId,
 	}
+	// gas limit
+	if gasLimit > 0 {
+		var limit = &commonPb.Limit{GasLimit: gasLimit}
+		payload.Limit = limit
+	}
 
 	return payload, nil
 }
-func constructInvokePayload(chainId, contractName, method string, pairs []*commonPb.KeyValuePair) (*commonPb.Payload, error) {
+func constructInvokePayload(chainId, contractName, method string, pairs []*commonPb.KeyValuePair, gasLimit uint64) (*commonPb.Payload, error) {
 	payload := &commonPb.Payload{
 		ContractName:   contractName,
 		Method:         method,
@@ -43,6 +49,11 @@ func constructInvokePayload(chainId, contractName, method string, pairs []*commo
 		ChainId:        chainId,
 		Timestamp:      time.Now().Unix(),
 		ExpirationTime: 0,
+	}
+	// gas limit
+	if gasLimit > 0 {
+		var limit = &commonPb.Limit{GasLimit: gasLimit}
+		payload.Limit = limit
 	}
 
 	return payload, nil
@@ -104,6 +115,10 @@ func acSign(msg *commonPb.Payload) ([]*commonPb.EndorsementEntry, error) {
 		}
 	}
 
+	hashType, err := getHashType(hashAlgo)
+	if err != nil {
+		return nil, err
+	}
 	endorsers := make([]*commonPb.EndorsementEntry, len(adminKeys))
 	for i := range adminKeys {
 		var e *commonPb.EndorsementEntry
@@ -113,14 +128,14 @@ func acSign(msg *commonPb.Payload) ([]*commonPb.EndorsementEntry, error) {
 		} else if authType == sdk.PermissionedWithKey {
 			e, err = sdkutils.MakePkEndorserWithPath(
 				adminKeys[i],
-				crypto.HASH_TYPE_SHA256,
+				hashType,
 				adminOrgs[i],
 				msg,
 			)
 		} else {
 			e, err = sdkutils.MakePkEndorserWithPath(
 				adminKeys[i],
-				crypto.HASH_TYPE_SHA256,
+				hashType,
 				"",
 				msg,
 			)
@@ -131,4 +146,11 @@ func acSign(msg *commonPb.Payload) ([]*commonPb.EndorsementEntry, error) {
 		endorsers[i] = e
 	}
 	return endorsers, nil
+}
+
+func getHashType(hashType string) (crypto.HashType, error) {
+	if t, ok := crypto.HashAlgoMap[hashType]; ok {
+		return t, nil
+	}
+	return 0, fmt.Errorf("unknown hash algo %s", hashType)
 }

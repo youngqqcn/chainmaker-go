@@ -86,13 +86,14 @@ var (
 
 	authTypeUint32 uint32
 	authType       sdk.AuthType
+	gasLimit       uint64
 )
 
 type KeyValuePair struct {
 	Key        string `json:"key,omitempty"`
 	Value      string `json:"value,omitempty"`
 	Unique     bool   `json:"unique,omitempty"`
-	RandomRate int    `json:"randomRate,omitempty"`
+	RandomRate int64  `json:"randomRate,omitempty"`
 }
 
 type Detail struct {
@@ -191,6 +192,7 @@ func ParallelCMD() *cobra.Command {
 	flags.BoolVar(&useShortCrt, "use-short-crt", false, "use compressed certificate in transactions")
 	flags.IntVar(&requestTimeout, "requestTimeout", 5, "specify request timeout(unit: s)")
 	flags.Uint32Var(&authTypeUint32, "auth-type", 1, "chainmaker auth type. PermissionedWithCert:1,PermissionedWithKey:2,Public:3")
+	flags.Uint64Var(&gasLimit, "gas-limit", 0, "gas limit in uint64 type")
 
 	cmd.AddCommand(invokeCMD())
 	cmd.AddCommand(queryCMD())
@@ -559,9 +561,9 @@ var (
 	resultStr   = "exec result, orgid: %s, loop_id: %d, method1: %s, txid: %s, resp: %+v"
 )
 
-var randomRate = 0
-var totalSentTxs = 1
-var totalRandomSentTxs = 1
+var randomRate int64
+var totalSentTxs int64 = 1
+var totalRandomSentTxs int64 = 1
 var resp *commonPb.TxResponse
 
 type InvokerMsg struct {
@@ -579,7 +581,8 @@ func (h *invokeHandler) handle(client apiPb.RpcNodeClient, sk3 crypto.PrivateKey
 
 	// 构造Payload
 	pairs := make([]*commonPb.KeyValuePair, 0)
-	randomRateTmp := 0
+	var randomRateTmp int64
+	atomic.AddInt64(&totalSentTxs, 1)
 	for _, p := range ps {
 		if p.RandomRate > 100 || p.RandomRate < 0 {
 			panic("randomRate must int in [0,100]")
@@ -595,11 +598,10 @@ func (h *invokeHandler) handle(client apiPb.RpcNodeClient, sk3 crypto.PrivateKey
 
 		key := p.Key
 		val := []byte(p.Value)
-		totalSentTxs += 1
 		if randomRate > 0 && p.RandomRate > 0 {
 			if randomRate > (totalRandomSentTxs * 100 / totalSentTxs) {
 				val = []byte(fmt.Sprintf(templateStr, p.Value, h.threadId, loopId, time.Now().UnixNano()))
-				totalRandomSentTxs += 1
+				atomic.AddInt64(&totalRandomSentTxs, 1)
 			}
 		} else if p.Unique {
 			val = []byte(fmt.Sprintf(templateStr, p.Value, h.threadId, loopId, time.Now().UnixNano()))
@@ -632,7 +634,7 @@ func (h *invokeHandler) handle(client apiPb.RpcNodeClient, sk3 crypto.PrivateKey
 	method1, pairs1, err := makePairs(method, abiPath, pairs, commonPb.RuntimeType(runTime), abiData)
 
 	//fmt.Println("[exec_handle]orgId: ", orgId, ", userCrtPath: ", userCrtPath, ", loopId: ", loopId, ", method1: ", method1, ", pairs1: ", pairs1, ", method: ", method, ", pairs: ", pairs)
-	payloadBytes, err := constructInvokePayload(chainId, contractName, method1, pairs1)
+	payloadBytes, err := constructInvokePayload(chainId, contractName, method1, pairs1, gasLimit)
 	if err != nil {
 		return err
 	}
@@ -684,7 +686,7 @@ func (h *queryHandler) handle(client apiPb.RpcNodeClient, sk3 crypto.PrivateKey,
 		}
 	}
 
-	payloadBytes, err := constructQueryPayload(chainId, contractName, method, pairs)
+	payloadBytes, err := constructQueryPayload(chainId, contractName, method, pairs, gasLimit)
 	if err != nil {
 		return err
 	}
@@ -716,6 +718,11 @@ func (h *createContractHandler) handle(client apiPb.RpcNodeClient, sk3 crypto.Pr
 	var pairs []*commonPb.KeyValuePair
 	payload, _ := utils.GenerateInstallContractPayload(fmt.Sprintf(templateStr, contractName, h.threadId, loopId, time.Now().Unix()),
 		"1.0.0", commonPb.RuntimeType(runTime), wasmBin, pairs)
+	// gas limit
+	if gasLimit > 0 {
+		var limit = &commonPb.Limit{GasLimit: gasLimit}
+		payload.Limit = limit
+	}
 
 	//
 	//method := syscontract.ContractManageFunction_INIT_CONTRACT.String()
@@ -766,6 +773,11 @@ func (h *upgradeContractHandler) handle(client apiPb.RpcNodeClient, sk3 crypto.P
 	var pairs []*commonPb.KeyValuePair
 	payload, _ := GenerateUpgradeContractPayload(fmt.Sprintf(templateStr, contractName, h.threadId, loopId, time.Now().Unix()),
 		version, commonPb.RuntimeType(runTime), wasmBin, pairs)
+	// gas limit
+	if gasLimit > 0 {
+		var limit = &commonPb.Limit{GasLimit: gasLimit}
+		payload.Limit = limit
+	}
 	payload.TxId = txId
 	payload.ChainId = chainId
 	payload.Timestamp = time.Now().Unix()
@@ -886,7 +898,12 @@ func sendRequest(sk3 crypto.PrivateKey, client apiPb.RpcNodeClient, msg *Invoker
 		return nil, err
 	}
 
-	signBytes, err := sdkutils.SignPayloadBytesWithHashType(sk3, crypto.HASH_TYPE_SHA256, rawTxBytes)
+	hashType, err := getHashType(hashAlgo)
+	if err != nil {
+		return nil, err
+	}
+
+	signBytes, err := sdkutils.SignPayloadBytesWithHashType(sk3, hashType, rawTxBytes)
 	if err != nil {
 		return nil, err
 	}
