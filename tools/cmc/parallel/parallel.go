@@ -773,17 +773,17 @@ func (h *upgradeContractHandler) handle(client apiPb.RpcNodeClient, sk3 crypto.P
 	var pairs []*commonPb.KeyValuePair
 	payload, _ := GenerateUpgradeContractPayload(fmt.Sprintf(templateStr, contractName, h.threadId, loopId, time.Now().Unix()),
 		version, commonPb.RuntimeType(runTime), wasmBin, pairs)
+	// gas limit
+	if gasLimit > 0 {
+		var limit = &commonPb.Limit{GasLimit: gasLimit}
+		payload.Limit = limit
+	}
 	payload.TxId = txId
 	payload.ChainId = chainId
 	payload.Timestamp = time.Now().Unix()
 	endorsement, err := acSign(payload)
 	if err != nil {
 		return err
-	}
-	// gas limit
-	if gasLimit > 0 {
-		var limit = &commonPb.Limit{GasLimit: gasLimit}
-		payload.Limit = limit
 	}
 
 	resp, err = sendRequest(sk3, client, &InvokerMsg{txType: commonPb.TxType_INVOKE_CONTRACT,
