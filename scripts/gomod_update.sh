@@ -16,10 +16,10 @@ cd ..
 
 go get chainmaker.org/chainmaker/chainconf/v2@${QC}
 go get chainmaker.org/chainmaker/common/v2@${BRANCH}
-go get chainmaker.org/chainmaker/consensus-maxbft/v2@${BRANCH}
-go get chainmaker.org/chainmaker/consensus-dpos/v2@${BRANCH}
-go get chainmaker.org/chainmaker/consensus-raft/v2@${BRANCH}
-go get chainmaker.org/chainmaker/consensus-solo/v2@${BRANCH}
+go get chainmaker.org/chainmaker/consensus-maxbft/v2@${QC}
+go get chainmaker.org/chainmaker/consensus-dpos/v2@${QC}
+go get chainmaker.org/chainmaker/consensus-raft/v2@${QC}
+go get chainmaker.org/chainmaker/consensus-solo/v2@${QC}
 go get chainmaker.org/chainmaker/consensus-tbft/v2@${QC}
 go get chainmaker.org/chainmaker/consensus-utils/v2@${QC}
 go get chainmaker.org/chainmaker/localconf/v2@${QC}
