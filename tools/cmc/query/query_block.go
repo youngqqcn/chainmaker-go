@@ -36,7 +36,7 @@ func newQueryBlockByHeightOnChainCMD() *cobra.Command {
 				}
 			}
 			//// 1.Chain Client
-			cc, err := util.CreateChainClient(sdkConfPath, "", "", "", "", "", "")
+			cc, err := util.CreateChainClient(sdkConfPath, chainId, "", "", "", "", "")
 			if err != nil {
 				return err
 			}
@@ -68,7 +68,9 @@ func newQueryBlockByHeightOnChainCMD() *cobra.Command {
 		},
 	}
 
-	util.AttachAndRequiredFlags(cmd, flags, []string{flagSdkConfPath})
+	util.AttachAndRequiredFlags(cmd, flags, []string{
+		flagSdkConfPath, flagChainId,
+	})
 	return cmd
 }
 
