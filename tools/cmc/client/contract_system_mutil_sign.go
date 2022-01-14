@@ -109,10 +109,13 @@ func multiSignQueryCMD() *cobra.Command {
 func multiSignReq() error {
 	var (
 		err     error
+		output  []byte
 		payload *common.Payload
+		client  *sdk.ChainClient
+		resp    *common.TxResponse
 	)
 
-	client, err := util.CreateChainClient(sdkConfPath, chainId, orgId, userTlsCrtFilePath, userTlsKeyFilePath,
+	client, err = util.CreateChainClient(sdkConfPath, chainId, orgId, userTlsCrtFilePath, userTlsKeyFilePath,
 		userSignCrtFilePath, userSignKeyFilePath)
 	if err != nil {
 		return err
@@ -121,7 +124,7 @@ func multiSignReq() error {
 	var pms []*ParamMultiSign
 	var pairs []*common.KeyValuePair
 	if params != "" {
-		err := json.Unmarshal([]byte(params), &pms)
+		err = json.Unmarshal([]byte(params), &pms)
 		if err != nil {
 			return err
 		}
@@ -136,7 +139,6 @@ func multiSignReq() error {
 				Key:   pm.Key,
 				Value: byteCode,
 			})
-
 		} else {
 			pairs = append(pairs, &common.KeyValuePair{
 				Key:   pm.Key,
@@ -147,13 +149,15 @@ func multiSignReq() error {
 	}
 	payload = client.CreateMultiSignReqPayload(pairs)
 
-	resp, err := client.MultiSignContractReq(payload)
+	resp, err = client.MultiSignContractReq(payload)
 	if err != nil {
 		return fmt.Errorf("multi sign req failed, %s", err.Error())
 	}
-
-	fmt.Printf("multi sign req resp: %+v\n", resp)
-
+	output, err = prettyjson.Marshal(resp)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("multi sign req resp: %s\n", string(output))
 	return nil
 }
 
@@ -165,12 +169,16 @@ func multiSignVote() error {
 		adminKeys []string
 		adminCrts []string
 		adminOrgs []string
+		output    []byte
 		err       error
 		payload   *common.Payload
 		endorser  *common.EndorsementEntry
+		client    *sdk.ChainClient
+		resp      *common.TxResponse
+		tx        *common.TransactionInfo
 	)
 
-	client, err := util.CreateChainClient(sdkConfPath, chainId, orgId, userTlsCrtFilePath, userTlsKeyFilePath,
+	client, err = util.CreateChainClient(sdkConfPath, chainId, orgId, userTlsCrtFilePath, userTlsKeyFilePath,
 		userSignCrtFilePath, userSignKeyFilePath)
 	if err != nil {
 		return err
@@ -211,11 +219,11 @@ func multiSignVote() error {
 		adminKey = adminKeys[0]
 	}
 
-	result, err := client.GetTxByTxId(txId)
+	tx, err = client.GetTxByTxId(txId)
 	if err != nil {
 		return fmt.Errorf("get tx by txid failed, %s", err.Error())
 	}
-	payload = result.Transaction.Payload
+	payload = tx.Transaction.Payload
 	if sdk.AuthTypeToStringMap[client.GetAuthType()] == protocol.PermissionedWithCert {
 		endorser, err = sdkutils.MakeEndorserWithPath(adminKey, adminCrt, payload)
 		if err != nil {
@@ -236,12 +244,15 @@ func multiSignVote() error {
 
 	}
 
-	resp, err := client.MultiSignContractVote(payload, endorser)
+	resp, err = client.MultiSignContractVote(payload, endorser)
 	if err != nil {
 		return fmt.Errorf("multi sign vote failed, %s", err.Error())
 	}
-
-	fmt.Printf("multi sign vote resp: %+v\n", resp)
+	output, err = prettyjson.Marshal(resp)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("multi sign vote resp: %s\n", string(output))
 
 	return nil
 }
