@@ -132,6 +132,9 @@ func (s *MockSimContextImpl) GetChainNodesInfoProvider() (protocol.ChainNodesInf
 func (s *MockSimContextImpl) Get(contractName string, key []byte) ([]byte, error) {
 	return nil, nil
 }
+func (s *MockSimContextImpl) GetNoRecord(contractName string, key []byte) ([]byte, error) {
+	return nil, nil
+}
 
 // 写入合约账户状态
 func (s *MockSimContextImpl) Put(contractName string, key []byte, value []byte) error {

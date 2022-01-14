@@ -14,7 +14,7 @@ import (
 
 	acPb "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
-	protocol "chainmaker.org/chainmaker/protocol/v2"
+	"chainmaker.org/chainmaker/protocol/v2"
 )
 
 // Storage interface for smart contracts, implement TxSimContext
@@ -84,6 +84,10 @@ func (s *txQuerySimContextImpl) Get(contractName string, key []byte) ([]byte, er
 	// if get from db success, put into read set
 	s.putIntoReadSet(contractName, key, value)
 	return value, nil
+}
+
+func (s *txQuerySimContextImpl) GetNoRecord(contractName string, key []byte) ([]byte, error) {
+	return s.Get(contractName, key)
 }
 
 func (s *txQuerySimContextImpl) Put(contractName string, key []byte, value []byte) error {
