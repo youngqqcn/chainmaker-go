@@ -6,10 +6,11 @@
 package util
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
+	"errors"
 
 	sdk "chainmaker.org/chainmaker/sdk-go/v2"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // CreateChainClient create a chain client with sdk config file path.
@@ -31,14 +32,7 @@ func CreateChainClient(sdkConfPath, chainId, orgId, userTlsCrtPath, userTlsKeyPa
 		return nil, err
 	}
 
-	// Enable certificate compression
-	if cc.GetAuthType() == sdk.PermissionedWithCert {
-		err = cc.EnableCertHash()
-	}
-	if err != nil {
-		return nil, err
-	}
-	return cc, nil
+	return cc, DealChainClientCertHash(cc, true)
 }
 
 func CreateChainClientWithConfPath(sdkConfPath string, enableCertHash bool) (*sdk.ChainClient, error) {
@@ -49,16 +43,7 @@ func CreateChainClientWithConfPath(sdkConfPath string, enableCertHash bool) (*sd
 		return nil, err
 	}
 
-	// Enable certificate compression
-	if cc.GetAuthType() == sdk.PermissionedWithCert {
-		if enableCertHash {
-			err = cc.EnableCertHash()
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	return cc, nil
+	return cc, DealChainClientCertHash(cc, enableCertHash)
 }
 
 func AttachAndRequiredFlags(cmd *cobra.Command, flags *pflag.FlagSet, names []string) {
@@ -80,4 +65,19 @@ func AttachFlags(cmd *cobra.Command, flags *pflag.FlagSet, names []string) {
 			cmdFlags.AddFlag(&flagCopied)
 		}
 	}
+}
+
+// DealChainClientCertHash add cc's cert hash on chain if enableCertHash is true and
+// cc's authtype is PermissionedWithCert, else do nothing.
+func DealChainClientCertHash(cc *sdk.ChainClient, enableCertHash bool) error {
+	if cc == nil {
+		return errors.New("ChainClient is nil")
+	}
+
+	if enableCertHash && cc.GetAuthType() == sdk.PermissionedWithCert {
+		if err := cc.EnableCertHash(); err != nil {
+			return err
+		}
+	}
+	return nil
 }

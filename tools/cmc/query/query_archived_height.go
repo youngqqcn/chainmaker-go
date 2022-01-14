@@ -8,10 +8,10 @@ package query
 import (
 	"fmt"
 
+	"chainmaker.org/chainmaker-go/tools/cmc/util"
+	sdk "chainmaker.org/chainmaker/sdk-go/v2"
 	"github.com/hokaccha/go-prettyjson"
 	"github.com/spf13/cobra"
-
-	"chainmaker.org/chainmaker-go/tools/cmc/util"
 )
 
 func newQueryArchivedHeightOnChainCMD() *cobra.Command {
@@ -28,17 +28,26 @@ func newQueryArchivedHeightOnChainCMD() *cobra.Command {
 	util.AttachAndRequiredFlags(cmd, flags, []string{
 		flagSdkConfPath, flagChainId,
 	})
+	util.AttachFlags(cmd, flags, []string{
+		flagEnableCertHash,
+	})
 	return cmd
 }
 
 // runQueryArchivedHeightOnChainCMD `query archived height` command implementation
 func runQueryArchivedHeightOnChainCMD() error {
 	//// 1.Chain Client
-	cc, err := util.CreateChainClient(sdkConfPath, chainId, "", "", "", "", "")
+	cc, err := sdk.NewChainClient(
+		sdk.WithConfPath(sdkConfPath),
+		sdk.WithChainClientChainId(chainId),
+	)
 	if err != nil {
 		return err
 	}
 	defer cc.Stop()
+	if err := util.DealChainClientCertHash(cc, enableCertHash); err != nil {
+		return err
+	}
 
 	//// 2.Query archived height
 	archivedBlkHeight, err := cc.GetArchivedBlockHeight()
