@@ -248,36 +248,42 @@ func multiSignVote() error {
 
 func multiSignQuery() error {
 	var (
-		err error
+		err    error
+		resp   *common.TxResponse
+		client *sdk.ChainClient
+		output []byte
 	)
 
-	client, err := util.CreateChainClient(sdkConfPath, chainId, orgId, userTlsCrtFilePath, userTlsKeyFilePath,
+	client, err = util.CreateChainClient(sdkConfPath, chainId, orgId, userTlsCrtFilePath, userTlsKeyFilePath,
 		userSignCrtFilePath, userSignKeyFilePath)
 	if err != nil {
 		return err
 	}
 	defer client.Stop()
 
-	resp, err := client.MultiSignContractQuery(txId)
+	resp, err = client.MultiSignContractQuery(txId)
 	if err != nil {
 		return fmt.Errorf("multi sign query failed, %s", err.Error())
 	}
-	if resp.Code == 0 {
-		if resp.ContractResult.Code == 0 {
-			result := &syscontract.MultiSignInfo{}
-			err = proto.Unmarshal(resp.ContractResult.Result, result)
-			if err != nil {
-				return err
-			}
-			output, err := prettyjson.Marshal(result)
-			if err != nil {
-				return err
-			}
-			fmt.Printf("multi sign query resp: %s\n", string(output))
-			return nil
-		}
-	}
-	fmt.Printf("multi sign query resp: %+v\n", resp)
 
+	if resp.Code == 0 && resp.ContractResult.Code == 0 {
+		multiSignInfo := &syscontract.MultiSignInfo{}
+		err = proto.Unmarshal(resp.ContractResult.Result, multiSignInfo)
+		if err != nil {
+			return err
+		}
+		output, err = prettyjson.Marshal(multiSignInfo)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("multi sign query resp: %s\n", string(output))
+		return nil
+	}
+
+	output, err = prettyjson.Marshal(resp)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("multi sign query resp: %s\n", string(output))
 	return nil
 }
