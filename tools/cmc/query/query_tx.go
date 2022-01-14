@@ -8,11 +8,11 @@ package query
 import (
 	"fmt"
 
-	"github.com/hokaccha/go-prettyjson"
-	"github.com/spf13/cobra"
-
 	"chainmaker.org/chainmaker-go/tools/cmc/util"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
+	sdk "chainmaker.org/chainmaker/sdk-go/v2"
+	"github.com/hokaccha/go-prettyjson"
+	"github.com/spf13/cobra"
 )
 
 // newQueryTxOnChainCMD `query tx` command implementation
@@ -24,11 +24,17 @@ func newQueryTxOnChainCMD() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			//// 1.Chain Client
-			cc, err := util.CreateChainClient(sdkConfPath, chainId, "", "", "", "", "")
+			cc, err := sdk.NewChainClient(
+				sdk.WithConfPath(sdkConfPath),
+				sdk.WithChainClientChainId(chainId),
+			)
 			if err != nil {
 				return err
 			}
 			defer cc.Stop()
+			if err := util.DealChainClientCertHash(cc, enableCertHash); err != nil {
+				return err
+			}
 
 			//// 2.Query tx on-chain
 			var txInfo *common.TransactionInfo
@@ -49,6 +55,9 @@ func newQueryTxOnChainCMD() *cobra.Command {
 
 	util.AttachAndRequiredFlags(cmd, flags, []string{
 		flagSdkConfPath, flagChainId,
+	})
+	util.AttachFlags(cmd, flags, []string{
+		flagEnableCertHash,
 	})
 	return cmd
 }

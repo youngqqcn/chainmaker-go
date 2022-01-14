@@ -13,6 +13,7 @@ import (
 
 	"chainmaker.org/chainmaker-go/tools/cmc/types"
 	"chainmaker.org/chainmaker-go/tools/cmc/util"
+	sdk "chainmaker.org/chainmaker/sdk-go/v2"
 	"github.com/hokaccha/go-prettyjson"
 	"github.com/spf13/cobra"
 )
@@ -36,11 +37,17 @@ func newQueryBlockByHeightOnChainCMD() *cobra.Command {
 				}
 			}
 			//// 1.Chain Client
-			cc, err := util.CreateChainClient(sdkConfPath, chainId, "", "", "", "", "")
+			cc, err := sdk.NewChainClient(
+				sdk.WithConfPath(sdkConfPath),
+				sdk.WithChainClientChainId(chainId),
+			)
 			if err != nil {
 				return err
 			}
 			defer cc.Stop()
+			if err := util.DealChainClientCertHash(cc, enableCertHash); err != nil {
+				return err
+			}
 
 			//// 2.Query block on-chain.
 			blkWithRWSetOnChain, err := cc.GetFullBlockByHeight(height)
@@ -71,6 +78,9 @@ func newQueryBlockByHeightOnChainCMD() *cobra.Command {
 	util.AttachAndRequiredFlags(cmd, flags, []string{
 		flagSdkConfPath, flagChainId,
 	})
+	util.AttachFlags(cmd, flags, []string{
+		flagEnableCertHash,
+	})
 	return cmd
 }
 
@@ -83,11 +93,17 @@ func newQueryBlockByHashOnChainCMD() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			//// 1.Chain Client
-			cc, err := util.CreateChainClient(sdkConfPath, chainId, "", "", "", "", "")
+			cc, err := sdk.NewChainClient(
+				sdk.WithConfPath(sdkConfPath),
+				sdk.WithChainClientChainId(chainId),
+			)
 			if err != nil {
 				return err
 			}
 			defer cc.Stop()
+			if err := util.DealChainClientCertHash(cc, enableCertHash); err != nil {
+				return err
+			}
 
 			//// 2.Query block on-chain.
 			height, err := cc.GetBlockHeightByHash(args[0])
@@ -122,6 +138,9 @@ func newQueryBlockByHashOnChainCMD() *cobra.Command {
 	util.AttachAndRequiredFlags(cmd, flags, []string{
 		flagSdkConfPath, flagChainId,
 	})
+	util.AttachFlags(cmd, flags, []string{
+		flagEnableCertHash,
+	})
 	return cmd
 }
 
@@ -134,11 +153,17 @@ func newQueryBlockByTxIdOnChainCMD() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			//// 1.Chain Client
-			cc, err := util.CreateChainClient(sdkConfPath, chainId, "", "", "", "", "")
+			cc, err := sdk.NewChainClient(
+				sdk.WithConfPath(sdkConfPath),
+				sdk.WithChainClientChainId(chainId),
+			)
 			if err != nil {
 				return err
 			}
 			defer cc.Stop()
+			if err := util.DealChainClientCertHash(cc, enableCertHash); err != nil {
+				return err
+			}
 
 			//// 2.Query block on-chain.
 			height, err := cc.GetBlockHeightByTxId(args[0])
@@ -172,6 +197,9 @@ func newQueryBlockByTxIdOnChainCMD() *cobra.Command {
 
 	util.AttachAndRequiredFlags(cmd, flags, []string{
 		flagSdkConfPath, flagChainId,
+	})
+	util.AttachFlags(cmd, flags, []string{
+		flagEnableCertHash,
 	})
 	return cmd
 }
