@@ -87,9 +87,8 @@ chainmaker.org/chainmaker/store-badgerdb/v2 v2.1.1-0.20211214130222-5e9dc704e9bc
 chainmaker.org/chainmaker/store-badgerdb/v2 v2.1.2-0.20220114073131-9ea2e09a3c40 h1:qr9PaD+GE+J+kl84pfuNPeHzcSjgDyNr8SkyO6v2/pU=
 chainmaker.org/chainmaker/store-badgerdb/v2 v2.1.2-0.20220114073131-9ea2e09a3c40/go.mod h1:7mubiPsMMwJJCyOZ3t1P20gZhXWumkGLsFHDayBiK6U=
 chainmaker.org/chainmaker/store-leveldb/v2 v2.1.1-0.20211214130047-b87efabd33f0/go.mod h1:hWvttpVNivHkcOb9WbT/u+BbKT8wa7dy8yXtxvc+4yI=
+chainmaker.org/chainmaker/store-leveldb/v2 v2.1.1-0.20220113080141-2d682eea27ac h1:gX/Ua2aVdhfZ7+ZWg8kjUWHiXsS9SXIR/ziSZNFXq3k=
 chainmaker.org/chainmaker/store-leveldb/v2 v2.1.1-0.20220113080141-2d682eea27ac/go.mod h1:hWvttpVNivHkcOb9WbT/u+BbKT8wa7dy8yXtxvc+4yI=
-chainmaker.org/chainmaker/store-leveldb/v2 v2.1.1-0.20220114070922-276f51d5bae4 h1:WY0fDPy853wXMzOnAne4dUZTWWMRIWaKO8TpMlQUg4E=
-chainmaker.org/chainmaker/store-leveldb/v2 v2.1.1-0.20220114070922-276f51d5bae4/go.mod h1:9cNgJtSgmqapforbA/D+rDCOcpbGViAotWEFjOzPE6o=
 chainmaker.org/chainmaker/store-sqldb/v2 v2.1.1-0.20211214130635-f474b108e7c9/go.mod h1:eM0k1sNQ7GEu5bwd5qYA4Gg71iHKsikV4PHHFhjj8yA=
 chainmaker.org/chainmaker/store-sqldb/v2 v2.1.1-0.20211230144202-fa69d67c8425 h1:icLZOLh/ezIi828dt6msCdNWnK8+Nd5vB9FFWu+3sPw=
 chainmaker.org/chainmaker/store-sqldb/v2 v2.1.1-0.20211230144202-fa69d67c8425/go.mod h1:v/ZuRhRdjP35VQwzN5zUsDXtVdcu1kIbAX7aVhTzAcY=
@@ -1841,8 +1840,6 @@ github.com/yiyanwannian/badger/v3 v3.2111.29 h1:uYBWPvYZ6Ic4MoFgoYuFhudO89YJrmMP
 github.com/yiyanwannian/badger/v3 v3.2111.29/go.mod h1:ZvCpTxabNO5gxej+HFnHWGzVRkfhCciTDZ3gco4C82s=
 github.com/yiyanwannian/client-go v1.0.2 h1:weQ7lFcxt21X2DNKMV9NROip4QljON4ykJPWuGATfY4=
 github.com/yiyanwannian/client-go v1.0.2/go.mod h1:LHOAht+FfSr1+ExhZWBySQCkrVuTNAd1bAqEC72yXyM=
-github.com/yiyanwannian/goleveldb v1.0.1-0.20220111065830-b053cb868885 h1:NcYCLv4jOjMoqCiynfvi9t5ulXJSLFAYt99LpPpzq6Q=
-github.com/yiyanwannian/goleveldb v1.0.1-0.20220111065830-b053cb868885/go.mod h1:GYoYZPPrNtXIXHlmNusJK/LuCbIl8FS1no51emci0Ew=
 github.com/yookoala/realpath v1.0.0/go.mod h1:gJJMA9wuX7AcqLy1+ffPatSCySA1FQ2S8Ya9AIoYBpE=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
