@@ -13,9 +13,6 @@ import (
 	"fmt"
 	"strings"
 
-	"chainmaker.org/chainmaker/chainconf/v2"
-	"chainmaker.org/chainmaker/common/v2/crypto/engine"
-
 	"chainmaker.org/chainmaker-go/module/accesscontrol"
 	"chainmaker.org/chainmaker-go/module/consensus"
 	"chainmaker.org/chainmaker-go/module/core"
@@ -27,6 +24,7 @@ import (
 	blockSync "chainmaker.org/chainmaker-go/module/sync"
 	"chainmaker.org/chainmaker-go/module/txpool"
 	componentVm "chainmaker.org/chainmaker-go/module/vm"
+	"chainmaker.org/chainmaker/chainconf/v2"
 	"chainmaker.org/chainmaker/common/v2/container"
 	consensusUtils "chainmaker.org/chainmaker/consensus-utils/v2"
 	"chainmaker.org/chainmaker/localconf/v2"
@@ -466,8 +464,6 @@ func (bc *Blockchain) initAC() (err error) {
 		bc.log.Errorf("new ac provider failed, %s", err.Error())
 		return
 	}
-	//init crypto engine for ac
-	engine.InitCryptoEngine(localconf.ChainMakerConfig.CryptoEngine, false)
 
 	switch bc.chainConf.ChainConfig().AuthType {
 	case protocol.PermissionedWithCert, protocol.Identity:

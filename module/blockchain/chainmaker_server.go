@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 package blockchain
 
 import (
+	"chainmaker.org/chainmaker/common/v2/crypto/engine"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -302,6 +303,9 @@ func (server *ChainMakerServer) Start() error {
 		return err
 	}
 	log.Infof("[Net] start success!")
+
+	//init crypto engine for ac
+	engine.InitCryptoEngine(localconf.ChainMakerConfig.CryptoEngine, false)
 
 	// 2) start blockchains
 	server.blockchains.Range(func(_, value interface{}) bool {
