@@ -8,7 +8,6 @@ SPDX-License-Identifier: Apache-2.0
 package blockchain
 
 import (
-	"chainmaker.org/chainmaker/common/v2/crypto/engine"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -16,6 +15,8 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"chainmaker.org/chainmaker/common/v2/crypto/engine"
 
 	"chainmaker.org/chainmaker-go/module/net"
 	"chainmaker.org/chainmaker-go/module/subscriber"
@@ -90,6 +91,7 @@ func (server *ChainMakerServer) initNet() error {
 	switch strings.ToLower(provider) {
 	case "libp2p":
 		netType = protocol.Libp2p
+
 	case "liquid":
 		netType = protocol.Liquid
 	default:
