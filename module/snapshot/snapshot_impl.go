@@ -9,9 +9,11 @@ package snapshot
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"chainmaker.org/chainmaker/localconf/v2"
+
 	"chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"go.uber.org/atomic"
@@ -165,7 +167,7 @@ func (s *SnapshotImpl) ApplyTxSimContext(txSimContext protocol.TxSimContext, spe
 	defer s.lock.Unlock()
 	// it is necessary to check sealed secondly
 	if !applySpecialTx && s.IsSealed() {
-		return false, s.GetSnapshotSize()
+		return false, len(s.txTable)
 	}
 
 	txExecSeq := txSimContext.GetTxExecSeq()
@@ -586,5 +588,8 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 //}
 
 func constructKey(contractName string, key []byte) string {
-	return contractName + string(key)
+	var builder strings.Builder
+	builder.WriteString(contractName)
+	builder.Write(key)
+	return builder.String()
 }

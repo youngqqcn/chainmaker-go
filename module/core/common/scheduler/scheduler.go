@@ -304,8 +304,7 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 
 	var goRoutinePool *ants.Pool
 	var err error
-	poolCapacity := ts.StoreHelper.GetPoolCapacity()
-	if goRoutinePool, err = ants.NewPool(poolCapacity, ants.WithPreAlloc(true)); err != nil {
+	if goRoutinePool, err = ants.NewPool(len(block.Txs), ants.WithPreAlloc(true)); err != nil {
 		return nil, nil, err
 	}
 	defer goRoutinePool.Release()
