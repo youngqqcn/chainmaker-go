@@ -14,12 +14,14 @@ var (
 	sdkConfPath    string
 	chainId        string
 	enableCertHash bool
+	withRWSet      bool
 )
 
 const (
 	flagSdkConfPath    = "sdk-conf-path"
 	flagChainId        = "chain-id"
 	flagEnableCertHash = "enable-cert-hash"
+	flagWithRWSet      = "with-rw-set"
 )
 
 func NewQueryOnChainCMD() *cobra.Command {
@@ -45,5 +47,6 @@ func init() {
 
 	flags.StringVar(&chainId, flagChainId, "", "Chain ID")
 	flags.StringVar(&sdkConfPath, flagSdkConfPath, "", "specify sdk config path")
-	flags.BoolVar(&enableCertHash, flagEnableCertHash, true, "whether enable cert hash, default true")
+	flags.BoolVar(&enableCertHash, flagEnableCertHash, true, "whether enable cert hash")
+	flags.BoolVar(&withRWSet, flagWithRWSet, true, "whether with RWSet")
 }

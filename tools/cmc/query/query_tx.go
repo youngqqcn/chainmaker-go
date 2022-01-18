@@ -9,7 +9,6 @@ import (
 	"fmt"
 
 	"chainmaker.org/chainmaker-go/tools/cmc/util"
-	"chainmaker.org/chainmaker/pb-go/v2/common"
 	sdk "chainmaker.org/chainmaker/sdk-go/v2"
 	"github.com/hokaccha/go-prettyjson"
 	"github.com/spf13/cobra"
@@ -37,14 +36,20 @@ func newQueryTxOnChainCMD() *cobra.Command {
 			}
 
 			//// 2.Query tx on-chain
-			var txInfo *common.TransactionInfo
-			var output []byte
-			txInfo, err = cc.GetTxByTxId(args[0])
-			if err != nil {
-				return err
+			var txInfo interface{}
+			if withRWSet {
+				txInfo, err = cc.GetTxWithRWSetByTxId(args[0])
+				if err != nil {
+					return err
+				}
+			} else {
+				txInfo, err = cc.GetTxByTxId(args[0])
+				if err != nil {
+					return err
+				}
 			}
 
-			output, err = prettyjson.Marshal(txInfo)
+			output, err := prettyjson.Marshal(txInfo)
 			if err != nil {
 				return err
 			}
@@ -57,7 +62,7 @@ func newQueryTxOnChainCMD() *cobra.Command {
 		flagSdkConfPath, flagChainId,
 	})
 	util.AttachFlags(cmd, flags, []string{
-		flagEnableCertHash,
+		flagEnableCertHash, flagWithRWSet,
 	})
 	return cmd
 }
