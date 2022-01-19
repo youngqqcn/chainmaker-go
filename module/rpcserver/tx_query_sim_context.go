@@ -131,9 +131,15 @@ func (s *txQuerySimContextImpl) GetHistoryIterForKey(contractName string,
 func (s *txQuerySimContextImpl) GetCreator(contractName string) *acPb.Member {
 	contract, err := s.GetContractByName(contractName)
 	if err != nil {
+		//TODO log
+		fmt.Println(err)
 		return nil
 	}
-	return contract.Creator
+	return &acPb.Member{
+		OrgId:      contract.Creator.OrgId,
+		MemberType: contract.Creator.MemberType,
+		MemberInfo: contract.Creator.MemberInfo,
+	}
 }
 
 func (s *txQuerySimContextImpl) GetSender() *acPb.Member {
