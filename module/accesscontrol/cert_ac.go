@@ -493,22 +493,28 @@ func (cp *certACProvider) GetHashAlg() string {
 }
 
 func (cp *certACProvider) NewMember(pbMember *pbac.Member) (protocol.Member, error) {
+
 	if pbMember.MemberType != pbac.MemberType_CERT &&
 		pbMember.MemberType != pbac.MemberType_CERT_HASH {
 		return nil, fmt.Errorf("new member failed: the member type does not match")
 	}
 
+	var memberTmp *pbac.Member
 	if pbMember.MemberType == pbac.MemberType_CERT_HASH {
 		memInfoBytes, ok := cp.lookUpCertCache(pbMember.MemberInfo)
 		if !ok {
 			return nil, fmt.Errorf("new member failed, the provided certificate ID is not registered")
 		}
-		pbMember.MemberInfo = memInfoBytes
+		memberTmp = &pbac.Member{
+			OrgId:      pbMember.OrgId,
+			MemberType: pbMember.MemberType,
+			MemberInfo: memInfoBytes,
+		}
 	}
 
-	memberCache, ok := cp.acService.lookUpMemberInCache(string(pbMember.MemberInfo))
+	memberCache, ok := cp.acService.lookUpMemberInCache(string(memberTmp.MemberInfo))
 	if !ok {
-		remoteMember, isTrustMember, err := cp.newNoCacheMember(pbMember)
+		remoteMember, isTrustMember, err := cp.newNoCacheMember(memberTmp)
 		if err != nil {
 			return nil, fmt.Errorf("new member failed: %s", err.Error())
 		}
@@ -521,7 +527,7 @@ func (cp *certACProvider) NewMember(pbMember *pbac.Member) (protocol.Member, err
 			}
 		}
 
-		cp.acService.memberCache.Add(string(pbMember.MemberInfo), &memberCached{
+		cp.acService.memberCache.Add(string(memberTmp.MemberInfo), &memberCached{
 			member:    remoteMember,
 			certChain: certChain,
 		})
