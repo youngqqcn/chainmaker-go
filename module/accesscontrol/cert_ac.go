@@ -494,12 +494,12 @@ func (cp *certACProvider) GetHashAlg() string {
 
 func (cp *certACProvider) NewMember(pbMember *pbac.Member) (protocol.Member, error) {
 
+	var memberTmp *pbac.Member
 	if pbMember.MemberType != pbac.MemberType_CERT &&
 		pbMember.MemberType != pbac.MemberType_CERT_HASH {
 		return nil, fmt.Errorf("new member failed: the member type does not match")
 	}
 
-	var memberTmp *pbac.Member
 	if pbMember.MemberType == pbac.MemberType_CERT_HASH {
 		memInfoBytes, ok := cp.lookUpCertCache(pbMember.MemberInfo)
 		if !ok {
@@ -510,6 +510,8 @@ func (cp *certACProvider) NewMember(pbMember *pbac.Member) (protocol.Member, err
 			MemberType: pbMember.MemberType,
 			MemberInfo: memInfoBytes,
 		}
+	} else {
+		memberTmp = pbMember
 	}
 
 	memberCache, ok := cp.acService.lookUpMemberInCache(string(memberTmp.MemberInfo))
