@@ -590,6 +590,7 @@ func (ts *TxScheduler) runVM(tx *commonPb.Transaction, txSimContext protocol.TxS
 		parameters, txSimContext, 0, tx.Payload.TxType)
 	result.Code = txStatusCode
 	result.ContractResult = contractResultPayload
+	result.Message = contractResultPayload.Message
 
 	// refund gas
 	_, err = ts.refundGas(accountMangerContract, tx, txSimContext, contractName, method, pk, result,
