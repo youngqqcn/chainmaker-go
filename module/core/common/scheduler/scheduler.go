@@ -18,6 +18,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hokaccha/go-prettyjson"
+
 	"chainmaker.org/chainmaker/localconf/v2"
 
 	"chainmaker.org/chainmaker-go/module/core/provider/conf"
@@ -253,7 +255,8 @@ func (ts *TxScheduler) getTxRWSetTable(snapshot protocol.Snapshot, block *common
 	}
 	//ts.dumpDAG(block.Dag, block.Txs)
 	if localconf.ChainMakerConfig.SchedulerConfig.RWSetLog {
-		ts.log.Debugf("rwset %v", txRWSetMap)
+		result, _ := prettyjson.Marshal(txRWSetMap)
+		ts.log.Infof("schedule rwset :%s", result)
 	}
 	return txRWSetMap
 }
@@ -349,17 +352,17 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 				}
 			case doneTxIndex := <-doneTxC:
 				txIndexBatchAfterShrink := ts.shrinkDag(doneTxIndex, dagRemain, reverseDagRemain)
-				ts.log.Debugf("block [%d] schedule with dag, pop next tx index batch size:%d, dagRemain size:%d",
+				ts.log.Debugf("block [%d] simulate with dag, pop next tx index batch size:%d, dagRemain size:%d",
 					block.Header.BlockHeight, len(txIndexBatchAfterShrink), len(dagRemain))
 				for _, tx := range txIndexBatchAfterShrink {
 					runningTxC <- tx
 				}
 			case <-finishC:
-				ts.log.Debugf("block [%d] schedule with dag finish", block.Header.BlockHeight)
+				ts.log.Debugf("block [%d] simulate with dag finish", block.Header.BlockHeight)
 				ts.scheduleFinishC <- true
 				return
 			case <-timeoutC:
-				ts.log.Errorf("block [%d] schedule with dag timeout", block.Header.BlockHeight)
+				ts.log.Errorf("block [%d] simulate with dag timeout", block.Header.BlockHeight)
 				ts.scheduleFinishC <- true
 				return
 			}
@@ -379,7 +382,8 @@ func (ts *TxScheduler) SimulateWithDag(block *commonPb.Block, snapshot protocol.
 		}
 	}
 	if localconf.ChainMakerConfig.SchedulerConfig.RWSetLog {
-		ts.log.Debugf("rwset %v", txRWSetMap)
+		result, _ := prettyjson.Marshal(txRWSetMap)
+		ts.log.Infof("simulate with dag rwset :%s", result)
 	}
 	return txRWSetMap, snapshot.GetTxResultMap(), nil
 }
