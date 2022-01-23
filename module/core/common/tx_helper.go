@@ -7,6 +7,7 @@ package common
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"sync"
 
@@ -140,7 +141,12 @@ func VerifyTxResult(tx *commonpb.Transaction, result *commonpb.Result, hashType 
 		return fmt.Errorf("calc tx result (tx:%s), %s)", tx.Payload.TxId, err.Error())
 	}
 	if !bytes.Equal(txResultHash, resultHash) {
-		return fmt.Errorf("tx result (tx:%s) expect %x, got %x", tx.Payload.TxId, txResultHash, resultHash)
+		debugInfo := "tx.Result:"
+		r1, _ := json.Marshal(tx.Result)
+		r2, _ := json.Marshal(result)
+		debugInfo += string(r1) + "\ncurrent result:\n" + string(r2)
+		return fmt.Errorf("tx result (tx:%s) expect %x, got %x\nDebug info:%s",
+			tx.Payload.TxId, txResultHash, resultHash, debugInfo)
 	}
 	return nil
 }
