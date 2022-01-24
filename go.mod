@@ -9,7 +9,7 @@ require (
 	chainmaker.org/chainmaker/consensus-maxbft/v2 v2.0.0-20220123081443-736f5658401c
 	chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20211231065915-33ec8814372a
 	chainmaker.org/chainmaker/consensus-solo/v2 v2.0.0-20211220120848-36f05d90fd9c
-	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20220121061558-629932ed55da
+	chainmaker.org/chainmaker/consensus-tbft/v2 v2.0.0-20220124074801-487ab2d227f0
 	chainmaker.org/chainmaker/consensus-utils/v2 v2.0.0-20220111072256-e5816e4f8aae
 	chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20220112085516-908b8478be8f
 	chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211214124250-621f11b35ab0
