@@ -8,6 +8,7 @@ package proposer
 
 import (
 	"bytes"
+	"fmt"
 	"sync"
 	"time"
 
@@ -249,13 +250,31 @@ func (bp *BlockProposerImpl) proposing(height uint64, preHash []byte) *commonpb.
 	selfProposedBlock := bp.proposalCache.GetSelfProposedBlockAt(height)
 	if selfProposedBlock != nil {
 		if bytes.Equal(selfProposedBlock.Header.PreBlockHash, preHash) {
-			// Repeat propose block if node has proposed before at the same height
-			bp.proposalCache.SetProposedAt(height)
-			_, txsRwSet, _ := bp.proposalCache.GetProposedBlock(selfProposedBlock)
-			bp.msgBus.Publish(msgbus.ProposedBlock, &consensuspb.ProposalBlock{Block: selfProposedBlock, TxsRwSet: txsRwSet})
-			bp.log.Infof("proposer success repeat [%d](txs:%d,hash:%x)",
-				selfProposedBlock.Header.BlockHeight, selfProposedBlock.Header.TxCount, selfProposedBlock.Header.BlockHash)
-			return nil
+			hash := fmt.Sprint(selfProposedBlock.Header.BlockHash)
+			timer, ok := common.ProposeRepeatTimerMap[hash]
+			if !ok {
+				timer = time.NewTimer(1 * time.Second)
+				common.ProposeRepeatTimerMap[hash] = timer
+			}
+
+			select {
+			case <-timer.C:
+
+				// Repeat propose block if node has proposed before at the same height
+				bp.proposalCache.SetProposedAt(height)
+				_, txsRwSet, _ := bp.proposalCache.GetProposedBlock(selfProposedBlock)
+
+				bp.msgBus.Publish(msgbus.ProposedBlock, &consensuspb.ProposalBlock{Block: selfProposedBlock,
+					TxsRwSet: txsRwSet})
+				bp.log.Infof("proposer success repeat [%d](txs:%d,hash:%x)",
+					selfProposedBlock.Header.BlockHeight, selfProposedBlock.Header.TxCount,
+					selfProposedBlock.Header.BlockHash)
+
+				return nil
+
+			default:
+				return nil
+			}
 		}
 		bp.proposalCache.ClearTheBlock(selfProposedBlock)
 		// Note: It is not possible to re-add the transactions in the deleted block to txpool; because some transactions may

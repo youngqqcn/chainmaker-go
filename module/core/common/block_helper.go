@@ -30,6 +30,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+var (
+	//proposeRepeatTimer *time.Timer //timer controls the propose repeat interval
+	ProposeRepeatTimerMap = make(map[string]*time.Timer)
+)
+
 const (
 	DEFAULTDURATION = 1000 // default proposal duration, millis seconds
 )
@@ -941,6 +946,9 @@ func (chain *BlockCommitterImpl) AddBlock(block *commonPb.Block) (err error) {
 	poolLasts := utils.CurrentTimeMillisSeconds() - startPoolTick
 
 	chain.proposalCache.ClearProposedBlockAt(height)
+
+	// clear propose repeat map before send
+	ProposeRepeatTimerMap = make(map[string]*time.Timer)
 
 	// synchronize new block height to consensus and sync module
 	chain.msgBus.PublishSafe(msgbus.BlockInfo, blockInfo)
