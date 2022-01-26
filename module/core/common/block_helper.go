@@ -695,7 +695,7 @@ func (vb *VerifierBlock) ValidateBlockWithRWSets(
 	}
 	verifiertx := NewVerifierTx(verifierTxConf)
 	txHashes, _, errTxs, err := verifiertx.verifierTxs(block)
-	vb.log.Warnf("verifierTxs txhashes %d, block.txs %d, %x", len(txHashes), len(block.Txs), block.Header.TxRoot)
+	vb.log.Warnf("verifierTxs txHashCount:%d, txCount:%d, %x", len(txHashes), len(block.Txs), block.Header.TxRoot)
 	txLasts := utils.CurrentTimeMillisSeconds() - startTxTick
 	timeLasts = append(timeLasts, txLasts)
 	if err != nil {
