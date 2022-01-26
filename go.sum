@@ -133,6 +133,10 @@ chainmaker.org/chainmaker/vm-wxvm/v2 v2.1.1-0.20211223061926-78b8d34d3aa3/go.mod
 chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211215035257-059dbafc381f/go.mod h1:EUAdRv6KE6oC4HQaHZ7h23J8/PGCtac2pFV4T8e3WwQ=
 chainmaker.org/chainmaker/vm/v2 v2.1.2-0.20220121131109-1b44329294ae h1:DQz8N4O3mu3ROX5humeXFxYkVLQYZSpQ48vNG/8/Uec=
 chainmaker.org/chainmaker/vm/v2 v2.1.2-0.20220121131109-1b44329294ae/go.mod h1:AfVD5lnJKPRUerIUMhbL6KvDSGbgWnYd7+KxaReqIyo=
+chainmaker.org/chainmaker/vm/v2 v2.1.2-0.20220126035251-1e9180149a66 h1:0HhNDw2SIU/Q3mtS7AGjqcgmfUWuvU6E//VbupiqaIs=
+chainmaker.org/chainmaker/vm/v2 v2.1.2-0.20220126035251-1e9180149a66/go.mod h1:AfVD5lnJKPRUerIUMhbL6KvDSGbgWnYd7+KxaReqIyo=
+chainmaker.org/chainmaker/vm/v2 v2.1.2-0.20220126035704-adefbadaf97a h1:brVSExDaDrdbwEzcgwNw95qK4uBYgAVQYwro9IdR2iY=
+chainmaker.org/chainmaker/vm/v2 v2.1.2-0.20220126035704-adefbadaf97a/go.mod h1:AfVD5lnJKPRUerIUMhbL6KvDSGbgWnYd7+KxaReqIyo=
 cloud.google.com/go v0.31.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.37.0/go.mod h1:TS1dMSSfndXH133OKGwekG838Om/cQT0BUHV3HcBgoo=
