@@ -159,7 +159,9 @@ func IsTxRWSetValid(block *commonpb.Block, tx *commonpb.Transaction, rwSet *comm
 			block.Header.BlockHeight, block.Header.BlockHash, tx.Payload.TxId)
 	}
 	if !bytes.Equal(tx.Result.RwSetHash, rwsetHash) {
-		return fmt.Errorf("tx rwset (tx:%s) expect %x, got %x", tx.Payload.TxId, tx.Result.RwSetHash, rwsetHash)
+		rwSetJ, _ := json.Marshal(rwSet)
+		return fmt.Errorf("Tx[%s] rwset hash expect %x, got %x, rwset details:%s",
+			tx.Payload.TxId, tx.Result.RwSetHash, rwsetHash, string(rwSetJ))
 	}
 	return nil
 }
