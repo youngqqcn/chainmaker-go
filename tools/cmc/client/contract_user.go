@@ -286,9 +286,6 @@ func createUserContract() error {
 		if adminKeyFilePaths != "" {
 			adminKeys = strings.Split(adminKeyFilePaths, ",")
 		}
-		if len(adminKeys) == 0 {
-			return errAdminOrgIdKeyCertIsEmpty
-		}
 	}
 
 	rt, ok := common.RuntimeType_value[runtimeType]
@@ -566,9 +563,6 @@ func upgradeUserContract() error {
 		if adminKeyFilePaths != "" {
 			adminKeys = strings.Split(adminKeyFilePaths, ",")
 		}
-		if len(adminKeys) == 0 {
-			return errAdminOrgIdKeyCertIsEmpty
-		}
 	}
 
 	rt, ok := common.RuntimeType_value[runtimeType]
@@ -683,9 +677,6 @@ func freezeOrUnfreezeOrRevokeUserContract(which int) error {
 	} else {
 		if adminKeyFilePaths != "" {
 			adminKeys = strings.Split(adminKeyFilePaths, ",")
-		}
-		if len(adminKeys) == 0 {
-			return errAdminOrgIdKeyCertIsEmpty
 		}
 	}
 
