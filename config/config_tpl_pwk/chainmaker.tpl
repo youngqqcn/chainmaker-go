@@ -367,6 +367,6 @@ vm:
   # Number of user Ids
   user_num: 100
   # Timeout per transaction, Unit: second
-  time_limit: 2
+  time_limit: 8
   # Max process for contract
   max_concurrency: 50
