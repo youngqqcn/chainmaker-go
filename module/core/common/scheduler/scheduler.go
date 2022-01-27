@@ -421,7 +421,7 @@ func (ts *TxScheduler) adjustPoolSize(pool *ants.Pool, conflictsBitWindow *Confl
 func (ts *TxScheduler) executeTx(tx *commonPb.Transaction, snapshot protocol.Snapshot, block *commonPb.Block) (
 	protocol.TxSimContext, protocol.ExecOrderTxType, bool) {
 	ts.log.Debugf("run vm start for tx:%s", tx.Payload.GetTxId())
-	txSimContext := vm.NewTxSimContext(ts.VmManager, snapshot, tx, block.Header.BlockVersion)
+	txSimContext := vm.NewTxSimContext(ts.VmManager, snapshot, tx, block.Header.BlockVersion, ts.log)
 	ts.log.Debugf("new tx simulate context finished for tx id:%s", tx.Payload.GetTxId())
 	runVmSuccess := true
 	var txResult *commonPb.Result
