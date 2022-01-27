@@ -82,7 +82,7 @@ func TxVerifyResultsMerge(resultTasks map[int]VerifyBlockBatch,
 
 	errTxs := make([]*commonpb.Transaction, 0)
 	txHashes := make([][]byte, 0)
-	txNewAdd := make([]*commonpb.Transaction, len(resultTasks))
+	txNewAdd := make([]*commonpb.Transaction, 0)
 	if len(resultTasks) < len(verifyBatchs) {
 		return nil, nil, errTxs, fmt.Errorf("tx verify error, batch num mismatch, received: %d,expected:%d",
 			len(resultTasks), len(verifyBatchs))
