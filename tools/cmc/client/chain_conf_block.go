@@ -88,9 +88,6 @@ func updateBlockInterval() error {
 		if adminKeyFilePaths != "" {
 			adminKeys = strings.Split(adminKeyFilePaths, ",")
 		}
-		if len(adminKeys) == 0 {
-			return errAdminOrgIdKeyCertIsEmpty
-		}
 	}
 	chainConfig, err := client.GetChainConfig()
 	if err != nil {
