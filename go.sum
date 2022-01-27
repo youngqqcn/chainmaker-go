@@ -128,6 +128,8 @@ chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211214132707-4ab8964bd865/go.m
 chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20220121105247-d319396719ed/go.mod h1:f1EAHzS/Z0VPMtcXgGn9MPcEGL8OAwd6rxd0plw/qqw=
 chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20220126084137-9f1d88bcde0f h1:F51nUTuNvxEpnO2/1QWa23pWSfXBm23Nzxwc2Ga4MMY=
 chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20220126084137-9f1d88bcde0f/go.mod h1:f1EAHzS/Z0VPMtcXgGn9MPcEGL8OAwd6rxd0plw/qqw=
+chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20220127034246-3a4d2e327454 h1:joohGn3kguS8y1YA15d5GKQ83rIgRVrbU5y9E/n5j2E=
+chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20220127034246-3a4d2e327454/go.mod h1:f1EAHzS/Z0VPMtcXgGn9MPcEGL8OAwd6rxd0plw/qqw=
 chainmaker.org/chainmaker/vm-wasmer/v2 v2.1.1-0.20220120115138-f769ebcc1296 h1:az0J72RE+0vAz3u3nzkCuYDfJRpKjKRZHDNJtRuXUGI=
 chainmaker.org/chainmaker/vm-wasmer/v2 v2.1.1-0.20220120115138-f769ebcc1296/go.mod h1:3l/gNYgcXfj44CmyOgJU4zMlBKDSjc52p9zvYvBFLI8=
 chainmaker.org/chainmaker/vm-wxvm/v2 v2.1.1-0.20211223061926-78b8d34d3aa3 h1:8CncyRvAHUu9O5qDjnJlE7fOpLQetPHVzG90Tat4Ke8=
@@ -135,6 +137,8 @@ chainmaker.org/chainmaker/vm-wxvm/v2 v2.1.1-0.20211223061926-78b8d34d3aa3/go.mod
 chainmaker.org/chainmaker/vm/v2 v2.1.1-0.20211215035257-059dbafc381f/go.mod h1:EUAdRv6KE6oC4HQaHZ7h23J8/PGCtac2pFV4T8e3WwQ=
 chainmaker.org/chainmaker/vm/v2 v2.1.2-0.20220126035704-adefbadaf97a h1:brVSExDaDrdbwEzcgwNw95qK4uBYgAVQYwro9IdR2iY=
 chainmaker.org/chainmaker/vm/v2 v2.1.2-0.20220126035704-adefbadaf97a/go.mod h1:AfVD5lnJKPRUerIUMhbL6KvDSGbgWnYd7+KxaReqIyo=
+chainmaker.org/chainmaker/vm/v2 v2.1.2-0.20220127034357-464446c36f34 h1:LDsNa5fY+thsFl+4jvuhWod1NIIm1OsRyfAFQdjDCUA=
+chainmaker.org/chainmaker/vm/v2 v2.1.2-0.20220127034357-464446c36f34/go.mod h1:AfVD5lnJKPRUerIUMhbL6KvDSGbgWnYd7+KxaReqIyo=
 cloud.google.com/go v0.31.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.37.0/go.mod h1:TS1dMSSfndXH133OKGwekG838Om/cQT0BUHV3HcBgoo=
