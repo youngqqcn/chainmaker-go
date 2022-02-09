@@ -112,17 +112,32 @@ type Detail struct {
 	Nodes        map[string]interface{} `json:"nodes"`
 }
 
+type reqStat struct {
+	success bool
+	elapsed int64
+	nodeId  int
+}
+
 type Statistician struct {
-	completedCount int32
-	completedTimes []int64
-	completedState []bool
-	completedId    []int
+	reqStatC          chan *reqStat
+	minSuccessElapsed int64
+	maxSuccessElapsed int64
+	sumSuccessElapsed int64
+	totalCount        int32
+	successCount      int
 
 	lastIndex     int
 	lastStartTime time.Time
 
 	startTime time.Time
 	endTime   time.Time
+
+	// Classify by node id
+	nodeMinSuccessElapsed []int64
+	nodeMaxSuccessElapsed []int64
+	nodeSumSuccessElapsed []int64
+	nodeSuccessReqCount   []int
+	nodeTotalReqCount     []int
 }
 
 func ParallelCMD() *cobra.Command {
@@ -217,11 +232,21 @@ func parallel(parallelMethod string) error {
 	timeoutChan := make(chan struct{}, threadNum)
 	doneChan := make(chan struct{}, threadNum)
 	doneCount := 0
+
+	// Statistician updater
 	statistician := &Statistician{
-		completedTimes: make([]int64, threadNum*loopNum),
-		completedState: make([]bool, threadNum*loopNum),
-		completedId:    make([]int, threadNum*loopNum),
+		reqStatC: make(chan *reqStat, threadNum),
+
+		nodeMinSuccessElapsed: make([]int64, nodeNum),
+		nodeMaxSuccessElapsed: make([]int64, nodeNum),
+		nodeSumSuccessElapsed: make([]int64, nodeNum),
+		nodeSuccessReqCount:   make([]int, nodeNum),
+		nodeTotalReqCount:     make([]int, nodeNum),
 	}
+	for i := 0; i < nodeNum; i++ {
+		statistician.nodeMinSuccessElapsed[i] = math.MaxInt16
+	}
+	go statistician.Start()
 
 	var threads []*Thread
 	for i := 0; i < threadNum; i++ {
@@ -316,56 +341,44 @@ func parallelStart(threads []*Thread) {
 	}
 }
 
+func (s *Statistician) Start() {
+	for {
+		select {
+		case stat := <-s.reqStatC:
+			if stat.success {
+				if stat.elapsed < s.minSuccessElapsed {
+					s.minSuccessElapsed = stat.elapsed
+				}
+				if stat.elapsed > s.maxSuccessElapsed {
+					s.maxSuccessElapsed = stat.elapsed
+				}
+
+				if stat.elapsed < s.nodeMinSuccessElapsed[stat.nodeId] {
+					s.nodeMinSuccessElapsed[stat.nodeId] = stat.elapsed
+				}
+				if stat.elapsed > s.nodeMaxSuccessElapsed[stat.nodeId] {
+					s.nodeMaxSuccessElapsed[stat.nodeId] = stat.elapsed
+				}
+
+				s.successCount++
+				s.sumSuccessElapsed += stat.elapsed
+
+				s.nodeSuccessReqCount[stat.nodeId]++
+				s.nodeSumSuccessElapsed[stat.nodeId] += stat.elapsed
+			}
+
+			s.nodeTotalReqCount[stat.nodeId]++
+		}
+	}
+}
+
 func (s *Statistician) PrintDetails(all bool) {
-	nodeMin := make([]int64, nodeNum)
-	nodeMax := make([]int64, nodeNum)
-	nodeSum := make([]int64, nodeNum)
-	nodeSuccessCount := make([]int, nodeNum)
-	nodeCount := make([]int, nodeNum)
-
-	for i := 0; i < nodeNum; i++ {
-		nodeMin[i] = math.MaxInt16
-		nodeMax[i] = 0
-	}
-
-	last := 0
-	if !all {
-		last = s.lastIndex
-	}
-	nowCount := atomic.LoadInt32(&s.completedCount)
+	nowCount := atomic.LoadInt32(&s.totalCount)
 	nowTime := time.Now()
-	min, max, sum, successCount, count := s.completedTimes[0], s.completedTimes[0], int64(0), 0, int64(0)
-	for i := last; i < int(nowCount); i++ {
-		nodeId := s.completedId[i]
 
-		sum += s.completedTimes[i]
-		nodeSum[nodeId] += s.completedTimes[i]
-
-		count++
-		nodeCount[nodeId]++
-
-		if s.completedState[i] {
-			successCount++
-			nodeSuccessCount[nodeId]++
-		}
-		if s.completedTimes[i] < min {
-			min = s.completedTimes[i]
-		}
-		if s.completedTimes[i] < nodeMin[nodeId] {
-			nodeMin[nodeId] = s.completedTimes[i]
-		}
-
-		if s.completedTimes[i] > max {
-			max = s.completedTimes[i]
-		}
-		if s.completedTimes[i] > nodeMax[nodeId] {
-			nodeMax[nodeId] = s.completedTimes[i]
-		}
-	}
-
-	detail := s.statisticsResults(&numberResults{count: int(count), successCount: successCount,
-		max: max, min: min, sum: sum, nodeSuccessCount: nodeSuccessCount, nodeCount: nodeCount,
-		nodeMin: nodeMin, nodeMax: nodeMax, nodeSum: nodeSum}, all, nowTime)
+	detail := s.statisticsResults(&numberResults{count: int(s.totalCount), successCount: s.successCount,
+		max: s.maxSuccessElapsed, min: s.minSuccessElapsed, sum: s.sumSuccessElapsed, nodeSuccessCount: s.nodeSuccessReqCount,
+		nodeCount: s.nodeTotalReqCount, nodeMin: s.nodeMinSuccessElapsed, nodeMax: s.nodeMaxSuccessElapsed, nodeSum: s.nodeSumSuccessElapsed}, all, nowTime)
 	s.lastIndex = int(nowCount)
 	s.lastStartTime = time.Now()
 
@@ -492,10 +505,12 @@ func (t *Thread) Start() {
 
 			elapsed := time.Since(start)
 
-			index := atomic.AddInt32(&t.statistician.completedCount, 1)
-			t.statistician.completedTimes[index-1] = elapsed.Milliseconds()
-			t.statistician.completedState[index-1] = err == nil
-			t.statistician.completedId[index-1] = t.index
+			atomic.AddInt32(&t.statistician.totalCount, 1)
+			t.statistician.reqStatC <- &reqStat{
+				success: err == nil,
+				elapsed: elapsed.Milliseconds(),
+				nodeId:  t.index,
+			}
 
 			if recordLog && err != nil {
 				log.Errorf("threadId: %d, loopId: %d, nodeId: %d, err: %s", t.id, i, t.index, err)
