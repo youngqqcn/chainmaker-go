@@ -37,6 +37,11 @@ var (
 
 const (
 	DEFAULTDURATION = 1000 // default proposal duration, millis seconds
+	//blockSig:%d,vm:%d,txVerify:%d,txRoot:%d
+	BlockSig = "blockSig"
+	VM       = "vm"
+	TxVerify = "txVerify"
+	TxRoot   = "txRoot"
 )
 
 type BlockBuilderConf struct {
@@ -521,8 +526,8 @@ func (vb *VerifierBlock) FetchLastBlock(block *commonPb.Block) (*commonPb.Block,
 
 // validateBlock, validate block and transactions
 func (vb *VerifierBlock) ValidateBlock(
-	block, lastBlock *commonPb.Block, hashType string, timeLasts []int64) (
-	map[string]*commonPb.TxRWSet, map[string][]*commonPb.ContractEvent, []int64, error) {
+	block, lastBlock *commonPb.Block, hashType string, timeLasts map[string]int64) (
+	map[string]*commonPb.TxRWSet, map[string][]*commonPb.ContractEvent, map[string]int64, error) {
 
 	if err := IsBlockHashValid(block, vb.chainConf.ChainConfig().Crypto.Hash); err != nil {
 		return nil, nil, timeLasts, err
@@ -538,7 +543,7 @@ func (vb *VerifierBlock) ValidateBlock(
 			block.Header.BlockHeight, block.Header.BlockHash, block.Header.Proposer, block.Header.Signature)
 	}
 	sigLasts := utils.CurrentTimeMillisSeconds() - startSigTick
-	timeLasts = append(timeLasts, sigLasts)
+	timeLasts[BlockSig] = sigLasts
 
 	err := CheckVacuumBlock(block, vb.chainConf.ChainConfig().Consensus.Type)
 	if err != nil {
@@ -566,7 +571,7 @@ func (vb *VerifierBlock) ValidateBlock(
 	vb.log.Infof("Validate block[%v](txs:%v), time used(new snapshot:%v, start DB transaction:%v, vm:%v)",
 		block.Header.BlockHeight, block.Header.TxCount, startDbTxTick-snapshotTick, startVMTick-startDbTxTick, vmLasts)
 
-	timeLasts = append(timeLasts, vmLasts)
+	timeLasts[VM] = vmLasts
 	if err != nil {
 		return nil, nil, timeLasts, fmt.Errorf("simulate %s", err)
 	}
@@ -590,7 +595,7 @@ func (vb *VerifierBlock) ValidateBlock(
 	verifiertx := NewVerifierTx(verifierTxConf)
 	txHashes, _, errTxs, err := verifiertx.verifierTxs(block)
 	txLasts := utils.CurrentTimeMillisSeconds() - startTxTick
-	timeLasts = append(timeLasts, txLasts)
+	timeLasts[TxVerify] = txLasts
 	if err != nil {
 		if len(errTxs) > 0 {
 			vb.log.Warn("[Duplicate txs] delete the err txs")
@@ -619,15 +624,16 @@ func (vb *VerifierBlock) ValidateBlock(
 		return txRWSetMap, contractEventMap, timeLasts, err
 	}
 	rootsLast := utils.CurrentTimeMillisSeconds() - startRootsTick
-	timeLasts = append(timeLasts, rootsLast)
+	timeLasts[TxRoot] = rootsLast
 
 	return txRWSetMap, contractEventMap, timeLasts, nil
 }
 
 // validateBlock, validate block and transactions
 func (vb *VerifierBlock) ValidateBlockWithRWSets(
-	block, lastBlock *commonPb.Block, hashType string, timeLasts []int64, txRWSetMap map[string]*commonPb.TxRWSet) (
-	map[string][]*commonPb.ContractEvent, []int64, error) {
+	block, lastBlock *commonPb.Block, hashType string,
+	timeLasts map[string]int64, txRWSetMap map[string]*commonPb.TxRWSet) (
+	map[string][]*commonPb.ContractEvent, map[string]int64, error) {
 	// 1.block verify
 	if err := IsBlockHashValid(block, vb.chainConf.ChainConfig().Crypto.Hash); err != nil {
 		return nil, timeLasts, err
@@ -648,7 +654,7 @@ func (vb *VerifierBlock) ValidateBlockWithRWSets(
 			block.Header.BlockHeight, block.Header.BlockHash, block.Header.Proposer, block.Header.Signature)
 	}
 	sigLasts := utils.CurrentTimeMillisSeconds() - startSigTick
-	timeLasts = append(timeLasts, sigLasts)
+	timeLasts[BlockSig] = sigLasts
 
 	err := CheckVacuumBlock(block, vb.chainConf.ChainConfig().Consensus.Type)
 	if err != nil {
@@ -674,7 +680,7 @@ func (vb *VerifierBlock) ValidateBlockWithRWSets(
 	//}
 
 	vmLasts := utils.CurrentTimeMillisSeconds() - startVMTick
-	timeLasts = append(timeLasts, vmLasts)
+	timeLasts[VM] = vmLasts
 
 	if block.Header.TxCount != uint32(len(txRWSetMap)) {
 		return nil, timeLasts, fmt.Errorf("simulate txcount expect %d, got %d",
@@ -697,7 +703,7 @@ func (vb *VerifierBlock) ValidateBlockWithRWSets(
 	txHashes, _, errTxs, err := verifiertx.verifierTxs(block)
 	vb.log.Warnf("verifierTxs txHashCount:%d, txCount:%d, %x", len(txHashes), len(block.Txs), block.Header.TxRoot)
 	txLasts := utils.CurrentTimeMillisSeconds() - startTxTick
-	timeLasts = append(timeLasts, txLasts)
+	timeLasts[TxVerify] = txLasts
 	if err != nil {
 		if len(errTxs) > 0 {
 			vb.log.Warn("[Duplicate txs] delete the err txs")
@@ -726,7 +732,7 @@ func (vb *VerifierBlock) ValidateBlockWithRWSets(
 		return contractEventMap, timeLasts, err
 	}
 	rootsLast := utils.CurrentTimeMillisSeconds() - startRootsTick
-	timeLasts = append(timeLasts, rootsLast)
+	timeLasts[TxRoot] = rootsLast
 
 	return contractEventMap, timeLasts, nil
 }

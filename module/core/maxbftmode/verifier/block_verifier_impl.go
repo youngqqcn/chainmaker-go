@@ -223,8 +223,8 @@ func (v *BlockVerifierImpl) VerifyBlock(block *commonpb.Block, mode protocol.Ver
 	elapsed := utils.CurrentTimeMillisSeconds() - startTick
 	v.log.Infof("verify success [%d,%x]"+
 		"(blockSig:%d,vm:%d,txVerify:%d,txRoot:%d,pool:%d,consensusCheckUsed:%d,total:%d)",
-		newBlock.Header.BlockHeight, newBlock.Header.BlockHash, timeLasts[0], timeLasts[1],
-		timeLasts[2], timeLasts[3], lastPool, consensusCheckUsed, elapsed)
+		newBlock.Header.BlockHeight, newBlock.Header.BlockHash, timeLasts[common.BlockSig], timeLasts[common.VM],
+		timeLasts[common.TxVerify], timeLasts[common.TxRoot], lastPool, consensusCheckUsed, elapsed)
 
 	if localconf.ChainMakerConfig.MonitorConfig.Enabled {
 		v.metricBlockVerifyTime.WithLabelValues(v.chainId).Observe(float64(elapsed) / 1000)
@@ -305,7 +305,6 @@ func (v *BlockVerifierImpl) VerifyBlockWithRwSets(block *commonpb.Block,
 		}
 	}
 	consensusCheckUsed := utils.CurrentTimeMillisSeconds() - beginConsensCheck
-	timeLasts = append(timeLasts, consensusCheckUsed)
 
 	if notSolo {
 		// verify success, cache block and read write set
@@ -323,11 +322,10 @@ func (v *BlockVerifierImpl) VerifyBlockWithRwSets(block *commonpb.Block,
 		v.msgBus.Publish(msgbus.VerifyResult, parseVerifyResult(newBlock, isValid, txRWSetMap))
 	}
 	elapsed := utils.CurrentTimeMillisSeconds() - startTick
-	timeLasts = append(timeLasts, elapsed)
 	v.log.Infof("verify success [%d,%x]"+
 		"(blockSig:%d,vm:%d,txVerify:%d,txRoot:%d,pool:%d,consensusCheckUsed:%d,total:%d)",
-		newBlock.Header.BlockHeight, newBlock.Header.BlockHash, timeLasts[0], timeLasts[1],
-		timeLasts[2], timeLasts[3], lastPool, consensusCheckUsed, elapsed)
+		newBlock.Header.BlockHeight, newBlock.Header.BlockHash, timeLasts[common.BlockSig], timeLasts[common.VM],
+		timeLasts[common.TxVerify], timeLasts[common.TxRoot], lastPool, consensusCheckUsed, elapsed)
 
 	if localconf.ChainMakerConfig.MonitorConfig.Enabled {
 		v.metricBlockVerifyTime.WithLabelValues(v.chainId).Observe(float64(elapsed) / 1000)
@@ -336,9 +334,9 @@ func (v *BlockVerifierImpl) VerifyBlockWithRwSets(block *commonpb.Block,
 }
 
 func (v *BlockVerifierImpl) validateBlock(block, lastBlock *commonpb.Block) (map[string]*commonpb.TxRWSet,
-	map[string][]*commonpb.ContractEvent, []int64, error) {
+	map[string][]*commonpb.ContractEvent, map[string]int64, error) {
 	hashType := v.chainConf.ChainConfig().Crypto.Hash
-	timeLasts := make([]int64, 0)
+	timeLasts := make(map[string]int64)
 	var err error
 	txCapacity := v.chainConf.ChainConfig().Block.BlockTxCapacity
 	if block.Header.TxCount > txCapacity {
@@ -363,9 +361,9 @@ func (v *BlockVerifierImpl) validateBlock(block, lastBlock *commonpb.Block) (map
 
 func (v *BlockVerifierImpl) validateBlockWithRWSets(block, lastBlock *commonpb.Block,
 	txRWSetMap map[string]*commonpb.TxRWSet) (
-	map[string][]*commonpb.ContractEvent, []int64, error) {
+	map[string][]*commonpb.ContractEvent, map[string]int64, error) {
 	hashType := v.chainConf.ChainConfig().Crypto.Hash
-	timeLasts := make([]int64, 0)
+	timeLasts := make(map[string]int64)
 	var err error
 	txCapacity := uint32(v.chainConf.ChainConfig().Block.BlockTxCapacity)
 	if block.Header.TxCount > txCapacity {
