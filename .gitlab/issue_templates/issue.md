@@ -3,7 +3,7 @@
 - [ ] P2P网络相关（包含libp2p,liquid）
 - [ ] 链账户身份与权限相关（证书问题、public、多签投票问题）
 - [ ] 核心交易引擎相关（交易池、DAG）
-- [ ]共识相关
+- [ ] 共识相关
 - [ ] 智能合约相关
 - [ ] 存储相关
 - [ ] SDK相关
@@ -20,16 +20,17 @@
 
 ### 【问题描述】（请对问题进行描述，方便定位问题）
 
-具体的现象，操作步骤，前置条件等，尽可能描述清楚，有截图说明更佳
+> 具体的现象，操作步骤，前置条件等，尽可能描述清楚，有截图说明更佳
 
 ### 【相关日志文件】（如果有报错日志请贴图，或者上传附件）
-- chainmaker-go 的 log/system.log & bin/panic.log file *
-- SDK 的 sdk.log file
+> chainmaker-go 的 log/system.log & bin/panic.log file *
+> 
+> SDK 的 sdk.log file
 
 ### 【系统信息】（请填写系统信息，方便定位问题）
-- **chainmaker-go version * :**
-- **OS & version * :**
-- **docker镜像 version:**
+- **chainmaker-go version * :** [v2.1.0]
+- **OS & version * :** 
+- **docker镜像 version:** 
 - **管理台 version:** 
   - 如果是管理台的相关问题，请附带管理台版本，如果不是可忽略。
 - **区块浏览器 version:** 
