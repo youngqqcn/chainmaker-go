@@ -32,7 +32,9 @@ import (
 
 var (
 	//proposeRepeatTimer *time.Timer //timer controls the propose repeat interval
-	ProposeRepeatTimerMap = make(map[string]*time.Timer)
+	//ProposeRepeatTimerMap = make(map[string]*time.Timer)
+
+	ProposeRepeatTimerMap sync.Map
 )
 
 const (
@@ -954,7 +956,7 @@ func (chain *BlockCommitterImpl) AddBlock(block *commonPb.Block) (err error) {
 	chain.proposalCache.ClearProposedBlockAt(height)
 
 	// clear propose repeat map before send
-	ProposeRepeatTimerMap = make(map[string]*time.Timer)
+	ProposeRepeatTimerMap = sync.Map{}
 
 	// synchronize new block height to consensus and sync module
 	chain.msgBus.PublishSafe(msgbus.BlockInfo, blockInfo)

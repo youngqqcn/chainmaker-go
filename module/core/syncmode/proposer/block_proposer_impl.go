@@ -255,10 +255,18 @@ func (bp *BlockProposerImpl) proposing(height uint64, preHash []byte) *commonpb.
 		if bytes.Equal(selfProposedBlock.Header.PreBlockHash, preHash) {
 
 			hash := fmt.Sprint(selfProposedBlock.Header.BlockHash)
-			timer, ok := common.ProposeRepeatTimerMap[hash]
+			timer := new(time.Timer)
+			ti, ok := common.ProposeRepeatTimerMap.Load(hash)
 			if !ok {
 				timer = time.NewTimer(1 * time.Second)
-				common.ProposeRepeatTimerMap[hash] = timer
+				common.ProposeRepeatTimerMap.Store(hash, timer)
+			} else {
+				timer, _ = ti.(*time.Timer)
+				if timer == nil {
+					bp.log.Warnf("timer is nil, height(%d)", height)
+					timer = time.NewTimer(1 * time.Second)
+					common.ProposeRepeatTimerMap.Store(hash, timer)
+				}
 			}
 
 			select {
