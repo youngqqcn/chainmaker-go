@@ -255,7 +255,7 @@ func (bp *BlockProposerImpl) proposing(height uint64, preHash []byte) *commonpb.
 		if bytes.Equal(selfProposedBlock.Header.PreBlockHash, preHash) {
 
 			hash := fmt.Sprint(selfProposedBlock.Header.BlockHash)
-			timer := new(time.Timer)
+			var timer *time.Timer
 			ti, ok := common.ProposeRepeatTimerMap.Load(hash)
 			if !ok {
 				timer = time.NewTimer(1 * time.Second)
