@@ -10,6 +10,7 @@ package parallel
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math"
@@ -53,6 +54,7 @@ var (
 	useShortCrt    bool
 
 	hostsString        string
+	hostnamesString    string
 	userCrtPathsString string
 	userKeyPathsString string
 	orgIDsString       string
@@ -72,6 +74,7 @@ var (
 
 	caPaths      []string
 	hosts        []string
+	hostnames    []string
 	userCrtPaths []string
 	userKeyPaths []string
 	orgIDs       []string
@@ -149,6 +152,7 @@ func ParallelCMD() *cobra.Command {
 			authType = sdk.AuthType(authTypeUint32)
 			caPaths = strings.Split(caPathsString, ",")
 			hosts = strings.Split(hostsString, ",")
+			hostnames = strings.Split(hostnamesString, ",")
 			userCrtPaths = strings.Split(userCrtPathsString, ",")
 			userKeyPaths = strings.Split(userKeyPathsString, ",")
 			orgIDs = strings.Split(orgIDsString, ",")
@@ -208,6 +212,7 @@ func ParallelCMD() *cobra.Command {
 	flags.IntVar(&requestTimeout, "requestTimeout", 5, "specify request timeout(unit: s)")
 	flags.Uint32Var(&authTypeUint32, "auth-type", 1, "chainmaker auth type. PermissionedWithCert:1,PermissionedWithKey:2,Public:3")
 	flags.Uint64Var(&gasLimit, "gas-limit", 0, "gas limit in uint64 type")
+	flags.StringVarP(&hostnamesString, "tls-host-names", "", "chainmaker.org,node2.chainmaker.org", "specify hostname, the sequence is the same as --hosts")
 
 	cmd.AddCommand(invokeCMD())
 	cmd.AddCommand(queryCMD())
@@ -545,8 +550,17 @@ func (t *Thread) initGRPCConnect(useTLS bool, index int) (*grpc.ClientConn, erro
 	url := hosts[index]
 
 	if useTLS {
+		var serverName string
+		if hostnamesString == "" {
+			serverName = "chainmaker.org"
+		} else {
+			if len(hosts) != len(hostnames) {
+				return nil, errors.New("required len(hosts) == len(hostnames)")
+			}
+			serverName = hostnames[index]
+		}
 		tlsClient := ca.CAClient{
-			ServerName: "chainmaker.org",
+			ServerName: serverName,
 			CaPaths:    []string{caPaths[index]},
 			CertFile:   userCrtPaths[index],
 			KeyFile:    userKeyPaths[index],
