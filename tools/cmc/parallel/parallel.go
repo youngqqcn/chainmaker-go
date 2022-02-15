@@ -212,7 +212,7 @@ func ParallelCMD() *cobra.Command {
 	flags.IntVar(&requestTimeout, "requestTimeout", 5, "specify request timeout(unit: s)")
 	flags.Uint32Var(&authTypeUint32, "auth-type", 1, "chainmaker auth type. PermissionedWithCert:1,PermissionedWithKey:2,Public:3")
 	flags.Uint64Var(&gasLimit, "gas-limit", 0, "gas limit in uint64 type")
-	flags.StringVarP(&hostnamesString, "tls-host-names", "", "chainmaker.org,node2.chainmaker.org", "specify hostname, the sequence is the same as --hosts")
+	flags.StringVarP(&hostnamesString, "tls-host-names", "", "", "specify hostname, the sequence is the same as --hosts")
 
 	cmd.AddCommand(invokeCMD())
 	cmd.AddCommand(queryCMD())
