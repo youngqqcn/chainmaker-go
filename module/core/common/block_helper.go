@@ -993,7 +993,7 @@ func (chain *BlockCommitterImpl) AddBlock(block *commonPb.Block) (err error) {
 		chain.metricBlockCommitTime.WithLabelValues(chain.chainId).Observe(float64(elapsed) / 1000)
 		chain.metricBlockIntervalTime.WithLabelValues(chain.chainId).Observe(float64(interval) / 1000)
 		chain.metricTpsGauge.WithLabelValues(chain.chainId).
-			Set(float64(lastProposed.Header.TxCount) / float64(interval) / 1000)
+			Set(float64(lastProposed.Header.TxCount) / (float64(interval) / 1000))
 	}
 	return nil
 }
