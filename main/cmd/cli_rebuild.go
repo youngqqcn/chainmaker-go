@@ -10,6 +10,8 @@ import (
 	"fmt"
 	_ "net/http/pprof"
 	"os"
+	"path"
+	"strconv"
 	"time"
 
 	"chainmaker.org/chainmaker/store/v2/conf"
@@ -27,30 +29,29 @@ func RebuildDbsCMD() *cobra.Command {
 		Long:  "RebuildDbs ChainMaker",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			initLocalConfig(cmd)
-			backupDbs()
+			backupDbs(rebuildChainId)
 			rebuildDbsStart()
 			fmt.Println("ChainMaker exit")
 			return nil
 		},
 	}
-	attachFlags(rebuildDbsCmd, []string{flagNameOfConfigFilepath})
+	attachFlags(rebuildDbsCmd, []string{flagNameOfConfigFilepath, flagNameOfChainId})
 	return rebuildDbsCmd
 }
-func backupDbs() {
-	timeS := time.Now().String()
+
+func backupDbs(chainId string) {
+	timeS := strconv.FormatInt(time.Now().UnixNano(), 10)
 	localconf.ChainMakerConfig.StorageConfig["back_path"] = timeS
+	localconf.ChainMakerConfig.StorageConfig["rebuild_chainId"] = chainId
 	config := &conf.StorageConfig{}
-	err := mapstructure.Decode(localconf.ChainMakerConfig.StorageConfig, config)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(0)
-	}
+	errThenExit(mapstructure.Decode(localconf.ChainMakerConfig.StorageConfig, config))
+
 	if config.BlockDbConfig.Provider != "leveldb" {
 		fmt.Println("Unsupported storage type")
 		os.Exit(0)
 	}
 	oldStorePath :=
-		config.BlockDbConfig.LevelDbConfig["store_path"].(string) + "-" + timeS
+		path.Join(config.BlockDbConfig.LevelDbConfig["store_path"].(string), chainId) + "-" + timeS
 	isExists, s := pathExists(oldStorePath)
 	if s != "" {
 		fmt.Println(s)
@@ -63,41 +64,32 @@ func backupDbs() {
 		)
 		os.Exit(0)
 	}
-	err = os.Rename(config.BlockDbConfig.LevelDbConfig["store_path"].(string),
-		config.BlockDbConfig.LevelDbConfig["store_path"].(string)+"-"+timeS)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(0)
+
+	backupDir(config.BlockDbConfig.LevelDbConfig["store_path"].(string), timeS, chainId)
+	backupDir(config.StateDbConfig.LevelDbConfig["store_path"].(string), timeS, chainId)
+	backupDir(config.ResultDbConfig.LevelDbConfig["store_path"].(string), timeS, chainId)
+	backupDir(config.HistoryDbConfig.LevelDbConfig["store_path"].(string), timeS, chainId)
+
+	if config.TxExistDbConfig != nil {
+		backupDir(config.TxExistDbConfig.LevelDbConfig["store_path"].(string), timeS, chainId)
 	}
-	err = os.Rename(config.StateDbConfig.LevelDbConfig["store_path"].(string),
-		config.StateDbConfig.LevelDbConfig["store_path"].(string)+"-"+timeS)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(0)
-	}
-	err = os.Rename(config.ResultDbConfig.LevelDbConfig["store_path"].(string),
-		config.ResultDbConfig.LevelDbConfig["store_path"].(string)+"-"+timeS)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(0)
-	}
-	err = os.Rename(config.HistoryDbConfig.LevelDbConfig["store_path"].(string),
-		config.HistoryDbConfig.LevelDbConfig["store_path"].(string)+"-"+timeS)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(0)
-	}
-	err = os.Rename(config.TxExistDbConfig.LevelDbConfig["store_path"].(string),
-		config.TxExistDbConfig.LevelDbConfig["store_path"].(string)+"-"+timeS)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(0)
-	}
-	err = os.Rename(config.StorePath,
-		config.StorePath+"-"+timeS)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(0)
+
+	backupDir(config.StorePath, timeS, chainId)
+}
+
+func backupDir(oldPath, timeS, chainId string) {
+	newPath := oldPath + "-" + timeS
+	errThenExit(os.Mkdir(newPath, os.ModePerm))
+	errThenExit(os.Rename(path.Join(oldPath, chainId), path.Join(newPath, chainId)))
+	errThenExit(os.RemoveAll(path.Join(oldPath, chainId)))
+}
+
+func errThenExit(err error) func() {
+	return func() {
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(0)
+		}
 	}
 }
 
@@ -123,7 +115,8 @@ func rebuildDbsStart() {
 
 	// init chainmaker server
 	chainMakerServer := blockchain.NewChainMakerServer()
-	if err := chainMakerServer.InitForRebuildDbs(); err != nil {
+	chainId, _ := localconf.ChainMakerConfig.StorageConfig["rebuild_chainId"].(string)
+	if err := chainMakerServer.InitForRebuildDbs(chainId); err != nil {
 		log.Errorf("chainmaker server init failed, %s", err.Error())
 		return
 	}
