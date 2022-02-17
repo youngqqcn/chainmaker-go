@@ -16,6 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
+  "iteration": 1645102540090,
   "links": [],
   "panels": [
     {
@@ -1322,9 +1323,192 @@
       "timeShift": null,
       "title": "区块提交时间",
       "type": "bargauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 47
+      },
+      "id": 21,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "7.1.2",
+      "targets": [
+        {
+          "expr": "sum by (le) (chainmaker_committer_metric_block_interval_time_bucket{chainId=~\"$chainId\", job=~\"$node\", le=\"0.2\"})",
+          "interval": "",
+          "legendFormat": "[0,0.2]",
+          "refId": "A"
+        },
+        {
+          "expr": "(sum by (le) (chainmaker_committer_metric_block_interval_time_bucket{chainId=~\"$chainId\", job=~\"$node\", le=\"0.5\"}))-ignoring(le)(sum by (le) (chainmaker_committer_metric_block_interval_time_bucket{chainId=~\"$chainId\", job=~\"$node\", le=\"0.2\"}))",
+          "interval": "",
+          "legendFormat": "(0.2,0.5]",
+          "refId": "B"
+        },
+        {
+          "expr": "(sum by (le) (chainmaker_committer_metric_block_interval_time_bucket{chainId=~\"$chainId\", job=~\"$node\", le=\"1\"}))-ignoring(le)(sum by (le) (chainmaker_committer_metric_block_interval_time_bucket{chainId=~\"$chainId\", job=~\"$node\", le=\"0.5\"}))",
+          "interval": "",
+          "legendFormat": "(0.5,1]",
+          "refId": "C"
+        },
+        {
+          "expr": "(sum by (le) (chainmaker_committer_metric_block_interval_time_bucket{chainId=~\"$chainId\", job=~\"$node\", le=\"2\"}))-ignoring(le)(sum by (le) (chainmaker_committer_metric_block_interval_time_bucket{chainId=~\"$chainId\", job=~\"$node\", le=\"1\"}))",
+          "interval": "",
+          "legendFormat": "(1,2]",
+          "refId": "D"
+        },
+        {
+          "expr": "(sum by (le) (chainmaker_committer_metric_block_interval_time_bucket{chainId=~\"$chainId\", job=~\"$node\", le=\"5\"}))-ignoring(le)(sum by (le) (chainmaker_committer_metric_block_interval_time_bucket{chainId=~\"$chainId\", job=~\"$node\", le=\"2\"}))",
+          "interval": "",
+          "legendFormat": "(2,5]",
+          "refId": "E"
+        },
+        {
+          "expr": "(sum by (le) (chainmaker_committer_metric_block_interval_time_bucket{chainId=~\"$chainId\", job=~\"$node\", le=\"10\"}))-ignoring(le)(sum by (le) (chainmaker_committer_metric_block_interval_time_bucket{chainId=~\"$chainId\", job=~\"$node\", le=\"5\"}))",
+          "interval": "",
+          "legendFormat": "(5,10]",
+          "refId": "F"
+        },
+        {
+          "expr": "(sum by (le) (chainmaker_committer_metric_block_interval_time_bucket{chainId=~\"$chainId\", job=~\"$node\", le=\"20\"}))-ignoring(le)(sum by (le) (chainmaker_committer_metric_block_interval_time_bucket{chainId=~\"$chainId\", job=~\"$node\", le=\"10\"}))",
+          "interval": "",
+          "legendFormat": "(10,20]",
+          "refId": "G"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "区块间隔时间(秒)",
+      "type": "bargauge"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 47
+      },
+      "hiddenSeries": false,
+      "id": 22,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "percentage": false,
+      "pluginVersion": "7.1.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "chainmaker_committer_metric_tps_gauge{chainId=~\"$chainId\", job=~\"$node\"}",
+          "interval": "",
+          "legendFormat": "{{chainId}}, {{instance}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "transaction per second (TPS)",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
-  "refresh": false,
+  "refresh": "5s",
   "schemaVersion": 26,
   "style": "dark",
   "tags": [],
@@ -1387,7 +1571,7 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {
@@ -1418,5 +1602,5 @@
   "timezone": "browser",
   "title": "ChainMaker",
   "uid": "CkwuqfoGk",
-  "version": 1
+  "version": 2
 }
