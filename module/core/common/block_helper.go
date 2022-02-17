@@ -773,6 +773,7 @@ type BlockCommitterImpl struct {
 	metricTxCounter         *prometheus.CounterVec   // metric transaction counter
 	metricBlockCommitTime   *prometheus.HistogramVec // metric block commit time
 	metricBlockIntervalTime *prometheus.HistogramVec // metric block interval time
+	metricTpsGauge          *prometheus.GaugeVec     // metric real-time transaction per second (TPS)
 	storeHelper             conf.StoreHelper
 	blockInterval           int64
 }
@@ -845,6 +846,13 @@ func NewBlockCommitter(config BlockCommitterConfig, log protocol.Logger) (protoc
 			[]float64{0.2, 0.5, 1, 2, 5, 10, 20},
 			monitor.ChainId,
 		)
+
+		blockchain.metricTpsGauge = monitor.NewGaugeVec(
+			monitor.SUBSYSTEM_CORE_COMMITTER,
+			monitor.MetricTpsGauge,
+			monitor.HelpTpsGaugeMetric,
+			monitor.ChainId,
+		)
 	}
 
 	cbConf := &CommitBlockConf{
@@ -860,6 +868,7 @@ func NewBlockCommitter(config BlockCommitterConfig, log protocol.Logger) (protoc
 		MetricBlockCounter:      blockchain.metricBlockCounter,
 		MetricBlockSize:         blockchain.metricBlockSize,
 		MetricTxCounter:         blockchain.metricTxCounter,
+		MetricTpsGauge:          blockchain.metricTpsGauge,
 	}
 	blockchain.commonCommit = NewCommitBlock(cbConf)
 
@@ -983,6 +992,8 @@ func (chain *BlockCommitterImpl) AddBlock(block *commonPb.Block) (err error) {
 	if localconf.ChainMakerConfig.MonitorConfig.Enabled {
 		chain.metricBlockCommitTime.WithLabelValues(chain.chainId).Observe(float64(elapsed) / 1000)
 		chain.metricBlockIntervalTime.WithLabelValues(chain.chainId).Observe(float64(interval) / 1000)
+		chain.metricTpsGauge.WithLabelValues(chain.chainId).
+			Set(float64(lastProposed.Header.TxCount) / float64(interval) / 1000)
 	}
 	return nil
 }

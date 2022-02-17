@@ -27,6 +27,7 @@ type CommitBlock struct {
 	metricBlockSize         *prometheus.HistogramVec // metric block size
 	metricBlockCounter      *prometheus.CounterVec   // metric block counter
 	metricTxCounter         *prometheus.CounterVec   // metric transaction counter
+	metricTpsGauge          *prometheus.GaugeVec     // metric real-time transaction per second (TPS)
 	metricBlockCommitTime   *prometheus.HistogramVec // metric block commit time
 	metricBlockIntervalTime *prometheus.HistogramVec // metric block interval time
 }
@@ -42,6 +43,7 @@ type CommitBlockConf struct {
 	MetricBlockSize         *prometheus.HistogramVec // metric block size
 	MetricBlockCounter      *prometheus.CounterVec   // metric block counter
 	MetricTxCounter         *prometheus.CounterVec   // metric transaction counter
+	MetricTpsGauge          *prometheus.GaugeVec     // metric real-time transaction per second (TPS)
 	MetricBlockCommitTime   *prometheus.HistogramVec // metric block commit time
 	MetricBlockIntervalTime *prometheus.HistogramVec // metric block interval time
 }
@@ -61,6 +63,7 @@ func NewCommitBlock(cbConf *CommitBlockConf) *CommitBlock {
 		commitBlock.metricTxCounter = cbConf.MetricTxCounter
 		commitBlock.metricBlockCommitTime = cbConf.MetricBlockCommitTime
 		commitBlock.metricBlockIntervalTime = cbConf.MetricBlockIntervalTime
+		commitBlock.metricTpsGauge = cbConf.MetricTpsGauge
 	}
 	return commitBlock
 }
