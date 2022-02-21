@@ -10,6 +10,9 @@ package native_test
 import (
 	"fmt"
 	"testing"
+	"time"
+
+	"github.com/hokaccha/go-prettyjson"
 
 	apiPb "chainmaker.org/chainmaker/pb-go/v2/api"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
@@ -181,4 +184,193 @@ func processResults(resp *commonPb.TxResponse, err error) {
 		return
 	}
 	fmt.Printf("ERROR: client.call err: %v\n", err)
+}
+
+func Test_CertAlias(t *testing.T) {
+	certAliasAdd(t, "alias001")
+	certAliasAdd(t, "alias002")
+	time.Sleep(time.Second * 3)
+	certAliasQuery(t)
+
+	certAliasDelete(t)
+	time.Sleep(time.Second * 3)
+	certAliasQuery(t)
+
+	certAliasFrozen(t)
+	time.Sleep(time.Second * 3)
+	certAliasQuery(t)
+
+	certAliasUnfrozen(t)
+	time.Sleep(time.Second * 3)
+	certAliasQuery(t)
+
+	certAliasUpdate(t)
+	time.Sleep(time.Second * 3)
+	certAliasQuery(t)
+}
+
+// 别名添加，个人添加自己的别名
+func Test_CertAliasAdd(t *testing.T) {
+	certAliasAdd(t, "alias001")
+}
+
+// 证书查询
+func Test_CertAliasQuery(t *testing.T) {
+	certAliasQuery(t)
+}
+
+// 证书的删除（管理员操作）
+func Test_CertAliasDelete(t *testing.T) {
+	certAliasDelete(t)
+}
+
+// 证书冻结
+func Test_CertAliasFrozen(t *testing.T) {
+	certAliasFrozen(t)
+}
+
+// 证书解冻
+func Test_CertAliasUnfrozen(t *testing.T) {
+	certAliasUnfrozen(t)
+}
+
+// 别名更新
+func Test_CertAliasUpdate(t *testing.T) {
+	certAliasUpdate(t)
+	time.Sleep(time.Second * 3)
+	certAliasQuery(t)
+}
+
+func certAliasAdd(t *testing.T, name string) {
+	txId := utils.GetRandTxId()
+	require.True(t, len(txId) > 0)
+	fmt.Printf("\n============ certAliasAdd send Tx [%s] ============\n", txId)
+	fmt.Printf("\n============ certAliasAdd send Tx [%s] ============\n", txId)
+	fmt.Printf("\n============ certAliasAdd send Tx [%s] ============\n", txId)
+	fmt.Printf("\n============ certAliasAdd send Tx [%s] ============\n", txId)
+	fmt.Printf("\n============ certAliasAdd send Tx [%s] ============\n", txId)
+
+	pairs := []*commonPb.KeyValuePair{
+		{
+			Key:   "alias",
+			Value: []byte(name),
+		},
+	}
+	// 添加证书 ../config/crypto-config/wx-org1.chainmaker.org/user/client1/client1.sign.crt
+	sk, member := native.GetUserSK(1)
+	resp, err := native.UpdateSysRequest(sk, member, &native.InvokeContractMsg{TxId: txId, TxType: commonPb.TxType_INVOKE_CONTRACT,
+		ChainId: CHAIN1, ContractName: syscontract.SystemContract_CERT_MANAGE.String(),
+		MethodName: syscontract.CertManageFunction_CERT_ALIAS_ADD.String(), Pairs: pairs})
+	processResults(resp, err)
+}
+func certAliasQuery(t *testing.T) {
+	conn, err := native.InitGRPCConnect(isTls)
+	require.NoError(t, err)
+	client := apiPb.NewRpcNodeClient(conn)
+
+	fmt.Println("============ certAliasQuery============")
+	fmt.Println("============ certAliasQuery============")
+	fmt.Println("============ certAliasQuery============")
+	fmt.Println("============ certAliasQuery============")
+	fmt.Println("============ certAliasQuery============")
+	// 构造Payload
+	// 查询证书 ../config/crypto-config/wx-org1.chainmaker.org/user/client1/client1.sign.crt
+	pairs := []*commonPb.KeyValuePair{
+		{
+			Key:   "aliases",
+			Value: []byte("alias001,alias002"),
+		},
+	}
+	sk, member := native.GetUserSK(1)
+	resp, err := native.QueryRequest(sk, member, &client, &native.InvokeContractMsg{TxType: commonPb.TxType_QUERY_CONTRACT, ChainId: CHAIN1,
+		ContractName: syscontract.SystemContract_CERT_MANAGE.String(), MethodName: syscontract.CertManageFunction_CERTS_ALIAS_QUERY.String(), Pairs: pairs})
+
+	assert.Nil(t, err)
+	if resp.ContractResult.Result != nil {
+		r := &commonPb.AliasInfos{}
+		proto.Unmarshal(resp.ContractResult.Result, r)
+		s, err := prettyjson.Marshal(r)
+		fmt.Printf("%s %s", s, err)
+	} else {
+		processResults(resp, err)
+	}
+}
+
+func certAliasDelete(t *testing.T) {
+	txId := utils.GetRandTxId()
+	require.True(t, len(txId) > 0)
+	fmt.Printf("\n============ certAliasDelete send Tx [%s] ============\n", txId)
+	fmt.Printf("\n============ certAliasDelete send Tx [%s] ============\n", txId)
+	fmt.Printf("\n============ certAliasDelete send Tx [%s] ============\n", txId)
+	fmt.Printf("\n============ certAliasDelete send Tx [%s] ============\n", txId)
+	fmt.Printf("\n============ certAliasDelete send Tx [%s] ============\n", txId)
+
+	// 构造Payload
+	// 删除证书 ../config/crypto-config/wx-org1.chainmaker.org/user/client1/client1.sign.crt
+	pairs := []*commonPb.KeyValuePair{
+		{
+			Key:   "aliases",
+			Value: []byte("alias001,alias002"),
+		},
+	}
+	sk, member := native.GetUserSK(1)
+	resp, err := native.UpdateSysRequest(sk, member, &native.InvokeContractMsg{TxId: txId, TxType: commonPb.TxType_INVOKE_CONTRACT, ChainId: CHAIN1,
+		ContractName: syscontract.SystemContract_CERT_MANAGE.String(), MethodName: syscontract.CertManageFunction_CERTS_ALIAS_DELETE.String(), Pairs: pairs})
+	processResults(resp, err)
+}
+
+func certAliasFrozen(t *testing.T) {
+	txId := utils.GetRandTxId()
+	require.True(t, len(txId) > 0)
+	// 构造Payload
+	// 冻结证书 ../config/crypto-config/wx-org1.chainmaker.org/user/client1/client1.sign.crt
+	pairs := []*commonPb.KeyValuePair{
+		{
+			Key:   "aliases",
+			Value: []byte("alias001,alias002"),
+		},
+	}
+
+	sk, member := native.GetUserSK(1)
+	resp, err := native.UpdateSysRequest(sk, member, &native.InvokeContractMsg{TxId: txId, TxType: commonPb.TxType_INVOKE_CONTRACT, ChainId: CHAIN1,
+		ContractName: syscontract.SystemContract_CERT_MANAGE.String(), MethodName: syscontract.CertManageFunction_CERTS_ALIAS_FREEZE.String(), Pairs: pairs})
+	processResults(resp, err)
+}
+
+func certAliasUnfrozen(t *testing.T) {
+	txId := utils.GetRandTxId()
+	require.True(t, len(txId) > 0)
+	// 构造Payload
+	// 解冻证书 ../config/crypto-config/wx-org1.chainmaker.org/user/client1/client1.sign.crt
+	pairs := []*commonPb.KeyValuePair{
+		{
+			Key:   "aliases",
+			Value: []byte("alias001,alias002"),
+		},
+	}
+	sk, member := native.GetUserSK(1)
+	resp, err := native.UpdateSysRequest(sk, member, &native.InvokeContractMsg{TxId: txId, TxType: commonPb.TxType_INVOKE_CONTRACT, ChainId: CHAIN1,
+		ContractName: syscontract.SystemContract_CERT_MANAGE.String(), MethodName: syscontract.CertManageFunction_CERTS_ALIAS_UNFREEZE.String(), Pairs: pairs})
+	processResults(resp, err)
+}
+
+func certAliasUpdate(t *testing.T) {
+	txId := utils.GetRandTxId()
+	require.True(t, len(txId) > 0)
+	// 构造Payload
+	// 解冻证书 ../config/crypto-config/wx-org1.chainmaker.org/user/client1/client1.sign.crt
+	pairs := []*commonPb.KeyValuePair{
+		{
+			Key:   "alias",
+			Value: []byte("alias001"),
+		},
+		{
+			Key:   "cert",
+			Value: []byte("-----BEGIN CERTIFICATE-----\nMIIChzCCAi2gAwIBAgIDCYwFMAoGCCqGSM49BAMCMIGKMQswCQYDVQQGEwJDTjEQ\nMA4GA1UECBMHQmVpamluZzEQMA4GA1UEBxMHQmVpamluZzEfMB0GA1UEChMWd3gt\nb3JnMS5jaGFpbm1ha2VyLm9yZzESMBAGA1UECxMJcm9vdC1jZXJ0MSIwIAYDVQQD\nExljYS53eC1vcmcxLmNoYWlubWFrZXIub3JnMB4XDTIxMDgxNjEyMDU1NVoXDTI2\nMDgxNTEyMDU1NVowgY8xCzAJBgNVBAYTAkNOMRAwDgYDVQQIEwdCZWlqaW5nMRAw\nDgYDVQQHEwdCZWlqaW5nMR8wHQYDVQQKExZ3eC1vcmcxLmNoYWlubWFrZXIub3Jn\nMQ4wDAYDVQQLEwVsaWdodDErMCkGA1UEAxMibGlnaHQxLnNpZ24ud3gtb3JnMS5j\naGFpbm1ha2VyLm9yZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABOQ/Mhohg1aO\n5y2tEpDzRnNJNALy1BJVwaqtslx3U5e9J0teBL1KxCcvYu9wcRGXt1USv6SxIxgV\nxqy0vyGxHiujezB5MA4GA1UdDwEB/wQEAwIBpjAPBgNVHSUECDAGBgRVHSUAMCkG\nA1UdDgQiBCBTGj1EVe+QNPx8C3nTMlpEqT58KEm3eO5ONgjtxKbqkTArBgNVHSME\nJDAigCA1JD9xHLm3xDUukx9wxXMx+XQJwtng+9/sHFBf2xCJZzAKBggqhkjOPQQD\nAgNIADBFAiEAtJxK9BvQsJ6W2HpSJD+PvhgVUO2kpr69UbETXlgZALACIHbqKU44\nHpZwyFMH2X+ozS4Yql3t2dU5e/E+EjNSbM3m\n-----END CERTIFICATE-----\n"),
+		},
+	}
+	sk, member := native.GetUserSK(1)
+	resp, err := native.UpdateSysRequest(sk, member, &native.InvokeContractMsg{TxId: txId, TxType: commonPb.TxType_INVOKE_CONTRACT, ChainId: CHAIN1,
+		ContractName: syscontract.SystemContract_CERT_MANAGE.String(), MethodName: syscontract.CertManageFunction_CERT_ALIAS_UPDATE.String(), Pairs: pairs})
+	processResults(resp, err)
 }
