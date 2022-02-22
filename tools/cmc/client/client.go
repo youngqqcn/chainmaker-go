@@ -9,13 +9,10 @@ package client
 
 import (
 	"fmt"
-	"log"
-
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 
 	"chainmaker.org/chainmaker-go/tools/cmc/util"
-	sdk "chainmaker.org/chainmaker/sdk-go/v2"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 var (
@@ -262,25 +259,6 @@ func attachFlags(cmd *cobra.Command, names []string) {
 			//cmdFlags.AddFlag(flag)
 		}
 	}
-}
-
-func createAdminWithConfig(adminKeyFilePath, adminCrtFilePath string) (*sdk.ChainClient, error) {
-	chainClient, err := sdk.NewChainClient(
-		sdk.WithConfPath(sdkConfPath),
-		sdk.WithUserKeyFilePath(adminKeyFilePath),
-		sdk.WithUserCrtFilePath(adminCrtFilePath),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	//启用证书压缩（开启证书压缩可以减小交易包大小，提升处理性能）
-	err = chainClient.EnableCertHash()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return chainClient, nil
 }
 
 func getChainMakerServerVersionCMD() *cobra.Command {
