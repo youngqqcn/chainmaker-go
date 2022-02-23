@@ -268,8 +268,10 @@ func (bc *Blockchain) initOldStore() (err error) {
 		config.ResultDbConfig.LevelDbConfig["store_path"].(string) + "-" + timeS
 	config.HistoryDbConfig.LevelDbConfig["store_path"] =
 		config.HistoryDbConfig.LevelDbConfig["store_path"].(string) + "-" + timeS
-	config.TxExistDbConfig.LevelDbConfig["store_path"] =
-		config.TxExistDbConfig.LevelDbConfig["store_path"].(string) + "-" + timeS
+	if config.TxExistDbConfig != nil {
+		config.TxExistDbConfig.LevelDbConfig["store_path"] =
+			config.TxExistDbConfig.LevelDbConfig["store_path"].(string) + "-" + timeS
+	}
 	if err != nil {
 		return err
 	}

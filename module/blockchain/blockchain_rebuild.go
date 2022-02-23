@@ -43,7 +43,7 @@ func (bc *Blockchain) RebuildDbs() {
 		}
 	}
 	for i = 1; i <= height; i++ {
-		block, err := bc.oldStore.GetBlock(uint64(i))
+		block, err := bc.oldStore.GetBlock(i)
 		if err != nil {
 			bc.log.Errorf("get block %d err(%s)", i, err.Error())
 		}

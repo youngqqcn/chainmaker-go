@@ -67,7 +67,7 @@ func (server *ChainMakerServer) Init() error {
 }
 
 // Init ChainMakerServer.
-func (server *ChainMakerServer) InitForRebuildDbs() error {
+func (server *ChainMakerServer) InitForRebuildDbs(chainId string) error {
 	var err error
 	log.Debug("begin init chain maker rebuild dbs server...")
 	server.readyC = make(chan struct{})
@@ -76,7 +76,7 @@ func (server *ChainMakerServer) InitForRebuildDbs() error {
 	//	return err
 	//}
 	// 2) init blockchains
-	if err = server.initBlockchainsForRebuildDbs(); err != nil {
+	if err = server.initBlockchainsForRebuildDbs(chainId); err != nil {
 		return err
 	}
 	log.Info("init chain maker server success!")
@@ -201,19 +201,23 @@ func (server *ChainMakerServer) initBlockchains() error {
 	return nil
 }
 
-func (server *ChainMakerServer) initBlockchainsForRebuildDbs() error {
+func (server *ChainMakerServer) initBlockchainsForRebuildDbs(chainId string) error {
 	server.blockchains = sync.Map{}
 	ok := false
 	for _, chain := range localconf.ChainMakerConfig.GetBlockChains() {
-		chainId := chain.ChainId
-		if err := server.initBlockchainForRebuildDbs(chainId, chain.Genesis); err != nil {
-			log.Error(err.Error())
-			continue
+		if chainId == chain.ChainId {
+			if err := server.initBlockchainForRebuildDbs(chainId, chain.Genesis); err != nil {
+				return err
+			}
+			ok = true
 		}
-		ok = true
+		//if err := server.initBlockchainForRebuildDbs(chainId, chain.Genesis); err != nil {
+		//	log.Error(err.Error())
+		//	continue
+		//}
 	}
 	if !ok {
-		return fmt.Errorf("init all blockchains fail")
+		return fmt.Errorf("init %s blockchains fail for not exists", chainId)
 	}
 	go server.newBlockchainTaskListener()
 	return nil
@@ -228,17 +232,14 @@ func (server *ChainMakerServer) newBlockchainTaskListener() {
 		}
 		log.Infof("new block chain found(chain-id: %s), start to init new block chain.", newChainId)
 		for _, chain := range localconf.ChainMakerConfig.GetBlockChains() {
-			chainId := chain.ChainId
-			if chainId != newChainId {
-				continue
+			if chain.ChainId == newChainId {
+				if err := server.initBlockchain(newChainId, chain.Genesis); err != nil {
+					log.Error(err.Error())
+					continue
+				}
+				newBlockchain, _ := server.blockchains.Load(newChainId)
+				go startBlockchain(newBlockchain.(*Blockchain))
 			}
-			if err := server.initBlockchain(chainId, chain.Genesis); err != nil {
-				log.Error(err.Error())
-				continue
-			}
-			newBlockchain, _ := server.blockchains.Load(newChainId)
-			go startBlockchain(newBlockchain.(*Blockchain))
-
 		}
 	}
 }
