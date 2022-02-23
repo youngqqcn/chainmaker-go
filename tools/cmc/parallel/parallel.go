@@ -440,9 +440,9 @@ func (s *Statistician) statisticsResults(ret *numberResults, all bool, nowTime t
 		detail.StartTime = s.lastStartTime.Format("2006-01-02 15:04:05.000")
 		detail.EndTime = nowTime.Format("2006-01-02 15:04:05.000")
 		detail.Elapsed = float32(nowTime.Sub(s.lastStartTime).Milliseconds()) / 1000
-		detail.TPS = float32(ret.successCount) / float32(nowTime.Sub(s.lastStartTime).Seconds())
+		detail.TPS = float32(ret.successCount) / float32(nowTime.Sub(s.startTime).Seconds())
 		for i := 0; i < nodeNum; i++ {
-			detail.Nodes[fmt.Sprintf("node%d_tps", i)] = float32(ret.nodeSuccessCount[i]) / float32(nowTime.Sub(s.lastStartTime).Seconds())
+			detail.Nodes[fmt.Sprintf("node%d_tps", i)] = float32(ret.nodeSuccessCount[i]) / float32(nowTime.Sub(s.startTime).Seconds())
 		}
 	}
 	return detail
