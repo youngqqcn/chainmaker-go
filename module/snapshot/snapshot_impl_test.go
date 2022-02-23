@@ -247,21 +247,27 @@ func testSnapshot(t *testing.T, i int) {
 			if !applyResult {
 				fmt.Printf("!!!")
 				for {
-					txSimContext.txRwSet = genRwSet(readKey, writeKey)
-					// TODO: Use of weak random number generator (math/rand instead of crypto/rand) ?
-					// nolint: gosec
-					txSimContext.txExecSeq = txSimContext.txExecSeq +
-						int32(
-							rand.Intn(
-								len(snapshot.txTable)-int(txSimContext.txExecSeq)+1,
-							),
-						)
-					applyResult, _ = snapshot.ApplyTxSimContext(txSimContext, protocol.ExecOrderTxTypeNormal, true, false)
 
-					atomic.AddInt64(&count, 1)
-					if applyResult {
-						break
+					randNum := len(snapshot.txTable) - int(txSimContext.txExecSeq) + 1
+
+					if randNum > 0 {
+						txSimContext.txRwSet = genRwSet(readKey, writeKey)
+						// TODO: Use of weak random number generator (math/rand instead of crypto/rand) ?
+						// nolint: gosec
+						txSimContext.txExecSeq = txSimContext.txExecSeq +
+							int32(
+								rand.Intn(
+									randNum,
+								),
+							)
+						applyResult, _ = snapshot.ApplyTxSimContext(txSimContext, protocol.ExecOrderTxTypeNormal, true, false)
+
+						atomic.AddInt64(&count, 1)
+						if applyResult {
+							break
+						}
 					}
+
 				}
 			}
 			wg.Done()
