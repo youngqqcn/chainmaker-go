@@ -151,7 +151,9 @@ func TestApplyTxSimContext(t *testing.T) {
 	snapshot := createSnapshotEvidenceList(t)[0]
 	vmManager := &mock.MockVmManager{}
 
-	txSimContext := vm.NewTxSimContext(vmManager, snapshot, &common.Transaction{Payload: &common.Payload{ChainId: "12345"}}, block.Header.BlockVersion)
+	txSimContext := vm.NewTxSimContext(vmManager, snapshot,
+		&common.Transaction{Payload: &common.Payload{ChainId: "12345"}},
+		block.Header.BlockVersion, &test.GoLogger{})
 
 	txSimContext.SetTxResult(&common.Result{Code: common.TxStatusCode_ARCHIVED_BLOCK})
 	res, tableLen := snapshot.ApplyTxSimContext(txSimContext, protocol.ExecOrderTxTypeNormal, true, false)

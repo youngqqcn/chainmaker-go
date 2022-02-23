@@ -30,8 +30,20 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+var (
+	//proposeRepeatTimer *time.Timer //timer controls the propose repeat interval
+	//ProposeRepeatTimerMap = make(map[string]*time.Timer)
+
+	ProposeRepeatTimerMap sync.Map
+)
+
 const (
 	DEFAULTDURATION = 1000 // default proposal duration, millis seconds
+	//blockSig:%d,vm:%d,txVerify:%d,txRoot:%d
+	BlockSig = "blockSig"
+	VM       = "vm"
+	TxVerify = "txVerify"
+	TxRoot   = "txRoot"
 )
 
 type BlockBuilderConf struct {
@@ -516,8 +528,8 @@ func (vb *VerifierBlock) FetchLastBlock(block *commonPb.Block) (*commonPb.Block,
 
 // validateBlock, validate block and transactions
 func (vb *VerifierBlock) ValidateBlock(
-	block, lastBlock *commonPb.Block, hashType string, timeLasts []int64) (
-	map[string]*commonPb.TxRWSet, map[string][]*commonPb.ContractEvent, []int64, error) {
+	block, lastBlock *commonPb.Block, hashType string, timeLasts map[string]int64) (
+	map[string]*commonPb.TxRWSet, map[string][]*commonPb.ContractEvent, map[string]int64, error) {
 
 	if err := IsBlockHashValid(block, vb.chainConf.ChainConfig().Crypto.Hash); err != nil {
 		return nil, nil, timeLasts, err
@@ -533,7 +545,7 @@ func (vb *VerifierBlock) ValidateBlock(
 			block.Header.BlockHeight, block.Header.BlockHash, block.Header.Proposer, block.Header.Signature)
 	}
 	sigLasts := utils.CurrentTimeMillisSeconds() - startSigTick
-	timeLasts = append(timeLasts, sigLasts)
+	timeLasts[BlockSig] = sigLasts
 
 	err := CheckVacuumBlock(block, vb.chainConf.ChainConfig().Consensus.Type)
 	if err != nil {
@@ -561,7 +573,7 @@ func (vb *VerifierBlock) ValidateBlock(
 	vb.log.Infof("Validate block[%v](txs:%v), time used(new snapshot:%v, start DB transaction:%v, vm:%v)",
 		block.Header.BlockHeight, block.Header.TxCount, startDbTxTick-snapshotTick, startVMTick-startDbTxTick, vmLasts)
 
-	timeLasts = append(timeLasts, vmLasts)
+	timeLasts[VM] = vmLasts
 	if err != nil {
 		return nil, nil, timeLasts, fmt.Errorf("simulate %s", err)
 	}
@@ -585,7 +597,7 @@ func (vb *VerifierBlock) ValidateBlock(
 	verifiertx := NewVerifierTx(verifierTxConf)
 	txHashes, _, errTxs, err := verifiertx.verifierTxs(block)
 	txLasts := utils.CurrentTimeMillisSeconds() - startTxTick
-	timeLasts = append(timeLasts, txLasts)
+	timeLasts[TxVerify] = txLasts
 	if err != nil {
 		if len(errTxs) > 0 {
 			vb.log.Warn("[Duplicate txs] delete the err txs")
@@ -614,15 +626,16 @@ func (vb *VerifierBlock) ValidateBlock(
 		return txRWSetMap, contractEventMap, timeLasts, err
 	}
 	rootsLast := utils.CurrentTimeMillisSeconds() - startRootsTick
-	timeLasts = append(timeLasts, rootsLast)
+	timeLasts[TxRoot] = rootsLast
 
 	return txRWSetMap, contractEventMap, timeLasts, nil
 }
 
 // validateBlock, validate block and transactions
 func (vb *VerifierBlock) ValidateBlockWithRWSets(
-	block, lastBlock *commonPb.Block, hashType string, timeLasts []int64, txRWSetMap map[string]*commonPb.TxRWSet) (
-	map[string][]*commonPb.ContractEvent, []int64, error) {
+	block, lastBlock *commonPb.Block, hashType string,
+	timeLasts map[string]int64, txRWSetMap map[string]*commonPb.TxRWSet) (
+	map[string][]*commonPb.ContractEvent, map[string]int64, error) {
 	// 1.block verify
 	if err := IsBlockHashValid(block, vb.chainConf.ChainConfig().Crypto.Hash); err != nil {
 		return nil, timeLasts, err
@@ -643,7 +656,7 @@ func (vb *VerifierBlock) ValidateBlockWithRWSets(
 			block.Header.BlockHeight, block.Header.BlockHash, block.Header.Proposer, block.Header.Signature)
 	}
 	sigLasts := utils.CurrentTimeMillisSeconds() - startSigTick
-	timeLasts = append(timeLasts, sigLasts)
+	timeLasts[BlockSig] = sigLasts
 
 	err := CheckVacuumBlock(block, vb.chainConf.ChainConfig().Consensus.Type)
 	if err != nil {
@@ -669,7 +682,7 @@ func (vb *VerifierBlock) ValidateBlockWithRWSets(
 	//}
 
 	vmLasts := utils.CurrentTimeMillisSeconds() - startVMTick
-	timeLasts = append(timeLasts, vmLasts)
+	timeLasts[VM] = vmLasts
 
 	if block.Header.TxCount != uint32(len(txRWSetMap)) {
 		return nil, timeLasts, fmt.Errorf("simulate txcount expect %d, got %d",
@@ -690,9 +703,9 @@ func (vb *VerifierBlock) ValidateBlockWithRWSets(
 	}
 	verifiertx := NewVerifierTx(verifierTxConf)
 	txHashes, _, errTxs, err := verifiertx.verifierTxs(block)
-	vb.log.Warnf("verifierTxs txhashes %d, block.txs %d, %x", len(txHashes), len(block.Txs), block.Header.TxRoot)
+	vb.log.Warnf("verifierTxs txHashCount:%d, txCount:%d, %x", len(txHashes), len(block.Txs), block.Header.TxRoot)
 	txLasts := utils.CurrentTimeMillisSeconds() - startTxTick
-	timeLasts = append(timeLasts, txLasts)
+	timeLasts[TxVerify] = txLasts
 	if err != nil {
 		if len(errTxs) > 0 {
 			vb.log.Warn("[Duplicate txs] delete the err txs")
@@ -721,7 +734,7 @@ func (vb *VerifierBlock) ValidateBlockWithRWSets(
 		return contractEventMap, timeLasts, err
 	}
 	rootsLast := utils.CurrentTimeMillisSeconds() - startRootsTick
-	timeLasts = append(timeLasts, rootsLast)
+	timeLasts[TxRoot] = rootsLast
 
 	return contractEventMap, timeLasts, nil
 }
@@ -747,20 +760,22 @@ type BlockCommitterImpl struct {
 	txPool          protocol.TxPool          // transaction pool
 	chainConf       protocol.ChainConf       // chain config
 
-	ledgerCache           protocol.LedgerCache        // ledger cache
-	proposalCache         protocol.ProposalCache      // proposal cache
-	log                   protocol.Logger             // logger
-	msgBus                msgbus.MessageBus           // message bus
-	mu                    sync.Mutex                  // lock, to avoid concurrent block commit
-	subscriber            *subscriber.EventSubscriber // subscriber
-	verifier              protocol.BlockVerifier      // block verifier
-	commonCommit          *CommitBlock
-	metricBlockSize       *prometheus.HistogramVec // metric block size
-	metricBlockCounter    *prometheus.CounterVec   // metric block counter
-	metricTxCounter       *prometheus.CounterVec   // metric transaction counter
-	metricBlockCommitTime *prometheus.HistogramVec // metric block commit time
-	storeHelper           conf.StoreHelper
-	blockInterval         int64
+	ledgerCache             protocol.LedgerCache        // ledger cache
+	proposalCache           protocol.ProposalCache      // proposal cache
+	log                     protocol.Logger             // logger
+	msgBus                  msgbus.MessageBus           // message bus
+	mu                      sync.Mutex                  // lock, to avoid concurrent block commit
+	subscriber              *subscriber.EventSubscriber // subscriber
+	verifier                protocol.BlockVerifier      // block verifier
+	commonCommit            *CommitBlock
+	metricBlockSize         *prometheus.HistogramVec // metric block size
+	metricBlockCounter      *prometheus.CounterVec   // metric block counter
+	metricTxCounter         *prometheus.CounterVec   // metric transaction counter
+	metricBlockCommitTime   *prometheus.HistogramVec // metric block commit time
+	metricBlockIntervalTime *prometheus.HistogramVec // metric block interval time
+	metricTpsGauge          *prometheus.GaugeVec     // metric real-time transaction per second (TPS)
+	storeHelper             conf.StoreHelper
+	blockInterval           int64
 }
 
 type BlockCommitterConfig struct {
@@ -823,20 +838,37 @@ func NewBlockCommitter(config BlockCommitterConfig, log protocol.Logger) (protoc
 			[]float64{0.005, 0.01, 0.015, 0.05, 0.1, 1, 10},
 			monitor.ChainId,
 		)
+
+		blockchain.metricBlockIntervalTime = monitor.NewHistogramVec(
+			monitor.SUBSYSTEM_CORE_COMMITTER,
+			monitor.MetricBlockIntervalTime,
+			monitor.HelpBlockIntervalTimeMetric,
+			[]float64{0.2, 0.5, 1, 2, 5, 10, 20},
+			monitor.ChainId,
+		)
+
+		blockchain.metricTpsGauge = monitor.NewGaugeVec(
+			monitor.SUBSYSTEM_CORE_COMMITTER,
+			monitor.MetricTpsGauge,
+			monitor.HelpTpsGaugeMetric,
+			monitor.ChainId,
+		)
 	}
 
 	cbConf := &CommitBlockConf{
-		Store:                 blockchain.blockchainStore,
-		Log:                   blockchain.log,
-		SnapshotManager:       blockchain.snapshotManager,
-		TxPool:                blockchain.txPool,
-		LedgerCache:           blockchain.ledgerCache,
-		ChainConf:             blockchain.chainConf,
-		MsgBus:                blockchain.msgBus,
-		MetricBlockCommitTime: blockchain.metricBlockCommitTime,
-		MetricBlockCounter:    blockchain.metricBlockCounter,
-		MetricBlockSize:       blockchain.metricBlockSize,
-		MetricTxCounter:       blockchain.metricTxCounter,
+		Store:                   blockchain.blockchainStore,
+		Log:                     blockchain.log,
+		SnapshotManager:         blockchain.snapshotManager,
+		TxPool:                  blockchain.txPool,
+		LedgerCache:             blockchain.ledgerCache,
+		ChainConf:               blockchain.chainConf,
+		MsgBus:                  blockchain.msgBus,
+		MetricBlockCommitTime:   blockchain.metricBlockCommitTime,
+		MetricBlockIntervalTime: blockchain.metricBlockIntervalTime,
+		MetricBlockCounter:      blockchain.metricBlockCounter,
+		MetricBlockSize:         blockchain.metricBlockSize,
+		MetricTxCounter:         blockchain.metricTxCounter,
+		MetricTpsGauge:          blockchain.metricTpsGauge,
 	}
 	blockchain.commonCommit = NewCommitBlock(cbConf)
 
@@ -942,6 +974,9 @@ func (chain *BlockCommitterImpl) AddBlock(block *commonPb.Block) (err error) {
 
 	chain.proposalCache.ClearProposedBlockAt(height)
 
+	// clear propose repeat map before send
+	ProposeRepeatTimerMap = sync.Map{}
+
 	// synchronize new block height to consensus and sync module
 	chain.msgBus.PublishSafe(msgbus.BlockInfo, blockInfo)
 
@@ -956,6 +991,9 @@ func (chain *BlockCommitterImpl) AddBlock(block *commonPb.Block) (err error) {
 		checkLasts, dbLasts, snapshotLasts, confLasts, poolLasts, pubEvent, otherLasts, elapsed, interval)
 	if localconf.ChainMakerConfig.MonitorConfig.Enabled {
 		chain.metricBlockCommitTime.WithLabelValues(chain.chainId).Observe(float64(elapsed) / 1000)
+		chain.metricBlockIntervalTime.WithLabelValues(chain.chainId).Observe(float64(interval) / 1000)
+		chain.metricTpsGauge.WithLabelValues(chain.chainId).
+			Set(float64(lastProposed.Header.TxCount) / (float64(interval) / 1000))
 	}
 	return nil
 }

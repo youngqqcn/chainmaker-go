@@ -18,30 +18,34 @@ import (
 )
 
 type CommitBlock struct {
-	store                 protocol.BlockchainStore
-	log                   protocol.Logger
-	snapshotManager       protocol.SnapshotManager
-	ledgerCache           protocol.LedgerCache
-	chainConf             protocol.ChainConf
-	msgBus                msgbus.MessageBus
-	metricBlockSize       *prometheus.HistogramVec // metric block size
-	metricBlockCounter    *prometheus.CounterVec   // metric block counter
-	metricTxCounter       *prometheus.CounterVec   // metric transaction counter
-	metricBlockCommitTime *prometheus.HistogramVec // metric block commit time
+	store                   protocol.BlockchainStore
+	log                     protocol.Logger
+	snapshotManager         protocol.SnapshotManager
+	ledgerCache             protocol.LedgerCache
+	chainConf               protocol.ChainConf
+	msgBus                  msgbus.MessageBus
+	metricBlockSize         *prometheus.HistogramVec // metric block size
+	metricBlockCounter      *prometheus.CounterVec   // metric block counter
+	metricTxCounter         *prometheus.CounterVec   // metric transaction counter
+	metricTpsGauge          *prometheus.GaugeVec     // metric real-time transaction per second (TPS)
+	metricBlockCommitTime   *prometheus.HistogramVec // metric block commit time
+	metricBlockIntervalTime *prometheus.HistogramVec // metric block interval time
 }
 
 type CommitBlockConf struct {
-	Store                 protocol.BlockchainStore
-	Log                   protocol.Logger
-	SnapshotManager       protocol.SnapshotManager
-	TxPool                protocol.TxPool
-	LedgerCache           protocol.LedgerCache
-	ChainConf             protocol.ChainConf
-	MsgBus                msgbus.MessageBus
-	MetricBlockSize       *prometheus.HistogramVec // metric block size
-	MetricBlockCounter    *prometheus.CounterVec   // metric block counter
-	MetricTxCounter       *prometheus.CounterVec   // metric transaction counter
-	MetricBlockCommitTime *prometheus.HistogramVec // metric block commit time
+	Store                   protocol.BlockchainStore
+	Log                     protocol.Logger
+	SnapshotManager         protocol.SnapshotManager
+	TxPool                  protocol.TxPool
+	LedgerCache             protocol.LedgerCache
+	ChainConf               protocol.ChainConf
+	MsgBus                  msgbus.MessageBus
+	MetricBlockSize         *prometheus.HistogramVec // metric block size
+	MetricBlockCounter      *prometheus.CounterVec   // metric block counter
+	MetricTxCounter         *prometheus.CounterVec   // metric transaction counter
+	MetricTpsGauge          *prometheus.GaugeVec     // metric real-time transaction per second (TPS)
+	MetricBlockCommitTime   *prometheus.HistogramVec // metric block commit time
+	MetricBlockIntervalTime *prometheus.HistogramVec // metric block interval time
 }
 
 func NewCommitBlock(cbConf *CommitBlockConf) *CommitBlock {
@@ -58,6 +62,8 @@ func NewCommitBlock(cbConf *CommitBlockConf) *CommitBlock {
 		commitBlock.metricBlockCounter = cbConf.MetricBlockCounter
 		commitBlock.metricTxCounter = cbConf.MetricTxCounter
 		commitBlock.metricBlockCommitTime = cbConf.MetricBlockCommitTime
+		commitBlock.metricBlockIntervalTime = cbConf.MetricBlockIntervalTime
+		commitBlock.metricTpsGauge = cbConf.MetricTpsGauge
 	}
 	return commitBlock
 }

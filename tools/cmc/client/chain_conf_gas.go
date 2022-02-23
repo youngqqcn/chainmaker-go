@@ -53,13 +53,11 @@ func enableOrDisableGasCMD() *cobra.Command {
 			if err != nil {
 				return err
 			}
-
-			if chainConfig.AccountConfig == nil {
-				fmt.Println("unsupport gas feature")
-				return nil
+			isGasEnabled := false
+			if chainConfig.AccountConfig != nil {
+				isGasEnabled = chainConfig.AccountConfig.EnableGas
 			}
 
-			var isGasEnabled = chainConfig.AccountConfig.EnableGas
 			if (gasEnable && !isGasEnabled) || (!gasEnable && isGasEnabled) {
 				payload, err := cc.CreateChainConfigEnableOrDisableGasPayload()
 				if err != nil {
