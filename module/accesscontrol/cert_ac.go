@@ -533,8 +533,6 @@ func (cp *certACProvider) systemContractCallbackCertManagementAliasDeleteCase(pa
 	return nil
 }
 
-
-
 // GetHashAlg return hash algorithm the access control provider uses
 func (cp *certACProvider) GetHashAlg() string {
 	return cp.acService.hashType
@@ -549,8 +547,7 @@ func (cp *certACProvider) NewMember(pbMember *pbac.Member) (protocol.Member, err
 		return nil, fmt.Errorf("new member failed: the member type does not match")
 	}
 
-	if pbMember.MemberType == pbac.MemberType_CERT_HASH	|| 
-		pbMember.MemberType == pbac.MemberType_ALIAS {
+	if pbMember.MemberType == pbac.MemberType_CERT_HASH || pbMember.MemberType == pbac.MemberType_ALIAS {
 		memInfoBytes, ok := cp.lookUpCertCache(pbMember.MemberInfo)
 		if !ok {
 			return nil, fmt.Errorf("new member failed, the provided certificate ID is not registered")
@@ -769,7 +766,7 @@ func (cp *certACProvider) refineEndorsements(endorsements []*common.EndorsementE
 			cp.acService.log.Debugf("target endorser uses full certificate")
 			memInfo = string(endorsement.Signer.MemberInfo)
 		}
-		if endorsement.Signer.MemberType == pbac.MemberType_CERT_HASH || 
+		if endorsement.Signer.MemberType == pbac.MemberType_CERT_HASH ||
 			endorsement.Signer.MemberType == pbac.MemberType_ALIAS {
 			cp.acService.log.Debugf("target endorser uses compressed certificate")
 			memInfoBytes, ok := cp.lookUpCertCache(endorsement.Signer.MemberInfo)
