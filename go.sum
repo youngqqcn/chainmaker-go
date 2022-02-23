@@ -117,8 +117,8 @@ chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20220126115039-40c207e4a3c5 h
 chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20220126115039-40c207e4a3c5/go.mod h1:ON/h/++oVNGtxL5uougpUXuLchofZbKruatit+nHkq8=
 chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20220124125450-af7817cb999a h1:TK4mMrZicopvEn94nHPxFPzcQAbLFNKUexNKYagM238=
 chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20220124125450-af7817cb999a/go.mod h1:kQZcWPX/aJq2JJ/0oPF2h3QgLR3eryCoqwdVUDGGd+w=
-chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20220222125305-62c1f88e707b h1:lFfpGMEVVtmcDpR5ixcwIQp2HfuB4HKVty6UMZOabN4=
-chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20220222125305-62c1f88e707b/go.mod h1:h5tzt3/8WvMkOvBGQYH6V/IDIQiFIaibCvyqcsbXOiM=
+chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20220223062538-5503a7415fe3 h1:T/7pkly3ZznPFdbJur7NQ/x57+DLkAh1+t1iOJBkBPg=
+chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20220223062538-5503a7415fe3/go.mod h1:h5tzt3/8WvMkOvBGQYH6V/IDIQiFIaibCvyqcsbXOiM=
 chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211203151445-3e9efc3f8ad6/go.mod h1:qh0QJ2ZQuMnItJn0l9vOSPscgD3fdv0IteAniiOfpqY=
 chainmaker.org/chainmaker/vm-native/v2 v2.1.1-0.20211214132707-4ab8964bd865/go.mod h1:RokdcVZic01QhX6PyM0RN1kmFs4EtizLxmfz+VCs71Q=
 chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20220121105247-d319396719ed/go.mod h1:f1EAHzS/Z0VPMtcXgGn9MPcEGL8OAwd6rxd0plw/qqw=
