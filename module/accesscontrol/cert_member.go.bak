@@ -27,6 +27,14 @@ import (
 
 var _ protocol.Member = (*certificateMember)(nil)
 
+type CompressType int32
+
+const (
+	CompressType_NONE  	CompressType = 0
+	CompressType_HASH   CompressType = 1
+	CompressType_ALIAS  CompressType = 2
+)
+
 // an instance whose member type is a public key
 type certificateMember struct {
 
@@ -46,7 +54,8 @@ type certificateMember struct {
 	hashType string
 
 	// the certificate is compressed or not
-	isCompressed bool
+	compressType CompressType
+	//isCompressed bool
 }
 
 func (cm *certificateMember) GetMemberId() string {
@@ -84,7 +93,7 @@ func (cm *certificateMember) Verify(hashType string, msg []byte, sig []byte) err
 }
 
 func (cm *certificateMember) GetMember() (*pbac.Member, error) {
-	if cm.isCompressed {
+	if cm.compressType == CompressType_HASH {
 		id, err := utils.GetCertificateIdFromDER(cm.cert.Raw, cm.hashType)
 		if err != nil {
 			return nil, fmt.Errorf("get pb member failed: [%s]", err.Error())
@@ -93,6 +102,16 @@ func (cm *certificateMember) GetMember() (*pbac.Member, error) {
 			OrgId:      cm.orgId,
 			MemberInfo: id,
 			MemberType: pbac.MemberType_CERT_HASH,
+		}, nil
+	} else if cm.compressType == CompressType_ALIAS {
+		id, err := utils.GetCertificateIdFromDER(cm.cert.Raw, cm.hashType)
+		if err != nil {
+			return nil, fmt.Errorf("get pb member failed: [%s]", err.Error())
+		}
+		return &pbac.Member{
+			OrgId:      cm.orgId,
+			MemberInfo: id,
+			MemberType: pbac.MemberType_ALIAS,
 		}, nil
 	}
 
@@ -207,12 +226,9 @@ func newCertMemberFromPb(member *pbac.Member, acs *accessControlService) (*certi
 		return newMemberFromCertPem(member.OrgId, acs.hashType, member.MemberInfo, false)
 	}
 
-	if member.MemberType == pbac.MemberType_CERT_HASH {
+	if member.MemberType == pbac.MemberType_CERT_HASH || 
+		member.MemberType == pbac.MemberType_ALIAS {
 		return newMemberFromCertPem(member.OrgId, acs.hashType, member.MemberInfo, true)
-	}
-
-	if member.MemberType == pbac.MemberType_ALIAS {
-		return newMemberFromCertPem(member.OrgId, acs.hashType, member.MemberInfo, false)
 	}
 
 	return nil, fmt.Errorf("setup member failed, unsupport cert member type")

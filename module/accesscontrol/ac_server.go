@@ -29,6 +29,8 @@ import (
 const (
 	LIMIT_DELIMITER              = "/"
 	PARAM_CERTS                  = "certs"
+	PARAM_CERTHASHES             = "cert_hashes"
+	PARAM_ALIASES                = "aliases"
 	PUBLIC_KEYS                  = "pubkey"
 	unsupportedRuleErrorTemplate = "bad configuration: unsupported rule [%s]"
 )
@@ -291,6 +293,10 @@ func (acs *accessControlService) createDefaultResourcePolicy(localOrgId string) 
 		syscontract.CertManageFunction_CERTS_QUERY.String(), policySpecialRead)
 	acs.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
 		syscontract.CertManageFunction_CERT_ADD.String(), policySpecialWrite)
+	acs.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERTS_ALIAS_QUERY.String(), policySpecialRead)
+	acs.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERT_ALIAS_ADD.String(), policySpecialWrite)
 
 	// Disable pubkey management for cert mode
 	acs.exceptionalPolicyMap.Store(syscontract.SystemContract_PUBKEY_MANAGE.String()+"-"+
@@ -380,6 +386,12 @@ func (acs *accessControlService) createDefaultResourcePolicy(localOrgId string) 
 		syscontract.CertManageFunction_CERTS_DELETE.String(), policyAdmin)
 	acs.resourceNamePolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
 		syscontract.CertManageFunction_CERTS_REVOKE.String(), policyAdmin)
+	// for cert_alias
+	acs.resourceNamePolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERT_ALIAS_UPDATE.String(), policyAdmin)
+	acs.resourceNamePolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERTS_ALIAS_DELETE.String(), policyAdmin)
+
 }
 
 func (acs *accessControlService) createDefaultResourcePolicyForPK(localOrgId string) {
@@ -451,6 +463,13 @@ func (acs *accessControlService) createDefaultResourcePolicyForPK(localOrgId str
 		syscontract.CertManageFunction_CERTS_DELETE.String(), policyForbidden)
 	acs.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
 		syscontract.CertManageFunction_CERTS_REVOKE.String(), policyForbidden)
+
+	acs.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERT_ALIAS_ADD.String(), policyForbidden)
+	acs.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERT_ALIAS_UPDATE.String(), policyForbidden)
+	acs.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERTS_ALIAS_DELETE.String(), policyForbidden)
 
 	// Disable trust member management for pk mode
 	acs.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+

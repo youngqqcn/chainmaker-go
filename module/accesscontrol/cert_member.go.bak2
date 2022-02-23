@@ -47,6 +47,9 @@ type certificateMember struct {
 
 	// the certificate is compressed or not
 	isCompressed bool
+	
+	// the alias for cert
+	alias string
 }
 
 func (cm *certificateMember) GetMemberId() string {
@@ -85,6 +88,13 @@ func (cm *certificateMember) Verify(hashType string, msg []byte, sig []byte) err
 
 func (cm *certificateMember) GetMember() (*pbac.Member, error) {
 	if cm.isCompressed {
+		if cm.alias != "" {
+			return &pbac.Member{
+				OrgId:      cm.orgId,
+				MemberInfo: alias,
+				MemberType: pbac.MemberType_ALIAS,
+			}, nil
+		}
 		id, err := utils.GetCertificateIdFromDER(cm.cert.Raw, cm.hashType)
 		if err != nil {
 			return nil, fmt.Errorf("get pb member failed: [%s]", err.Error())
@@ -105,7 +115,7 @@ func (cm *certificateMember) GetMember() (*pbac.Member, error) {
 }
 
 func newCertMemberFromParam(orgId, role, hashType string, isCompressed bool,
-	certPEM []byte) (*certificateMember, error) {
+	certPEM []byte, alias string) (*certificateMember, error) {
 	var (
 		cert *bcx509.Certificate
 		err  error
@@ -141,12 +151,14 @@ func newCertMemberFromParam(orgId, role, hashType string, isCompressed bool,
 		cert:         cert,
 		hashType:     hashType,
 		isCompressed: isCompressed,
+		alias:        alias,
 	}, nil
 }
 
-func newMemberFromCertPem(orgId, hashType string, certPEM []byte, isCompressed bool) (*certificateMember, error) {
+func newMemberFromCertPem(orgId, hashType string, certPEM []byte, isCompressed bool, alias string) (*certificateMember, error) {
 	var member certificateMember
 	member.isCompressed = isCompressed
+	member.alias = alias
 
 	var cert *bcx509.Certificate
 	var err error
@@ -201,20 +213,17 @@ func newMemberFromCertPem(orgId, hashType string, certPEM []byte, isCompressed b
 	return &member, nil
 }
 
-func newCertMemberFromPb(member *pbac.Member, acs *accessControlService) (*certificateMember, error) {
+func newCertMemberFromPb(member *pbac.Member, acs *accessControlService, alias string) (*certificateMember, error) {
 
 	if member.MemberType == pbac.MemberType_CERT {
-		return newMemberFromCertPem(member.OrgId, acs.hashType, member.MemberInfo, false)
+		return newMemberFromCertPem(member.OrgId, acs.hashType, member.MemberInfo, false, nil)
 	}
 
-	if member.MemberType == pbac.MemberType_CERT_HASH {
-		return newMemberFromCertPem(member.OrgId, acs.hashType, member.MemberInfo, true)
+	if member.MemberType == pbac.MemberType_CERT_HASH || 
+		member.MemberType == pbac.MemberType_ALIAS {
+		return newMemberFromCertPem(member.OrgId, acs.hashType, member.MemberInfo, true, alias)
 	}
-
-	if member.MemberType == pbac.MemberType_ALIAS {
-		return newMemberFromCertPem(member.OrgId, acs.hashType, member.MemberInfo, false)
-	}
-
+	
 	return nil, fmt.Errorf("setup member failed, unsupport cert member type")
 }
 
@@ -243,7 +252,7 @@ func (scm *signingCertMember) Sign(hashType string, msg []byte) ([]byte, error) 
 func NewCertSigningMember(hashType string, member *pbac.Member, privateKeyPem,
 	password string) (protocol.SigningMember, error) {
 
-	certMember, err := newMemberFromCertPem(member.OrgId, hashType, member.MemberInfo, false)
+	certMember, err := newMemberFromCertPem(member.OrgId, hashType, member.MemberInfo, false, nil)
 	if err != nil {
 		return nil, err
 	}

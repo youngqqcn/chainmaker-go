@@ -487,6 +487,54 @@ func (cp *certACProvider) systemContractCallbackCertManagementCertRevokeCase(pay
 	return nil
 }
 
+func (cp *certACProvider) systemContractCallbackCertManagementCertsDeleteCase(payload *common.Payload) error {
+	cp.acService.log.Debugf("callback for certsdelete")
+	for _, param := range payload.Parameters {
+		if param.Key == PARAM_CERTHASHES {
+			certHashStr := strings.TrimSpace(string(param.Value))
+			certHashes := strings.Split(certHashStr, ",")
+			for _, hash := range certHashes {
+				cp.acService.log.Debugf("certHashes in certsdelete = [%s]", hash)
+				bin, err := hex.DecodeString(string(hash))
+				if err != nil {
+					cp.acService.log.Warnf("decode error for certhash: %s", string(hash))
+					return nil
+				}
+				_, ok := cp.certCache.Get(string(bin))
+				if ok {
+					cp.acService.log.Infof("remove certhash from certcache: %s", string(hash))
+					cp.certCache.Remove(string(bin))
+				}
+			}
+
+			return nil
+		}
+	}
+	return nil
+}
+
+func (cp *certACProvider) systemContractCallbackCertManagementAliasDeleteCase(payload *common.Payload) error {
+	cp.acService.log.Debugf("callback for aliasdelete")
+	for _, param := range payload.Parameters {
+		if param.Key == PARAM_ALIASES {
+			names := strings.TrimSpace(string(param.Value))
+			nameList := strings.Split(names, ",")
+			cp.acService.log.Debugf("names in aliasdelete = [%s]", nameList)
+			for _, name := range nameList {
+				_, ok := cp.certCache.Get(string(name))
+				if ok {
+					cp.acService.log.Infof("remove alias from certcache: %s", string(name))
+					cp.certCache.Remove(string(name))
+				}
+			}
+			return nil
+		}
+	}
+	return nil
+}
+
+
+
 // GetHashAlg return hash algorithm the access control provider uses
 func (cp *certACProvider) GetHashAlg() string {
 	return cp.acService.hashType
@@ -496,11 +544,13 @@ func (cp *certACProvider) NewMember(pbMember *pbac.Member) (protocol.Member, err
 
 	var memberTmp *pbac.Member
 	if pbMember.MemberType != pbac.MemberType_CERT &&
+		pbMember.MemberType != pbac.MemberType_ALIAS &&
 		pbMember.MemberType != pbac.MemberType_CERT_HASH {
 		return nil, fmt.Errorf("new member failed: the member type does not match")
 	}
 
-	if pbMember.MemberType == pbac.MemberType_CERT_HASH {
+	if pbMember.MemberType == pbac.MemberType_CERT_HASH	|| 
+		pbMember.MemberType == pbac.MemberType_ALIAS {
 		memInfoBytes, ok := cp.lookUpCertCache(pbMember.MemberInfo)
 		if !ok {
 			return nil, fmt.Errorf("new member failed, the provided certificate ID is not registered")
@@ -719,7 +769,8 @@ func (cp *certACProvider) refineEndorsements(endorsements []*common.EndorsementE
 			cp.acService.log.Debugf("target endorser uses full certificate")
 			memInfo = string(endorsement.Signer.MemberInfo)
 		}
-		if endorsement.Signer.MemberType == pbac.MemberType_CERT_HASH {
+		if endorsement.Signer.MemberType == pbac.MemberType_CERT_HASH || 
+			endorsement.Signer.MemberType == pbac.MemberType_ALIAS {
 			cp.acService.log.Debugf("target endorser uses compressed certificate")
 			memInfoBytes, ok := cp.lookUpCertCache(endorsement.Signer.MemberInfo)
 			if !ok {
@@ -1054,6 +1105,10 @@ func (cp *certACProvider) systemContractCallbackCertManagementCase(payloadBytes 
 		return cp.systemContractCallbackCertManagementCertUnfreezeCase(&payload)
 	case syscontract.CertManageFunction_CERTS_REVOKE.String():
 		return cp.systemContractCallbackCertManagementCertRevokeCase(&payload)
+	case syscontract.CertManageFunction_CERTS_DELETE.String():
+		return cp.systemContractCallbackCertManagementCertsDeleteCase(&payload)
+	case syscontract.CertManageFunction_CERTS_ALIAS_DELETE.String():
+		return cp.systemContractCallbackCertManagementAliasDeleteCase(&payload)
 	default:
 		cp.acService.log.Debugf("unwatched method [%s]", payload.Method)
 		return nil
