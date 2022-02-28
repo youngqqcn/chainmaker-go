@@ -157,6 +157,7 @@ func ClientCMD() *cobra.Command {
 	clientCmd.AddCommand(certManageCMD())
 	clientCmd.AddCommand(blockChainsCMD())
 	clientCmd.AddCommand(enableOrDisableGasCMD())
+	clientCmd.AddCommand(certAliasCMD())
 
 	return clientCmd
 }
