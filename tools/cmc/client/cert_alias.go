@@ -10,7 +10,7 @@ package client
 import (
 	"errors"
 	"fmt"
-	"os"
+	"io/ioutil"
 	"strings"
 
 	"chainmaker.org/chainmaker-go/tools/cmc/util"
@@ -75,7 +75,7 @@ func updateCertByAliasCMD() *cobra.Command {
 			}
 
 			//// 2. update cert alias for myself
-			newCertPEM, err := os.ReadFile(newCertPath)
+			newCertPEM, err := ioutil.ReadFile(newCertPath)
 			if err != nil {
 				return fmt.Errorf("read cert file failed, %s", err)
 			}
