@@ -256,8 +256,10 @@ func FinalizeBlock(
 	block.Header.TxCount = uint32(txCount)
 
 	// TxRoot/RwSetRoot
-	var err error
+	var errs []error
 	txHashes := make([][]byte, txCount)
+	wg := &sync.WaitGroup{}
+	wg.Add(txCount)
 	for i, tx := range block.Txs {
 		// finalize tx, put rwsethash into tx.Result
 		rwSet := txRWSetMap[tx.Payload.TxId]
@@ -268,59 +270,91 @@ func FinalizeBlock(
 				TxWrites: nil,
 			}
 		}
-
-		var rwSetHash []byte
-		rwSetHash, err = utils.CalcRWSetHash(hashType, rwSet)
-		logger.DebugDynamic(func() string {
-			str := fmt.Sprintf("CalcRWSetHash rwset: %+v ,hash: %x", rwSet, rwSetHash)
-			if len(str) > 1024 {
-				str = str[:1024] + " ......"
+		go func(tx *commonPb.Transaction, rwSet *commonPb.TxRWSet, x int) {
+			defer wg.Done()
+			var err error
+			txHashes[x], err = getTxHash(tx, rwSet, hashType, logger)
+			if err != nil {
+				errs = append(errs, err)
 			}
-			return str
+
+		}(tx, rwSet, i)
+	}
+	wg.Wait()
+	if len(errs) > 0 {
+		return errs[0]
+	}
+	wg.Add(3)
+	//calc tx root
+	go func() {
+		defer wg.Done()
+		var err error
+		block.Header.TxRoot, err = hash.GetMerkleRoot(hashType, txHashes)
+		if err != nil {
+			logger.Warnf("get tx merkle root error %s", err)
+			errs = append(errs, err)
+		}
+		logger.DebugDynamic(func() string {
+			return fmt.Sprintf("GetMerkleRoot(%s) get %x", hashType, block.Header.TxRoot)
 		})
+	}()
+	//calc rwset root
+	go func() {
+		defer wg.Done()
+		var err error
+		block.Header.RwSetRoot, err = utils.CalcRWSetRoot(hashType, block.Txs)
 		if err != nil {
-			return err
+			logger.Warnf("get rwset merkle root error %s", err)
+			errs = append(errs, err)
 		}
-		if tx.Result == nil {
-			// in case tx.Result is nil, avoid panic
-			e := fmt.Errorf("tx(%s) result == nil", tx.Payload.TxId)
-			logger.Error(e.Error())
-			return e
-		}
-		tx.Result.RwSetHash = rwSetHash
-		// calculate complete tx hash, include tx.Header, tx.Payload, tx.Result
-		var txHash []byte
-		txHash, err = utils.CalcTxHash(hashType, tx)
+	}()
+	//calc dag hash
+	go func() {
+		defer wg.Done()
+		// DagDigest
+		var dagHash []byte
+		var err error
+		dagHash, err = utils.CalcDagHash(hashType, block.Dag)
 		if err != nil {
-			return err
+			logger.Warnf("get dag hash error %s", err)
+			errs = append(errs, err)
 		}
-		txHashes[i] = txHash
+		block.Header.DagHash = dagHash
+	}()
+	wg.Wait()
+	if len(errs) > 0 {
+		return errs[0]
 	}
-
-	block.Header.TxRoot, err = hash.GetMerkleRoot(hashType, txHashes)
-	if err != nil {
-		logger.Warnf("get tx merkle root error %s", err)
-		return err
-	}
-	logger.DebugDynamic(func() string {
-		return fmt.Sprintf("GetMerkleRoot(%s) get %x", hashType, block.Header.TxRoot)
-	})
-	block.Header.RwSetRoot, err = utils.CalcRWSetRoot(hashType, block.Txs)
-	if err != nil {
-		logger.Warnf("get rwset merkle root error %s", err)
-		return err
-	}
-
-	// DagDigest
-	var dagHash []byte
-	dagHash, err = utils.CalcDagHash(hashType, block.Dag)
-	if err != nil {
-		logger.Warnf("get dag hash error %s", err)
-		return err
-	}
-	block.Header.DagHash = dagHash
-
 	return nil
+}
+func getTxHash(tx *commonPb.Transaction, rwSet *commonPb.TxRWSet, hashType string, logger protocol.Logger) (
+	[]byte, error) {
+	var rwSetHash []byte
+	rwSetHash, err := utils.CalcRWSetHash(hashType, rwSet)
+	logger.DebugDynamic(func() string {
+		str := fmt.Sprintf("CalcRWSetHash rwset: %+v ,hash: %x", rwSet, rwSetHash)
+		if len(str) > 1024 {
+			str = str[:1024] + " ......"
+		}
+		return str
+	})
+	if err != nil {
+		return nil, err
+	}
+	if tx.Result == nil {
+		// in case tx.Result is nil, avoid panic
+		e := fmt.Errorf("tx(%s) result == nil", tx.Payload.TxId)
+		logger.Error(e.Error())
+		return nil, e
+	}
+	tx.Result.RwSetHash = rwSetHash
+	// calculate complete tx hash, include tx.Header, tx.Payload, tx.Result
+	var txHash []byte
+	txHash, err = utils.CalcTxHash(hashType, tx)
+	if err != nil {
+		return nil, err
+	}
+	return txHash, nil
 }
 
 // IsTxCountValid, to check if txcount in block is valid
