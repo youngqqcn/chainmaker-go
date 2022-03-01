@@ -81,7 +81,6 @@ chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20220107184221-3b7ad20fc480/go.mo
 chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20220110033503-d6b4e5a065d9/go.mod h1:7VlxwX9MHyHpfAFw7OW+y7hUqawbp/GZKLeQlRDVZdk=
 chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20220111073502-e71900b9fc57/go.mod h1:SYkMoufkVVj4wI1JOU/YpV4Re4Z2i1WXgk+sn0ulWDk=
 chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20220113081648-bbf6c1946b59/go.mod h1:SYkMoufkVVj4wI1JOU/YpV4Re4Z2i1WXgk+sn0ulWDk=
-chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20220121132530-b83d04e6f3cc h1:p48CMstxSsSJawxgQSKYVaMXewSJ4aRTkL9GnXNNrhs=
 chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20220121132530-b83d04e6f3cc/go.mod h1:SYkMoufkVVj4wI1JOU/YpV4Re4Z2i1WXgk+sn0ulWDk=
 chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20220228111620-71485ecb4450 h1:Rlyottfj8S2bJ8rUkDhXnRUuZw91NMF4vo/rGjZZlhc=
 chainmaker.org/chainmaker/protocol/v2 v2.1.2-0.20220228111620-71485ecb4450/go.mod h1:SYkMoufkVVj4wI1JOU/YpV4Re4Z2i1WXgk+sn0ulWDk=
@@ -120,8 +119,8 @@ chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20220110033929-0723ce6bd6ac/go.mod h
 chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20220114120415-8e1af1e262a7/go.mod h1:GeDrATiYzHJ6tdzV3+81kBjCBy5Bb9fCjTQLZLE6kJo=
 chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20220124072923-e59e8500c1a7 h1:Nai+KPSundHORj3UyDnVLmX6bZLIwgRy2PLgi6GmZ8g=
 chainmaker.org/chainmaker/utils/v2 v2.1.1-0.20220124072923-e59e8500c1a7/go.mod h1:GeDrATiYzHJ6tdzV3+81kBjCBy5Bb9fCjTQLZLE6kJo=
-chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20220228094933-8b2e90afb9e1 h1:ztQTPRK5gLhhVjxW+IBfED2YNxzvMRKsHEL4sBu5UD8=
-chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20220228094933-8b2e90afb9e1/go.mod h1:DcJV8+A2RCcEaDKDFmptTW2Y1JCxFsUpkKM4bAw5+04=
+chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20220301072415-e13a5f8d4662 h1:kxbTJxC2N/6Vewx6V3ePSSquYAKPHjUrirmNxjx2bz4=
+chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20220301072415-e13a5f8d4662/go.mod h1:DcJV8+A2RCcEaDKDFmptTW2Y1JCxFsUpkKM4bAw5+04=
 chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20220124125450-af7817cb999a h1:TK4mMrZicopvEn94nHPxFPzcQAbLFNKUexNKYagM238=
 chainmaker.org/chainmaker/vm-evm/v2 v2.1.1-0.20220124125450-af7817cb999a/go.mod h1:kQZcWPX/aJq2JJ/0oPF2h3QgLR3eryCoqwdVUDGGd+w=
 chainmaker.org/chainmaker/vm-gasm/v2 v2.1.1-0.20220223062538-5503a7415fe3 h1:T/7pkly3ZznPFdbJur7NQ/x57+DLkAh1+t1iOJBkBPg=
