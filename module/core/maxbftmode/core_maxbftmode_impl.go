@@ -17,7 +17,6 @@ import (
 	"chainmaker.org/chainmaker/common/v2/msgbus"
 	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/consensus/maxbft"
-	txpoolpb "chainmaker.org/chainmaker/pb-go/v2/txpool"
 	"chainmaker.org/chainmaker/protocol/v2"
 )
 
@@ -141,10 +140,6 @@ func (c *CoreEngine) OnMessage(message *msgbus.Message) {
 	// 5. receive build proposal signal from maxbft consensus
 
 	switch message.Topic {
-	case msgbus.ProposeState:
-		if proposeStatus, ok := message.Payload.(bool); ok {
-			c.blockProposer.OnReceiveProposeStatusChange(proposeStatus)
-		}
 	case msgbus.VerifyBlock:
 		go func() {
 			if block, ok := message.Payload.(*commonpb.Block); ok {
@@ -162,10 +157,6 @@ func (c *CoreEngine) OnMessage(message *msgbus.Message) {
 				}
 			}
 		}()
-	case msgbus.TxPoolSignal:
-		if signal, ok := message.Payload.(*txpoolpb.TxPoolSignal); ok {
-			c.blockProposer.OnReceiveTxPoolSignal(signal)
-		}
 	case msgbus.BuildProposal:
 		if proposal, ok := message.Payload.(*maxbft.BuildProposal); ok {
 			c.blockProposer.OnReceiveMaxBFTProposal(proposal)
