@@ -533,6 +533,23 @@ func (cp *certACProvider) systemContractCallbackCertManagementAliasDeleteCase(pa
 	return nil
 }
 
+func (cp *certACProvider) systemContractCallbackCertManagementAliasUpdateCase(payload *common.Payload) error {
+	cp.acService.log.Debugf("callback for aliasupdate")
+	for _, param := range payload.Parameters {
+		if param.Key == PARAM_ALIAS {
+			name := strings.TrimSpace(string(param.Value))
+			cp.acService.log.Infof("name in aliasupdate = [%s]", name)
+			_, ok := cp.certCache.Get(string(name))
+			if ok {
+				cp.acService.log.Infof("remove alias from certcache: %s", string(name))
+				cp.certCache.Remove(string(name))
+			}
+			return nil
+		}
+	}
+	return nil
+}
+
 // GetHashAlg return hash algorithm the access control provider uses
 func (cp *certACProvider) GetHashAlg() string {
 	return cp.acService.hashType
@@ -771,7 +788,7 @@ func (cp *certACProvider) refineEndorsements(endorsements []*common.EndorsementE
 			cp.acService.log.Debugf("target endorser uses compressed certificate")
 			memInfoBytes, ok := cp.lookUpCertCache(endorsement.Signer.MemberInfo)
 			if !ok {
-				cp.acService.log.Infof("authentication failed, unknown signer, the provided certificate ID is not registered")
+				cp.acService.log.Warnf("authentication failed, unknown signer, the provided certificate ID is not registered")
 				continue
 			}
 			memInfo = string(memInfoBytes)
@@ -784,7 +801,7 @@ func (cp *certACProvider) refineEndorsements(endorsements []*common.EndorsementE
 				"\n%s", memInfo)
 			remoteMember, certChain, ok, err := cp.verifyPrincipalSignerNotInCache(endorsement, msg, memInfo)
 			if !ok {
-				cp.acService.log.Infof("verify principal signer not in cache failed, [endorsement: %v],[err: %s]",
+				cp.acService.log.Warnf("verify principal signer not in cache failed, [endorsement: %v],[err: %s]",
 					endorsement, err.Error())
 				continue
 			}
@@ -797,7 +814,7 @@ func (cp *certACProvider) refineEndorsements(endorsements []*common.EndorsementE
 		} else {
 			flat, err := cp.verifyPrincipalSignerInCache(signerInfo, endorsement, msg, memInfo)
 			if !flat {
-				cp.acService.log.Infof("verify principal signer in cache failed, [endorsement: %v],[err: %s]",
+				cp.acService.log.Warnf("verify principal signer in cache failed, [endorsement: %v],[err: %s]",
 					endorsement, err.Error())
 				continue
 			}
@@ -817,17 +834,17 @@ func (cp *certACProvider) lookUpCertCache(certId []byte) ([]byte, bool) {
 	if !ok {
 		cp.acService.log.Debugf("looking up the full certificate for the compressed one [%v]", certId)
 		if cp.acService.dataStore == nil {
-			cp.acService.log.Debugf("local data storage is not set up")
+			cp.acService.log.Errorf("local data storage is not set up")
 			return nil, false
 		}
 		certIdHex := hex.EncodeToString(certId)
 		cert, err := cp.acService.dataStore.ReadObject(syscontract.SystemContract_CERT_MANAGE.String(), []byte(certIdHex))
 		if err != nil {
-			cp.acService.log.Debugf("fail to load compressed certificate from local storage [%s]", certIdHex)
+			cp.acService.log.Errorf("fail to load compressed certificate from local storage [%s]", certIdHex)
 			return nil, false
 		}
 		if cert == nil {
-			cp.acService.log.Debugf("cert id [%s] does not exist in local storage", certIdHex)
+			cp.acService.log.Warnf("cert id [%s] does not exist in local storage", certIdHex)
 			return nil, false
 		}
 		cp.addCertCache(string(certId), cert)
@@ -868,7 +885,7 @@ func (cp *certACProvider) verifyPrincipalSignerNotInCache(endorsement *common.En
 
 	if err = remoteMember.Verify(cp.acService.hashType, msg, endorsement.Signature); err != nil {
 		err = fmt.Errorf("member verify signature failed: [%s]", err.Error())
-		cp.acService.log.Debugf("information for invalid signature:\norganization: %s\ncertificate: %s\nmessage: %s\n"+
+		cp.acService.log.Warnf("information for invalid signature:\norganization: %s\ncertificate: %s\nmessage: %s\n"+
 			"signature: %s", endorsement.Signer.OrgId, memInfo, hex.Dump(msg), hex.Dump(endorsement.Signature))
 		ok = false
 		return
@@ -902,7 +919,7 @@ func (cp *certACProvider) verifyPrincipalSignerInCache(signerInfo *memberCached,
 	}
 	if err := signerInfo.member.Verify(cp.acService.hashType, msg, endorsement.Signature); err != nil {
 		err = fmt.Errorf("signer member verify signature failed: [%s]", err.Error())
-		cp.acService.log.Debugf("information for invalid signature:\norganization: %s\ncertificate: %s\nmessage: %s\n"+
+		cp.acService.log.Warnf("information for invalid signature:\norganization: %s\ncertificate: %s\nmessage: %s\n"+
 			"signature: %s", endorsement.Signer.OrgId, memInfo, hex.Dump(msg), hex.Dump(endorsement.Signature))
 		return false, err
 	}
@@ -956,12 +973,12 @@ func (cp *certACProvider) findCertChain(org *organization, certChains [][]*bcx50
 			// check CRL and frozen list
 			err = cp.checkCRL(chain)
 			if err != nil {
-				cp.acService.log.Debugf("authentication failed, CRL: %v", err)
+				cp.acService.log.Warnf("authentication failed, CRL: %v", err)
 				continue
 			}
 			err = cp.checkCertFrozenList(chain)
 			if err != nil {
-				cp.acService.log.Debugf("authentication failed, certificate frozen list: %v", err)
+				cp.acService.log.Warnf("authentication failed, certificate frozen list: %v", err)
 				continue
 			}
 			return chain
@@ -1106,6 +1123,9 @@ func (cp *certACProvider) systemContractCallbackCertManagementCase(payloadBytes 
 		return cp.systemContractCallbackCertManagementCertsDeleteCase(&payload)
 	case syscontract.CertManageFunction_CERTS_ALIAS_DELETE.String():
 		return cp.systemContractCallbackCertManagementAliasDeleteCase(&payload)
+	case syscontract.CertManageFunction_CERT_ALIAS_UPDATE.String():
+		return cp.systemContractCallbackCertManagementAliasUpdateCase(&payload)
+
 	default:
 		cp.acService.log.Debugf("unwatched method [%s]", payload.Method)
 		return nil

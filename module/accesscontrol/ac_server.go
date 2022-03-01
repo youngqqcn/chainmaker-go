@@ -31,6 +31,7 @@ const (
 	PARAM_CERTS                  = "certs"
 	PARAM_CERTHASHES             = "cert_hashes"
 	PARAM_ALIASES                = "aliases"
+	PARAM_ALIAS                  = "alias"
 	PUBLIC_KEYS                  = "pubkey"
 	unsupportedRuleErrorTemplate = "bad configuration: unsupported rule [%s]"
 )
