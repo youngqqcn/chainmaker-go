@@ -90,6 +90,10 @@ func updateCertByAliasCMD() *cobra.Command {
 				endorsementEntrys[i] = e
 			}
 
+			if certAlias == cc.GetLocalCertAlias() {
+				syncResult = false
+			}
+
 			resp, err := cc.UpdateCertByAlias(payload, endorsementEntrys, -1, syncResult)
 			if err != nil {
 				return fmt.Errorf("send request failed, %s", err.Error())
