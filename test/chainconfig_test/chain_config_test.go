@@ -47,7 +47,7 @@ func getChainConfig() *configPb.ChainConfig {
 	var pairs []*commonPb.KeyValuePair
 	//Pairs = append(Pairs, pair)
 
-	sk, member := native.GetUserSK(1)
+	sk, member := native.GetAdminSK(1)
 	resp, err := native.QueryRequest(sk, member, &client, &native.InvokeContractMsg{TxType: commonPb.TxType_QUERY_CONTRACT, ChainId: CHAIN1,
 		ContractName: syscontract.SystemContract_CHAIN_CONFIG.String(), MethodName: syscontract.ChainConfigFunction_GET_CHAIN_CONFIG.String(), Pairs: pairs})
 	if err == nil {
@@ -56,8 +56,9 @@ func getChainConfig() *configPb.ChainConfig {
 		}
 		result := &configPb.ChainConfig{}
 		err = proto.Unmarshal(resp.ContractResult.Result, result)
-		data, _ := json.MarshalIndent(result, "", "\t")
-		fmt.Printf("send tx resp: code:%d, msg:%s, chainConfig:%s\n", resp.Code, resp.Message, data)
+		fmt.Printf("send tx resp: code:%d, msg:%s", resp.Code, resp.Message)
+		//data, _ := json.MarshalIndent(result, "", "\t")
+		//fmt.Printf("send tx resp: code:%d, msg:%s, chainConfig:%s\n", resp.Code, resp.Message, data)
 		fmt.Printf("\n============ get chain config end============\n\n\n")
 		return result
 	}

@@ -455,6 +455,6 @@ func UpdateSysRequest(sk3 crypto.PrivateKey, sender *acPb.Member, msg *InvokeCon
 	}
 
 	req.Sender.Signature = signBytes
-	fmt.Printf("\n\n============request param↓============\n %+v \n============request param↑============\n\n", req)
+	//fmt.Printf("\n\n============request param↓============\n %+v \n============request param↑============\n\n", req)
 	return client.SendRequest(ctx, req)
 }
