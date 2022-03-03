@@ -993,7 +993,6 @@ func (cp *certACProvider) Module() string {
 
 func (cp *certACProvider) Watch(chainConfig *config.ChainConfig) error {
 	cp.acService.hashType = chainConfig.GetCrypto().GetHash()
-	cp.acService.authType = chainConfig.AuthType
 	err := cp.initTrustRootsForUpdatingChainConfig(chainConfig, cp.localOrg.id)
 	if err != nil {
 		return err

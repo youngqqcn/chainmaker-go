@@ -127,5 +127,7 @@ vm:
   user_num: 100
   time_limit: 2
   max_concurrency: 50
+  max_send_msg_size: 10
+  max_recv_msg_size: 10
 
 

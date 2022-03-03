@@ -16,7 +16,6 @@ import (
 	"chainmaker.org/chainmaker-go/module/subscriber"
 	"chainmaker.org/chainmaker/common/v2/msgbus"
 	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
-	"chainmaker.org/chainmaker/pb-go/v2/consensus/maxbft"
 	txpoolpb "chainmaker.org/chainmaker/pb-go/v2/txpool"
 	"chainmaker.org/chainmaker/protocol/v2"
 )
@@ -145,25 +144,25 @@ func (c *CoreEngine) OnMessage(message *msgbus.Message) {
 			c.blockProposer.OnReceiveProposeStatusChange(proposeStatus)
 		}
 	case msgbus.VerifyBlock:
-		if block, ok := message.Payload.(*commonpb.Block); ok {
-			c.BlockVerifier.VerifyBlock(block, protocol.CONSENSUS_VERIFY) //nolint: errcheck
-		}
-	case msgbus.CommitBlock:
-		if block, ok := message.Payload.(*commonpb.Block); ok {
-			if err := c.BlockCommitter.AddBlock(block); err != nil {
-				c.log.Warnf("put block(%d,%x) error %s",
-					block.Header.BlockHeight,
-					block.Header.BlockHash,
-					err.Error())
+		go func() {
+			if block, ok := message.Payload.(*commonpb.Block); ok {
+				c.BlockVerifier.VerifyBlock(block, protocol.CONSENSUS_VERIFY) //nolint: errcheck
 			}
-		}
+		}()
+	case msgbus.CommitBlock:
+		go func() {
+			if block, ok := message.Payload.(*commonpb.Block); ok {
+				if err := c.BlockCommitter.AddBlock(block); err != nil {
+					c.log.Warnf("put block(%d,%x) error %s",
+						block.Header.BlockHeight,
+						block.Header.BlockHash,
+						err.Error())
+				}
+			}
+		}()
 	case msgbus.TxPoolSignal:
 		if signal, ok := message.Payload.(*txpoolpb.TxPoolSignal); ok {
 			c.blockProposer.OnReceiveTxPoolSignal(signal)
-		}
-	case msgbus.BuildProposal:
-		if proposal, ok := message.Payload.(*maxbft.BuildProposal); ok {
-			c.blockProposer.OnReceiveMaxBFTProposal(proposal)
 		}
 	}
 }
