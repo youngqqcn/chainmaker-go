@@ -339,6 +339,11 @@ func (bc *Blockchain) initChainConf() (err error) {
 		return fmt.Errorf("auth type of chain config mismatch the local config")
 	}
 
+	protocol.ParametersValueMaxLength = bc.chainConf.ChainConfig().Block.TxParameterSize * 1024 * 1024
+	if bc.chainConf.ChainConfig().Block.TxParameterSize <= 0 {
+		protocol.ParametersValueMaxLength = protocol.DefaultParametersValueMaxSize * 1024 * 1024
+	}
+
 	bc.chainNodeList, err = bc.chainConf.GetConsensusNodeIdList()
 	if err != nil {
 		bc.log.Errorf("load node list of chain config failed, %s", err)
