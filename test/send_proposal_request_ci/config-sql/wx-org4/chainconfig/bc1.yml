@@ -27,7 +27,6 @@ vm:
     - "evm"
     - "dockergo"
 
-
 # 交易、区块相关配置
 block:
   tx_timestamp_verify: true # 是否需要开启交易时间戳校验

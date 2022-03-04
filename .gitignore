@@ -37,3 +37,5 @@ test/send_proposal_request_ci/chainmaker
 tools/cmc/testdata/crypto-config/
 tools/cmc/testdata/crypto-config-middle-cert/
 tools/cmc/testdata/crypto-config-pk/
+
+test*.txt

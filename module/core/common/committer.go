@@ -23,6 +23,7 @@ type CommitBlock struct {
 	snapshotManager         protocol.SnapshotManager
 	ledgerCache             protocol.LedgerCache
 	chainConf               protocol.ChainConf
+	txFilter                protocol.TxFilter
 	msgBus                  msgbus.MessageBus
 	metricBlockSize         *prometheus.HistogramVec // metric block size
 	metricBlockCounter      *prometheus.CounterVec   // metric block counter
@@ -39,6 +40,7 @@ type CommitBlockConf struct {
 	TxPool                  protocol.TxPool
 	LedgerCache             protocol.LedgerCache
 	ChainConf               protocol.ChainConf
+	TxFilter                protocol.TxFilter
 	MsgBus                  msgbus.MessageBus
 	MetricBlockSize         *prometheus.HistogramVec // metric block size
 	MetricBlockCounter      *prometheus.CounterVec   // metric block counter
@@ -51,6 +53,7 @@ type CommitBlockConf struct {
 func NewCommitBlock(cbConf *CommitBlockConf) *CommitBlock {
 	commitBlock := &CommitBlock{
 		store:           cbConf.Store,
+		txFilter:        cbConf.TxFilter,
 		log:             cbConf.Log,
 		snapshotManager: cbConf.SnapshotManager,
 		ledgerCache:     cbConf.LedgerCache,
@@ -73,7 +76,7 @@ func (cb *CommitBlock) CommitBlock(
 	block *commonpb.Block,
 	rwSetMap map[string]*commonpb.TxRWSet,
 	conEventMap map[string][]*commonpb.ContractEvent) (
-	dbLasts, snapshotLasts, confLasts, otherLasts, pubEvent int64, blockInfo *commonpb.BlockInfo, err error) {
+	dbLasts, snapshotLasts, confLasts, otherLasts, pubEvent, filterLasts int64, blockInfo *commonpb.BlockInfo, err error) {
 	// record block
 	rwSet := RearrangeRWSet(block, rwSetMap)
 	// record contract event
@@ -87,20 +90,29 @@ func (cb *CommitBlock) CommitBlock(
 	}
 	dbLasts = utils.CurrentTimeMillisSeconds() - startDBTick
 
+	// TxFilter adds
+	filterLasts = utils.CurrentTimeMillisSeconds()
+	err = cb.txFilter.Adds(utils.GetTxIds(block.Txs))
+	if err != nil {
+		return
+	}
+	cb.txFilter.SetHeight(block.Header.GetBlockHeight())
+	filterLasts = utils.CurrentTimeMillisSeconds() - filterLasts
+
 	// clear snapshot
 	startSnapshotTick := utils.CurrentTimeMillisSeconds()
 	if err = cb.snapshotManager.NotifyBlockCommitted(block); err != nil {
 		err = fmt.Errorf("notify snapshot error [%d](hash:%x)",
 			block.Header.BlockHeight, block.Header.BlockHash)
 		cb.log.Error(err)
-		return 0, 0, 0, 0, 0, nil, err
+		return 0, 0, 0, 0, 0, 0, nil, err
 	}
 	snapshotLasts = utils.CurrentTimeMillisSeconds() - startSnapshotTick
 
 	// notify chainConf to update config when config block committed
 	startConfTick := utils.CurrentTimeMillisSeconds()
 	if err = NotifyChainConf(block, cb.chainConf); err != nil {
-		return 0, 0, 0, 0, 0, nil, err
+		return 0, 0, 0, 0, 0, 0, nil, err
 	}
 
 	cb.ledgerCache.SetLastCommittedBlock(block)
@@ -138,7 +150,7 @@ func (cb *CommitBlock) CommitBlock(
 	}
 
 	if err = cb.MonitorCommit(blockInfo); err != nil {
-		return 0, 0, 0, 0, 0, nil, err
+		return 0, 0, 0, 0, 0, 0, nil, err
 	}
 	otherLasts = utils.CurrentTimeMillisSeconds() - startOtherTick
 
