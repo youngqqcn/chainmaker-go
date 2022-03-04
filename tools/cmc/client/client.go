@@ -50,15 +50,16 @@ var (
 	userSignKeyFilePath string
 	userSignCrtFilePath string
 
-	blockInterval  uint32
-	nodeOrgId      string
-	nodeIdOld      string
-	nodeId         string
-	nodeIds        string
-	trustRootOrgId string
-	trustRootPaths []string
-	certFilePaths  string
-	certCrlPath    string
+	blockInterval   uint32
+	txParameterSize uint32
+	nodeOrgId       string
+	nodeIdOld       string
+	nodeId          string
+	nodeIds         string
+	trustRootOrgId  string
+	trustRootPaths  []string
+	certFilePaths   string
+	certCrlPath     string
 
 	address   string
 	amount    string
@@ -113,6 +114,7 @@ const (
 	flagUserSignCrtFilePath              = "user-signcrt-file-path"
 	flagTimeout                          = "timeout"
 	flagBlockInterval                    = "block-interval"
+	flagTxParameterSize                  = "tx-parameter-size"
 	flagNodeOrgId                        = "node-org-id"
 	flagNodeIdOld                        = "node-id-old"
 	flagNodeId                           = "node-id"
