@@ -114,6 +114,7 @@ const (
 	flagUserSignCrtFilePath              = "user-signcrt-file-path"
 	flagTimeout                          = "timeout"
 	flagBlockInterval                    = "block-interval"
+	flagTxParameterSize                  = "tx-parameter-size"
 	flagNodeOrgId                        = "node-org-id"
 	flagNodeIdOld                        = "node-id-old"
 	flagNodeId                           = "node-id"
