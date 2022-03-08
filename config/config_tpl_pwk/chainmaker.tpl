@@ -352,25 +352,13 @@ storage:
 vm:
   # Enable docker go virtual machine
   enable_dockervm: {enable_dockervm}
-  # Docker go virtual machine container name
-  dockervm_container_name: {dockervm_container_name}
   # Mount point in chain maker
   dockervm_mount_path: ../data/{org_id}/docker-go
-  # Specify log file path
-  dockervm_log_path: ../log/{org_id}/docker-go
-  # Whether to print log at terminal
-  log_in_console: false
-  # Log level
-  log_level: INFO
-  # Unix domain socket open, used for chainmaker and docker manager communication
-  uds_open: true
-  # Number of user Ids
-  user_num: 100
-  # Timeout per transaction, Unit: second
-  time_limit: 8
-  # Max process for contract
-  max_concurrency: 50
   # Grpc max send message size, Default size is 4, Unit: MB
-  max_send_msg_size: 10
+  max_send_msg_size: 20
   # Grpc max receive message size, Default size is 4, Unit: MB
-  max_recv_msg_size: 10
+  max_recv_msg_size: 20
+  # docker vm contract service host, default 127.0.0.1
+  docker_vm_host: 127.0.0.1
+  # docker vm contract service port, default 22351
+  docker_vm_port: {docker_vm_port}
