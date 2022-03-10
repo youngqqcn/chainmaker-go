@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	chainmaker.org/chainmaker/chainconf/v2 v2.1.2-0.20220304064458-4d8be01d6961
-	chainmaker.org/chainmaker/common/v2 v2.1.2-0.20220301062133-c3850a6efa7f
+	chainmaker.org/chainmaker/common/v2 v2.1.2-0.20220310092807-e24d5d9360d1
 	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211220115802-ad63e1565a38
 	chainmaker.org/chainmaker/consensus-maxbft/v2 v2.0.0-20220214094627-a616ca03d6aa
 	chainmaker.org/chainmaker/consensus-raft/v2 v2.0.0-20220221033200-bcc78c45c616
@@ -29,7 +29,7 @@ require (
 	chainmaker.org/chainmaker/vm-native/v2 v2.1.2-0.20220309080119-a54d1bf30f6e
 	chainmaker.org/chainmaker/vm-wasmer/v2 v2.1.1-0.20220224064011-5a7caccf53ed
 	chainmaker.org/chainmaker/vm-wxvm/v2 v2.1.1-0.20211223061926-78b8d34d3aa3
-	chainmaker.org/chainmaker/vm/v2 v2.1.2-0.20220309092204-09d1810a96e1
+	chainmaker.org/chainmaker/vm/v2 v2.1.2-0.20220310093556-14f20641e7e0
 	code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5
 	github.com/Rican7/retry v0.1.0
 	github.com/Workiva/go-datastructures v1.0.53
