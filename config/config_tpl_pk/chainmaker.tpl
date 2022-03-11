@@ -359,11 +359,11 @@ vm:
   # Unix domain socket open, used for chainmaker and docker manager communication
   uds_open: true
   # Number of user Ids
-  user_num: 100
+  user_num: 1000
   # Timeout per transaction, Unit: second
   time_limit: 8
   # Max process for contract
-  max_concurrency: 50
+  max_concurrency: 500
   # Grpc max send message size, Default size is 4, Unit: MB
   max_send_msg_size: 10
   # Grpc max receive message size, Default size is 4, Unit: MB
