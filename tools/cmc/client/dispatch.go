@@ -110,3 +110,29 @@ func runInvokeContractOnce(client *sdk.ChainClient, contractName, method string,
 	fmt.Printf("INVOKE contract resp, [code:%d]/[msg:%s]/[contractResult:%+v]/[txId:%s]\n", resp.Code, resp.Message,
 		resp.ContractResult, txId)
 }
+
+func invokeContract(client *sdk.ChainClient, contractName, method, txId string, kvs []*sdkPbCommon.KeyValuePair,
+	evmMethod *ethabi.Method, limit *sdkPbCommon.Limit) {
+	resp, err := client.InvokeContractWithLimit(contractName, method, txId, kvs, timeout, syncResult, limit)
+	if err != nil {
+		fmt.Printf("[ERROR] invoke contract failed, %s", err.Error())
+		return
+	}
+
+	if resp.Code != sdkPbCommon.TxStatusCode_SUCCESS {
+		fmt.Printf("[ERROR] invoke contract failed, [code:%d]/[msg:%s]/[txId:%s]\n", resp.Code, resp.Message, txId)
+		return
+	}
+
+	if evmMethod != nil && resp.ContractResult != nil {
+		output, err := util.DecodeOutputs(evmMethod, resp.ContractResult.Result)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		resp.ContractResult.Result = []byte(fmt.Sprintf("%v", output))
+	}
+
+	fmt.Printf("INVOKE contract resp, [code:%d]/[msg:%s]/[contractResult:%+v]/[txId:%s]\n", resp.Code, resp.Message,
+		resp.ContractResult, txId)
+}
