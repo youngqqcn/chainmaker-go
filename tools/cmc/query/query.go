@@ -11,18 +11,17 @@ import (
 )
 
 var (
-	// sdk config file path
-	sdkConfPath string
-
-	chainId string
+	sdkConfPath    string
+	chainId        string
+	enableCertHash bool
+	withRWSet      bool
 )
 
 const (
-	// TODO: wrap common flags to a separate package?
-	//// Common flags
-	// sdk config file path flag
-	flagSdkConfPath = "sdk-conf-path"
-	flagChainId     = "chain-id"
+	flagSdkConfPath    = "sdk-conf-path"
+	flagChainId        = "chain-id"
+	flagEnableCertHash = "enable-cert-hash"
+	flagWithRWSet      = "with-rw-set"
 )
 
 func NewQueryOnChainCMD() *cobra.Command {
@@ -48,4 +47,6 @@ func init() {
 
 	flags.StringVar(&chainId, flagChainId, "", "Chain ID")
 	flags.StringVar(&sdkConfPath, flagSdkConfPath, "", "specify sdk config path")
+	flags.BoolVar(&enableCertHash, flagEnableCertHash, true, "whether enable cert hash")
+	flags.BoolVar(&withRWSet, flagWithRWSet, true, "whether with RWSet")
 }

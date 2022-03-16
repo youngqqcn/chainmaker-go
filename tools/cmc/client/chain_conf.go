@@ -10,9 +10,9 @@ package client
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-
 	"chainmaker.org/chainmaker-go/tools/cmc/util"
+	"github.com/hokaccha/go-prettyjson"
+	"github.com/spf13/cobra"
 )
 
 func chainConfigCMD() *cobra.Command {
@@ -27,6 +27,8 @@ func chainConfigCMD() *cobra.Command {
 	chainConfigCmd.AddCommand(configConsensueNodeIdCMD())
 	chainConfigCmd.AddCommand(configConsensueNodeOrgCMD())
 	chainConfigCmd.AddCommand(configTrustMemberCMD())
+	chainConfigCmd.AddCommand(alterAddrTypeCMD())
+	chainConfigCmd.AddCommand(permissionResourceCMD())
 	return chainConfigCmd
 }
 
@@ -62,6 +64,11 @@ func queryChainConfig() error {
 	if err != nil {
 		return fmt.Errorf("get chain config failed, %s", err.Error())
 	}
-	fmt.Printf("Query chain config resp:\n %+v \n", chainConfig)
+
+	output, err := prettyjson.Marshal(chainConfig)
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(output))
 	return nil
 }

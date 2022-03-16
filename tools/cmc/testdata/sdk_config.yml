@@ -15,6 +15,9 @@ chain_client:
   retry_limit: 10
   # 同步交易结果模式下，每次轮训交易结果时的等待时间，单位：ms 删除此项或设为<=0则使用默认值 500
   retry_interval: 500
+  # 当前签名证书的别名。当设置此配置项时，chain client 对象将自动检查链上是否已添加此别名，如果没有则自动上链此证书别名，
+  # 并且后续所有交易都会使用别名，别名可降低交易体大小。若为空则不启用。
+  alias: my_cert_alias
 
   nodes:
     - # 节点地址，格式为：IP:端口:连接数
@@ -26,7 +29,6 @@ chain_client:
       # 信任证书池路径
       trust_root_paths:
         - "./testdata/crypto-config/wx-org1.chainmaker.org/ca"
-        - "./testdata/crypto-config/wx-org2.chainmaker.org/ca"
       # TLS hostname
       tls_host_name: "chainmaker.org"
   archive:
@@ -35,8 +37,8 @@ chain_client:
     dest: "root:123456:localhost:3306"
     secret_key: xxx
   rpc_client:
-    # grpc客户端最大接受容量(MB)
-    max_receive_message_size: 16
+    max_receive_message_size: 16 # grpc客户端接收消息时，允许单条message大小的最大值(MB)
+    max_send_message_size: 16 # grpc客户端发送消息时，允许单条message大小的最大值(MB)
   pkcs11:
     enabled: false # pkcs11 is not used by default
     library: /usr/local/lib64/pkcs11/libupkcs11.so # path to the .so file of pkcs11 interface

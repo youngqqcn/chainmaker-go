@@ -17,15 +17,15 @@ import (
 	"strings"
 	"time"
 
-	"chainmaker.org/chainmaker-go/blockchain"
+	"chainmaker.org/chainmaker-go/module/blockchain"
 	"chainmaker.org/chainmaker/common/v2/ca"
 	"chainmaker.org/chainmaker/common/v2/crypto"
 	"chainmaker.org/chainmaker/common/v2/crypto/hash"
 	"chainmaker.org/chainmaker/common/v2/monitor"
-	"chainmaker.org/chainmaker/localconf/v2"
-	"chainmaker.org/chainmaker/logger/v2"
+	localconf "chainmaker.org/chainmaker/localconf/v2"
+	logger "chainmaker.org/chainmaker/logger/v2"
 	apiPb "chainmaker.org/chainmaker/pb-go/v2/api"
-	"chainmaker.org/chainmaker/protocol/v2"
+	protocol "chainmaker.org/chainmaker/protocol/v2"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
@@ -56,9 +56,6 @@ const (
 	// subscriber ratelimit config
 	subscriberRateLimitDefaultTokenPerSecond  = 1000
 	subscriberRateLimitDefaultTokenBucketSize = 1000
-
-	maxRecvMessageSize = 10 * 1024 * 1024 // 10 MiB
-	maxSendMessageSize = 10 * 1024 * 1024 // 10 MiB
 )
 
 // TLS Mode
@@ -345,8 +342,8 @@ func newGrpc(chainMakerServer *blockchain.ChainMakerServer) (*grpc.Server, error
 		opts = append(opts, grpc.Creds(*c))
 	}
 
-	opts = append(opts, grpc.MaxSendMsgSize(maxSendMessageSize))
-	opts = append(opts, grpc.MaxRecvMsgSize(maxRecvMessageSize))
+	opts = append(opts, grpc.MaxSendMsgSize(localconf.ChainMakerConfig.RpcConfig.MaxSendMsgSize))
+	opts = append(opts, grpc.MaxRecvMsgSize(localconf.ChainMakerConfig.RpcConfig.MaxRecvMsgSize))
 
 	//params := grpc.KeepaliveParams(keepalive.ServerParameters{
 	//	Time:    10 * time.Second,

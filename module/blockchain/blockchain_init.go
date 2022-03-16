@@ -13,28 +13,27 @@ import (
 	"fmt"
 	"strings"
 
-	"chainmaker.org/chainmaker/store/v2"
-
-	componentVm "chainmaker.org/chainmaker-go/vm"
-
-	"chainmaker.org/chainmaker-go/accesscontrol"
-	"chainmaker.org/chainmaker-go/consensus"
-	"chainmaker.org/chainmaker-go/core"
-	"chainmaker.org/chainmaker-go/core/cache"
-	providerConf "chainmaker.org/chainmaker-go/core/provider/conf"
-	"chainmaker.org/chainmaker-go/net"
-	"chainmaker.org/chainmaker-go/snapshot"
-	"chainmaker.org/chainmaker-go/subscriber"
-	blockSync "chainmaker.org/chainmaker-go/sync"
-	"chainmaker.org/chainmaker-go/txpool"
+	"chainmaker.org/chainmaker-go/module/accesscontrol"
+	"chainmaker.org/chainmaker-go/module/consensus"
+	"chainmaker.org/chainmaker-go/module/core"
+	"chainmaker.org/chainmaker-go/module/core/cache"
+	providerConf "chainmaker.org/chainmaker-go/module/core/provider/conf"
+	"chainmaker.org/chainmaker-go/module/net"
+	"chainmaker.org/chainmaker-go/module/snapshot"
+	"chainmaker.org/chainmaker-go/module/subscriber"
+	blockSync "chainmaker.org/chainmaker-go/module/sync"
+	"chainmaker.org/chainmaker-go/module/txpool"
+	componentVm "chainmaker.org/chainmaker-go/module/vm"
 	"chainmaker.org/chainmaker/chainconf/v2"
 	"chainmaker.org/chainmaker/common/v2/container"
+	consensusUtils "chainmaker.org/chainmaker/consensus-utils/v2"
 	"chainmaker.org/chainmaker/localconf/v2"
 	"chainmaker.org/chainmaker/logger/v2"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	consensusPb "chainmaker.org/chainmaker/pb-go/v2/consensus"
 	storePb "chainmaker.org/chainmaker/pb-go/v2/store"
 	"chainmaker.org/chainmaker/protocol/v2"
+	"chainmaker.org/chainmaker/store/v2"
 	"chainmaker.org/chainmaker/store/v2/conf"
 	"chainmaker.org/chainmaker/utils/v2"
 	"chainmaker.org/chainmaker/vm/v2"
@@ -106,12 +105,66 @@ func (bc *Blockchain) Init() (err error) {
 	return bc.initExtModules(extModules)
 }
 
+// Init all the modules.
+func (bc *Blockchain) InitForRebuildDbs() (err error) {
+	baseModules := []map[string]func() error{
+		// init Subscriber
+		{moduleNameSubscriber: bc.initSubscriber},
+		// init store module
+		{moduleNameStore: bc.initStore},
+		// init old store module
+		{moduleNameStore: bc.initOldStore},
+		// init ledger module
+		{moduleNameLedger: bc.initCache},
+		// init chain config , must latter than store module
+		{moduleNameChainConf: bc.initChainConf},
+	}
+	if err := bc.initBaseModules(baseModules); err != nil {
+		return err
+	}
+	var extModules []map[string]func() error
+	if bc.getConsensusType() == consensusPb.ConsensusType_SOLO {
+		// solo
+		extModules = []map[string]func() error{
+			// init access control
+			{moduleNameAccessControl: bc.initAC},
+			// init vm instances and module
+			{moduleNameVM: bc.initVM},
+			// init transaction pool
+			{moduleNameTxPool: bc.initTxPool},
+			// init core engine
+			{moduleNameCore: bc.initCore},
+			// init consensus module
+			{moduleNameConsensus: bc.initConsensus},
+		}
+	} else {
+		// not solo
+		extModules = []map[string]func() error{
+			// init access control
+			{moduleNameAccessControl: bc.initAC},
+			// init net service
+			//{moduleNameNetService: bc.initNetService},
+			// init vm instances and module
+			{moduleNameVM: bc.initVM},
+			// init transaction pool
+			{moduleNameTxPool: bc.initTxPool},
+			// init core engine
+			{moduleNameCore: bc.initCore},
+			// init consensus module
+			{moduleNameConsensus: bc.initConsensus},
+			// init sync service module
+			//{moduleNameSync: bc.initSync},
+		}
+	}
+	bc.log.Debug("start to init blockchain ...")
+	return bc.initExtModules(extModules)
+}
 func (bc *Blockchain) initBaseModules(baseModules []map[string]func() error) (err error) {
 	moduleNum := len(baseModules)
 	for idx, baseModule := range baseModules {
 		for name, initFunc := range baseModule {
 			if err := initFunc(); err != nil {
-				bc.log.Errorf("init module[%s] failed, %s", name, err)
+				bc.log.Errorf("init base module[%s] failed, %s", name, err)
 				return err
 			}
 			bc.log.Infof("BASE INIT STEP (%d/%d) => init base[%s] success :)", idx+1, moduleNum, name)
@@ -125,10 +178,10 @@ func (bc *Blockchain) initExtModules(extModules []map[string]func() error) (err 
 	for idx, initModule := range extModules {
 		for name, initFunc := range initModule {
 			if err := initFunc(); err != nil {
-				bc.log.Errorf("init module[%s] failed, %s", name, err)
+				bc.log.Errorf("init ext module[%s] failed, %s", name, err)
 				return err
 			}
-			bc.log.Infof("MODULE INIT STEP (%d/%d) => init module[%s] success :)", idx+1, moduleNum, name)
+			bc.log.Infof("MODULE INIT STEP (%d/%d) => init ext module[%s] success :)", idx+1, moduleNum, name)
 		}
 	}
 	return
@@ -162,8 +215,8 @@ func (bc *Blockchain) initStore() (err error) {
 	if err != nil {
 		return err
 	}
-	config := &conf.StorageConfig{}
-	err = mapstructure.Decode(localconf.ChainMakerConfig.StorageConfig, config)
+	config, err := conf.NewStorageConfig(localconf.ChainMakerConfig.StorageConfig)
+	//err = mapstructure.Decode(localconf.ChainMakerConfig.StorageConfig, config)
 	if err != nil {
 		return err
 	}
@@ -190,6 +243,58 @@ func (bc *Blockchain) initStore() (err error) {
 	return
 }
 
+func (bc *Blockchain) initOldStore() (err error) {
+	_, ok := bc.initModules[moduleNameOldStore]
+	if ok {
+		bc.log.Infof("store module existed, ignore.")
+		return
+	}
+	var storeFactory store.Factory // nolint: typecheck
+	storeLogger := logger.GetLoggerByChain(logger.MODULE_STORAGE, bc.chainId)
+	err = container.Register(func() protocol.Logger { return storeLogger },
+		container.Name("oldStore"))
+	if err != nil {
+		return err
+	}
+	config := &conf.StorageConfig{}
+	err = mapstructure.Decode(localconf.ChainMakerConfig.StorageConfig, config)
+	timeS, _ := localconf.ChainMakerConfig.StorageConfig["back_path"].(string)
+	config.StorePath = config.StorePath + "-" + timeS
+	config.BlockDbConfig.LevelDbConfig["store_path"] =
+		config.BlockDbConfig.LevelDbConfig["store_path"].(string) + "-" + timeS
+	config.StateDbConfig.LevelDbConfig["store_path"] =
+		config.StateDbConfig.LevelDbConfig["store_path"].(string) + "-" + timeS
+	config.ResultDbConfig.LevelDbConfig["store_path"] =
+		config.ResultDbConfig.LevelDbConfig["store_path"].(string) + "-" + timeS
+	config.HistoryDbConfig.LevelDbConfig["store_path"] =
+		config.HistoryDbConfig.LevelDbConfig["store_path"].(string) + "-" + timeS
+	if config.TxExistDbConfig != nil {
+		config.TxExistDbConfig.LevelDbConfig["store_path"] =
+			config.TxExistDbConfig.LevelDbConfig["store_path"].(string) + "-" + timeS
+	}
+	if err != nil {
+		return err
+	}
+	//p11Handle, err := localconf.ChainMakerConfig.GetP11Handle()
+	err = container.Register(localconf.ChainMakerConfig.GetP11Handle)
+	if err != nil {
+		return err
+	}
+	err = container.Register(storeFactory.NewStore,
+		container.Parameters(map[int]interface{}{0: bc.chainId, 1: config}),
+		container.DependsOn(map[int]string{2: "oldStore"}),
+		container.Name(bc.chainId))
+	if err != nil {
+		return err
+	}
+	err = container.Resolve(&bc.oldStore, container.ResolveName(bc.chainId))
+	if err != nil {
+		bc.log.Errorf("new store failed, %s", err.Error())
+		return err
+	}
+	bc.initModules[moduleNameOldStore] = struct{}{}
+	return
+}
 func (bc *Blockchain) initChainConf() (err error) {
 	_, ok := bc.initModules[moduleNameChainConf]
 	if ok {
@@ -232,6 +337,11 @@ func (bc *Blockchain) initChainConf() (err error) {
 
 	if authType != localAuthType {
 		return fmt.Errorf("auth type of chain config mismatch the local config")
+	}
+
+	protocol.ParametersValueMaxLength = bc.chainConf.ChainConfig().Block.TxParameterSize * 1024 * 1024
+	if bc.chainConf.ChainConfig().Block.TxParameterSize <= 0 {
+		protocol.ParametersValueMaxLength = protocol.DefaultParametersValueMaxSize * 1024 * 1024
 	}
 
 	bc.chainNodeList, err = bc.chainConf.GetConsensusNodeIdList()
@@ -371,7 +481,7 @@ func (bc *Blockchain) initAC() (err error) {
 			return
 		}
 	case protocol.PermissionedWithKey, protocol.Public:
-		bc.identity, err = accesscontrol.InitPKSigningMember(bc.ac, nodeConfig.OrgId,
+		bc.identity, err = accesscontrol.InitPKSigningMember(bc.ac.GetHashAlg(), nodeConfig.OrgId,
 			nodeConfig.PrivKeyFile, nodeConfig.PrivKeyPassword)
 		if err != nil {
 			bc.log.Errorf("initialize identity failed, %s", err.Error())
@@ -464,12 +574,7 @@ func (bc *Blockchain) initVM() (err error) {
 			)
 		*/
 
-		chainConfig, err := chainconf.Genesis(bc.genesis)
-		if err != nil {
-			bc.log.Errorf("invoke chain config genesis failed, %s", err)
-			return err
-		}
-
+		chainConfig := bc.chainConf.ChainConfig()
 		supportedVmManagerList := make(map[common.RuntimeType]protocol.VmInstancesManager)
 
 		for _, vmType := range chainConfig.Vm.SupportList {
@@ -516,12 +621,7 @@ func (bc *Blockchain) initVM() (err error) {
 			)
 		*/
 
-		chainConfig, err := chainconf.Genesis(bc.genesis)
-		if err != nil {
-			bc.log.Errorf("invoke chain config genesis failed, %s", err)
-			return err
-		}
-
+		chainConfig := bc.chainConf.ChainConfig()
 		supportedVmManagerList := make(map[common.RuntimeType]protocol.VmInstancesManager)
 
 		for _, vmType := range chainConfig.Vm.SupportList {
@@ -557,12 +657,13 @@ func (bc *Blockchain) initCore() (err error) {
 		bc.log.Infof("core engine module existed, ignore.")
 		return
 	}
+	var log = logger.GetLogger(logger.MODULE_SNAPSHOT)
 	// create snapshot manager
 	var snapshotFactory snapshot.Factory
 	if bc.chainConf.ChainConfig().Snapshot != nil && bc.chainConf.ChainConfig().Snapshot.EnableEvidence {
-		bc.snapshotManager = snapshotFactory.NewSnapshotEvidenceMgr(bc.store)
+		bc.snapshotManager = snapshotFactory.NewSnapshotEvidenceMgr(bc.store, log)
 	} else {
-		bc.snapshotManager = snapshotFactory.NewSnapshotManager(bc.store)
+		bc.snapshotManager = snapshotFactory.NewSnapshotManager(bc.store, log)
 	}
 
 	// init coreEngine module
@@ -594,7 +695,7 @@ func (bc *Blockchain) initCore() (err error) {
 
 func (bc *Blockchain) initConsensus() (err error) {
 	// init consensus module
-	var consensusFactory consensus.Factory
+	//var consensusFactory consensus.Factory
 	id := localconf.ChainMakerConfig.NodeConfig.NodeId
 	nodes := bc.chainConf.ChainConfig().Consensus.Nodes
 	nodeIds := make([]string, len(nodes))
@@ -617,25 +718,22 @@ func (bc *Blockchain) initConsensus() (err error) {
 		bc.log.Infof("consensus module existed, ignore.")
 		return
 	}
-	dbHandle := bc.store.GetDBHandle(protocol.ConsensusDBName)
-	bc.consensus, err = consensusFactory.NewConsensusEngine(
-		bc.getConsensusType(),
-		bc.chainId,
-		id,
-		nodeIds,
-		bc.identity,
-		bc.ac,
-		dbHandle,
-		bc.ledgerCache,
-		bc.proposalCache,
-		bc.coreEngine.GetBlockVerifier(),
-		bc.coreEngine.GetBlockCommitter(),
-		bc.netService,
-		bc.msgBus,
-		bc.chainConf,
-		bc.store,
-		bc.coreEngine.GetHotStuffHelper(),
-	)
+
+	config := &consensusUtils.ConsensusImplConfig{
+		ChainId:       bc.chainId,
+		NodeId:        id,
+		Ac:            bc.ac,
+		Core:          bc.coreEngine,
+		ChainConf:     bc.chainConf,
+		NetService:    bc.netService,
+		Signer:        bc.identity,
+		Store:         bc.store,
+		LedgerCache:   bc.ledgerCache,
+		ProposalCache: bc.proposalCache,
+		MsgBus:        bc.msgBus,
+	}
+	provider := consensus.GetConsensusProvider(bc.chainConf.ChainConfig().Consensus.Type)
+	bc.consensus, err = provider(config)
 	if err != nil {
 		bc.log.Errorf("new consensus engine failed, %s", err)
 		return err
@@ -650,6 +748,7 @@ func (bc *Blockchain) initSync() (err error) {
 		bc.log.Infof("sync module existed, ignore.")
 		return
 	}
+
 	// init sync service module
 	bc.syncServer = blockSync.NewBlockChainSyncServer(
 		bc.chainId,
@@ -659,6 +758,7 @@ func (bc *Blockchain) initSync() (err error) {
 		bc.ledgerCache,
 		bc.coreEngine.GetBlockVerifier(),
 		bc.coreEngine.GetBlockCommitter(),
+		logger.GetLoggerByChain(logger.MODULE_SYNC, bc.chainId),
 	)
 	bc.initModules[moduleNameSync] = struct{}{}
 	return

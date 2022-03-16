@@ -7,9 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 package core
 
 import (
-	hotstuffMode "chainmaker.org/chainmaker-go/core/hotstuffmode"
-	"chainmaker.org/chainmaker-go/core/provider"
-	syncMode "chainmaker.org/chainmaker-go/core/syncmode"
+	maxbftMode "chainmaker.org/chainmaker-go/module/core/maxbftmode"
+	"chainmaker.org/chainmaker-go/module/core/provider"
+	syncMode "chainmaker.org/chainmaker-go/module/core/syncmode"
 )
 
 func init() {
@@ -17,5 +17,5 @@ func init() {
 	provider.RegisterCoreEngineProvider(syncMode.ConsensusTypeRAFT, syncMode.NilRAFTProvider)
 	provider.RegisterCoreEngineProvider(syncMode.ConsensusTypeTBFT, syncMode.NilTBFTProvider)
 	provider.RegisterCoreEngineProvider(syncMode.ConsensusTypeDPOS, syncMode.NilDPOSProvider)
-	provider.RegisterCoreEngineProvider(hotstuffMode.ConsensusTypeHOTSTUFF, hotstuffMode.NilTHOTSTUFFProvider)
+	provider.RegisterCoreEngineProvider(maxbftMode.ConsensusTypeMAXBFT, maxbftMode.NilTMAXBFTProvider)
 }

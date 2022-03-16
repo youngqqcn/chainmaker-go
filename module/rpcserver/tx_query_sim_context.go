@@ -40,6 +40,13 @@ func (s *txQuerySimContextImpl) PutIntoReadSet(contractName string, key []byte, 
 	// do nothing
 }
 
+func (s *txQuerySimContextImpl) GetBlockTimestamp() int64 {
+	if lastBlock, err := s.blockchainStore.GetLastBlock(); err == nil {
+		return lastBlock.Header.BlockTimestamp
+	}
+	return 0
+}
+
 type callContractResult struct {
 	contractName string
 	method       string
@@ -77,6 +84,10 @@ func (s *txQuerySimContextImpl) Get(contractName string, key []byte) ([]byte, er
 	// if get from db success, put into read set
 	s.putIntoReadSet(contractName, key, value)
 	return value, nil
+}
+
+func (s *txQuerySimContextImpl) GetNoRecord(contractName string, key []byte) ([]byte, error) {
+	return s.Get(contractName, key)
 }
 
 func (s *txQuerySimContextImpl) Put(contractName string, key []byte, value []byte) error {
@@ -120,9 +131,15 @@ func (s *txQuerySimContextImpl) GetHistoryIterForKey(contractName string,
 func (s *txQuerySimContextImpl) GetCreator(contractName string) *acPb.Member {
 	contract, err := s.GetContractByName(contractName)
 	if err != nil {
+		//TODO log
+		fmt.Println(err)
 		return nil
 	}
-	return contract.Creator
+	return &acPb.Member{
+		OrgId:      contract.Creator.OrgId,
+		MemberType: contract.Creator.MemberType,
+		MemberInfo: contract.Creator.MemberInfo,
+	}
 }
 
 func (s *txQuerySimContextImpl) GetSender() *acPb.Member {
@@ -221,10 +238,14 @@ func (s *txQuerySimContextImpl) GetTxRWSet(runVmSuccess bool) *commonPb.TxRWSet 
 		return txRwSet
 	}
 	for _, txRead := range s.txReadKeyMap {
-		txRwSet.TxReads = append(txRwSet.TxReads, txRead)
+		if txRead != nil {
+			txRwSet.TxReads = append(txRwSet.TxReads, txRead)
+		}
 	}
 	for _, txWrite := range s.txWriteKeyMap {
-		txRwSet.TxWrites = append(txRwSet.TxWrites, txWrite)
+		if txWrite != nil {
+			txRwSet.TxWrites = append(txRwSet.TxWrites, txWrite)
+		}
 	}
 	txRwSet.TxWrites = append(txRwSet.TxWrites, s.txWriteKeySql...)
 	return txRwSet

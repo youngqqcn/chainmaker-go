@@ -77,7 +77,7 @@ func createUserContractCMD() *cobra.Command {
 		flagUserTlsKeyFilePath, flagUserTlsCrtFilePath, flagUserSignKeyFilePath, flagUserSignCrtFilePath,
 		flagSdkConfPath, flagContractName, flagVersion, flagByteCodePath, flagOrgId, flagChainId, flagSendTimes,
 		flagRuntimeType, flagTimeout, flagParams, flagSyncResult, flagEnableCertHash,
-		flagAdminKeyFilePaths, flagAdminCrtFilePaths, flagAdminOrgIds,
+		flagAdminKeyFilePaths, flagAdminCrtFilePaths, flagAdminOrgIds, flagGasLimit,
 	})
 
 	cmd.MarkFlagRequired(flagSdkConfPath)
@@ -103,6 +103,7 @@ func invokeUserContractCMD() *cobra.Command {
 		flagUserSignKeyFilePath, flagUserSignCrtFilePath, flagUserTlsKeyFilePath, flagUserTlsCrtFilePath,
 		flagConcurrency, flagTotalCountPerGoroutine, flagSdkConfPath, flagOrgId, flagChainId, flagSendTimes,
 		flagEnableCertHash, flagContractName, flagMethod, flagParams, flagTimeout, flagSyncResult, flagAbiFilePath,
+		flagGasLimit,
 	})
 
 	cmd.MarkFlagRequired(flagSdkConfPath)
@@ -171,7 +172,7 @@ func upgradeUserContractCMD() *cobra.Command {
 		flagUserSignKeyFilePath, flagUserSignCrtFilePath, flagUserTlsKeyFilePath, flagUserTlsCrtFilePath,
 		flagSdkConfPath, flagContractName, flagVersion, flagByteCodePath, flagOrgId, flagChainId, flagSendTimes,
 		flagRuntimeType, flagTimeout, flagParams, flagSyncResult, flagEnableCertHash,
-		flagAdminCrtFilePaths, flagAdminKeyFilePaths, flagAdminOrgIds,
+		flagAdminCrtFilePaths, flagAdminKeyFilePaths, flagAdminOrgIds, flagGasLimit,
 	})
 
 	cmd.MarkFlagRequired(flagSdkConfPath)
@@ -281,6 +282,10 @@ func createUserContract() error {
 		if len(adminKeys) != len(adminOrgs) {
 			return fmt.Errorf(ADMIN_ORGID_KEY_LENGTH_NOT_EQUAL_FORMAT, len(adminKeys), len(adminOrgs))
 		}
+	} else {
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
 	}
 
 	rt, ok := common.RuntimeType_value[runtimeType]
@@ -323,28 +328,36 @@ func createUserContract() error {
 		return err
 	}
 
+	if gasLimit > 0 {
+		var limit = &common.Limit{GasLimit: gasLimit}
+		payload = client.AttachGasLimit(payload, limit)
+	}
+
 	endorsementEntrys := make([]*common.EndorsementEntry, len(adminKeys))
 	for i := range adminKeys {
+		var e *common.EndorsementEntry
+		var err error
 		if sdk.AuthTypeToStringMap[client.GetAuthType()] == protocol.PermissionedWithCert {
-			e, err := sdkutils.MakeEndorserWithPath(adminKeys[i], adminCrts[i], payload)
-			if err != nil {
-				return err
-			}
-
-			endorsementEntrys[i] = e
+			e, err = sdkutils.MakeEndorserWithPath(adminKeys[i], adminCrts[i], payload)
 		} else if sdk.AuthTypeToStringMap[client.GetAuthType()] == protocol.PermissionedWithKey {
-			e, err := sdkutils.MakePkEndorserWithPath(
+			e, err = sdkutils.MakePkEndorserWithPath(
 				adminKeys[i],
 				crypto.HashAlgoMap[client.GetHashType()],
 				adminOrgs[i],
 				payload,
 			)
-			if err != nil {
-				return err
-			}
-
-			endorsementEntrys[i] = e
+		} else {
+			e, err = sdkutils.MakePkEndorserWithPath(
+				adminKeys[i],
+				crypto.HashAlgoMap[client.GetHashType()],
+				"",
+				payload,
+			)
 		}
+		if err != nil {
+			return err
+		}
+		endorsementEntrys[i] = e
 	}
 
 	resp, err := client.SendContractManageRequest(payload, endorsementEntrys, timeout, syncResult)
@@ -417,7 +430,12 @@ func invokeUserContract() error {
 		}
 	}
 
-	Dispatch(client, contractName, method, kvs, evmMethod)
+	var limit *common.Limit
+	if gasLimit > 0 {
+		limit = &common.Limit{GasLimit: gasLimit}
+	}
+
+	Dispatch(client, contractName, method, kvs, evmMethod, limit)
 	return nil
 }
 
@@ -541,6 +559,10 @@ func upgradeUserContract() error {
 		if len(adminKeys) != len(adminOrgs) {
 			return fmt.Errorf(ADMIN_ORGID_KEY_LENGTH_NOT_EQUAL_FORMAT, len(adminKeys), len(adminOrgs))
 		}
+	} else {
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
 	}
 
 	rt, ok := common.RuntimeType_value[runtimeType]
@@ -563,6 +585,11 @@ func upgradeUserContract() error {
 		return err
 	}
 
+	if gasLimit > 0 {
+		var limit = &common.Limit{GasLimit: gasLimit}
+		payload = client.AttachGasLimit(payload, limit)
+	}
+
 	endorsementEntrys := make([]*common.EndorsementEntry, len(adminKeys))
 	for i := range adminKeys {
 		if sdk.AuthTypeToStringMap[client.GetAuthType()] == protocol.PermissionedWithCert {
@@ -577,6 +604,18 @@ func upgradeUserContract() error {
 				adminKeys[i],
 				crypto.HashAlgoMap[client.GetHashType()],
 				adminOrgs[i],
+				payload,
+			)
+			if err != nil {
+				return err
+			}
+
+			endorsementEntrys[i] = e
+		} else {
+			e, err := sdkutils.MakePkEndorserWithPath(
+				adminKeys[i],
+				crypto.HashAlgoMap[client.GetHashType()],
+				"",
 				payload,
 			)
 			if err != nil {
@@ -635,6 +674,10 @@ func freezeOrUnfreezeOrRevokeUserContract(which int) error {
 		if len(adminKeys) != len(adminOrgs) {
 			return fmt.Errorf(ADMIN_ORGID_KEY_LENGTH_NOT_EQUAL_FORMAT, len(adminKeys), len(adminOrgs))
 		}
+	} else {
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
 	}
 
 	var (
@@ -673,6 +716,18 @@ func freezeOrUnfreezeOrRevokeUserContract(which int) error {
 				adminKeys[i],
 				crypto.HashAlgoMap[client.GetHashType()],
 				adminOrgs[i],
+				payload,
+			)
+			if err != nil {
+				return err
+			}
+
+			endorsementEntrys[i] = e
+		} else {
+			e, err := sdkutils.MakePkEndorserWithPath(
+				adminKeys[i],
+				crypto.HashAlgoMap[client.GetHashType()],
+				"",
 				payload,
 			)
 			if err != nil {

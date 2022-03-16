@@ -25,7 +25,7 @@ CRYPTOGEN_TOOL_BIN=${CRYPTOGEN_TOOL_PATH}/bin/chainmaker-cryptogen
 CRYPTOGEN_TOOL_CONF=${CRYPTOGEN_TOOL_PATH}/config/pk_config_template.yml
 #CRYPTOGEN_TOOL_PKCS11_KEYS=${CRYPTOGEN_TOOL_PATH}/config/pkcs11_keys.yml
 
-VERSION=v2.1.0
+VERSION=v2.2.0_alpha
 
 function show_help() {
     echo "Usage:  "
@@ -122,15 +122,18 @@ function generate_keys() {
 
 function generate_config() {
     LOG_LEVEL="INFO"
-    CONSENSUS_TYPE=5
+    CONSENSUS_TYPE=1
+    CONSENSUS_ORGID="public"
     HASH_TYPE="SHA256"
     MONITOR_PORT=14321
     PPROF_PORT=24321
     TRUSTED_PORT=13301
+    DOCKER_VM_CONTAINER_NAME_PREFIX="chainmaker-vm-docker-go-container"
+    ENABLE_DOCKERVM="false"
 
-    read -p "input consensus type (5-DPOS(default)): " tmp
+    read -p "input consensus type (1-TBFT(default),5-DPOS): " tmp
     if  [ ! -z "$tmp" ] ;then
-      if  [ $tmp -eq 5 ] ;then
+      if  [ $tmp -eq 1 ] || [ $tmp -eq 5 ] ;then
           CONSENSUS_TYPE=$tmp
       else
         echo "unknown consensus type [" $tmp "], so use default"
@@ -155,6 +158,13 @@ function generate_config() {
       fi
     fi
 
+    read -p "enable docker vm (YES|NO(default))" enable_dockervm
+        if  [ ! -z "$enable_dockervm" ]; then
+          if  [ $enable_dockervm == "YES" ]; then
+              ENABLE_DOCKERVM="true"
+              echo "enable docker vm"
+          fi
+        fi
 
     cd "${BUILD_PATH}"
     if [ -d config ]; then
@@ -180,6 +190,8 @@ function generate_config() {
         xsed "s%{monitor_port}%$(($MONITOR_PORT+$i-1))%g" node$i/chainmaker.yml
         xsed "s%{pprof_port}%$(($PPROF_PORT+$i-1))%g" node$i/chainmaker.yml
         xsed "s%{trusted_port}%$(($TRUSTED_PORT+$i-1))%g" node$i/chainmaker.yml
+        xsed "s%{enable_dockervm}%$ENABLE_DOCKERVM%g" node$i/chainmaker.yml
+        xsed "s%{dockervm_container_name}%"${DOCKER_VM_CONTAINER_NAME_PREFIX}$i"%g" node$i/chainmaker.yml
 
         system=$(uname)
 
@@ -211,24 +223,37 @@ function generate_config() {
 
             if  [ $NODE_CNT -eq 4 ] || [ $NODE_CNT -eq 7 ]; then
                 cp $CONFIG_TPL_PATH/chainconfig/bc_4_7.tpl node$i/chainconfig/bc$j.yml
-                xsed "s%{consensus_type}%$CONSENSUS_TYPE%g" node$i/chainconfig/bc$j.yml
             elif [ $NODE_CNT -eq 16 ]; then
                 cp $CONFIG_TPL_PATH/chainconfig/bc_16.tpl node$i/chainconfig/bc$j.yml
-                xsed "s%{consensus_type}%$CONSENSUS_TYPE%g" node$i/chainconfig/bc$j.yml
             else
                 cp $CONFIG_TPL_PATH/chainconfig/bc_10_13.tpl node$i/chainconfig/bc$j.yml
-                xsed "s%{consensus_type}%$CONSENSUS_TYPE%g" node$i/chainconfig/bc$j.yml
+            fi
+
+            DPOS_LINE_START=$(awk '/DPOS config start/{print NR}' node$i/chainconfig/bc$j.yml)
+            DPOS_LINE_END=$(awk '/DPOS config end/{print NR}' node$i/chainconfig/bc$j.yml)
+            NODES_LINE_START=$(awk '/Consensus node list start/{print NR}' node$i/chainconfig/bc$j.yml)
+            NODES_LINE_END=$(awk '/Consensus node list end/{print NR}' node$i/chainconfig/bc$j.yml)
+            xsed "s%{consensus_type}%$CONSENSUS_TYPE%g" node$i/chainconfig/bc$j.yml
+            if  [ $CONSENSUS_TYPE -eq 1 ]; then
+                xsed "${DPOS_LINE_START},${DPOS_LINE_END}d" node$i/chainconfig/bc$j.yml
+                xsed "s%{public_org_id}%$CONSENSUS_ORGID%g" node$i/chainconfig/bc$j.yml
+            elif  [ $CONSENSUS_TYPE -eq 5 ]; then
+                xsed "${NODES_LINE_START},${NODES_LINE_END}d" node$i/chainconfig/bc$j.yml
             fi
 
             xsed "s%{chain_id}%chain$j%g" node$i/chainconfig/bc$j.yml
             xsed "s%{version}%$VERSION%g" node$i/chainconfig/bc$j.yml
             xsed "s%{hash_type}%$HASH_TYPE%g" node$i/chainconfig/bc$j.yml
 
-            if  [ $NODE_CNT -eq 7 ] || [ $NODE_CNT -eq 13 ] || [ $NODE_CNT -eq 16 ]; then
+            if  [ $NODE_CNT -eq 7 ] || [ $NODE_CNT -eq 13 ]; then
                 # dpos cancel kv annotation
                 if  [ $CONSENSUS_TYPE -eq 5 ]; then
                     xsed "s%#\(.*\)- key:%\1- key:%g" node$i/chainconfig/bc$j.yml
                     xsed "s%#\(.*\)value:%\1value:%g" node$i/chainconfig/bc$j.yml
+                fi
+                # cancel node ids
+                if  [ $CONSENSUS_TYPE -eq 1 ]; then
+                    xsed "s%#\(.*\)- \"{org%\1- \"{org%g" node$i/chainconfig/bc$j.yml
                 fi
             fi
 

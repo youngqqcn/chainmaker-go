@@ -25,10 +25,10 @@ CRYPTOGEN_TOOL_BIN=${CRYPTOGEN_TOOL_PATH}/bin/chainmaker-cryptogen
 CRYPTOGEN_TOOL_CONF=${CRYPTOGEN_TOOL_PATH}/config/pwk_config_template.yml
 #CRYPTOGEN_TOOL_PKCS11_KEYS=${CRYPTOGEN_TOOL_PATH}/config/pkcs11_keys.yml
 
-VERSION=v2.1.0
+VERSION=v2.2.0_alpha
 
-BC_YML_TRUST_ROOT_LINE=128
-BC_YML_TRUST_ROOT_LINE_END=148
+BC_YML_TRUST_ROOT_LINE=$(awk '/trust roots list start/{print NR}' ${CONFIG_TPL_PATH}/chainconfig/bc_4_7.tpl)
+BC_YML_TRUST_ROOT_LINE_END=$(awk '/trust roots list end/{print NR}' ${CONFIG_TPL_PATH}/chainconfig/bc_4_7.tpl)
 
 function show_help() {
     echo "Usage:  "
@@ -130,8 +130,10 @@ function generate_config() {
     MONITOR_PORT=14321
     PPROF_PORT=24321
     TRUSTED_PORT=13301
+    DOCKER_VM_CONTAINER_NAME_PREFIX="chainmaker-vm-docker-go-container"
+    ENABLE_DOCKERVM="false"
 
-    read -p "input consensus type (0-SOLO,1-TBFT(default),3-HOTSTUFF,4-RAFT): " tmp
+    read -p "input consensus type (0-SOLO,1-TBFT(default),3-MAXBFT,4-RAFT): " tmp
     if  [ ! -z "$tmp" ] ;then
       if  [ $tmp -eq 0 ] || [ $tmp -eq 1 ] || [ $tmp -eq 3 ] || [ $tmp -eq 4 ] ;then
           CONSENSUS_TYPE=$tmp
@@ -158,6 +160,14 @@ function generate_config() {
       fi
     fi
 
+    read -p "enable docker vm (YES|NO(default))" enable_dockervm
+        if  [ ! -z "$enable_dockervm" ]; then
+          if  [ $enable_dockervm == "YES" ]; then
+              ENABLE_DOCKERVM="true"
+              echo "enable docker vm"
+          fi
+        fi
+
     cd "${BUILD_PATH}"
     if [ -d config ]; then
         mkdir -p backup/backup_config
@@ -182,6 +192,8 @@ function generate_config() {
         xsed "s%{monitor_port}%$(($MONITOR_PORT+$i-1))%g" node$i/chainmaker.yml
         xsed "s%{pprof_port}%$(($PPROF_PORT+$i-1))%g" node$i/chainmaker.yml
         xsed "s%{trusted_port}%$(($TRUSTED_PORT+$i-1))%g" node$i/chainmaker.yml
+        xsed "s%{enable_dockervm}%$ENABLE_DOCKERVM%g" node$i/chainmaker.yml
+        xsed "s%{dockervm_container_name}%"${DOCKER_VM_CONTAINER_NAME_PREFIX}$i"%g" node$i/chainmaker.yml
 
         system=$(uname)
 

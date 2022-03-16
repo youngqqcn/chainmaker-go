@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"chainmaker.org/chainmaker-go/accesscontrol"
+	"chainmaker.org/chainmaker-go/module/accesscontrol"
 	"chainmaker.org/chainmaker/common/v2/ca"
 	"chainmaker.org/chainmaker/common/v2/crypto"
 	"chainmaker.org/chainmaker/common/v2/crypto/asym"
@@ -47,7 +47,7 @@ var (
 
 const (
 	CHAIN1         = "chain1"
-	certPathPrefix = "/big_space/chainmaker/chainmaker-go/build/crypto-config/"
+	certPathPrefix = "../../build/crypto-config/"
 
 	contractNameFact = "ex_fact"
 	addContractName  = "add"

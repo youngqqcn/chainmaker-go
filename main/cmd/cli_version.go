@@ -9,7 +9,9 @@ package cmd
 import (
 	"fmt"
 
-	"chainmaker.org/chainmaker-go/blockchain"
+	"chainmaker.org/chainmaker/protocol/v2"
+
+	"chainmaker.org/chainmaker-go/module/blockchain"
 	"github.com/common-nighthawk/go-figure"
 	"github.com/spf13/cobra"
 )
@@ -32,6 +34,8 @@ func logo() string {
 	fragment := "================================================================================="
 	//versionInfo := "::ChainMaker::  version(" + protocol.DefaultBlockVersion + ")"
 	versionInfo := fmt.Sprintf("ChainMaker Version: %s\n", blockchain.CurrentVersion)
+
+	versionInfo += fmt.Sprintf("Block Version:%6s%d\n", " ", protocol.DefaultBlockVersion)
 
 	if blockchain.BuildDateTime != "" {
 		versionInfo += fmt.Sprintf("Build Time:%9s%s\n", " ", blockchain.BuildDateTime)

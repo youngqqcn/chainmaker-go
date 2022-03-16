@@ -20,6 +20,7 @@ import (
 type ManagerDelegate struct {
 	lock            sync.Mutex
 	blockchainStore protocol.BlockchainStore
+	log             protocol.Logger
 }
 
 func (m *ManagerDelegate) calcSnapshotFingerPrint(snapshot *SnapshotImpl) utils.BlockFingerPrint {
@@ -35,7 +36,19 @@ func (m *ManagerDelegate) calcSnapshotFingerPrint(snapshot *SnapshotImpl) utils.
 	return utils.CalcFingerPrint(chainId, blockHeight, blockTimestamp, blockProposerBytes, preBlockHash,
 		snapshot.txRoot, snapshot.dagHash, snapshot.rwSetHash)
 }
-
+func (m *ManagerDelegate) calcSnapshotFingerPrintWithoutTx(snapshot *SnapshotImpl) utils.BlockFingerPrint {
+	if snapshot == nil {
+		return ""
+	}
+	chainId := snapshot.chainId
+	blockHeight := snapshot.blockHeight
+	blockTimestamp := snapshot.blockTimestamp
+	blockProposer := snapshot.blockProposer
+	preBlockHash := snapshot.preBlockHash
+	blockProposerBytes, _ := blockProposer.Marshal()
+	return utils.CalcFingerPrint(chainId, blockHeight, blockTimestamp, blockProposerBytes, preBlockHash,
+		nil, nil, nil)
+}
 func (m *ManagerDelegate) makeSnapshotImpl(block *commonPb.Block, blockHeight uint64) *SnapshotImpl {
 	// If the corresponding Snapshot does not exist, create one
 	txCount := len(block.Txs) // as map init size
@@ -43,8 +56,8 @@ func (m *ManagerDelegate) makeSnapshotImpl(block *commonPb.Block, blockHeight ui
 		blockchainStore: m.blockchainStore,
 		sealed:          atomic.NewBool(false),
 		preSnapshot:     nil,
-
-		txResultMap: make(map[string]*commonPb.Result, txCount),
+		log:             m.log,
+		txResultMap:     make(map[string]*commonPb.Result, txCount),
 
 		chainId:        block.Header.ChainId,
 		blockHeight:    block.Header.BlockHeight,

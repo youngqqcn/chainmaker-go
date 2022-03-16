@@ -16,6 +16,7 @@ import (
 type ManagerImpl struct {
 	snapshots map[utils.BlockFingerPrint]*SnapshotImpl
 	delegate  *ManagerDelegate
+	log       protocol.Logger
 }
 
 func (m *ManagerImpl) storeAndLinkSnapshotImpl(snapshotImpl *SnapshotImpl,
@@ -37,11 +38,11 @@ func (m *ManagerImpl) NewSnapshot(prevBlock *commonPb.Block, block *commonPb.Blo
 	snapshotImpl := m.delegate.makeSnapshotImpl(block, blockHeight)
 
 	// 计算前序指纹, 和当前指纹
-	prevFingerPrint := utils.CalcBlockFingerPrint(prevBlock)
-	fingerPrint := utils.CalcBlockFingerPrint(block)
+	prevFingerPrint := utils.CalcBlockFingerPrintWithoutTx(prevBlock)
+	fingerPrint := utils.CalcBlockFingerPrintWithoutTx(block)
 	m.storeAndLinkSnapshotImpl(snapshotImpl, &prevFingerPrint, &fingerPrint)
 
-	log.Infof(
+	m.log.Infof(
 		"create snapshot@%s at height %d, fingerPrint[%v] -> prevFingerPrint[%v]",
 		block.Header.ChainId,
 		blockHeight,
@@ -55,46 +56,49 @@ func (m *ManagerImpl) NotifyBlockCommitted(block *commonPb.Block) error {
 	m.delegate.lock.Lock()
 	defer m.delegate.lock.Unlock()
 
-	log.Infof("commit snapshot@%s at height %d", block.Header.ChainId, block.Header.BlockHeight)
+	m.log.Infof("commit snapshot@%s at height %d", block.Header.ChainId, block.Header.BlockHeight)
 
 	// 计算刚落块的区块指纹
-	deleteFp := utils.CalcBlockFingerPrint(block)
+	deleteFp := utils.CalcBlockFingerPrintWithoutTx(block)
 	deleteFpEx := calcNotConsensusFingerPrint(block)
 	// 如果有snapshot对应的前序snapshot的指纹, 等于刚落块的区块指纹
 	for _, snapshot := range m.snapshots {
 		if snapshot == nil || snapshot.GetPreSnapshot() == nil {
 			continue
 		}
-		prevFp := m.delegate.calcSnapshotFingerPrint(snapshot.GetPreSnapshot().(*SnapshotImpl))
+		prevFp := m.delegate.calcSnapshotFingerPrintWithoutTx(snapshot.GetPreSnapshot().(*SnapshotImpl))
 		if deleteFp == prevFp {
 			snapshot.SetPreSnapshot(nil)
 		}
 	}
 
 	delete(m.snapshots, deleteFp)
+
 	// 删除未共识的区块指纹
 	if _, ok := m.snapshots[deleteFpEx]; ok {
 		delete(m.snapshots, deleteFpEx)
-		log.Infof("delete snapshot@%s %v & %v at height %d",
+		m.log.Infof("delete snapshot@%s %v & %v at height %d",
 			block.Header.ChainId, deleteFp, deleteFpEx, block.Header.BlockHeight)
 	} else {
-		log.Infof("delete snapshot@%s %v at height %d",
+		m.log.Infof("delete snapshot@%s %v at height %d",
 			block.Header.ChainId, deleteFp, block.Header.BlockHeight)
 	}
 
+	snapshotCount := 0
 	// in case of switch-fork, gc too old snapshot
-	for _, snapshot := range m.snapshots {
-		if snapshot == nil || snapshot.GetPreSnapshot() == nil {
+	for finger, snapshot := range m.snapshots {
+		snapshotCount++
+		if snapshot == nil {
 			continue
 		}
-		preSnapshot, _ := snapshot.GetPreSnapshot().(*SnapshotImpl)
-		if block.Header.BlockHeight-preSnapshot.GetBlockHeight() > 8 {
-			deleteOldFp := m.delegate.calcSnapshotFingerPrint(preSnapshot)
-			delete(m.snapshots, deleteOldFp)
-			log.Infof("delete snapshot %v at height %d while gc", deleteFp, preSnapshot.blockHeight)
+
+		if block.Header.BlockHeight-snapshot.GetBlockHeight() > 8 {
+			delete(m.snapshots, finger)
+			m.log.Infof("delete snapshot %v at height %d while gc", deleteFp, snapshot.blockHeight)
 			snapshot.SetPreSnapshot(nil)
 		}
 	}
+	m.log.Debugf("current snapshot count:%d", snapshotCount)
 	return nil
 }
 
@@ -113,5 +117,5 @@ func calcNotConsensusFingerPrint(block *commonPb.Block) utils.BlockFingerPrint {
 		},
 	}
 
-	return utils.CalcBlockFingerPrint(newBlock)
+	return utils.CalcBlockFingerPrintWithoutTx(newBlock)
 }

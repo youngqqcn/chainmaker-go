@@ -8,7 +8,6 @@ package common
 import (
 	"fmt"
 
-	"chainmaker.org/chainmaker/chainconf/v2"
 	"chainmaker.org/chainmaker/common/v2/msgbus"
 	"chainmaker.org/chainmaker/localconf/v2"
 	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
@@ -19,30 +18,34 @@ import (
 )
 
 type CommitBlock struct {
-	store                 protocol.BlockchainStore
-	log                   protocol.Logger
-	snapshotManager       protocol.SnapshotManager
-	ledgerCache           protocol.LedgerCache
-	chainConf             protocol.ChainConf
-	msgBus                msgbus.MessageBus
-	metricBlockSize       *prometheus.HistogramVec // metric block size
-	metricBlockCounter    *prometheus.CounterVec   // metric block counter
-	metricTxCounter       *prometheus.CounterVec   // metric transaction counter
-	metricBlockCommitTime *prometheus.HistogramVec // metric block commit time
+	store                   protocol.BlockchainStore
+	log                     protocol.Logger
+	snapshotManager         protocol.SnapshotManager
+	ledgerCache             protocol.LedgerCache
+	chainConf               protocol.ChainConf
+	msgBus                  msgbus.MessageBus
+	metricBlockSize         *prometheus.HistogramVec // metric block size
+	metricBlockCounter      *prometheus.CounterVec   // metric block counter
+	metricTxCounter         *prometheus.CounterVec   // metric transaction counter
+	metricTpsGauge          *prometheus.GaugeVec     // metric real-time transaction per second (TPS)
+	metricBlockCommitTime   *prometheus.HistogramVec // metric block commit time
+	metricBlockIntervalTime *prometheus.HistogramVec // metric block interval time
 }
 
 type CommitBlockConf struct {
-	Store                 protocol.BlockchainStore
-	Log                   protocol.Logger
-	SnapshotManager       protocol.SnapshotManager
-	TxPool                protocol.TxPool
-	LedgerCache           protocol.LedgerCache
-	ChainConf             protocol.ChainConf
-	MsgBus                msgbus.MessageBus
-	MetricBlockSize       *prometheus.HistogramVec // metric block size
-	MetricBlockCounter    *prometheus.CounterVec   // metric block counter
-	MetricTxCounter       *prometheus.CounterVec   // metric transaction counter
-	MetricBlockCommitTime *prometheus.HistogramVec // metric block commit time
+	Store                   protocol.BlockchainStore
+	Log                     protocol.Logger
+	SnapshotManager         protocol.SnapshotManager
+	TxPool                  protocol.TxPool
+	LedgerCache             protocol.LedgerCache
+	ChainConf               protocol.ChainConf
+	MsgBus                  msgbus.MessageBus
+	MetricBlockSize         *prometheus.HistogramVec // metric block size
+	MetricBlockCounter      *prometheus.CounterVec   // metric block counter
+	MetricTxCounter         *prometheus.CounterVec   // metric transaction counter
+	MetricTpsGauge          *prometheus.GaugeVec     // metric real-time transaction per second (TPS)
+	MetricBlockCommitTime   *prometheus.HistogramVec // metric block commit time
+	MetricBlockIntervalTime *prometheus.HistogramVec // metric block interval time
 }
 
 func NewCommitBlock(cbConf *CommitBlockConf) *CommitBlock {
@@ -59,6 +62,8 @@ func NewCommitBlock(cbConf *CommitBlockConf) *CommitBlock {
 		commitBlock.metricBlockCounter = cbConf.MetricBlockCounter
 		commitBlock.metricTxCounter = cbConf.MetricTxCounter
 		commitBlock.metricBlockCommitTime = cbConf.MetricBlockCommitTime
+		commitBlock.metricBlockIntervalTime = cbConf.MetricBlockIntervalTime
+		commitBlock.metricTpsGauge = cbConf.MetricTpsGauge
 	}
 	return commitBlock
 }
@@ -157,7 +162,7 @@ func (cb *CommitBlock) MonitorCommit(bi *commonpb.BlockInfo) error {
 
 func NotifyChainConf(block *commonpb.Block, chainConf protocol.ChainConf) (err error) {
 	if block != nil && block.GetTxs() != nil && len(block.GetTxs()) > 0 {
-		if _, ok := chainconf.IsNativeTx(block.GetTxs()[0]); ok || utils.HasDPosTxWritesInHeader(block, chainConf) {
+		if ok, _ := utils.IsNativeTx(block.GetTxs()[0]); ok || utils.HasDPosTxWritesInHeader(block, chainConf) {
 			if err = chainConf.CompleteBlock(block); err != nil {
 				return fmt.Errorf("chainconf block complete, %s", err)
 			}

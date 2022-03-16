@@ -20,14 +20,14 @@ import (
 )
 
 func Dispatch(client *sdk.ChainClient, contractName, method string, kvs []*sdkPbCommon.KeyValuePair,
-	evmMethod *ethabi.Method) {
+	evmMethod *ethabi.Method, limit *sdkPbCommon.Limit) {
 	var (
 		wgSendReq sync.WaitGroup
 	)
 
 	for i := 0; i < concurrency; i++ {
 		wgSendReq.Add(1)
-		go runInvokeContract(client, contractName, method, kvs, &wgSendReq, evmMethod)
+		go runInvokeContract(client, contractName, method, kvs, &wgSendReq, evmMethod, limit)
 	}
 
 	wgSendReq.Wait()
@@ -46,7 +46,7 @@ func DispatchTimes(client *sdk.ChainClient, contractName, method string, kvs []*
 }
 
 func runInvokeContract(client *sdk.ChainClient, contractName, method string, kvs []*sdkPbCommon.KeyValuePair,
-	wg *sync.WaitGroup, evmMethod *ethabi.Method) {
+	wg *sync.WaitGroup, evmMethod *ethabi.Method, limit *sdkPbCommon.Limit) {
 
 	defer func() {
 		wg.Done()
@@ -54,7 +54,7 @@ func runInvokeContract(client *sdk.ChainClient, contractName, method string, kvs
 
 	for i := 0; i < totalCntPerGoroutine; i++ {
 		txId := sdkutils.GetRandTxId()
-		resp, err := client.InvokeContract(contractName, method, txId, kvs, timeout, syncResult)
+		resp, err := client.InvokeContractWithLimit(contractName, method, txId, kvs, timeout, syncResult, limit)
 		if err != nil {
 			fmt.Printf("[ERROR] invoke contract failed, %s", err.Error())
 			return

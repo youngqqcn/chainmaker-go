@@ -17,7 +17,7 @@ import (
 
 	acPb "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 
-	"chainmaker.org/chainmaker-go/accesscontrol"
+	"chainmaker.org/chainmaker-go/module/accesscontrol"
 	"chainmaker.org/chainmaker/common/v2/ca"
 	"chainmaker.org/chainmaker/common/v2/crypto"
 	"chainmaker.org/chainmaker/common/v2/crypto/asym"
@@ -455,6 +455,6 @@ func UpdateSysRequest(sk3 crypto.PrivateKey, sender *acPb.Member, msg *InvokeCon
 	}
 
 	req.Sender.Signature = signBytes
-	fmt.Printf("\n\n============request param↓============\n %+v \n============request param↑============\n\n", req)
+	//fmt.Printf("\n\n============request param↓============\n %+v \n============request param↑============\n\n", req)
 	return client.SendRequest(ctx, req)
 }

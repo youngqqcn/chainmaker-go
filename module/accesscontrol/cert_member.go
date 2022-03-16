@@ -90,11 +90,12 @@ func (cm *certificateMember) GetMember() (*pbac.Member, error) {
 			return nil, fmt.Errorf("get pb member failed: [%s]", err.Error())
 		}
 		return &pbac.Member{
-			OrgId:      cm.id,
+			OrgId:      cm.orgId,
 			MemberInfo: id,
 			MemberType: pbac.MemberType_CERT_HASH,
 		}, nil
 	}
+
 	certPEM := pem.EncodeToMemory(&pem.Block{Bytes: cm.cert.Raw, Type: "CERTIFICATE"})
 	return &pbac.Member{
 		OrgId:      cm.orgId,
@@ -120,6 +121,10 @@ func newCertMemberFromParam(orgId, role, hashType string, isCompressed bool,
 		if err != nil {
 			return nil, fmt.Errorf("new cert member failed, invalid certificate")
 		}
+	}
+
+	if err = cryptoEngineOption(cert); err != nil {
+		return nil, fmt.Errorf("set crypto engine failed, err = %s", err)
 	}
 
 	id, err := bcx509.GetExtByOid(bcx509.OidNodeId, cert.Extensions)
@@ -156,6 +161,10 @@ func newMemberFromCertPem(orgId, hashType string, certPEM []byte, isCompressed b
 		if err != nil {
 			return nil, fmt.Errorf("new cert member failed, invalid certificate")
 		}
+	}
+
+	if err = cryptoEngineOption(cert); err != nil {
+		return nil, fmt.Errorf("set crypto engine failed, err = %s", err)
 	}
 
 	member.hashType = hashType
@@ -200,6 +209,10 @@ func newCertMemberFromPb(member *pbac.Member, acs *accessControlService) (*certi
 
 	if member.MemberType == pbac.MemberType_CERT_HASH {
 		return newMemberFromCertPem(member.OrgId, acs.hashType, member.MemberInfo, true)
+	}
+
+	if member.MemberType == pbac.MemberType_ALIAS {
+		return newMemberFromCertPem(member.OrgId, acs.hashType, member.MemberInfo, false)
 	}
 
 	return nil, fmt.Errorf("setup member failed, unsupport cert member type")

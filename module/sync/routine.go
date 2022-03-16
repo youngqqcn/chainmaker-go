@@ -12,7 +12,7 @@ import (
 	"sync/atomic"
 
 	commonErrors "chainmaker.org/chainmaker/common/v2/errors"
-	"chainmaker.org/chainmaker/logger/v2"
+	"chainmaker.org/chainmaker/protocol/v2"
 	"github.com/Workiva/go-datastructures/queue"
 )
 
@@ -21,14 +21,15 @@ type (
 	handleFunc      func(event queue.Item) (queue.Item, error)
 )
 
-const bufferSize = 1024
+//const bufferSize = 1024
+const bufferSize = 128
 
 // Routine Provide hosting of the service in goroutine
 type Routine struct {
 	name       string          // The name of the hosted service
 	handle     handleFunc      // Processing of the hosted service
 	queryState getServiceState // get state in the service
-	log        *logger.CMLogger
+	log        protocol.Logger
 
 	start int32                // The flag which detects whether the service is started
 	queue *queue.PriorityQueue // A queue to store tasks
@@ -36,7 +37,7 @@ type Routine struct {
 	stop  chan struct{}        // Notify whether the service has stopped
 }
 
-func NewRoutine(name string, handle handleFunc, queryState getServiceState, log *logger.CMLogger) *Routine {
+func NewRoutine(name string, handle handleFunc, queryState getServiceState, log protocol.Logger) *Routine {
 	return &Routine{
 		name:       name,
 		handle:     handle,
@@ -82,7 +83,8 @@ func (r *Routine) loop() {
 
 func (r *Routine) addTask(event queue.Item) error {
 	if atomic.LoadInt32(&r.start) != 1 {
-		return commonErrors.ErrSyncServiceHasStoped
+		r.log.Warn("add task to Routine failed, the sync service has been stopped")
+		return nil
 	}
 	if err := r.queue.Put(event); err != nil {
 		return fmt.Errorf("add task to the queue failed, reason: %s", err)

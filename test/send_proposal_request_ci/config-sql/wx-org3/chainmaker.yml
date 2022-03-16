@@ -76,6 +76,16 @@ pprof:
 storage:
   db_prefix: org3_
   store_path: ./data/org3/ledgerData1
+  write_block_type: 0  # 0普通写模式，1快速写模式
+  state_cache_config:
+    life_window: 3000000000000   #key/value ttl 时间，单位 ns
+    clean_window: 1000000000
+    max_entry_size: 500
+    hard_max_cache_size: 10240   #缓存大小，单位MB
+  txexistdb_config:
+    provider: leveldb
+    leveldb_config:
+      store_path: ../data/org3/txexist
   blockdb_config:
     provider: sql
     sqldb_config:
@@ -106,4 +116,17 @@ debug:
   # 是否开启CLI功能，过度期间使用
   is_cli_open: true
   is_http_open: false
+
+vm:
+  enable_dockervm: false
+  dockervm_container_name: chainmaker-vm-docker-go-container
+  dockervm_mount_path: ../data/org1/docker-go     # mount point in chain maker
+  dockervm_log_path: ../log/org1/dockervm
+  log_in_console: true
+  log_level: INFO
+  uds_open: true                             # default is unix domain socket connection
+  tx_size: 1000
+  user_num: 100
+  time_limit: 20
+
 

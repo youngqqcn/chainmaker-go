@@ -9,6 +9,8 @@
 log:
   config_file: ../config-sql/wx-org2/log.yml          # config file of logger configuration.
 
+crypto_engine: tjfoc #crypto engine config setting, support gmssl, tencentsm and tjfoc
+
 blockchain:
   - chainId: chain1
     genesis: ../config-sql/wx-org2/chainconfig/bc1.yml

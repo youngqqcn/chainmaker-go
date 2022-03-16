@@ -36,6 +36,16 @@ contract:
   # If it is true, storage.statedb_config.provider in chainmaker.yml should be sql.
   enable_sql_support: false
 
+vm:
+  #0:chainmaker, 1:zxl, 2:ethereum(reserved)
+  addr_type: 0
+  # support vm list
+  support_list:
+    - "wasmer"
+    - "gasm"
+    - "evm"
+    - "dockergo"
+
 # Block proposing related settings
 block:
   # Verify the transaction timestamp or not
@@ -64,6 +74,12 @@ core:
   # [0, 60]
   tx_scheduler_validate_timeout: 10
 
+  # Used for handling txs with sender conflicts efficiently
+  enable_sender_group: false
+
+  # Used for dynamic tuning the capacity of tx execution goroutine pool
+  enable_conflicts_bit_window: true
+
   # Consensus message compression related settings
   # consensus_turbo_config:
     # If consensus message compression is enabled or not.
@@ -75,10 +91,37 @@ core:
     # Retry interval of fetching transaction in txpool by txid, in ms.
     # retry_interval: 20
 
+# gas account config
+account_config:
+  enable_gas: false
+  gas_count: 0
+  gas_admin_address: "ZXff78ca3b84e3f5f91ff18b45fc1ecfda2d5990db"
+  default_gas: 0
+
 # Consensus settings
 consensus:
-  # Consensus type 5-DPOS
+  # Consensus type: 1-TBFT, 5-DPOS
   type: {consensus_type}
+
+  # Consensus node list start
+  nodes:
+    - org_id: "{public_org_id}"
+      node_id:
+        - "{org1_peerid}"
+        - "{org2_peerid}"
+        - "{org3_peerid}"
+        - "{org4_peerid}"
+        - "{org5_peerid}"
+        - "{org6_peerid}"
+        - "{org7_peerid}"
+        - "{org8_peerid}"
+        - "{org9_peerid}"
+        - "{org10_peerid}"
+#        - "{org11_peerid}"
+#        - "{org12_peerid}"
+#        - "{org13_peerid}"
+  # Consensus node list end
+  # DPOS config start
   dpos_config: # DPoS
     # ERC20 contract config
     - key: erc20.total
@@ -150,6 +193,8 @@ consensus:
 #      value: "{org12_peerid}"
 #    - key: stake.nodeID:{org13_peeraddr}
 #      value: "{org13_peerid}"
+  # DPOS config end
+
   # We can specify other consensus config here in key-value format.
   ext_config:
     # - key: aa

@@ -36,6 +36,19 @@ contract:
   # If it is true, storage.statedb_config.provider in chainmaker.yml should be sql.
   enable_sql_support: false
 
+# Virtual machine related settings
+vm:
+  # Address type
+  # 0-chainmaker, 1-zxl, 3-ethereum(reserved value, which is not supported in the current version)
+  addr_type: 1
+  # Virtual machine support list, In the current version, there are wasmer, gasm, evm and dockergo
+  # virtual machines to choose from. One or more virtual machines can be configured to be started
+  support_list:
+    - "wasmer"
+    - "gasm"
+    - "evm"
+    - "dockergo"
+
 # Block proposing related settings
 block:
   # Verify the transaction timestamp or not
@@ -64,6 +77,12 @@ core:
   # [0, 60]
   tx_scheduler_validate_timeout: 10
 
+  # Used for handling txs with sender conflicts efficiently
+  enable_sender_group: false
+
+  # Used for dynamic tuning the capacity of tx execution goroutine pool
+  enable_conflicts_bit_window: true
+
   # Consensus message compression related settings
   # consensus_turbo_config:
     # If consensus message compression is enabled or not.
@@ -88,7 +107,7 @@ core:
 # Consensus settings
 consensus:
   # Consensus type
-  # 0-SOLO, 1-TBFT, 3-HOTSTUFF, 4-RAFT, 5-DPOS, 6-ABFT
+  # 0-SOLO, 1-TBFT, 3-MAXBFT, 4-RAFT, 5-DPOS, 6-ABFT
   type: {consensus_type}
 
   # Consensus node list

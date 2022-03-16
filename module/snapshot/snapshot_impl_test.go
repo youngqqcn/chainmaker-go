@@ -12,6 +12,7 @@ import (
 	"math/rand"
 	"strconv"
 	"sync"
+
 	"sync/atomic"
 	"testing"
 	"time"
@@ -19,6 +20,8 @@ import (
 	acPb "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/protocol/v2"
+	"chainmaker.org/chainmaker/protocol/v2/test"
+	uatomic "go.uber.org/atomic"
 	uberAtomic "go.uber.org/atomic"
 )
 
@@ -31,6 +34,10 @@ type MockSimContextImpl struct {
 	txRwSet      *commonPb.TxRWSet
 	currentDepth int
 	txResult     *commonPb.Result
+}
+
+func (s *MockSimContextImpl) GetBlockTimestamp() int64 {
+	panic("implement me")
 }
 
 func (s *MockSimContextImpl) GetHistoryIterForKey(contractName string, key []byte) (protocol.KeyHistoryIterator, error) {
@@ -125,6 +132,9 @@ func (s *MockSimContextImpl) GetChainNodesInfoProvider() (protocol.ChainNodesInf
 func (s *MockSimContextImpl) Get(contractName string, key []byte) ([]byte, error) {
 	return nil, nil
 }
+func (s *MockSimContextImpl) GetNoRecord(contractName string, key []byte) ([]byte, error) {
+	return nil, nil
+}
 
 // 写入合约账户状态
 func (s *MockSimContextImpl) Put(contractName string, key []byte, value []byte) error {
@@ -191,7 +201,7 @@ func TestSnapshot(t *testing.T) {
 }
 func testSnapshot(t *testing.T, i int) {
 	snapshot := &SnapshotImpl{
-		lock:            sync.Mutex{},
+		lock:            sync.RWMutex{},
 		blockchainStore: nil,
 		sealed:          uberAtomic.NewBool(false),
 		chainId:         "",
@@ -204,6 +214,7 @@ func testSnapshot(t *testing.T, i int) {
 		txResultMap:     make(map[string]*commonPb.Result, 256),
 		readTable:       make(map[string]*sv, 256),
 		writeTable:      make(map[string]*sv, 256),
+		log:             &test.GoLogger{},
 	}
 
 	txSimContext := &MockSimContextImpl{
@@ -236,21 +247,27 @@ func testSnapshot(t *testing.T, i int) {
 			if !applyResult {
 				fmt.Printf("!!!")
 				for {
-					txSimContext.txRwSet = genRwSet(readKey, writeKey)
-					// TODO: Use of weak random number generator (math/rand instead of crypto/rand) ?
-					// nolint: gosec
-					txSimContext.txExecSeq = txSimContext.txExecSeq +
-						int32(
-							rand.Intn(
-								len(snapshot.txTable)-int(txSimContext.txExecSeq)+1,
-							),
-						)
-					applyResult, _ = snapshot.ApplyTxSimContext(txSimContext, protocol.ExecOrderTxTypeNormal, true, false)
 
-					atomic.AddInt64(&count, 1)
-					if applyResult {
-						break
+					randNum := len(snapshot.txTable) - int(txSimContext.txExecSeq) + 1
+
+					if randNum > 0 {
+						txSimContext.txRwSet = genRwSet(readKey, writeKey)
+						// TODO: Use of weak random number generator (math/rand instead of crypto/rand) ?
+						// nolint: gosec
+						txSimContext.txExecSeq = txSimContext.txExecSeq +
+							int32(
+								rand.Intn(
+									randNum,
+								),
+							)
+						applyResult, _ = snapshot.ApplyTxSimContext(txSimContext, protocol.ExecOrderTxTypeNormal, true, false)
+
+						atomic.AddInt64(&count, 1)
+						if applyResult {
+							break
+						}
 					}
+
 				}
 			}
 			wg.Done()
@@ -340,4 +357,21 @@ func dumpDAG(dag *commonPb.DAG) {
 		}
 	}
 	fmt.Println("}")
+}
+
+var snapshot = &SnapshotImpl{
+	lock:            sync.RWMutex{},
+	blockchainStore: nil,
+	sealed:          uatomic.NewBool(false),
+	chainId:         "",
+	blockTimestamp:  0,
+	blockProposer:   nil,
+	blockHeight:     100,
+	preSnapshot:     nil,
+	txRWSetTable:    nil,
+	txTable:         make([]*commonPb.Transaction, 0, 2048),
+	txResultMap:     make(map[string]*commonPb.Result, 256),
+	readTable:       make(map[string]*sv, 256),
+	writeTable:      make(map[string]*sv, 256),
+	log:             &test.GoLogger{},
 }

@@ -24,10 +24,10 @@ CRYPTOGEN_TOOL_BIN=${CRYPTOGEN_TOOL_PATH}/bin/chainmaker-cryptogen
 CRYPTOGEN_TOOL_CONF=${CRYPTOGEN_TOOL_PATH}/config/crypto_config_template.yml
 CRYPTOGEN_TOOL_PKCS11_KEYS=${CRYPTOGEN_TOOL_PATH}/config/pkcs11_keys.yml
 
-VERSION=v2.1.0
+VERSION=v2.2.0_alpha
 
-BC_YML_TRUST_ROOT_LINE=128
-BC_YML_TRUST_ROOT_LINE_END=148
+BC_YML_TRUST_ROOT_LINE=$(awk '/trust roots list start/{print NR}' ${CONFIG_TPL_PATH}/chainconfig/bc_4_7.tpl)
+BC_YML_TRUST_ROOT_LINE_END=$(awk '/trust roots list end/{print NR}' ${CONFIG_TPL_PATH}/chainconfig/bc_4_7.tpl)
 
 function show_help() {
     echo "Usage:  "
@@ -131,7 +131,7 @@ function generate_config() {
     DOCKER_VM_CONTAINER_NAME_PREFIX="chainmaker-vm-docker-go-container"
     ENABLE_DOCKERVM="false"
 
-    read -p "input consensus type (0-SOLO,1-TBFT(default),3-HOTSTUFF,4-RAFT): " tmp
+    read -p "input consensus type (0-SOLO,1-TBFT(default),3-MAXBFT,4-RAFT): " tmp
     if  [ ! -z "$tmp" ] ;then
       if  [ $tmp -eq 0 ] || [ $tmp -eq 1 ] || [ $tmp -eq 3 ] || [ $tmp -eq 4 ] ;then
           CONSENSUS_TYPE=$tmp
@@ -311,12 +311,22 @@ function generate_config() {
 
         echo "begin node$i trust config..."
         if  [ $NODE_CNT -eq 4 ] || [ $NODE_CNT -eq 7 ]; then
+          trust_path=""
+          c=0
+          for file in `ls -tr $BUILD_CRYPTO_CONFIG_PATH`
+          do
+            c=$(($c+1))
+            if  [ $c -eq $i ]; then
+              trust_path=$file
+              break
+            fi
+          done
           for ((k = 1; k < $CHAIN_CNT + 1; k = k + 1)); do
             for file in `ls -tr $BUILD_CRYPTO_CONFIG_PATH`
             do
                 org_id_tmp="\ - org_id: \"${file}\""
                 org_root="\ \ \ root:"
-                org_root_tmp="\ \ \ \ \ - \"../config/wx-org${i}.chainmaker.org/certs/ca/${file}/ca.crt\""
+                org_root_tmp="\ \ \ \ \ - \"../config/${trust_path}/certs/ca/${file}/ca.crt\""
                 if [ "${system}" = "Linux" ]; then
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\ ${org_root_tmp}" node$i/chainconfig/bc$k.yml
                   xsed "${BC_YML_TRUST_ROOT_LINE}i\ ${org_root}" node$i/chainconfig/bc$k.yml
@@ -335,6 +345,7 @@ function generate_config() {
             done
           done
         fi
+
     done
 }
 

@@ -4,7 +4,7 @@ RPC_PORT=$2
 NODE_COUNT=$3
 CONFIG_DIR=$4
 SERVER_COUNT=$5
-IMAGE="chainmakerofficial/chainmaker:v2.1.0"
+IMAGE="chainmakerofficial/chainmaker:v2.2.0_alpha"
 
 CURRENT_PATH=$(pwd)
 CONFIG_FILE="docker-compose"
@@ -12,15 +12,16 @@ TEMPLATE_FILE="tpl_docker-compose_services.yml"
 
 function show_help() {
     echo "Usage:  "
-    echo "  create_yml.sh P2P_PORT(default:11301) RPC_PORT(default:12301) node_count config_dir(relative current dir or absolutely dir) server_node_count(default:99)"
-    echo "    P2P_PORT: peer to peer connect"
-    echo "    RPC_PORT: sdk to peer connect"
-    echo "    node_count: total node count"
-    echo "    config_dir: all node config path"
-    echo "    server_node_count: number of nodes per server"
+    echo "  create_yml.sh P2P_PORT RPC_PORT NODE_COUNT CONFIG_DIR SERVER_NODE_COUNT"
+    echo "    P2P_PORT:          peer to peer connect"
+    echo "    RPC_PORT:          sdk to peer connect"
+    echo "    NODE_COUNT:        total node count"
+    echo "    CONFIG_DIR:        all node config path, relative or absolute"
+    echo "    SERVER_NODE_COUNT: default:100, number of nodes per server"
     echo ""
-    echo "    eg: ./create_docker_compose_yml.sh 11301 12301 20 ../../../build/config 10"
-    echo "    eg: ./create_docker_compose_yml.sh 11301 12301 20 /mnt/d/develop/workspace/go/chainmaker-go/build/config 10"
+    echo "    eg: ./create_docker_compose_yml.sh 11301 12301 4 ./config : 4 nodes in 1 machine"
+    echo "    eg: ./create_docker_compose_yml.sh 11301 12301 16 ./config 2 : 4 nodes in 8 machine, 2 nodes per machine"
+    echo "    eg: ./create_docker_compose_yml.sh 11301 12301 4 /data/workspace/chainmaker-go/build/config 4"
 }
 if [ ! $# -eq 2 ] && [ ! $# -eq 3 ] && [ ! $# -eq 4 ] && [ ! $# -eq 5 ]; then
     echo "invalid params"
@@ -67,7 +68,7 @@ function check_params() {
     fi
 
     if  [[ ! -n $SERVER_COUNT ]] ;then
-        SERVER_COUNT=99
+        SERVER_COUNT=100
     fi
 
     if  [[ ! -n $CONFIG_DIR ]] ;then

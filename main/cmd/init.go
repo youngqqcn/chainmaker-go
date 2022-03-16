@@ -18,7 +18,10 @@ import (
 const (
 	flagNameOfConfigFilepath          = "conf-file"
 	flagNameShortHandOFConfigFilepath = "c"
+	flagNameOfChainId                 = "chain-id"
 )
+
+var rebuildChainId string
 
 func initLocalConfig(cmd *cobra.Command) {
 	if err := localconf.InitLocalConfig(cmd); err != nil {
@@ -31,6 +34,8 @@ func initFlagSet() *pflag.FlagSet {
 	flags := &pflag.FlagSet{}
 	flags.StringVarP(&localconf.ConfigFilepath, flagNameOfConfigFilepath, flagNameShortHandOFConfigFilepath,
 		localconf.ConfigFilepath, "specify config file path, if not set, default use ./chainmaker.yml")
+	flags.StringVarP(&rebuildChainId, flagNameOfChainId, "",
+		"chain1", "specify chain-id, this flag only used by rebuild-dbs module")
 	return flags
 }
 

@@ -25,7 +25,6 @@ import (
 	"chainmaker.org/chainmaker/common/v2/crypto"
 	"chainmaker.org/chainmaker/common/v2/crypto/asym"
 	"chainmaker.org/chainmaker/common/v2/crypto/x509"
-	"chainmaker.org/chainmaker/common/v2/random/uuid"
 )
 
 const (
@@ -134,7 +133,7 @@ func issueCertificate() error {
 	return cert.IssueCertificate(&cert.IssueCertificateConfig{HashType: hashType, IsCA: isCA,
 		IssuerPrivKeyFilePath: caKeyPath, IssuerCertFilePath: caCertPath,
 		CsrFilePath: csrPath, CertPath: path, CertFileName: name,
-		ExpireYear: expireYear, Sans: sans, Uuid: uuid.GetUUID()})
+		ExpireYear: expireYear, Sans: sans})
 }
 
 func loadPrivateKey(path string) (crypto.PrivateKey, error) {

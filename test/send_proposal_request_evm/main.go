@@ -25,7 +25,7 @@ import (
 	"chainmaker.org/chainmaker-go/test/common"
 	bcx509 "chainmaker.org/chainmaker/common/v2/crypto/x509"
 
-	"chainmaker.org/chainmaker-go/accesscontrol"
+	"chainmaker.org/chainmaker-go/module/accesscontrol"
 	"chainmaker.org/chainmaker/common/v2/ca"
 	"chainmaker.org/chainmaker/common/v2/crypto"
 	"chainmaker.org/chainmaker/common/v2/crypto/asym"

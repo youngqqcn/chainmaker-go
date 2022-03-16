@@ -36,6 +36,9 @@ const (
 	AdminPublicKey = "public"
 	// chainconfig the DPoS of orgId
 	DposOrgId = "dpos_org_id"
+
+	// chainconfig orgId for permission consensus, such as tbft
+	PermissionConsensusOrgId = "public"
 )
 
 var (
@@ -126,7 +129,11 @@ func newPkACProvider(chainConfig *config.ChainConfig,
 		exceptionalPolicyMap:  &sync.Map{},
 	}
 
-	pkAcProvider.createDefaultResourcePolicy()
+	if chainConfig.Consensus.Type == consensus.ConsensusType_DPOS {
+		pkAcProvider.createDefaultResourcePolicyForDPoS()
+	} else {
+		pkAcProvider.createDefaultResourcePolicy()
+	}
 
 	err := pkAcProvider.initAdminMembers(chainConfig.TrustRoots)
 	if err != nil {
@@ -180,6 +187,8 @@ func (p *pkACProvider) initAdminMembers(trustRootList []*config.TrustRootConfig)
 func (p *pkACProvider) initConsensusMember(chainConfig *config.ChainConfig) error {
 	if chainConfig.Consensus.Type == consensus.ConsensusType_DPOS {
 		return p.initDPoSMember(chainConfig.Consensus.Nodes)
+	} else if chainConfig.Consensus.Type == consensus.ConsensusType_TBFT {
+		return p.initPermissionMember(chainConfig.Consensus.Nodes)
 	}
 	return fmt.Errorf("public chain mode does not support other consensus")
 }
@@ -198,6 +207,23 @@ func (p *pkACProvider) initDPoSMember(consensusConf []*config.OrgConfig) error {
 	}
 	p.consensusMember = &consensusMember
 	p.log.Infof("update consensus list: [%v]", p.consensusMember)
+	return nil
+}
+
+func (p *pkACProvider) initPermissionMember(consensusConf []*config.OrgConfig) error {
+	if len(consensusConf) == 0 {
+		return fmt.Errorf("update permission consensus member failed: consensus node config can't be empty in chain config")
+	}
+
+	var consensusMember sync.Map
+	if consensusConf[0].OrgId != PermissionConsensusOrgId {
+		return fmt.Errorf("update permission consensus member failed: node config orgId do not match")
+	}
+	for _, nodeId := range consensusConf[0].NodeId {
+		consensusMember.Store(nodeId, struct{}{})
+	}
+	p.consensusMember = &consensusMember
+	p.log.Infof("update permission consensus list: [%v]", p.consensusMember)
 	return nil
 }
 
@@ -277,6 +303,134 @@ func (p *pkACProvider) createDefaultResourcePolicy() {
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
 		syscontract.ChainConfigFunction_TRUST_MEMBER_UPDATE.String(), pubPolicyForbidden)
 
+	p.resourceNamePolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_NODE_ID_ADD.String(), pubPolicyMajorityAdmin)
+	p.resourceNamePolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_NODE_ID_DELETE.String(), pubPolicyMajorityAdmin)
+	p.resourceNamePolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_NODE_ID_UPDATE.String(), pubPolicyMajorityAdmin)
+	p.resourceNamePolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_NODE_ORG_UPDATE.String(), pubPolicyMajorityAdmin)
+
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_NODE_ORG_ADD.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_NODE_ORG_DELETE.String(), pubPolicyForbidden)
+
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_CONSENSUS_EXT_ADD.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_CONSENSUS_EXT_UPDATE.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_CONSENSUS_EXT_DELETE.String(), pubPolicyForbidden)
+
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_PERMISSION_ADD.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_PERMISSION_UPDATE.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_PERMISSION_DELETE.String(), pubPolicyForbidden)
+
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERT_ADD.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERTS_FREEZE.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERTS_UNFREEZE.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERTS_DELETE.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERTS_REVOKE.String(), pubPolicyForbidden)
+
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERT_ALIAS_ADD.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERT_ALIAS_UPDATE.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERTS_ALIAS_DELETE.String(), pubPolicyForbidden)
+
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_PUBKEY_MANAGE.String()+"-"+
+		syscontract.PubkeyManageFunction_PUBKEY_ADD.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_PUBKEY_MANAGE.String()+"-"+
+		syscontract.PubkeyManageFunction_PUBKEY_DELETE.String(), pubPolicyForbidden)
+
+	// disable trust root add & delete for public mode
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_TRUST_ROOT_ADD.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_TRUST_ROOT_DELETE.String(), pubPolicyForbidden)
+
+	// disable contract access for public mode
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
+		syscontract.ContractManageFunction_GRANT_CONTRACT_ACCESS.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
+		syscontract.ContractManageFunction_REVOKE_CONTRACT_ACCESS.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
+		syscontract.ContractManageFunction_VERIFY_CONTRACT_ACCESS.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
+		syscontract.ContractQueryFunction_GET_DISABLED_CONTRACT_LIST.String(), pubPolicyForbidden)
+
+	// forbidden charge gas by go sdk
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_ACCOUNT_MANAGER.String()+"-"+
+		syscontract.GasAccountFunction_CHARGE_GAS.String(), pubPolicyForbidden)
+
+	// forbidden refund gas vm by go sdk
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_ACCOUNT_MANAGER.String()+"-"+
+		syscontract.GasAccountFunction_REFUND_GAS_VM.String(), pubPolicyForbidden)
+
+	p.resourceNamePolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
+		syscontract.ContractManageFunction_INIT_CONTRACT.String(), pubPolicyManage)
+	p.resourceNamePolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
+		syscontract.ContractManageFunction_UPGRADE_CONTRACT.String(), pubPolicyManage)
+	p.resourceNamePolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
+		syscontract.ContractManageFunction_FREEZE_CONTRACT.String(), pubPolicyManage)
+	p.resourceNamePolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
+		syscontract.ContractManageFunction_UNFREEZE_CONTRACT.String(), pubPolicyManage)
+	p.resourceNamePolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
+		syscontract.ContractManageFunction_REVOKE_CONTRACT.String(), pubPolicyManage)
+
+	p.resourceNamePolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_CORE_UPDATE.String(), pubPolicyMajorityAdmin)
+	p.resourceNamePolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_BLOCK_UPDATE.String(), pubPolicyMajorityAdmin)
+	p.resourceNamePolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_ENABLE_OR_DISABLE_GAS.String(), pubPolicyMajorityAdmin)
+	p.resourceNamePolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_ALTER_ADDR_TYPE.String(), pubPolicyMajorityAdmin)
+
+	// for admin management
+	p.resourceNamePolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_TRUST_ROOT_UPDATE.String(), pubPolicyMajorityAdmin)
+
+	// for gas admin
+	p.resourceNamePolicyMap.Store(syscontract.SystemContract_ACCOUNT_MANAGER.String()+"-"+
+		syscontract.GasAccountFunction_SET_ADMIN.String(), pubPolicyMajorityAdmin)
+}
+
+// need to consistent with 2.1.0 for dpos
+func (p *pkACProvider) createDefaultResourcePolicyForDPoS() {
+
+	p.resourceNamePolicyMap.Store(protocol.ResourceNameConsensusNode, pubPolicyConsensus)
+	// for txtype
+	p.resourceNamePolicyMap.Store(common.TxType_QUERY_CONTRACT.String(), pubPolicyTransaction)
+	p.resourceNamePolicyMap.Store(common.TxType_INVOKE_CONTRACT.String(), pubPolicyTransaction)
+	p.resourceNamePolicyMap.Store(common.TxType_SUBSCRIBE.String(), pubPolicyTransaction)
+	p.resourceNamePolicyMap.Store(common.TxType_ARCHIVE.String(), pubPolicyManage)
+
+	// exceptional resourceName
+	p.exceptionalPolicyMap.Store(protocol.ResourceNamePrivateCompute, pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_PRIVATE_COMPUTE.String()+"-"+
+		syscontract.PrivateComputeFunction_SAVE_CA_CERT.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_PRIVATE_COMPUTE.String()+"-"+
+		syscontract.PrivateComputeFunction_SAVE_ENCLAVE_REPORT.String(), pubPolicyForbidden)
+
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_TRUST_MEMBER_ADD.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_TRUST_MEMBER_DELETE.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_TRUST_MEMBER_UPDATE.String(), pubPolicyForbidden)
+
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
 		syscontract.ChainConfigFunction_NODE_ID_ADD.String(), pubPolicyForbidden)
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
@@ -315,6 +469,13 @@ func (p *pkACProvider) createDefaultResourcePolicy() {
 		syscontract.CertManageFunction_CERTS_DELETE.String(), pubPolicyForbidden)
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
 		syscontract.CertManageFunction_CERTS_REVOKE.String(), pubPolicyForbidden)
+
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERT_ALIAS_ADD.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERT_ALIAS_UPDATE.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CERT_MANAGE.String()+"-"+
+		syscontract.CertManageFunction_CERTS_ALIAS_DELETE.String(), pubPolicyForbidden)
 
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_PUBKEY_MANAGE.String()+"-"+
 		syscontract.PubkeyManageFunction_PUBKEY_ADD.String(), pubPolicyForbidden)
@@ -358,12 +519,17 @@ func (p *pkACProvider) createDefaultResourcePolicy() {
 	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
 		syscontract.ContractQueryFunction_GET_DISABLED_CONTRACT_LIST.String(), pubPolicyForbidden)
 
-	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
-		syscontract.ContractManageFunction_GRANT_CONTRACT_ACCESS.String(), pubPolicyForbidden)
-	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
-		syscontract.ContractManageFunction_REVOKE_CONTRACT_ACCESS.String(), pubPolicyForbidden)
-	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CONTRACT_MANAGE.String()+"-"+
-		syscontract.ContractManageFunction_VERIFY_CONTRACT_ACCESS.String(), pubPolicyForbidden)
+	// disable gas related native contract
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_ACCOUNT_MANAGER.String()+"-"+
+		syscontract.GasAccountFunction_CHARGE_GAS.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_ACCOUNT_MANAGER.String()+"-"+
+		syscontract.GasAccountFunction_REFUND_GAS_VM.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_ACCOUNT_MANAGER.String()+"-"+
+		syscontract.GasAccountFunction_SET_ADMIN.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_ENABLE_OR_DISABLE_GAS.String(), pubPolicyForbidden)
+	p.exceptionalPolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
+		syscontract.ChainConfigFunction_ALTER_ADDR_TYPE.String(), pubPolicyForbidden)
 
 	// for admin management
 	p.resourceNamePolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+

@@ -8,14 +8,14 @@ else
     endif
 endif
 DATETIME=$(shell date "+%Y%m%d%H%M%S")
-VERSION=v2.1.0
+VERSION=v2.2.0_alpha
 GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 GIT_COMMIT = $(shell git log --pretty=format:'%h' -n 1)
 
 AARCH64="aarch64"
 CPU=$(shell uname -m)
 
-LOCALCONF_HOME=chainmaker.org/chainmaker-go/blockchain
+LOCALCONF_HOME=chainmaker.org/chainmaker-go/module/blockchain
 GOLDFLAGS += -X "${LOCALCONF_HOME}.CurrentVersion=${VERSION}"
 GOLDFLAGS += -X "${LOCALCONF_HOME}.BuildDateTime=${DATETIME}"
 GOLDFLAGS += -X "${LOCALCONF_HOME}.GitBranch=${GIT_BRANCH}"
@@ -92,8 +92,8 @@ lint:
 	cd main && golangci-lint run ./...
 	cd module/accesscontrol && golangci-lint run .
 	cd module/blockchain && golangci-lint run .
-	cd module/consensus && golangci-lint run ./...
 	cd module/core && golangci-lint run ./...
+	cd module/consensus && golangci-lint run ./...
 	cd module/net && golangci-lint run ./...
 	cd module/rpcserver && golangci-lint run ./...
 	cd module/snapshot && golangci-lint run ./...
@@ -119,6 +119,10 @@ sql-qta:
 	cd test/send_proposal_request_ci && ./stop_sql_tbft_4.sh
 	cd test/send_proposal_request_ci && ./clean_sql_log.sh
 qta:
+	echo "clear environment"
+	cd test/send_proposal_request_ci && ./stop_solo.sh
+	cd test/send_proposal_request_ci && ./clean_data_log.sh
+	echo "start new qta test"
 	cd test/send_proposal_request_ci && ./build.sh
 	cd test/send_proposal_request_ci && ./start_solo.sh
 	cd test/send_proposal_request_ci && go run main.go

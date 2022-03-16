@@ -28,7 +28,7 @@ import (
 	"chainmaker.org/chainmaker-go/test/common"
 	configPb "chainmaker.org/chainmaker/pb-go/v2/config"
 
-	"chainmaker.org/chainmaker-go/accesscontrol"
+	"chainmaker.org/chainmaker-go/module/accesscontrol"
 	native "chainmaker.org/chainmaker-go/test/chainconfig_test"
 	"chainmaker.org/chainmaker/common/v2/ca"
 	"chainmaker.org/chainmaker/common/v2/crypto"
@@ -47,50 +47,50 @@ import (
 
 const (
 	CHAIN1           = "chain1"
-	certPathPrefix   = "../../build/crypto-config"
+	certPathPrefix   = "../../build/"
 	certWasmPath     = "../wasm/rust-fact-2.0.0.wasm"
 	addWasmPath      = "../wasm/rust-counter-2.0.0.wasm"
-	userKeyPath      = certPathPrefix + "/wx-org1.chainmaker.org/user/client1/client1.sign.key"
-	userCrtPath      = certPathPrefix + "/wx-org1.chainmaker.org/user/client1/client1.sign.crt"
+	userKeyPath      = certPathPrefix + "crypto-config/wx-org1.chainmaker.org/user/client1/client1.sign.key"
+	userCrtPath      = certPathPrefix + "crypto-config/wx-org1.chainmaker.org/user/client1/client1.sign.crt"
 	orgId            = "wx-org1.chainmaker.org"
 	certContractName = "ex_fact"
 	addContractName  = "add"
 
-	prePathFmt  = certPathPrefix + "/wx-org%s.chainmaker.org/user/admin1/"
+	prePathFmt  = certPathPrefix + "crypto-config/wx-org%s.chainmaker.org/user/admin1/"
 	OrgIdFormat = "wx-org%d.chainmaker.org"
 	tps         = 10000 //
 
-	userKeyPathFormat  = certPathPrefix + "/wx-org%d.chainmaker.org/user/client1/client1.sign.key"
-	userCertPathFormat = certPathPrefix + "/wx-org%d.chainmaker.org/user/client1/client1.sign.crt"
+	userKeyPathFormat  = certPathPrefix + "crypto-config/wx-org%d.chainmaker.org/user/client1/client1.sign.key"
+	userCertPathFormat = certPathPrefix + "crypto-config/wx-org%d.chainmaker.org/user/client1/client1.sign.crt"
 )
 
 var (
 	caPaths = [][]string{
-		{certPathPrefix + "/wx-org1.chainmaker.org/ca"},
-		{certPathPrefix + "/wx-org2.chainmaker.org/ca"},
-		{certPathPrefix + "/wx-org3.chainmaker.org/ca"},
-		{certPathPrefix + "/wx-org4.chainmaker.org/ca"},
-		{certPathPrefix + "/wx-org5.chainmaker.org/ca"},
-		{certPathPrefix + "/wx-org6.chainmaker.org/ca"},
-		{certPathPrefix + "/wx-org7.chainmaker.org/ca"},
+		{certPathPrefix + "crypto-config/wx-org1.chainmaker.org/ca"},
+		{certPathPrefix + "crypto-config/wx-org2.chainmaker.org/ca"},
+		{certPathPrefix + "crypto-config/wx-org3.chainmaker.org/ca"},
+		{certPathPrefix + "crypto-config/wx-org4.chainmaker.org/ca"},
+		{certPathPrefix + "crypto-config/wx-org5.chainmaker.org/ca"},
+		{certPathPrefix + "crypto-config/wx-org6.chainmaker.org/ca"},
+		{certPathPrefix + "crypto-config/wx-org7.chainmaker.org/ca"},
 	}
 	userKeyPaths = []string{
-		certPathPrefix + "/wx-org1.chainmaker.org/user/client1/client1.sign.key",
-		certPathPrefix + "/wx-org2.chainmaker.org/user/client1/client1.sign.key",
-		certPathPrefix + "/wx-org3.chainmaker.org/user/client1/client1.sign.key",
-		certPathPrefix + "/wx-org4.chainmaker.org/user/client1/client1.sign.key",
-		certPathPrefix + "/wx-org5.chainmaker.org/user/client1/client1.sign.key",
-		certPathPrefix + "/wx-org6.chainmaker.org/user/client1/client1.sign.key",
-		certPathPrefix + "/wx-org7.chainmaker.org/user/client1/client1.sign.key",
+		certPathPrefix + "crypto-config/wx-org1.chainmaker.org/user/client1/client1.sign.key",
+		certPathPrefix + "crypto-config/wx-org2.chainmaker.org/user/client1/client1.sign.key",
+		certPathPrefix + "crypto-config/wx-org3.chainmaker.org/user/client1/client1.sign.key",
+		certPathPrefix + "crypto-config/wx-org4.chainmaker.org/user/client1/client1.sign.key",
+		certPathPrefix + "crypto-config/wx-org5.chainmaker.org/user/client1/client1.sign.key",
+		certPathPrefix + "crypto-config/wx-org6.chainmaker.org/user/client1/client1.sign.key",
+		certPathPrefix + "crypto-config/wx-org7.chainmaker.org/user/client1/client1.sign.key",
 	}
 	userCrtPaths = []string{
-		certPathPrefix + "/wx-org1.chainmaker.org/user/client1/client1.sign.crt",
-		certPathPrefix + "/wx-org2.chainmaker.org/user/client1/client1.sign.crt",
-		certPathPrefix + "/wx-org3.chainmaker.org/user/client1/client1.sign.crt",
-		certPathPrefix + "/wx-org4.chainmaker.org/user/client1/client1.sign.crt",
-		certPathPrefix + "/wx-org5.chainmaker.org/user/client1/client1.sign.crt",
-		certPathPrefix + "/wx-org6.chainmaker.org/user/client1/client1.sign.crt",
-		certPathPrefix + "/wx-org7.chainmaker.org/user/client1/client1.sign.crt",
+		certPathPrefix + "crypto-config/wx-org1.chainmaker.org/user/client1/client1.sign.crt",
+		certPathPrefix + "crypto-config/wx-org2.chainmaker.org/user/client1/client1.sign.crt",
+		certPathPrefix + "crypto-config/wx-org3.chainmaker.org/user/client1/client1.sign.crt",
+		certPathPrefix + "crypto-config/wx-org4.chainmaker.org/user/client1/client1.sign.crt",
+		certPathPrefix + "crypto-config/wx-org5.chainmaker.org/user/client1/client1.sign.crt",
+		certPathPrefix + "crypto-config/wx-org6.chainmaker.org/user/client1/client1.sign.crt",
+		certPathPrefix + "crypto-config/wx-org7.chainmaker.org/user/client1/client1.sign.crt",
 	}
 	orgIds = []string{
 		"wx-org1.chainmaker.org",

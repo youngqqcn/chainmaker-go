@@ -19,6 +19,7 @@ func main() {
 	mainCmd.AddCommand(cmd.StartCMD())
 	mainCmd.AddCommand(cmd.VersionCMD())
 	mainCmd.AddCommand(cmd.ConfigCMD())
+	mainCmd.AddCommand(cmd.RebuildDbsCMD())
 
 	err := mainCmd.Execute()
 	if err != nil {

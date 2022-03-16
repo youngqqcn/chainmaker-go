@@ -16,15 +16,17 @@ import (
 	"strings"
 	"sync"
 
-	"chainmaker.org/chainmaker-go/net"
-	"chainmaker.org/chainmaker-go/subscriber"
+	"chainmaker.org/chainmaker/common/v2/crypto/engine"
+
+	"chainmaker.org/chainmaker-go/module/net"
+	"chainmaker.org/chainmaker-go/module/subscriber"
 	"chainmaker.org/chainmaker/common/v2/crypto/asym"
 	"chainmaker.org/chainmaker/common/v2/helper"
 	"chainmaker.org/chainmaker/common/v2/msgbus"
-	"chainmaker.org/chainmaker/localconf/v2"
-	"chainmaker.org/chainmaker/logger/v2"
+	localconf "chainmaker.org/chainmaker/localconf/v2"
+	logger "chainmaker.org/chainmaker/logger/v2"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
-	"chainmaker.org/chainmaker/protocol/v2"
+	protocol "chainmaker.org/chainmaker/protocol/v2"
 )
 
 var log = logger.GetLogger(logger.MODULE_BLOCKCHAIN)
@@ -64,6 +66,22 @@ func (server *ChainMakerServer) Init() error {
 	return nil
 }
 
+// Init ChainMakerServer.
+func (server *ChainMakerServer) InitForRebuildDbs(chainId string) error {
+	var err error
+	log.Debug("begin init chain maker rebuild dbs server...")
+	server.readyC = make(chan struct{})
+	// 1) init net
+	//if err = server.initNet(); err != nil {
+	//	return err
+	//}
+	// 2) init blockchains
+	if err = server.initBlockchainsForRebuildDbs(chainId); err != nil {
+		return err
+	}
+	log.Info("init chain maker server success!")
+	return nil
+}
 func (server *ChainMakerServer) initNet() error {
 	var netType protocol.NetType
 	var err error
@@ -73,6 +91,7 @@ func (server *ChainMakerServer) initNet() error {
 	switch strings.ToLower(provider) {
 	case "libp2p":
 		netType = protocol.Libp2p
+
 	case "liquid":
 		netType = protocol.Liquid
 	default:
@@ -166,12 +185,39 @@ func (server *ChainMakerServer) initNet() error {
 
 func (server *ChainMakerServer) initBlockchains() error {
 	server.blockchains = sync.Map{}
+	ok := false
 	for _, chain := range localconf.ChainMakerConfig.GetBlockChains() {
 		chainId := chain.ChainId
 		if err := server.initBlockchain(chainId, chain.Genesis); err != nil {
 			log.Error(err.Error())
 			continue
 		}
+		ok = true
+	}
+	if !ok {
+		return fmt.Errorf("init all blockchains fail")
+	}
+	go server.newBlockchainTaskListener()
+	return nil
+}
+
+func (server *ChainMakerServer) initBlockchainsForRebuildDbs(chainId string) error {
+	server.blockchains = sync.Map{}
+	ok := false
+	for _, chain := range localconf.ChainMakerConfig.GetBlockChains() {
+		if chainId == chain.ChainId {
+			if err := server.initBlockchainForRebuildDbs(chainId, chain.Genesis); err != nil {
+				return err
+			}
+			ok = true
+		}
+		//if err := server.initBlockchainForRebuildDbs(chainId, chain.Genesis); err != nil {
+		//	log.Error(err.Error())
+		//	continue
+		//}
+	}
+	if !ok {
+		return fmt.Errorf("init %s blockchains fail for not exists", chainId)
 	}
 	go server.newBlockchainTaskListener()
 	return nil
@@ -186,17 +232,14 @@ func (server *ChainMakerServer) newBlockchainTaskListener() {
 		}
 		log.Infof("new block chain found(chain-id: %s), start to init new block chain.", newChainId)
 		for _, chain := range localconf.ChainMakerConfig.GetBlockChains() {
-			chainId := chain.ChainId
-			if chainId != newChainId {
-				continue
+			if chain.ChainId == newChainId {
+				if err := server.initBlockchain(newChainId, chain.Genesis); err != nil {
+					log.Error(err.Error())
+					continue
+				}
+				newBlockchain, _ := server.blockchains.Load(newChainId)
+				go startBlockchain(newBlockchain.(*Blockchain))
 			}
-			if err := server.initBlockchain(chainId, chain.Genesis); err != nil {
-				log.Error(err.Error())
-				continue
-			}
-			newBlockchain, _ := server.blockchains.Load(newChainId)
-			go startBlockchain(newBlockchain.(*Blockchain))
-
 		}
 	}
 }
@@ -221,12 +264,38 @@ func (server *ChainMakerServer) initBlockchain(chainId, genesis string) error {
 	return nil
 }
 
+func (server *ChainMakerServer) initBlockchainForRebuildDbs(chainId, genesis string) error {
+	if !filepath.IsAbs(genesis) {
+		var err error
+		genesis, err = filepath.Abs(genesis)
+		if err != nil {
+			return err
+		}
+	}
+	log.Infof("load genesis file path of chain[%s]: %s", chainId, genesis)
+	blockchain := NewBlockchain(genesis, chainId, msgbus.NewMessageBus(), server.net)
+	if err := blockchain.InitForRebuildDbs(); err != nil {
+		errMsg := fmt.Sprintf("init blockchain[%s] failed, %s", chainId, err.Error())
+		return errors.New(errMsg)
+	}
+	server.blockchains.Store(chainId, blockchain)
+	log.Infof("init blockchain[%s] success!", chainId)
+	return nil
+}
 func startBlockchain(chain *Blockchain) {
 	if err := chain.Start(); err != nil {
 		log.Errorf("[Core] start blockchain[%s] failed, %s", chain.chainId, err.Error())
 		os.Exit(-1)
 	}
 	log.Infof("[Core] start blockchain[%s] success", chain.chainId)
+}
+func startBlockchainForRebuildDbs(chain *Blockchain) {
+	if err := chain.StartForRebuildDbs(); err != nil {
+		log.Errorf("[Core] start blockchain[%s] rebuild-dbs failed, %s", chain.chainId, err.Error())
+		os.Exit(-1)
+	}
+	log.Infof("[Core] start blockchain[%s] rebuild-dbs success", chain.chainId)
+	chain.RebuildDbs()
 }
 
 // Start ChainMakerServer.
@@ -238,10 +307,32 @@ func (server *ChainMakerServer) Start() error {
 	}
 	log.Infof("[Net] start success!")
 
+	//init crypto engine for ac
+	engine.InitCryptoEngine(localconf.ChainMakerConfig.CryptoEngine, false)
+
 	// 2) start blockchains
 	server.blockchains.Range(func(_, value interface{}) bool {
 		chain, _ := value.(*Blockchain)
 		go startBlockchain(chain)
+		return true
+	})
+	// 3) ready
+	close(server.readyC)
+	return nil
+}
+
+// Start ChainMakerServer for rebuild dbs.
+func (server *ChainMakerServer) StartForRebuildDbs() error {
+	// 1) start Net
+	//if err := server.net.Start(); err != nil {
+	//	log.Errorf("[Net] start failed, %s", err.Error())
+	//	return err
+	//}
+	//log.Infof("[Net] start success!")
+	// 2) start blockchains
+	server.blockchains.Range(func(_, value interface{}) bool {
+		chain, _ := value.(*Blockchain)
+		go startBlockchainForRebuildDbs(chain)
 		return true
 	})
 

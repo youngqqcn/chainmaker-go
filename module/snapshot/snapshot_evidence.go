@@ -18,6 +18,7 @@ import (
 
 type SnapshotEvidence struct {
 	delegate *SnapshotImpl
+	log      protocol.Logger
 }
 
 func (s *SnapshotEvidence) GetPreSnapshot() protocol.Snapshot {
@@ -91,65 +92,7 @@ func (s *SnapshotEvidence) ApplyTxSimContext(txSimContext protocol.TxSimContext,
 	if s.delegate == nil {
 		return false, -1
 	}
-	if s.delegate.IsSealed() {
-		return false, s.delegate.GetSnapshotSize()
-	}
-
-	s.delegate.lock.Lock()
-	defer s.delegate.lock.Unlock()
-
-	tx := txSimContext.GetTx()
-	txExecSeq := txSimContext.GetTxExecSeq()
-	var txRWSet *commonPb.TxRWSet
-	var txResult *commonPb.Result
-
-	if !withSpecialTx && specialTxType == protocol.ExecOrderTxTypeIterator {
-		s.delegate.specialTxTable = append(s.delegate.specialTxTable, tx)
-		return true, len(s.delegate.txTable) + len(s.delegate.specialTxTable)
-	}
-
-	// Only when the virtual machine is running normally can the read-write set be saved
-	txRWSet = txSimContext.GetTxRWSet(runVmSuccess)
-	txResult = txSimContext.GetTxResult()
-
-	if specialTxType == protocol.ExecOrderTxTypeIterator || txExecSeq >= len(s.delegate.txTable) {
-		s.apply(tx, txRWSet, txResult)
-		return true, len(s.delegate.txTable)
-	}
-
-	s.apply(tx, txRWSet, txResult)
-	return true, len(s.delegate.txTable)
-}
-
-// After the read-write set is generated, add TxSimContext to the snapshot
-func (s *SnapshotEvidence) apply(tx *commonPb.Transaction, txRWSet *commonPb.TxRWSet, txResult *commonPb.Result) {
-	// Append to read table
-	applySeq := len(s.delegate.txTable)
-	for _, txRead := range txRWSet.TxReads {
-		finalKey := constructKey(txRead.ContractName, txRead.Key)
-		s.delegate.readTable[finalKey] = &sv{
-			seq:   applySeq,
-			value: txRead.Value,
-		}
-	}
-
-	// Append to write table
-	for _, txWrite := range txRWSet.TxWrites {
-		finalKey := constructKey(txWrite.ContractName, txWrite.Key)
-		s.delegate.writeTable[finalKey] = &sv{
-			seq:   applySeq,
-			value: txWrite.Value,
-		}
-	}
-
-	// Append to read-write-set table
-	s.delegate.txRWSetTable = append(s.delegate.txRWSetTable, txRWSet)
-
-	// Add to tx result map
-	s.delegate.txResultMap[tx.Payload.TxId] = txResult
-
-	// Add to transaction table
-	s.delegate.txTable = append(s.delegate.txTable, tx)
+	return s.delegate.ApplyTxSimContext(txSimContext, specialTxType, runVmSuccess, withSpecialTx)
 }
 
 // check if snapshot is sealed
@@ -169,10 +112,10 @@ func (s *SnapshotEvidence) GetBlockHeight() uint64 {
 	return s.delegate.GetBlockHeight()
 }
 
-// GetBlockTimestamp returns current block timestamp
+// get block height for current snapshot
 func (s *SnapshotEvidence) GetBlockTimestamp() int64 {
 	if s.delegate == nil {
-		return 0
+		return math.MaxInt64
 	}
 	return s.delegate.GetBlockTimestamp()
 }
@@ -197,13 +140,13 @@ func (s *SnapshotEvidence) BuildDAG(isSql bool) *commonPb.DAG {
 		return nil
 	}
 	if !s.IsSealed() {
-		log.Warnf("you need to execute Seal before you can build DAG of snapshot with height %d", s.delegate.blockHeight)
+		s.log.Warnf("you need to execute Seal before you can build DAG of snapshot with height %d", s.delegate.blockHeight)
 	}
 	s.delegate.lock.Lock()
 	defer s.delegate.lock.Unlock()
 
 	txCount := len(s.delegate.txTable)
-	log.Debugf("start building DAG(all vertexes are nil) for block %d with %d txs", s.delegate.blockHeight, txCount)
+	s.log.Debugf("start building DAG(all vertexes are nil) for block %d with %d txs", s.delegate.blockHeight, txCount)
 
 	dag := &commonPb.DAG{}
 	if txCount == 0 {
@@ -229,7 +172,7 @@ func (s *SnapshotEvidence) BuildDAG(isSql bool) *commonPb.DAG {
 			}
 		}
 	}
-	log.Debugf("build DAG for block %d finished", s.delegate.blockHeight)
+	s.log.Debugf("build DAG for block %d finished", s.delegate.blockHeight)
 	return dag
 }
 

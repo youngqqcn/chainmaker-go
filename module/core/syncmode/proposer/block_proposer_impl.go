@@ -8,18 +8,19 @@ package proposer
 
 import (
 	"bytes"
+	"fmt"
 	"sync"
 	"time"
 
-	"chainmaker.org/chainmaker-go/core/common"
-	"chainmaker.org/chainmaker-go/core/provider/conf"
+	"chainmaker.org/chainmaker-go/module/core/common"
+	"chainmaker.org/chainmaker-go/module/core/provider/conf"
 	"chainmaker.org/chainmaker/common/v2/monitor"
 	"chainmaker.org/chainmaker/common/v2/msgbus"
 	"chainmaker.org/chainmaker/localconf/v2"
 	pbac "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
 	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
 	consensuspb "chainmaker.org/chainmaker/pb-go/v2/consensus"
-	"chainmaker.org/chainmaker/pb-go/v2/consensus/chainedbft"
+	"chainmaker.org/chainmaker/pb-go/v2/consensus/maxbft"
 	txpoolpb "chainmaker.org/chainmaker/pb-go/v2/txpool"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/utils/v2"
@@ -252,20 +253,48 @@ func (bp *BlockProposerImpl) proposing(height uint64, preHash []byte) *commonpb.
 	selfProposedBlock := bp.proposalCache.GetSelfProposedBlockAt(height)
 	if selfProposedBlock != nil {
 		if bytes.Equal(selfProposedBlock.Header.PreBlockHash, preHash) {
-			// Repeat propose block if node has proposed before at the same height
-			bp.proposalCache.SetProposedAt(height)
-			_, txsRwSet, _ := bp.proposalCache.GetProposedBlock(selfProposedBlock)
-			bp.msgBus.Publish(msgbus.ProposedBlock, &consensuspb.ProposalBlock{Block: selfProposedBlock, TxsRwSet: txsRwSet})
-			bp.log.Infof("proposer success repeat [%d](txs:%d,hash:%x)",
-				selfProposedBlock.Header.BlockHeight, selfProposedBlock.Header.TxCount, selfProposedBlock.Header.BlockHash)
-			return nil
+
+			hash := fmt.Sprint(selfProposedBlock.Header.BlockHash)
+			var timer *time.Timer
+			ti, ok := common.ProposeRepeatTimerMap.Load(hash)
+			if !ok {
+				timer = time.NewTimer(1 * time.Second)
+				common.ProposeRepeatTimerMap.Store(hash, timer)
+			} else {
+				timer, _ = ti.(*time.Timer)
+				if timer == nil {
+					bp.log.Warnf("timer is nil, height(%d)", height)
+					timer = time.NewTimer(1 * time.Second)
+					common.ProposeRepeatTimerMap.Store(hash, timer)
+				}
+			}
+
+			select {
+			case <-timer.C:
+
+				// Repeat propose block if node has proposed before at the same height
+				bp.proposalCache.SetProposedAt(height)
+				_, txsRwSet, _ := bp.proposalCache.GetProposedBlock(selfProposedBlock)
+
+				bp.msgBus.Publish(msgbus.ProposedBlock, &consensuspb.ProposalBlock{Block: selfProposedBlock,
+					TxsRwSet: txsRwSet})
+				bp.log.Infof("proposer success repeat [%d](txs:%d,hash:%x)",
+					selfProposedBlock.Header.BlockHeight, selfProposedBlock.Header.TxCount,
+					selfProposedBlock.Header.BlockHash)
+
+				return nil
+
+			default:
+				return nil
+			}
+
 		}
 		bp.proposalCache.ClearTheBlock(selfProposedBlock)
-		// Note: It is not possible to re-add the transactions in the deleted block to txpool; because some transactions may
-		// be included in other blocks to be confirmed, and it is impossible to quickly exclude these pending transactions
-		// that have been entered into the block. Comprehensive considerations, directly discard this block is the optimal
-		// choice. This processing method may only cause partial transaction loss at the current node, but it can be solved
-		// by rebroadcasting on the client side.
+		// Note: It is not possible to re-add the transactions in the deleted block to txpool; because some
+		// transactions may be included in other blocks to be confirmed, and it is impossible to quickly exclude
+		// these pending transactions that have been entered into the block. Comprehensive considerations,
+		// directly discard this block is the optimal choice. This processing method may only cause partial
+		// transaction loss at the current node, but it can be solved by rebroadcasting on the client side.
 		bp.txPool.RetryAndRemoveTxs(nil, selfProposedBlock.Txs)
 	}
 
@@ -333,9 +362,9 @@ func (bp *BlockProposerImpl) proposing(height uint64, preHash []byte) *commonpb.
 	bp.msgBus.Publish(msgbus.ProposedBlock, &consensuspb.ProposalBlock{Block: newBlock, TxsRwSet: rwSetMap})
 	//bp.log.Debugf("finalized block \n%s", utils.FormatBlock(block))
 	elapsed := utils.CurrentTimeMillisSeconds() - startTick
-	bp.log.Infof("proposer success [%d](txs:%d), time used(fetch:%d,dup:%d,vm:%v,total:%d)",
-		block.Header.BlockHeight, block.Header.TxCount,
-		fetchLasts, dupLasts, timeLasts, elapsed)
+	bp.log.Infof("proposer success [%d](txs:%d), time used(fetch:%d,dup:%d, begin DB transaction:%v, "+
+		"new snapshort:%v, vm:%v, finalize block:%v,total:%d)", block.Header.BlockHeight, block.Header.TxCount,
+		fetchLasts, dupLasts, timeLasts[0], timeLasts[1], timeLasts[2], timeLasts[3], elapsed)
 	if localconf.ChainMakerConfig.MonitorConfig.Enabled {
 		bp.metricBlockPackageTime.WithLabelValues(bp.chainId).Observe(float64(elapsed) / 1000)
 	}
@@ -402,12 +431,12 @@ func (bp *BlockProposerImpl) OnReceiveProposeStatusChange(proposeStatus bool) {
 	bp.log.Debugf("current node is proposer, timeout period is %v", bp.getDuration())
 }
 
-// OnReceiveChainedBFTProposal, to check if this proposer should propose a new block
-// Only for chained bft consensus
-func (bp *BlockProposerImpl) OnReceiveChainedBFTProposal(proposal *chainedbft.BuildProposal) {
+// OnReceiveMaxBFTProposal, to check if this proposer should propose a new block
+// Only for maxbft consensus
+func (bp *BlockProposerImpl) OnReceiveMaxBFTProposal(proposal *maxbft.BuildProposal) {
 	proposingHeight := proposal.Height
 	preHash := proposal.PreHash
-	if !bp.shouldProposeByChainedBFT(proposingHeight, preHash) {
+	if !bp.shouldProposeByMaxBFT(proposingHeight, preHash) {
 		bp.log.Infof("not a legal proposal request [%d](%x)", proposingHeight, preHash)
 		return
 	}
@@ -418,7 +447,7 @@ func (bp *BlockProposerImpl) OnReceiveChainedBFTProposal(proposal *chainedbft.Bu
 	}
 	defer bp.setIdle()
 
-	bp.log.Infof("trigger proposal from chainedBFT, height[%d]", proposal.Height)
+	bp.log.Infof("trigger proposal from maxBFT, height[%d]", proposal.Height)
 	go bp.proposing(proposingHeight, preHash)
 	<-bp.finishProposeC
 }
@@ -519,10 +548,10 @@ func (bp *BlockProposerImpl) isSelfProposer() bool {
 }
 
 /*
- * shouldProposeByChainedBFT, check if node should propose new block
- * Only for chained bft consensus
+ * shouldProposeByMaxBFT, check if node should propose new block
+ * Only for maxbft consensus
  */
-func (bp *BlockProposerImpl) shouldProposeByChainedBFT(height uint64, preHash []byte) bool {
+func (bp *BlockProposerImpl) shouldProposeByMaxBFT(height uint64, preHash []byte) bool {
 	committedBlock := bp.ledgerCache.GetLastCommittedBlock()
 	if committedBlock == nil {
 		bp.log.Errorf("no committed block found")

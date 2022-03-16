@@ -13,7 +13,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"chainmaker.org/chainmaker-go/blockchain"
+	"chainmaker.org/chainmaker-go/module/blockchain"
 	commonErr "chainmaker.org/chainmaker/common/v2/errors"
 	"chainmaker.org/chainmaker/common/v2/monitor"
 	"chainmaker.org/chainmaker/localconf/v2"
@@ -314,8 +314,12 @@ func (s *ApiService) dealSystemChainQuery(tx *commonPb.Transaction, vmMgr protoc
 		vmManager:        vmMgr,
 		blockVersion:     protocol.DefaultBlockVersion,
 	}
-
-	runtimeInstance := native.GetRuntimeInstance(chainId)
+	defaultGas := uint64(0)
+	chainConfig, _ := s.chainMakerServer.GetChainConf(chainId)
+	if chainConfig.ChainConfig().AccountConfig != nil && chainConfig.ChainConfig().AccountConfig.EnableGas {
+		defaultGas = chainConfig.ChainConfig().AccountConfig.DefaultGas
+	}
+	runtimeInstance := native.GetRuntimeInstance(chainId, defaultGas)
 	txResult := runtimeInstance.Invoke(&commonPb.Contract{
 		Name: tx.Payload.ContractName,
 	},
@@ -378,7 +382,6 @@ func (s *ApiService) dealTransact(tx *commonPb.Transaction, source protocol.TxSo
 
 		errCode = commonErr.ERR_CODE_TX_ADD_FAILED
 		errMsg = s.getErrMsg(errCode, err)
-		s.log.Error(errMsg)
 		resp.Code = commonPb.TxStatusCode_INTERNAL_ERROR
 		resp.Message = errMsg
 		resp.TxId = tx.Payload.TxId

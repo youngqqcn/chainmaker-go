@@ -9,9 +9,13 @@ import (
 	"chainmaker.org/chainmaker-go/tools/cmc/util"
 	"chainmaker.org/chainmaker/common/v2/crypto"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
+	"chainmaker.org/chainmaker/pb-go/v2/syscontract"
 	"chainmaker.org/chainmaker/protocol/v2"
 	sdk "chainmaker.org/chainmaker/sdk-go/v2"
 	sdkutils "chainmaker.org/chainmaker/sdk-go/v2/utils"
+
+	"github.com/gogo/protobuf/proto"
+	"github.com/hokaccha/go-prettyjson"
 	"github.com/spf13/cobra"
 )
 
@@ -70,7 +74,7 @@ func multiSignVoteCMD() *cobra.Command {
 	attachFlags(cmd, []string{
 		flagUserSignKeyFilePath, flagUserSignCrtFilePath,
 		flagConcurrency, flagTotalCountPerGoroutine, flagSdkConfPath, flagOrgId, flagChainId, flagTxId,
-		flagTimeout, flagUserTlsCrtFilePath, flagUserTlsKeyFilePath, flagEnableCertHash,
+		flagTimeout, flagUserTlsCrtFilePath, flagUserTlsKeyFilePath, flagEnableCertHash, flagIsAgree,
 		flagAdminCrtFilePaths, flagAdminKeyFilePaths, flagSyncResult, flagAdminOrgIds,
 	})
 
@@ -105,10 +109,13 @@ func multiSignQueryCMD() *cobra.Command {
 func multiSignReq() error {
 	var (
 		err     error
+		output  []byte
 		payload *common.Payload
+		client  *sdk.ChainClient
+		resp    *common.TxResponse
 	)
 
-	client, err := util.CreateChainClient(sdkConfPath, chainId, orgId, userTlsCrtFilePath, userTlsKeyFilePath,
+	client, err = util.CreateChainClient(sdkConfPath, chainId, orgId, userTlsCrtFilePath, userTlsKeyFilePath,
 		userSignCrtFilePath, userSignKeyFilePath)
 	if err != nil {
 		return err
@@ -117,7 +124,7 @@ func multiSignReq() error {
 	var pms []*ParamMultiSign
 	var pairs []*common.KeyValuePair
 	if params != "" {
-		err := json.Unmarshal([]byte(params), &pms)
+		err = json.Unmarshal([]byte(params), &pms)
 		if err != nil {
 			return err
 		}
@@ -132,7 +139,6 @@ func multiSignReq() error {
 				Key:   pm.Key,
 				Value: byteCode,
 			})
-
 		} else {
 			pairs = append(pairs, &common.KeyValuePair{
 				Key:   pm.Key,
@@ -143,13 +149,15 @@ func multiSignReq() error {
 	}
 	payload = client.CreateMultiSignReqPayload(pairs)
 
-	resp, err := client.MultiSignContractReq(payload)
+	resp, err = client.MultiSignContractReq(payload)
 	if err != nil {
 		return fmt.Errorf("multi sign req failed, %s", err.Error())
 	}
-
-	fmt.Printf("multi sign req resp: %+v\n", resp)
-
+	output, err = prettyjson.Marshal(resp)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("multi sign req resp: %s\n", string(output))
 	return nil
 }
 
@@ -161,12 +169,16 @@ func multiSignVote() error {
 		adminKeys []string
 		adminCrts []string
 		adminOrgs []string
+		output    []byte
 		err       error
 		payload   *common.Payload
 		endorser  *common.EndorsementEntry
+		client    *sdk.ChainClient
+		resp      *common.TxResponse
+		tx        *common.TransactionInfo
 	)
 
-	client, err := util.CreateChainClient(sdkConfPath, chainId, orgId, userTlsCrtFilePath, userTlsKeyFilePath,
+	client, err = util.CreateChainClient(sdkConfPath, chainId, orgId, userTlsCrtFilePath, userTlsKeyFilePath,
 		userSignCrtFilePath, userSignKeyFilePath)
 	if err != nil {
 		return err
@@ -197,13 +209,21 @@ func multiSignVote() error {
 		}
 		adminKey = adminKeys[0]
 		adminOrg = adminOrgs[0]
+	} else {
+		if adminKeyFilePaths != "" {
+			adminKeys = strings.Split(adminKeyFilePaths, ",")
+		}
+		if len(adminKeys) == 0 {
+			return fmt.Errorf(ADMIN_ORGID_KEY_LENGTH_NOT_EQUAL_FORMAT, len(adminKeys), len(adminOrgs))
+		}
+		adminKey = adminKeys[0]
 	}
 
-	result, err := client.GetTxByTxId(txId)
+	tx, err = client.GetTxByTxId(txId)
 	if err != nil {
 		return fmt.Errorf("get tx by txid failed, %s", err.Error())
 	}
-	payload = result.Transaction.Payload
+	payload = tx.Transaction.Payload
 	if sdk.AuthTypeToStringMap[client.GetAuthType()] == protocol.PermissionedWithCert {
 		endorser, err = sdkutils.MakeEndorserWithPath(adminKey, adminCrt, payload)
 		if err != nil {
@@ -215,36 +235,66 @@ func multiSignVote() error {
 		if err != nil {
 			return fmt.Errorf("multi sign vote failed, %s", err.Error())
 		}
+	} else {
+		endorser, err = sdkutils.MakePkEndorserWithPath(adminKey, crypto.HashAlgoMap[client.GetHashType()],
+			"", payload)
+		if err != nil {
+			return fmt.Errorf("multi sign vote failed, %s", err.Error())
+		}
+
 	}
 
-	resp, err := client.MultiSignContractVote(payload, endorser)
+	resp, err = client.MultiSignContractVote(payload, endorser, isAgree)
 	if err != nil {
 		return fmt.Errorf("multi sign vote failed, %s", err.Error())
 	}
-
-	fmt.Printf("multi sign vote resp: %+v\n", resp)
+	output, err = prettyjson.Marshal(resp)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("multi sign vote resp: %s\n", string(output))
 
 	return nil
 }
 
 func multiSignQuery() error {
 	var (
-		err error
+		err    error
+		resp   *common.TxResponse
+		client *sdk.ChainClient
+		output []byte
 	)
 
-	client, err := util.CreateChainClient(sdkConfPath, chainId, orgId, userTlsCrtFilePath, userTlsKeyFilePath,
+	client, err = util.CreateChainClient(sdkConfPath, chainId, orgId, userTlsCrtFilePath, userTlsKeyFilePath,
 		userSignCrtFilePath, userSignKeyFilePath)
 	if err != nil {
 		return err
 	}
 	defer client.Stop()
 
-	resp, err := client.MultiSignContractQuery(txId)
+	resp, err = client.MultiSignContractQuery(txId)
 	if err != nil {
 		return fmt.Errorf("multi sign query failed, %s", err.Error())
 	}
 
-	fmt.Printf("multi sign query resp: %+v\n", resp)
+	if resp.Code == 0 && resp.ContractResult.Code == 0 {
+		multiSignInfo := &syscontract.MultiSignInfo{}
+		err = proto.Unmarshal(resp.ContractResult.Result, multiSignInfo)
+		if err != nil {
+			return err
+		}
+		output, err = prettyjson.Marshal(multiSignInfo)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("multi sign query resp: %s\n", string(output))
+		return nil
+	}
 
+	output, err = prettyjson.Marshal(resp)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("multi sign query resp: %s\n", string(output))
 	return nil
 }
