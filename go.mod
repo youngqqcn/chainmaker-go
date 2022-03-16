@@ -3,7 +3,7 @@ module chainmaker.org/chainmaker-go
 go 1.15
 
 require (
-	chainmaker.org/chainmaker/chainconf/v2 v2.1.2-0.20220304064458-4d8be01d6961
+	chainmaker.org/chainmaker/chainconf/v2 v2.2.1-0.20220316065957-26b566a12cc6
 	chainmaker.org/chainmaker/common/v2 v2.2.0
 	chainmaker.org/chainmaker/consensus-dpos/v2 v2.0.0-20211220115802-ad63e1565a38
 	chainmaker.org/chainmaker/consensus-maxbft/v2 v2.0.0-20220214094627-a616ca03d6aa
@@ -67,7 +67,6 @@ require (
 )
 
 replace (
-	chainmaker.org/chainmaker/chainconf/v2 => ../chainconf
 	github.com/libp2p/go-libp2p-core => chainmaker.org/chainmaker/libp2p-core v0.0.2
 	github.com/spf13/afero => github.com/spf13/afero v1.5.1 //for go1.15 build
 	github.com/spf13/viper => github.com/spf13/viper v1.7.1 //for go1.15 build
