@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package verifier
 
 import (
+	chainConfConfig "chainmaker.org/chainmaker/pb-go/v2/config"
 	"encoding/hex"
 	"fmt"
 	"sync"
@@ -24,6 +25,8 @@ import (
 	"chainmaker.org/chainmaker/utils/v2"
 	"github.com/prometheus/client_golang/prometheus"
 )
+
+var ModuleNameCore = "Core"
 
 // BlockVerifierImpl implements BlockVerifier interface.
 // Verify block and transactions.
@@ -459,4 +462,18 @@ func (v *BlockVerifierImpl) cutBlocks(blocksToCut []*commonpb.Block, blockToKeep
 	if len(cutTxs) > 0 {
 		v.txPool.RetryAndRemoveTxs(cutTxs, nil)
 	}
+}
+
+func (v *BlockVerifierImpl) Module() string {
+	return ModuleNameCore
+}
+
+func (v *BlockVerifierImpl) Watch(chainConfig *chainConfConfig.ChainConfig) error {
+	v.chainConf.ChainConfig().Block = chainConfig.Block
+	protocol.ParametersValueMaxLength = chainConfig.Block.TxParameterSize * 1024 * 1024
+	if chainConfig.Block.TxParameterSize <= 0 {
+		protocol.ParametersValueMaxLength = protocol.DefaultParametersValueMaxSize * 1024 * 1024
+	}
+	v.log.Infof("update chainconf,blockverify[%v]", v.chainConf.ChainConfig().Block)
+	return nil
 }
