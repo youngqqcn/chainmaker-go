@@ -16,8 +16,8 @@ chainmaker.org/chainmaker/consensus-tbft/v2 v2.2.0 h1:rCON0idsunv9pBnDQ6SXGrgvd5
 chainmaker.org/chainmaker/consensus-tbft/v2 v2.2.0/go.mod h1:/+LiXxCNcg0ZooCHQFJQOM0g0rpjC9toBTRdJGBdBxs=
 chainmaker.org/chainmaker/consensus-utils/v2 v2.2.0 h1:W1d9NEpnQ9PHf8481mQYHQ+RNWdI/YEK9Y6AYVBHbAE=
 chainmaker.org/chainmaker/consensus-utils/v2 v2.2.0/go.mod h1:m4gpyPfhdDX4kk9fwVZJN98o/N2XU9kcYb9CHjELSt0=
-chainmaker.org/chainmaker/libp2p-core v0.0.2 h1:MK2GZV34ePtIWy1jJCpZGKEIk8+fYhzTdxmBJ3w06Ik=
-chainmaker.org/chainmaker/libp2p-core v0.0.2/go.mod h1:o5hZnNkN7gMbfe34vRKlgAtndDw2OtLUAS9+bUSz4SU=
+chainmaker.org/chainmaker/libp2p-core v1.0.0 h1:0wUc81wt6VwbmhcEswcwZ96f6NWo6Dtbl4wM6Q2TN/U=
+chainmaker.org/chainmaker/libp2p-core v1.0.0/go.mod h1:o5hZnNkN7gMbfe34vRKlgAtndDw2OtLUAS9+bUSz4SU=
 chainmaker.org/chainmaker/libp2p-pubsub v1.1.0 h1:6SUwVWl6b3CnX8jpwos9V8SrWdSOO8NlBx9i8vZR1Ks=
 chainmaker.org/chainmaker/libp2p-pubsub v1.1.0/go.mod h1:6kv8oBUEaVRQFVZ457T6Gf5VuNJlp9Z7fDWxUJl81m4=
 chainmaker.org/chainmaker/localconf/v2 v2.2.0 h1:fYw6zR4hWEwwiqxVDtRGRuv/J4W6S/Sl9VC3d1/sTSQ=

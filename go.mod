@@ -69,7 +69,7 @@ require (
 )
 
 replace (
-	github.com/libp2p/go-libp2p-core => chainmaker.org/chainmaker/libp2p-core v0.0.2
+	github.com/libp2p/go-libp2p-core => chainmaker.org/chainmaker/libp2p-core v1.0.0
 	github.com/spf13/afero => github.com/spf13/afero v1.5.1 //for go1.15 build
 	github.com/spf13/viper => github.com/spf13/viper v1.7.1 //for go1.15 build
 	google.golang.org/grpc => google.golang.org/grpc v1.26.0
