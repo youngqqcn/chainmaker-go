@@ -12,6 +12,7 @@ if [[ ! -n $BRANCH ]]; then
   BRANCH="v2.2.0"
 fi
 NET_VERSION="v1.1.0"
+V221="v2.2.1_qc"
 cd ..
 
 go get chainmaker.org/chainmaker/chainconf/v2@${BRANCH}
@@ -30,7 +31,7 @@ go get chainmaker.org/chainmaker/net-liquid@v1.0.0
 go get chainmaker.org/chainmaker/pb-go/v2@${BRANCH}
 go get chainmaker.org/chainmaker/protocol/v2@${BRANCH}
 go get chainmaker.org/chainmaker/sdk-go/v2@${BRANCH}
-go get chainmaker.org/chainmaker/store/v2@${BRANCH}
+go get chainmaker.org/chainmaker/store/v2@${V221}
 go get chainmaker.org/chainmaker/txpool-batch/v2@${BRANCH}
 go get chainmaker.org/chainmaker/txpool-single/v2@${BRANCH}
 go get chainmaker.org/chainmaker/utils/v2@${BRANCH}
