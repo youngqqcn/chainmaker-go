@@ -253,11 +253,9 @@ func (bp *BlockProposerImpl) proposing(height uint64, preHash []byte) *commonpb.
 	selfProposedBlock := bp.proposalCache.GetSelfProposedBlockAt(height)
 
 	if selfProposedBlock != nil {
-
 		if bytes.Equal(selfProposedBlock.Header.PreBlockHash, preHash) {
 			blockFinger := utils.CalcBlockFingerPrint(selfProposedBlock)
 			timeNow, err := bp.getLastProposeTimeByBlockFinger(string(blockFinger))
-
 			if err != nil {
 				bp.log.Errorf("proposer fail, get last propose time by hash err %s", err.Error())
 				return nil
@@ -576,12 +574,9 @@ func (bp *BlockProposerImpl) shouldProposeByMaxBFT(height uint64, preHash []byte
  * getLastProposeTimeByBlockFinger, get prorpose block time by block finger, it delayed by some second
  */
 func (bp *BlockProposerImpl) getLastProposeTimeByBlockFinger(blockFinger string) (int64, error) {
-
-	var timeNow int64
 	timeValue, ok := common.ProposeRepeatTimerMap.Load(blockFinger)
-
 	if !ok {
-		timeNow = utils.CurrentTimeMillisSeconds()
+		timeNow := utils.CurrentTimeMillisSeconds()
 		common.ProposeRepeatTimerMap.Store(blockFinger, timeNow)
 		return timeNow, nil
 	}
