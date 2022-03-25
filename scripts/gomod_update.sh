@@ -26,7 +26,7 @@ go get chainmaker.org/chainmaker/consensus-utils/v2@${BRANCH}
 go get chainmaker.org/chainmaker/localconf/v2@${BRANCH}
 go get chainmaker.org/chainmaker/logger/v2@${BRANCH}
 go get chainmaker.org/chainmaker/net-common@${NET_VERSION}
-go get chainmaker.org/chainmaker/net-libp2p@${NET_VERSION}
+go get chainmaker.org/chainmaker/net-libp2p@v1.1.1_qc
 go get chainmaker.org/chainmaker/net-liquid@v1.0.0
 go get chainmaker.org/chainmaker/pb-go/v2@${V221}
 go get chainmaker.org/chainmaker/protocol/v2@${V221}

@@ -28,12 +28,13 @@ chainmaker.org/chainmaker/libp2p-core v1.0.0 h1:0wUc81wt6VwbmhcEswcwZ96f6NWo6Dtb
 chainmaker.org/chainmaker/libp2p-core v1.0.0/go.mod h1:o5hZnNkN7gMbfe34vRKlgAtndDw2OtLUAS9+bUSz4SU=
 chainmaker.org/chainmaker/libp2p-pubsub v1.1.1-0.20220325084840-1ccf8f961528 h1:c8ioMs7q7qinuN58+ev12d0BU27m0mkyTYiin3AMSoo=
 chainmaker.org/chainmaker/libp2p-pubsub v1.1.1-0.20220325084840-1ccf8f961528/go.mod h1:fQ12j5zCd3STV0JAs7J/vvrZW/7J6ZdFODUovvROxB4=
+chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211216112331-2bee015483d0/go.mod h1:ylpW9ir14psujTtKb6qQW81aKhnhjzWW3n9XpjD9S0A=
 chainmaker.org/chainmaker/localconf/v2 v2.2.0 h1:fYw6zR4hWEwwiqxVDtRGRuv/J4W6S/Sl9VC3d1/sTSQ=
 chainmaker.org/chainmaker/localconf/v2 v2.2.0/go.mod h1:MDEtD3H9T05YNDepoA3vYSUQOoLyiIts/h07Z4u7880=
 chainmaker.org/chainmaker/logger/v2 v2.0.0-20220128022235-c984177a37cc/go.mod h1:9SGr3+IxowsghxElUTsCgbAKhUGHsa/gm0kNDJQFcHk=
 chainmaker.org/chainmaker/logger/v2 v2.1.1-0.20211214124250-621f11b35ab0/go.mod h1:pGuJzxvh/JywvHX2+ezy+Xts/Pajw4PGspKGc27U1ow=
 chainmaker.org/chainmaker/logger/v2 v2.2.0 h1:kQ84sVSDAwJ1nFP8dexP21rhE0jqGyDIaLeMv9VrHQA=
-chainmaker.org/chainmaker/logger/v2 v2.2.0/go.sed8/n38=
+chainmaker.org/chainmaker/logger/v2 v2.2.0/go.mod h1:fux32ogSRS2qKD9m52uE5jW3ngpgyV02Yd4Zed8/n38=
 chainmaker.org/chainmaker/net-common v1.0.0/go.mod h1:uo2RKRBeEqQcqcSVQwM84jdAPAG8RkJBYS/QSbni3K0=
 chainmaker.org/chainmaker/net-common v1.1.0 h1:3jvtFtjOhJWpgXE+6a7kdoYxXrEl4hj8YsmlBOwIf0E=
 chainmaker.org/chainmaker/net-common v1.1.0/go.mod h1:s+xPHPQ0JCJaSC/Xctn0w+hy6jX/mISfBzFtwXS4A2g=
