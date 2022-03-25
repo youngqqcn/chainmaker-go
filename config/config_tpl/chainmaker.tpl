@@ -134,7 +134,7 @@ net:
 # Transaction pool settings
 # Other txpool settings can be found in tx_Pool_config.go
 txpool:
-  # txpool type, can be signle or batch.
+  # txpool type, can be single or batch.
   # By default the txpool type is single.
   pool_type: "single"
 
@@ -272,6 +272,16 @@ storage:
 
   # file size of .fdb, MB, default: 20
   logdb_segment_size: 128
+
+  # bigfilter config
+  enable_bigfilter: false    #default false
+  bigfilter_config:
+    redis_hosts_port: "127.0.0.1:6300,127.0.0.1:6301"   #redis host:port
+    redis_password: abcpass  #redis password
+    tx_capacity: 1000000000   #support max transaction capacity
+    fp_rate: 0.000000001      #false postive rate
+  # RWC config               default 1000000
+  rolling_window_cache_capacity: 200 # greater than block_tx_capacity*1.1 and less than block_tx_capacity*2
 
   # Symmetric encryption key:16 bytes key
   # If pkcs11 is enabled, it is the keyID
