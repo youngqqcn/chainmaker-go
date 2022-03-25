@@ -222,6 +222,7 @@ func testSnapshot(t *testing.T, i int) {
 		blockTimestamp:  0,
 		blockProposer:   nil,
 		blockHeight:     100,
+		blockVersion:    210,
 		preSnapshot:     nil,
 		txRWSetTable:    nil,
 		txTable:         make([]*commonPb.Transaction, 0, 2048),
@@ -400,6 +401,7 @@ func TestSnapshotImpl_BuildDAG(t *testing.T) {
 		blockTimestamp  int64
 		blockProposer   *acPb.Member
 		blockHeight     uint64
+		blockVersion    uint32
 		preBlockHash    []byte
 		preSnapshot     protocol.Snapshot
 		txRWSetTable    []*commonPb.TxRWSet
@@ -451,7 +453,8 @@ func TestSnapshotImpl_BuildDAG(t *testing.T) {
 						},
 					},
 				},
-				blockHeight: 1,
+				blockHeight:  1,
+				blockVersion: 221,
 				txTable: []*commonPb.Transaction{
 					{},
 					{},
