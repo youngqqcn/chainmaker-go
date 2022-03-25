@@ -210,7 +210,7 @@ func (s *SnapshotImpl) apply(tx *commonPb.Transaction, txRWSet *commonPb.TxRWSet
 	// Append to read table
 	applySeq := len(s.txTable)
 	// compatible with version lower than 220
-	if s.blockVersion <= 220 || runVmSuccess {
+	if s.blockVersion < 220 || runVmSuccess {
 		for _, txRead := range txRWSet.TxReads {
 			finalKey := constructKey(txRead.ContractName, txRead.Key)
 			s.readTable[finalKey] = &sv{
