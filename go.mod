@@ -3,8 +3,8 @@ module chainmaker.org/chainmaker-go
 go 1.15
 
 require (
-	chainmaker.org/chainmaker/chainconf/v2 v2.2.0
-	chainmaker.org/chainmaker/common/v2 v2.2.0
+	chainmaker.org/chainmaker/chainconf/v2 v2.2.1-0.20220316065957-26b566a12cc6
+	chainmaker.org/chainmaker/common/v2 v2.2.1-0.20220322022231-fa4c645753d5
 	chainmaker.org/chainmaker/consensus-dpos/v2 v2.2.0
 	chainmaker.org/chainmaker/consensus-maxbft/v2 v2.2.0
 	chainmaker.org/chainmaker/consensus-raft/v2 v2.2.0
@@ -18,12 +18,12 @@ require (
 	chainmaker.org/chainmaker/net-liquid v1.0.0
 	chainmaker.org/chainmaker/pb-go/v2 v2.2.0
 	chainmaker.org/chainmaker/protocol/v2 v2.2.1-0.20220322035229-9472df51ccd4
-	chainmaker.org/chainmaker/sdk-go/v2 v2.2.0
+	chainmaker.org/chainmaker/sdk-go/v2 v2.2.1-0.20220322125425-b0d2fdf997e3
 	chainmaker.org/chainmaker/store/v2 v2.2.1-0.20220322080008-58bcff7741af
 	chainmaker.org/chainmaker/txpool-batch/v2 v2.2.1-0.20220322080318-be0d1460e13f
 	chainmaker.org/chainmaker/txpool-single/v2 v2.2.1-0.20220324125417-f104f89527af
 	chainmaker.org/chainmaker/utils/v2 v2.2.0
-	chainmaker.org/chainmaker/vm-docker-go/v2 v2.2.0
+	chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20220311061132-294ec0097829
 	chainmaker.org/chainmaker/vm-evm/v2 v2.2.0
 	chainmaker.org/chainmaker/vm-gasm/v2 v2.2.0
 	chainmaker.org/chainmaker/vm-native/v2 v2.2.0
