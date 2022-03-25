@@ -219,15 +219,6 @@ func (s *SnapshotImpl) apply(tx *commonPb.Transaction, txRWSet *commonPb.TxRWSet
 			}
 		}
 	}
-	if runVmSuccess {
-		for _, txRead := range txRWSet.TxReads {
-			finalKey := constructKey(txRead.ContractName, txRead.Key)
-			s.readTable[finalKey] = &sv{
-				seq:   applySeq,
-				value: txRead.Value,
-			}
-		}
-	}
 
 	// Append to write table
 	for _, txWrite := range txRWSet.TxWrites {
