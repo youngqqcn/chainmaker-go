@@ -170,7 +170,7 @@ func updateTxParameterSizeCMD() *cobra.Command {
 	})
 
 	cmd.MarkFlagRequired(flagSdkConfPath)
-	cmd.MarkFlagRequired(flagBlockInterval)
+	cmd.MarkFlagRequired(flagTxParameterSize)
 
 	return cmd
 }
