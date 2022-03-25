@@ -51,7 +51,7 @@ else
   ut_cover "module/core" 2.3 23
   ut_cover "module/net" 29 11
   ut_cover "module/rpcserver" 0 3.1
-  ut_cover "module/snapshot" 47 19
+  ut_cover "module/snapshot" 47 7
   ut_cover "module/sync" 71 4.3
   ut_cover "module/subscriber" 70 0.9
   ut_cover "tools/cmc" 10 2.3

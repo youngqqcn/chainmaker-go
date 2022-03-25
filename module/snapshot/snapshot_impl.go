@@ -65,29 +65,34 @@ func (s *SnapshotImpl) SetPreSnapshot(snapshot protocol.Snapshot) {
 	s.preSnapshot = snapshot
 }
 
+// GetBlockchainStore return the blockchainStore of the snapshot
 func (s *SnapshotImpl) GetBlockchainStore() protocol.BlockchainStore {
 	return s.blockchainStore
 }
 
+// GetSnapshotSize return the len of the txTable
 func (s *SnapshotImpl) GetSnapshotSize() int {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 	return len(s.txTable)
 }
 
+// GetTxTable return the txTable of the snapshot
 func (s *SnapshotImpl) GetTxTable() []*commonPb.Transaction {
 	return s.txTable
 }
 
+// GetSpecialTxTable return the specialTxTable of the snapshot
 func (s *SnapshotImpl) GetSpecialTxTable() []*commonPb.Transaction {
 	return s.specialTxTable
 }
 
-// After the scheduling is completed, get the result from the current snapshot
+// GetTxResultMap After the scheduling is completed, get the result from the current snapshot
 func (s *SnapshotImpl) GetTxResultMap() map[string]*commonPb.Result {
 	return s.txResultMap
 }
 
+// GetTxRWSetTable return the snapshot's txRWSetTable
 func (s *SnapshotImpl) GetTxRWSetTable() []*commonPb.TxRWSet {
 	if localconf.ChainMakerConfig.SchedulerConfig.RWSetLog {
 		s.log.DebugDynamic(func() string {
@@ -125,6 +130,7 @@ func (s *SnapshotImpl) GetTxRWSetTable() []*commonPb.TxRWSet {
 	return s.txRWSetTable
 }
 
+// GetKey from snapshot
 func (s *SnapshotImpl) GetKey(txExecSeq int, contractName string, key []byte) ([]byte, error) {
 	// get key before txExecSeq
 	snapshotSize := s.GetSnapshotSize()
@@ -240,7 +246,7 @@ func (s *SnapshotImpl) apply(tx *commonPb.Transaction, txRWSet *commonPb.TxRWSet
 	s.txTable = append(s.txTable, tx)
 }
 
-// check if snapshot is sealed
+// IsSealed check if snapshot is sealed
 func (s *SnapshotImpl) IsSealed() bool {
 	return s.sealed.Load()
 }
@@ -255,87 +261,15 @@ func (s *SnapshotImpl) GetBlockTimestamp() int64 {
 	return s.blockTimestamp
 }
 
-// Get Block Proposer for current snapshot
+// GetBlockProposer for current snapshot
 func (s *SnapshotImpl) GetBlockProposer() *accesscontrol.Member {
 	return s.blockProposer
 }
 
-// seal the snapshot
+// Seal the snapshot
 func (s *SnapshotImpl) Seal() {
 	s.sealed.Store(true)
 }
-
-// Build txs' read bitmap and write bitmap, so we can use AND to simplify read/write set conflict detection process.
-// keyDict: key string -> key index in bitmap, e.g., key1 -> 0, key2 -> 1, key3 -> 2
-// read/write Table:	tx1: {key1->value1, key3->value3}; tx2: {key2->value2, key3->value4}
-// read/write bitmap: 			key1	key2	key3
-//						tx1		1		0		1
-// 						tx2		0		1		1
-//func (s *SnapshotImpl) buildRWBitmaps() ([]*bitmap.Bitmap, []*bitmap.Bitmap) {
-//	dictIndex := 0
-//	txCount := len(s.txTable)
-//	readBitmap := make([]*bitmap.Bitmap, txCount)
-//	writeBitmap := make([]*bitmap.Bitmap, txCount)
-//	keyDict := make(map[string]int, 10240)
-//	var startTime time.Time
-//	for i := 0; i < txCount; i++ {
-//		readTableItemForI := s.txRWSetTable[i].TxReads
-//		writeTableItemForI := s.txRWSetTable[i].TxWrites
-//		if i == 0 || i == 1000 || i == txCount - 1 {
-//			startTime = time.Now()
-//			log.Debugf("start to build readmap:%d and writemap:%d", len(readTableItemForI), len(writeTableItemForI))
-//		}
-//		readBitmap[i] = &bitmap.Bitmap{}
-//		//readBitmap[i] = bitmap.NewBitmap(157)
-//		for _, keyForI := range readTableItemForI {
-//			if existIndex, ok := keyDict[string(keyForI.Key)]; !ok {
-//				keyDict[string(keyForI.Key)] = dictIndex
-//				readBitmap[i].Set(dictIndex)
-//				dictIndex++
-//			} else {
-//				readBitmap[i].Set(existIndex)
-//			}
-//		}
-//		if i == 0 || i == 1000 || i == txCount - 1 {
-//			log.Debugf("finish to build readmap, used time:%v", time.Since(startTime))
-//		}
-//		writeBitmap[i] = &bitmap.Bitmap{}
-//		//writeBitmap[i] = bitmap.NewBitmap(157)
-//		for _, keyForI := range writeTableItemForI {
-//			if existIndex, ok := keyDict[string(keyForI.Key)]; !ok {
-//				keyDict[string(keyForI.Key)] = dictIndex
-//				writeBitmap[i].Set(dictIndex)
-//				dictIndex++
-//			} else {
-//				writeBitmap[i].Set(existIndex)
-//			}
-//		}
-//		if i == 0 || i == 1000 || i == txCount - 1 {
-//			log.Debugf("finish to build writemap, used time:%v", time.Since(startTime))
-//		}
-//	}
-//	return readBitmap, writeBitmap
-//}
-//
-//func (s *SnapshotImpl) buildCumulativeBitmap(readBitmap []*bitmap.Bitmap,
-//writeBitmap []*bitmap.Bitmap) ([]*bitmap.Bitmap, []*bitmap.Bitmap) {
-//	cumulativeReadBitmap := make([]*bitmap.Bitmap, len(readBitmap))
-//	cumulativeWriteBitmap := make([]*bitmap.Bitmap, len(writeBitmap))
-//
-//	for i, b := range readBitmap {
-//		cumulativeReadBitmap[i] = b.Clone()
-//		if i > 0 {
-//			cumulativeReadBitmap[i].Or(cumulativeReadBitmap[i-1])
-//		}
-//	}
-//	for i, b := range writeBitmap {
-//		cumulativeWriteBitmap[i] = b.Clone()
-//		if i > 0 {
-//			cumulativeWriteBitmap[i].Or(cumulativeWriteBitmap[i-1])
-//		}
-//	}
-//	return cumulativeReadBitmap, cumulativeWriteBitmap
-//}
 
 // BuildDAG build the block dag according to the read-write table
 func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
@@ -361,6 +295,8 @@ func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
 		}
 		return dag
 	}
+	// build all txs' readKeyDictionary, writeKeyDictionary, readPos(the pos in readKeyDictionary) and
+	// writePos(the pos in writeKeyDictionary)
 	readKeyDict, writeKeyDict, readPos, writePos := s.buildDictAndPos(txCount)
 	reachMap := make([]*bitmap.Bitmap, txCount)
 	// build vertexes
@@ -388,12 +324,14 @@ func (s *SnapshotImpl) buildDictAndPos(txCount uint32) (map[string][]uint32, map
 		writeTableItemForI := s.txRWSetTable[i].TxWrites
 		readPos[i] = make(map[string]uint32)
 		writePos[i] = make(map[string]uint32)
+		// put all read key in to readKeyDict and set their pos into readPos and writePos
 		for _, keyForI := range readTableItemForI {
 			key := string(keyForI.Key)
 			readPos[i][key] = uint32(len(readKeyDict[key]))
 			writePos[i][key] = uint32(len(writeKeyDict[key]))
 			readKeyDict[key] = append(readKeyDict[key], i)
 		}
+		// put all write key in to writeKeyDict and set their pos into readPos and writePos
 		for _, keyForI := range writeTableItemForI {
 			key := string(keyForI.Key)
 			writePos[i][key] = uint32(len(writeKeyDict[key]))
@@ -414,6 +352,7 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 	allReachForI := &bitmap.Bitmap{}
 	allReachForI.Set(int(i))
 	directReachForI := &bitmap.Bitmap{}
+
 	//ReadSet && WriteSet conflict
 	for _, keyForI := range readTableItemForI {
 		readKey := string(keyForI.Key)
@@ -421,19 +360,21 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 		if len(writeKeyTxs) == 0 {
 			continue
 		}
+		// just check 1 write key before the tx because write keys all are conflict
 		j := int(writePos[i][readKey]) - 1
 		if j >= 0 && !allReachForI.Has(int(writeKeyTxs[j])) {
 			directReachForI.Set(int(writeKeyTxs[j]))
 			allReachForI.Or(reachMap[writeKeyTxs[j]])
 		}
 	}
-	//WriteSet and (ReadSet, WriteSet) conflict
+	//WriteSet and (all ReadSet, WriteSet) conflict
 	for _, keyForI := range writeTableItemForI {
 		writeKey := string(keyForI.Key)
 		readKeyTxs := readKeyDict[writeKey]
 		if len(readKeyTxs) == 0 {
 			continue
 		}
+		// we should check all readKeyTxs because read keys has no conflict
 		j := int(readPos[i][writeKey]) - 1
 		for ; j >= 0; j-- {
 			if !allReachForI.Has(int(readKeyTxs[j])) {
@@ -445,6 +386,7 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 		if len(writeKeyTxs) == 0 {
 			continue
 		}
+		// just check 1 write key before the tx because write keys all are conflict
 		j = int(writePos[i][writeKey]) - 1
 		if j >= 0 && !allReachForI.Has(int(writeKeyTxs[j])) {
 			directReachForI.Set(int(writeKeyTxs[j]))
@@ -454,121 +396,6 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 	reachMap[i] = allReachForI
 	return directReachForI
 }
-
-// According to the read-write table, the read-write dependency is checked from back to front to determine whether
-// the transaction can be executed concurrently.
-// From the process of building the read-write table, we have known that every transaction is based on a known
-// world state, or cache state. As long as the world state or cache state that the tx depends on does not
-// change during the execution, then the execution result of the transaction is determined.
-// We need to ensure that when validating the DAG, there is no possibility that the execution of other
-// transactions will affect the dependence of the current transaction
-//func (s *SnapshotImpl) BuildDAG(isSql bool) *commonPb.DAG {
-//	s.lock.RLock()
-//	defer s.lock.RUnlock()
-//
-//	txCount := len(s.txTable)
-//	log.Infof("start to build DAG for block %d with %d txs", s.blockHeight, txCount)
-//
-//	// build read-write bitmap for all transactions
-//	readBitmaps, writeBitmaps := s.buildRWBitmaps()
-//	log.Debugf("finished to build readBitMaps and writeMaps")
-//	cumulativeReadBitmap, cumulativeWriteBitmap := s.buildCumulativeBitmap(readBitmaps, writeBitmaps)
-//	log.Debugf("finished to build cumulative bitmaps")
-//	dag := &commonPb.DAG{}
-//	if txCount == 0 {
-//		return dag
-//	}
-//
-//	dag.Vertexes = make([]*commonPb.DAG_Neighbor, txCount)
-//
-//	// build DAG base on read and write bitmaps
-//	// reachMap describes reachability from tx i to tx j in DAG.
-//	// For example, if the DAG is tx3 -> tx2 -> tx1 -> begin, the reachMap is
-//	// 		tx1		tx2		tx3
-//	// tx1	0		0		0
-//	// tx2	1		0		0
-//	// tx3	1		1		0
-//	reachMap := make([]*bitmap.Bitmap, txCount)
-//	if isSql {
-//		for i := 0; i < txCount; i++ {
-//			dag.Vertexes[i] = &commonPb.DAG_Neighbor{
-//				Neighbors: make([]uint32, 0, 1),
-//			}
-//			if i != 0 {
-//				dag.Vertexes[i].Neighbors = append(dag.Vertexes[i].Neighbors, uint32(i-1))
-//			}
-//		}
-//	} else {
-//		//var startTime time.Time
-//		for i := 0; i < txCount; i++ {
-//			// 1、get read and write bitmap for tx i
-//			readBitmapForI := readBitmaps[i]
-//			writeBitmapForI := writeBitmaps[i]
-//
-//			// directReach is used to build DAG
-//			// reach is used to save reachability we have already known
-//			directReachFromI := &bitmap.Bitmap{}
-//			reachFromI := &bitmap.Bitmap{}
-//			reachFromI.Set(i)
-//
-//			if i > 0 && s.conflicted(readBitmapForI, writeBitmapForI, cumulativeReadBitmap[i-1],
-//				cumulativeWriteBitmap[i-1]) {
-//				// check reachability one by one, then build table
-//				log.Debugf("start to build 1 reach maps")
-//				s.buildReach(i, reachFromI, readBitmaps, writeBitmaps, readBitmapForI, writeBitmapForI,
-//					directReachFromI, reachMap)
-//				log.Debugf("finished to build 1 reach maps")
-//			}
-//			reachMap[i] = reachFromI
-//			//if i == 0 || i == 100 || i == txCount - 1 {
-//			//	startTime = time.Now()
-//			//	log.Debugf("start to build dag vertexes for tx:%d", i)
-//			//}
-//			// build DAG based on directReach bitmap
-//			dag.Vertexes[i] = &commonPb.DAG_Neighbor{
-//				Neighbors: make([]uint32, 0, 16),
-//			}
-//			for _, j := range directReachFromI.Pos1() {
-//				dag.Vertexes[i].Neighbors = append(dag.Vertexes[i].Neighbors, uint32(j))
-//			}
-//			//if i == 0 || i == 100 || i == txCount - 1 {
-//			//	log.Debugf("finished to build dag vertexes for tx:%d, used time:%v", i, time.Since(startTime))
-//			//}
-//		}
-//	}
-//	log.Infof("build DAG for block %d finished", s.blockHeight)
-//	return dag
-//}
-////
-//// check reachability one by one, then build table
-//func (s *SnapshotImpl) buildReach(i int, reachFromI *bitmap.Bitmap,
-//	readBitmaps []*bitmap.Bitmap, writeBitmaps []*bitmap.Bitmap,
-//	readBitmapForI *bitmap.Bitmap, writeBitmapForI *bitmap.Bitmap,
-//	directReachFromI *bitmap.Bitmap, reachMap []*bitmap.Bitmap) {
-//
-//	for j := i - 1; j >= 0; j-- {
-//		if reachFromI.Has(j) {
-//			continue
-//		}
-//
-//		readBitmapForJ := readBitmaps[j]
-//		writeBitmapForJ := writeBitmaps[j]
-//		if s.conflicted(readBitmapForI, writeBitmapForI, readBitmapForJ, writeBitmapForJ) {
-//			directReachFromI.Set(j)
-//			reachFromI.Or(reachMap[j])
-//		}
-//	}
-//}
-//
-//// Conflict cases: I read & J write; I write & J read; I write & J write
-//func (s *SnapshotImpl) conflicted(readBitmapForI, writeBitmapForI, readBitmapForJ,
-//	writeBitmapForJ *bitmap.Bitmap) bool {
-//	if readBitmapForI.InterExist(writeBitmapForJ) || writeBitmapForI.InterExist(writeBitmapForJ) ||
-//		writeBitmapForI.InterExist(readBitmapForJ) {
-//		return true
-//	}
-//	return false
-//}
 
 func constructKey(contractName string, key []byte) string {
 	var builder strings.Builder

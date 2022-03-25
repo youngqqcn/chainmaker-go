@@ -8,15 +8,13 @@ SPDX-License-Identifier: Apache-2.0
 package snapshot
 
 import (
-	"chainmaker.org/chainmaker/logger/v2"
 	"fmt"
 	"math/rand"
 	"reflect"
 	"strconv"
 	"sync"
 
-	"chainmaker.org/chainmaker/protocol/v2/mock"
-	"github.com/golang/mock/gomock"
+	"chainmaker.org/chainmaker/logger/v2"
 
 	"sync/atomic"
 	"testing"
@@ -205,14 +203,6 @@ func TestSnapshot(t *testing.T) {
 	}
 }
 
-func TestBuildDAG(t *testing.T) {
-	c := gomock.NewController(t)
-	defer c.Finish()
-	snapShot := mock.NewMockSnapshot(c)
-
-	snapShot.EXPECT().GetTxRWSetTable().Return().AnyTimes()
-}
-
 func testSnapshot(t *testing.T, i int) {
 	snapshot := &SnapshotImpl{
 		lock:            sync.RWMutex{},
@@ -393,7 +383,7 @@ var snapshot = &SnapshotImpl{
 
 func TestSnapshotImpl_BuildDAG(t *testing.T) {
 	type fields struct {
-		lock            sync.RWMutex
+		//lock            sync.RWMutex
 		blockchainStore protocol.BlockchainStore
 		log             protocol.Logger
 		sealed          *uatomic.Bool
@@ -492,7 +482,7 @@ func TestSnapshotImpl_BuildDAG(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &SnapshotImpl{
-				lock:            tt.fields.lock,
+				lock:            sync.RWMutex{},
 				blockchainStore: tt.fields.blockchainStore,
 				log:             tt.fields.log,
 				sealed:          tt.fields.sealed,
