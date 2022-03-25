@@ -82,8 +82,10 @@ func NewApiService(ctx context.Context, chainMakerServer *blockchain.ChainMakerS
 			"query request counts metric", "chainId", "state")
 		apiService.metricInvokeCounter = monitor.NewCounterVec(monitor.SUBSYSTEM_RPCSERVER, "metric_invoke_request_counter",
 			"invoke request counts metric", "chainId", "state")
-		apiService.metricInvokeTxSizeHistogram = monitor.NewHistogramVec(monitor.SUBSYSTEM_RPCSERVER, "metric_invoke_tx_size_histogram",
-			"invoke tx size histogram metric", prometheus.ExponentialBuckets(1024, 2, 12), "chainId", "state")
+		apiService.metricInvokeTxSizeHistogram = monitor.NewHistogramVec(monitor.SUBSYSTEM_RPCSERVER,
+			"metric_invoke_tx_size_histogram",
+			"invoke tx size histogram metric",
+			prometheus.ExponentialBuckets(1024, 2, 12), "chainId", "state")
 	}
 
 	return &apiService
