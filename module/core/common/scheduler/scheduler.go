@@ -725,7 +725,7 @@ func (ts *TxScheduler) refundGas(accountMangerContract *commonPb.Contract, tx *c
 		}
 
 		refundGas := limit - contractResultPayload.GasUsed
-		ts.log.Infof("=======refund gas %v  gas used %v======", refundGas, contractResultPayload.GasUsed)
+		ts.log.Debugf("refund gas [%d], gas used [%d]", refundGas, contractResultPayload.GasUsed)
 
 		if refundGas == 0 {
 			return result, nil

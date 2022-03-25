@@ -19,7 +19,7 @@ contract:
 
 # 虚拟机配置
 vm:
-  addr_type: 1 #0:chainmaker, 1:zxl, 2:ethereum(预留值，当前尚未支持)
+  addr_type: 0 #0:chainmaker, 1:zxl, 2:ethereum(预留值，当前尚未支持)
   # 虚拟机支持列表
   support_list:
     - "wasmer"

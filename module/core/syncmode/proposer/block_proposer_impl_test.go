@@ -6,6 +6,21 @@ SPDX-License-Identifier: Apache-2.0
 
 package proposer
 
+//import (
+//	"testing"
+//	"time"
+//
+//	"chainmaker.org/chainmaker-go/module/core/cache"
+//	msgbusMock "chainmaker.org/chainmaker/common/v2/msgbus"
+//	"chainmaker.org/chainmaker/logger/v2"
+//	accesscontrolPb "chainmaker.org/chainmaker/pb-go/v2/accesscontrol"
+//	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
+//	txpoolpb "chainmaker.org/chainmaker/pb-go/v2/txpool"
+//	"chainmaker.org/chainmaker/protocol/v2/mock"
+//	"github.com/golang/mock/gomock"
+//	"github.com/stretchr/testify/require"
+//)
+
 //
 //import (
 //	"chainmaker.org/chainmaker/common/v2/random/uuid"
@@ -438,6 +453,113 @@ package proposer
 //		},
 //		RequestPayload:   hash,
 //		RequestSignature: hash,
+//		Result: &commonpb.Result{
+//			Code:           commonpb.TxStatusCode_SUCCESS,
+//			ContractResult: nil,
+//			RwSetHash:      nil,
+//		},
+//	}
+//}
+
+//var chainId = "123456"
+
+//func TestProposeRepeat(t *testing.T) {
+//	ctl := gomock.NewController(t)
+//	txPool := mock.NewMockTxPool(ctl)
+//	snapshotMgr := mock.NewMockSnapshotManager(ctl)
+//	identity := mock.NewMockSigningMember(ctl)
+//	ledgerCache := cache.NewLedgerCache(chainId)
+//	msgBus := msgbusMock.NewMessageBus()
+//
+//	proposedCache := cache.NewProposalCache(nil, ledgerCache)
+//	txScheduler := mock.NewMockTxScheduler(ctl)
+//
+//	ledgerCache.SetLastCommittedBlock(createNewTestBlock(0))
+//	blockProposer := &BlockProposerImpl{
+//		chainId:         chainId,
+//		isProposer:      false, // not proposer when initialized
+//		idle:            true,
+//		canProposeC:     make(chan bool),
+//		txPoolSignalC:   make(chan *txpoolpb.TxPoolSignal),
+//		proposeTimer:    nil,
+//		exitC:           make(chan bool),
+//		txPool:          txPool,
+//		snapshotManager: snapshotMgr,
+//		txScheduler:     txScheduler,
+//		identity:        identity,
+//		ledgerCache:     ledgerCache,
+//		proposalCache:   proposedCache,
+//		msgBus:          msgBus,
+//		log:             logger.GetLoggerByChain(logger.MODULE_CORE, chainId),
+//	}
+//
+//	b0 := createNewTestBlock(0)
+//	ledgerCache.SetLastCommittedBlock(b0)
+//	require.True(t, blockProposer.shouldProposeByBFT(b0.Header.BlockHeight+1))
+//
+//	b := createNewTestBlock(1)
+//	err := proposedCache.SetProposedBlock(b, nil, nil, true)
+//
+//	if err != nil {
+//		t.Log(err)
+//	}
+//	block := proposedCache.GetSelfProposedBlockAt(1)
+//
+//	t.Log(block)
+//
+//	blockProposer.proposing(1, b.Header.PreBlockHash)
+//	blockProposer.proposing(1, b.Header.PreBlockHash)
+//	time.Sleep(1 * time.Second)
+//	blockProposer.proposing(1, b.Header.PreBlockHash)
+//	time.Sleep(1 * time.Second)
+//	blockProposer.proposing(1, b.Header.PreBlockHash)
+//}
+
+//func createNewTestBlock(height uint64) *commonpb.Block {
+//	var hash = []byte("0123456789")
+//	var version = uint32(0)
+//	var block = &commonpb.Block{
+//		Header: &commonpb.BlockHeader{
+//			ChainId:        "Chain1",
+//			BlockHeight:    height,
+//			PreBlockHash:   hash,
+//			BlockHash:      hash,
+//			PreConfHeight:  0,
+//			BlockVersion:   version,
+//			DagHash:        hash,
+//			RwSetRoot:      hash,
+//			TxRoot:         hash,
+//			BlockTimestamp: 0,
+//			Proposer: &accesscontrolPb.Member{
+//				MemberInfo: hash,
+//			},
+//			ConsensusArgs: nil,
+//			TxCount:       1,
+//			Signature:     []byte(""),
+//		},
+//		Dag: &commonpb.DAG{
+//			Vertexes: nil,
+//		},
+//		Txs: nil,
+//	}
+//	tx := createNewTestTx()
+//	txs := make([]*commonpb.Transaction, 1)
+//	txs[0] = tx
+//	block.Txs = txs
+//	return block
+//}
+
+//func createNewTestTx() *commonpb.Transaction {
+//	//var hash = []byte("0123456789")
+//	return &commonpb.Transaction{
+//		Payload: &commonpb.Payload{
+//			TxId:           "",
+//			TxType:         0,
+//			Timestamp:      0,
+//			ExpirationTime: 0,
+//			ContractName:   "",
+//		},
+//		Sender: nil,
 //		Result: &commonpb.Result{
 //			Code:           commonpb.TxStatusCode_SUCCESS,
 //			ContractResult: nil,

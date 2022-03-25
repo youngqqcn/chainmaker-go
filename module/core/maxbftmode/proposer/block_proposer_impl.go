@@ -273,10 +273,7 @@ func (bp *BlockProposerImpl) proposing(height uint64, preHash []byte) *commonpb.
 	fetchLasts := utils.CurrentTimeMillisSeconds() - startFetchTick
 	bp.log.Debugf("begin proposing block[%d], fetch tx num[%d]", height, len(fetchBatch))
 
-	startDupTick := utils.CurrentTimeMillisSeconds()
-	checkedBatch := bp.txDuplicateCheck(fetchBatch)
-	dupLasts := utils.CurrentTimeMillisSeconds() - startDupTick
-	if !utils.CanProposeEmptyBlock(bp.chainConf.ChainConfig().Consensus.Type) && len(checkedBatch) == 0 {
+	if !utils.CanProposeEmptyBlock(bp.chainConf.ChainConfig().Consensus.Type) && len(fetchBatch) == 0 {
 		// can not propose empty block and tx batch is empty, then yield proposing.
 		bp.log.Debugf("no txs in tx pool, proposing block stoped")
 		bp.txPool.RetryAndRemoveTxs(nil, fetchBatch)
@@ -284,23 +281,23 @@ func (bp *BlockProposerImpl) proposing(height uint64, preHash []byte) *commonpb.
 	}
 
 	txCapacity := int(bp.chainConf.ChainConfig().Block.BlockTxCapacity)
-	if len(checkedBatch) > txCapacity {
+	if len(fetchBatch) > txCapacity {
 		// check if checkedBatch > txCapacity, if so, strict block tx count according to  config,
 		// and put other txs back to txpool.
-		txRetry := checkedBatch[txCapacity:]
-		checkedBatch = checkedBatch[:txCapacity]
+		txRetry := fetchBatch[txCapacity:]
+		fetchBatch = fetchBatch[:txCapacity]
 		bp.txPool.RetryAndRemoveTxs(txRetry, nil)
-		bp.log.Warnf("txbatch oversize expect <= %d, got %d", txCapacity, len(checkedBatch))
+		bp.log.Warnf("txbatch oversize expect <= %d, got %d", txCapacity, len(fetchBatch))
 	}
 
-	block, timeLasts, err := bp.generateNewBlock(height, preHash, checkedBatch)
+	block, timeLasts, err := bp.generateNewBlock(height, preHash, fetchBatch)
 	if err != nil {
 		bp.log.Warnf("generate new block failed, %s", err.Error())
 		// rollback sql
 		if sqlErr := bp.storeHelper.RollBack(block, bp.blockchainStore); sqlErr != nil {
 			bp.log.Errorf("block [%d] rollback sql failed: %s", block.Header.BlockHeight, sqlErr)
 		}
-		bp.txPool.RetryAndRemoveTxs(checkedBatch, nil) // put txs back to txpool
+		bp.txPool.RetryAndRemoveTxs(fetchBatch, nil) // put txs back to txpool
 		return nil
 	}
 	_, txsRwSet, _ := bp.proposalCache.GetProposedBlock(block)
@@ -330,44 +327,13 @@ func (bp *BlockProposerImpl) proposing(height uint64, preHash []byte) *commonpb.
 
 	bp.msgBus.Publish(msgbus.ProposedBlock, &consensuspb.ProposalBlock{Block: newBlock, TxsRwSet: txsRwSet})
 	elapsed := utils.CurrentTimeMillisSeconds() - startTick
-	bp.log.Infof("proposer success [%d](txs:%d), time used(fetch:%d,dup:%d,vm:%v,total:%d)",
+	bp.log.Infof("proposer success [%d](txs:%d), time used(fetch:%d,vm:%v,total:%d)",
 		block.Header.BlockHeight, block.Header.TxCount,
-		fetchLasts, dupLasts, timeLasts, elapsed)
+		fetchLasts, timeLasts, elapsed)
 	if localconf.ChainMakerConfig.MonitorConfig.Enabled {
 		bp.metricBlockPackageTime.WithLabelValues(bp.chainId).Observe(float64(elapsed) / 1000)
 	}
 	return block
-}
-
-// txDuplicateCheck, to check if transactions that are about to proposing are double spenting.
-func (bp *BlockProposerImpl) txDuplicateCheck(batch []*commonpb.Transaction) []*commonpb.Transaction {
-	if len(batch) == 0 {
-		return nil
-	}
-	checked := make([]*commonpb.Transaction, 0, len(batch))
-	verifyBatches := utils.DispatchTxVerifyTask(batch)
-	workerCount := len(verifyBatches)
-	results := make([][]*commonpb.Transaction, workerCount)
-	var wg sync.WaitGroup
-	wg.Add(workerCount)
-	for i := 0; i < workerCount; i++ {
-		go func(index int, b []*commonpb.Transaction) {
-			defer wg.Done()
-			result := make([]*commonpb.Transaction, 0)
-			for _, tx := range b {
-				exist, err := bp.blockchainStore.TxExists(tx.Payload.TxId)
-				if err == nil && !exist {
-					result = append(result, tx)
-				}
-			}
-			results[index] = result
-		}(i, verifyBatches[i])
-	}
-	wg.Wait()
-	for _, result := range results {
-		checked = append(checked, result...)
-	}
-	return checked
 }
 
 // OnReceiveTxPoolSignal, receive txpool signal and deliver to chan txpool signal
