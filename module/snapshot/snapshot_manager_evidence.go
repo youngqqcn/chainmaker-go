@@ -24,7 +24,7 @@ func (m *ManagerEvidence) NewSnapshot(prevBlock *commonPb.Block, block *commonPb
 	m.delegate.lock.Lock()
 	defer m.delegate.lock.Unlock()
 	blockHeight := block.Header.BlockHeight
-	snapshotImpl := m.delegate.makeSnapshotImpl(block, blockHeight)
+	snapshotImpl := m.delegate.makeSnapshotImpl(block)
 	evidenceSnapshot := &SnapshotEvidence{
 		delegate: snapshotImpl,
 		log:      m.log,
