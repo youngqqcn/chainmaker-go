@@ -184,7 +184,7 @@ func (s *SnapshotImpl) ApplyTxSimContext(txSimContext protocol.TxSimContext, spe
 	txResult = txSimContext.GetTxResult()
 
 	if specialTxType == protocol.ExecOrderTxTypeIterator || txExecSeq >= len(s.txTable) {
-		s.apply(tx, txRWSet, txResult)
+		s.apply(tx, txRWSet, txResult, runVmSuccess)
 		return true, len(s.txTable)
 	}
 
@@ -199,19 +199,22 @@ func (s *SnapshotImpl) ApplyTxSimContext(txSimContext protocol.TxSimContext, spe
 		}
 	}
 
-	s.apply(tx, txRWSet, txResult)
+	s.apply(tx, txRWSet, txResult, runVmSuccess)
 	return true, len(s.txTable)
 }
 
 // After the read-write set is generated, add TxSimContext to the snapshot
-func (s *SnapshotImpl) apply(tx *commonPb.Transaction, txRWSet *commonPb.TxRWSet, txResult *commonPb.Result) {
+func (s *SnapshotImpl) apply(tx *commonPb.Transaction, txRWSet *commonPb.TxRWSet, txResult *commonPb.Result,
+	runVmSuccess bool) {
 	// Append to read table
 	applySeq := len(s.txTable)
-	for _, txRead := range txRWSet.TxReads {
-		finalKey := constructKey(txRead.ContractName, txRead.Key)
-		s.readTable[finalKey] = &sv{
-			seq:   applySeq,
-			value: txRead.Value,
+	if runVmSuccess {
+		for _, txRead := range txRWSet.TxReads {
+			finalKey := constructKey(txRead.ContractName, txRead.Key)
+			s.readTable[finalKey] = &sv{
+				seq:   applySeq,
+				value: txRead.Value,
+			}
 		}
 	}
 
@@ -421,14 +424,6 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 			directReachForI.Set(int(writeKeyTxs[j]))
 			allReachForI.Or(reachMap[writeKeyTxs[j]])
 		}
-		//for ; j >= 0; j-- {
-		//	if allReachForI.Has(int(writeKeyTxs[j])) {
-		//		continue
-		//	}
-		//	directReachForI.Set(int(writeKeyTxs[j]))
-		//	allReachForI.Or(reachMap[writeKeyTxs[j]])
-		//	break
-		//}
 	}
 	//WriteSet and (ReadSet, WriteSet) conflict
 	for _, keyForI := range writeTableItemForI {
@@ -438,35 +433,19 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 			continue
 		}
 		j := int(readPos[i][writeKey]) - 1
-		if j > 0 && !allReachForI.Has(int(readKeyTxs[j])) {
+		if j >= 0 && !allReachForI.Has(int(readKeyTxs[j])) {
 			directReachForI.Set(int(readKeyTxs[j]))
 			allReachForI.Or(reachMap[readKeyTxs[j]])
 		}
-		//for ; j >= 0; j-- {
-		//	if allReachForI.Has(int(readKeyTxs[j])) {
-		//		continue
-		//	}
-		//	directReachForI.Set(int(readKeyTxs[j]))
-		//	allReachForI.Or(reachMap[readKeyTxs[j]])
-		//	break
-		//}
 		writeKeyTxs := writeKeyDict[writeKey]
 		if len(writeKeyTxs) == 0 {
 			continue
 		}
 		j = int(writePos[i][writeKey]) - 1
-		if j > 0 && !allReachForI.Has(int(writeKeyTxs[j])) {
+		if j >= 0 && !allReachForI.Has(int(writeKeyTxs[j])) {
 			directReachForI.Set(int(writeKeyTxs[j]))
 			allReachForI.Or(reachMap[writeKeyTxs[j]])
 		}
-		//for ; j >= 0; j-- {
-		//	if allReachForI.Has(int(writeKeyTxs[j])) {
-		//		continue
-		//	}
-		//	directReachForI.Set(int(writeKeyTxs[j]))
-		//	allReachForI.Or(reachMap[writeKeyTxs[j]])
-		//	break
-		//}
 	}
 	reachMap[i] = allReachForI
 	return directReachForI

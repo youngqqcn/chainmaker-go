@@ -8,10 +8,15 @@ SPDX-License-Identifier: Apache-2.0
 package snapshot
 
 import (
+	"chainmaker.org/chainmaker/logger/v2"
 	"fmt"
 	"math/rand"
+	"reflect"
 	"strconv"
 	"sync"
+
+	"chainmaker.org/chainmaker/protocol/v2/mock"
+	"github.com/golang/mock/gomock"
 
 	"sync/atomic"
 	"testing"
@@ -199,6 +204,15 @@ func TestSnapshot(t *testing.T) {
 		testSnapshot(t, i)
 	}
 }
+
+func TestBuildDAG(t *testing.T) {
+	c := gomock.NewController(t)
+	defer c.Finish()
+	snapShot := mock.NewMockSnapshot(c)
+
+	snapShot.EXPECT().GetTxRWSetTable().Return().AnyTimes()
+}
+
 func testSnapshot(t *testing.T, i int) {
 	snapshot := &SnapshotImpl{
 		lock:            sync.RWMutex{},
@@ -374,4 +388,117 @@ var snapshot = &SnapshotImpl{
 	readTable:       make(map[string]*sv, 256),
 	writeTable:      make(map[string]*sv, 256),
 	log:             &test.GoLogger{},
+}
+
+func TestSnapshotImpl_BuildDAG(t *testing.T) {
+	type fields struct {
+		lock            sync.RWMutex
+		blockchainStore protocol.BlockchainStore
+		log             protocol.Logger
+		sealed          *uatomic.Bool
+		chainId         string
+		blockTimestamp  int64
+		blockProposer   *acPb.Member
+		blockHeight     uint64
+		preBlockHash    []byte
+		preSnapshot     protocol.Snapshot
+		txRWSetTable    []*commonPb.TxRWSet
+		txTable         []*commonPb.Transaction
+		specialTxTable  []*commonPb.Transaction
+		txResultMap     map[string]*commonPb.Result
+		readTable       map[string]*sv
+		writeTable      map[string]*sv
+		txRoot          []byte
+		dagHash         []byte
+		rwSetHash       []byte
+	}
+	type args struct {
+		isSql bool
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   *commonPb.DAG
+	}{
+		// TODO: Add test cases.
+		{
+			name: "txRWSetTable",
+			fields: fields{
+				txRWSetTable: []*commonPb.TxRWSet{
+					{
+						TxId: "11111111",
+						TxReads: []*commonPb.TxRead{
+							{
+								Key:   []byte("key1"),
+								Value: []byte("value of key1"),
+							},
+						},
+					},
+					{
+						TxId: "2222222",
+						TxReads: []*commonPb.TxRead{
+							{
+								Key:   []byte("key2"),
+								Value: []byte("value of key2"),
+							},
+						},
+						TxWrites: []*commonPb.TxWrite{
+							{
+								Key:   []byte("key1"),
+								Value: []byte("new value of key1"),
+							},
+						},
+					},
+				},
+				blockHeight: 1,
+				txTable: []*commonPb.Transaction{
+					{},
+					{},
+				},
+				log: logger.GetLogger("test"),
+			},
+			args: args{
+				isSql: false,
+			},
+			want: &commonPb.DAG{
+				Vertexes: []*commonPb.DAG_Neighbor{
+					{
+						Neighbors: []uint32{},
+					},
+					{
+						Neighbors: []uint32{0},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &SnapshotImpl{
+				lock:            tt.fields.lock,
+				blockchainStore: tt.fields.blockchainStore,
+				log:             tt.fields.log,
+				sealed:          tt.fields.sealed,
+				chainId:         tt.fields.chainId,
+				blockTimestamp:  tt.fields.blockTimestamp,
+				blockProposer:   tt.fields.blockProposer,
+				blockHeight:     tt.fields.blockHeight,
+				preBlockHash:    tt.fields.preBlockHash,
+				preSnapshot:     tt.fields.preSnapshot,
+				txRWSetTable:    tt.fields.txRWSetTable,
+				txTable:         tt.fields.txTable,
+				specialTxTable:  tt.fields.specialTxTable,
+				txResultMap:     tt.fields.txResultMap,
+				readTable:       tt.fields.readTable,
+				writeTable:      tt.fields.writeTable,
+				txRoot:          tt.fields.txRoot,
+				dagHash:         tt.fields.dagHash,
+				rwSetHash:       tt.fields.rwSetHash,
+			}
+			if got := s.BuildDAG(tt.args.isSql); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("BuildDAG() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
