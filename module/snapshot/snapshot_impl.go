@@ -435,9 +435,11 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 			continue
 		}
 		j := int(readPos[i][writeKey]) - 1
-		if j >= 0 && !allReachForI.Has(int(readKeyTxs[j])) {
-			directReachForI.Set(int(readKeyTxs[j]))
-			allReachForI.Or(reachMap[readKeyTxs[j]])
+		for ; j >= 0; j-- {
+			if !allReachForI.Has(int(readKeyTxs[j])) {
+				directReachForI.Set(int(readKeyTxs[j]))
+				allReachForI.Or(reachMap[readKeyTxs[j]])
+			}
 		}
 		writeKeyTxs := writeKeyDict[writeKey]
 		if len(writeKeyTxs) == 0 {

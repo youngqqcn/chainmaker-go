@@ -438,7 +438,16 @@ func TestSnapshotImpl_BuildDAG(t *testing.T) {
 						},
 					},
 					{
-						TxId: "2222222",
+						TxId: "222222222",
+						TxReads: []*commonPb.TxRead{
+							{
+								Key:   []byte("key1"),
+								Value: []byte("value of key1"),
+							},
+						},
+					},
+					{
+						TxId: "333333333",
 						TxReads: []*commonPb.TxRead{
 							{
 								Key:   []byte("key2"),
@@ -458,6 +467,7 @@ func TestSnapshotImpl_BuildDAG(t *testing.T) {
 				txTable: []*commonPb.Transaction{
 					{},
 					{},
+					{},
 				},
 				log: logger.GetLogger("test"),
 			},
@@ -470,7 +480,10 @@ func TestSnapshotImpl_BuildDAG(t *testing.T) {
 						Neighbors: []uint32{},
 					},
 					{
-						Neighbors: []uint32{0},
+						Neighbors: []uint32{},
+					},
+					{
+						Neighbors: []uint32{0, 1},
 					},
 				},
 			},
