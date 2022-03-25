@@ -358,37 +358,6 @@ func (bp *BlockProposerImpl) proposing(height uint64, preHash []byte) *commonpb.
 	return block
 }
 
-// txDuplicateCheck, to check if transactions that are about to proposing are double spenting.
-func (bp *BlockProposerImpl) txDuplicateCheck(batch []*commonpb.Transaction) []*commonpb.Transaction {
-	if len(batch) == 0 {
-		return nil
-	}
-	checked := make([]*commonpb.Transaction, 0, len(batch))
-	verifyBatches := utils.DispatchTxVerifyTask(batch)
-	workerCount := len(verifyBatches)
-	results := make([][]*commonpb.Transaction, workerCount)
-	var wg sync.WaitGroup
-	wg.Add(workerCount)
-	for i := 0; i < workerCount; i++ {
-		go func(index int, b []*commonpb.Transaction) {
-			defer wg.Done()
-			result := make([]*commonpb.Transaction, 0)
-			for _, tx := range b {
-				exist, err := bp.blockchainStore.TxExists(tx.Payload.TxId)
-				if err == nil && !exist {
-					result = append(result, tx)
-				}
-			}
-			results[index] = result
-		}(i, verifyBatches[i])
-	}
-	wg.Wait()
-	for _, result := range results {
-		checked = append(checked, result...)
-	}
-	return checked
-}
-
 // OnReceiveTxPoolSignal, receive txpool signal and deliver to chan txpool signal
 func (bp *BlockProposerImpl) OnReceiveTxPoolSignal(txPoolSignal *txpoolpb.TxPoolSignal) {
 	bp.txPoolSignalC <- txPoolSignal
