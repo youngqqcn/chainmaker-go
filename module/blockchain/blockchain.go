@@ -11,10 +11,10 @@ package blockchain
 import (
 	"chainmaker.org/chainmaker-go/module/subscriber"
 	"chainmaker.org/chainmaker/common/v2/msgbus"
-	logger "chainmaker.org/chainmaker/logger/v2"
+	"chainmaker.org/chainmaker/logger/v2"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/consensus"
-	protocol "chainmaker.org/chainmaker/protocol/v2"
+	"chainmaker.org/chainmaker/protocol/v2"
 )
 
 const (
@@ -30,6 +30,7 @@ const (
 	moduleNameCore          = "Core"
 	moduleNameConsensus     = "Consensus"
 	moduleNameSync          = "Sync"
+	moduleNameTxFilter      = "TxFilter"
 )
 
 // Blockchain is a block chain service. It manage all the modules of the chain.
@@ -89,6 +90,8 @@ type Blockchain struct {
 	chainNodeList []string
 
 	eventSubscriber *subscriber.EventSubscriber
+
+	txFilter protocol.TxFilter
 
 	initModules  map[string]struct{}
 	startModules map[string]struct{}

@@ -9,6 +9,8 @@ chain_client:
   crypto:
     hash: SHA256
   auth_type: public
+  # 默认支持TimestampKey，如果开启enableNormalKey则是有NormalKey
+  enable_normal_key: false
 
   nodes:
     - # 节点地址，格式为：IP:端口:连接数

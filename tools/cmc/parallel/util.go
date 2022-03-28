@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 package parallel
 
 import (
+	"chainmaker.org/chainmaker/utils/v2"
 	"errors"
 	"fmt"
 	"strings"
@@ -17,7 +18,6 @@ import (
 	commonPb "chainmaker.org/chainmaker/pb-go/v2/common"
 	sdk "chainmaker.org/chainmaker/sdk-go/v2"
 	sdkutils "chainmaker.org/chainmaker/sdk-go/v2/utils"
-	"chainmaker.org/chainmaker/utils/v2"
 )
 
 const GRPCMaxCallRecvMsgSize = 16 * 1024 * 1024
@@ -44,7 +44,7 @@ func constructInvokePayload(chainId, contractName, method string, pairs []*commo
 		ContractName:   contractName,
 		Method:         method,
 		Parameters:     pairs,
-		TxId:           utils.GetRandTxId(),
+		TxId:           utils.GetTimestampTxId(),
 		TxType:         commonPb.TxType_INVOKE_CONTRACT,
 		ChainId:        chainId,
 		Timestamp:      time.Now().Unix(),

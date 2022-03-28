@@ -606,7 +606,7 @@ type InvokerMsg struct {
 }
 
 func (h *invokeHandler) handle(client apiPb.RpcNodeClient, sk3 crypto.PrivateKey, orgId string, userCrtPath string, loopId int, ps []*KeyValuePair) error {
-	txId := utils.GetRandTxId()
+	txId := utils.GetTimestampTxId()
 
 	// 构造Payload
 	pairs := make([]*commonPb.KeyValuePair, 0)
@@ -691,7 +691,7 @@ type queryHandler struct {
 }
 
 func (h *queryHandler) handle(client apiPb.RpcNodeClient, sk3 crypto.PrivateKey, orgId string, userCrtPath string, loopId int, ps []*KeyValuePair) error {
-	txId := utils.GetRandTxId()
+	txId := utils.GetTimestampTxId()
 
 	// 构造Payload
 	//var ps []*KeyValuePair
@@ -738,7 +738,7 @@ type createContractHandler struct {
 }
 
 func (h *createContractHandler) handle(client apiPb.RpcNodeClient, sk3 crypto.PrivateKey, orgId string, userCrtPath string, loopId int, ps []*KeyValuePair) error {
-	txId := utils.GetRandTxId()
+	txId := utils.GetTimestampTxId()
 
 	wasmBin, err := ioutil.ReadFile(wasmPath)
 	if err != nil {
@@ -792,7 +792,7 @@ type upgradeContractHandler struct {
 }
 
 func (h *upgradeContractHandler) handle(client apiPb.RpcNodeClient, sk3 crypto.PrivateKey, orgId string, userCrtPath string, loopId int, ps []*KeyValuePair) error {
-	txId := utils.GetRandTxId()
+	txId := utils.GetTimestampTxId()
 
 	wasmBin, err := ioutil.ReadFile(wasmPath)
 	if err != nil {

@@ -40,10 +40,9 @@ type VerifyStat struct {
 	SigCount    int
 }
 
-func ValidateTx(txsRet map[string]*commonpb.Transaction, tx *commonpb.Transaction, blockHeight uint64,
-	stat *VerifyStat, newAddTxs []*commonpb.Transaction, block *commonpb.Block,
-	consensusType consensuspb.ConsensusType, hashType string, store protocol.BlockchainStore,
-	chainId string, ac protocol.AccessControlProvider) error {
+func ValidateTx(txsRet map[string]*commonpb.Transaction, tx *commonpb.Transaction, blockHeight uint64, stat *VerifyStat,
+	newAddTxs []*commonpb.Transaction, block *commonpb.Block, consensusType consensuspb.ConsensusType, hashType string,
+	filter protocol.TxFilter, chainId string, ac protocol.AccessControlProvider, mode protocol.VerifyMode) error {
 	txInPool, existTx := txsRet[tx.Payload.TxId]
 	if existTx {
 		if consensuspb.ConsensusType_MAXBFT == consensusType &&
@@ -57,7 +56,15 @@ func ValidateTx(txsRet map[string]*commonpb.Transaction, tx *commonpb.Transactio
 		return IsTxHashValid(tx, txInPool, hashType)
 	}
 	startDBTicker := utils.CurrentTimeMillisSeconds()
-	isExist, err := store.TxExists(tx.Payload.TxId)
+	var (
+		isExist bool
+		err     error
+	)
+	if mode == protocol.CONSENSUS_VERIFY {
+		isExist, err = filter.IsExists(tx.Payload.TxId, commonpb.RuleType_AbsoluteExpireTime)
+	} else {
+		isExist, err = filter.IsExists(tx.Payload.TxId)
+	}
 	stat.DBLasts += utils.CurrentTimeMillisSeconds() - startDBTicker
 	if err != nil || isExist {
 		err = fmt.Errorf("tx duplicate in DB (tx:%s)", tx.Payload.TxId)
@@ -174,7 +181,7 @@ type VerifierTx struct {
 	txRWSetMap  map[string]*commonpb.TxRWSet
 	txResultMap map[string]*commonpb.Result
 	log         protocol.Logger
-	store       protocol.BlockchainStore
+	txFilter    protocol.TxFilter
 	txPool      protocol.TxPool
 	ac          protocol.AccessControlProvider
 	chainConf   protocol.ChainConf
@@ -185,7 +192,7 @@ type VerifierTxConfig struct {
 	TxRWSetMap  map[string]*commonpb.TxRWSet
 	TxResultMap map[string]*commonpb.Result
 	Log         protocol.Logger
-	Store       protocol.BlockchainStore
+	TxFilter    protocol.TxFilter
 	TxPool      protocol.TxPool
 	Ac          protocol.AccessControlProvider
 	ChainConf   protocol.ChainConf
@@ -197,7 +204,7 @@ func NewVerifierTx(conf *VerifierTxConfig) *VerifierTx {
 		txRWSetMap:  conf.TxRWSetMap,
 		txResultMap: conf.TxResultMap,
 		log:         conf.Log,
-		store:       conf.Store,
+		txFilter:    conf.TxFilter,
 		txPool:      conf.TxPool,
 		ac:          conf.Ac,
 		chainConf:   conf.ChainConf,
@@ -206,7 +213,7 @@ func NewVerifierTx(conf *VerifierTxConfig) *VerifierTx {
 
 // VerifyTxs verify transactions in block
 // include if transaction is double spent, transaction signature
-func (vt *VerifierTx) verifierTxs(block *commonpb.Block) ([][]byte, []*commonpb.Transaction,
+func (vt *VerifierTx) verifierTxs(block *commonpb.Block, mode protocol.VerifyMode) ([][]byte, []*commonpb.Transaction,
 	[]*commonpb.Transaction, error) {
 
 	verifyBatchs := utils.DispatchTxVerifyTask(block.Txs)
@@ -232,7 +239,7 @@ func (vt *VerifierTx) verifierTxs(block *commonpb.Block) ([][]byte, []*commonpb.
 			stat := &VerifyStat{
 				TotalCount: len(txs),
 			}
-			txHashes1, newAddTxs, err1 := vt.verifyTx(txs, txsRet, txsHeightRet, stat, block)
+			txHashes1, newAddTxs, err1 := vt.verifyTx(txs, txsRet, txsHeightRet, stat, block, mode)
 			if err1 != nil {
 				vt.log.Error(err1)
 				err = err1
@@ -271,15 +278,15 @@ func (vt *VerifierTx) verifierTxs(block *commonpb.Block) ([][]byte, []*commonpb.
 }
 
 func (vt *VerifierTx) verifyTx(txs []*commonpb.Transaction, txsRet map[string]*commonpb.Transaction,
-	txsHeightRet map[string]uint64, stat *VerifyStat, block *commonpb.Block) (
+	txsHeightRet map[string]uint64, stat *VerifyStat, block *commonpb.Block, mode protocol.VerifyMode) (
 	[][]byte, []*commonpb.Transaction, error) {
 	txHashes := make([][]byte, 0)
 	newAddTxs := make([]*commonpb.Transaction, 0) // tx that verified and not in txpool, need to be added to txpool
 	for _, tx := range txs {
 		blockHeight := txsHeightRet[tx.Payload.TxId]
 		if err := ValidateTx(txsRet, tx, blockHeight, stat, newAddTxs, block,
-			vt.chainConf.ChainConfig().Consensus.Type, vt.chainConf.ChainConfig().Crypto.Hash, vt.store,
-			vt.chainConf.ChainConfig().ChainId, vt.ac); err != nil {
+			vt.chainConf.ChainConfig().Consensus.Type, vt.chainConf.ChainConfig().Crypto.Hash, vt.txFilter,
+			vt.chainConf.ChainConfig().ChainId, vt.ac, mode); err != nil {
 			return nil, nil, err
 		}
 		startOthersTicker := utils.CurrentTimeMillisSeconds()
