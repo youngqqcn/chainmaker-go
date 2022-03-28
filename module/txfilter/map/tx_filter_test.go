@@ -6,10 +6,11 @@ SPDX-License-Identifier: Apache-2.0
 package mapimpl
 
 import (
-	"chainmaker.org/chainmaker/pb-go/v2/common"
 	"reflect"
 	"sync"
 	"testing"
+
+	"chainmaker.org/chainmaker/pb-go/v2/common"
 )
 
 func TestInit(t *testing.T) {
@@ -24,8 +25,8 @@ func TestInit(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Init(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Init() = %v, want %v", got, tt.want)
+			if got := New(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("New() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -34,7 +35,6 @@ func TestInit(t *testing.T) {
 func TestTxFilter_IsExistsAndReturnHeight(t *testing.T) {
 	type fields struct {
 		height uint64
-		m      sync.Map
 	}
 	type args struct {
 		in0 string
@@ -49,12 +49,11 @@ func TestTxFilter_IsExistsAndReturnHeight(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "test0",
-			fields:  fields{
+			name: "test0",
+			fields: fields{
 				height: 0,
-				m:      sync.Map{},
 			},
-			args:    args{
+			args: args{
 				in0: "",
 				in1: nil,
 			},
@@ -67,7 +66,6 @@ func TestTxFilter_IsExistsAndReturnHeight(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			f := &TxFilter{
 				height: tt.fields.height,
-				m:      tt.fields.m,
 			}
 			got, got1, err := f.IsExistsAndReturnHeight(tt.args.in0, tt.args.in1...)
 			if (err != nil) != tt.wantErr {
@@ -87,7 +85,6 @@ func TestTxFilter_IsExistsAndReturnHeight(t *testing.T) {
 func TestTxFilter_GetHeight(t *testing.T) {
 	type fields struct {
 		height uint64
-		m      sync.Map
 	}
 	tests := []struct {
 		name   string
@@ -95,19 +92,17 @@ func TestTxFilter_GetHeight(t *testing.T) {
 		want   uint64
 	}{
 		{
-			name:   "test0",
+			name: "test0",
 			fields: fields{
 				height: 0,
-				m:      sync.Map{},
 			},
-			want:   0,
+			want: 0,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			f := &TxFilter{
 				height: tt.fields.height,
-				m:      tt.fields.m,
 			}
 			if got := f.GetHeight(); got != tt.want {
 				t.Errorf("GetHeight() = %v, want %v", got, tt.want)
@@ -119,7 +114,6 @@ func TestTxFilter_GetHeight(t *testing.T) {
 func TestTxFilter_SetHeight(t *testing.T) {
 	type fields struct {
 		height uint64
-		m      sync.Map
 	}
 	type args struct {
 		height uint64
@@ -130,19 +124,17 @@ func TestTxFilter_SetHeight(t *testing.T) {
 		args   args
 	}{
 		{
-			name:   "test0",
+			name: "test0",
 			fields: fields{
 				height: 0,
-				m:      sync.Map{},
 			},
-			args:   args{},
+			args: args{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			f := &TxFilter{
 				height: tt.fields.height,
-				m:      tt.fields.m,
 			}
 			f.SetHeight(tt.args.height)
 		})
@@ -152,7 +144,6 @@ func TestTxFilter_SetHeight(t *testing.T) {
 func TestTxFilter_Add(t *testing.T) {
 	type fields struct {
 		height uint64
-		m      sync.Map
 	}
 	type args struct {
 		txId string
@@ -164,12 +155,11 @@ func TestTxFilter_Add(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "test0",
-			fields:  fields{
+			name: "test0",
+			fields: fields{
 				height: 0,
-				m:      sync.Map{},
 			},
-			args:    args{
+			args: args{
 				txId: "chain1",
 			},
 			wantErr: false,
@@ -179,7 +169,7 @@ func TestTxFilter_Add(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			f := &TxFilter{
 				height: tt.fields.height,
-				m:      tt.fields.m,
+				m:      sync.Map{},
 			}
 			if err := f.Add(tt.args.txId); (err != nil) != tt.wantErr {
 				t.Errorf("Add() error = %v, wantErr %v", err, tt.wantErr)
@@ -191,7 +181,6 @@ func TestTxFilter_Add(t *testing.T) {
 func TestTxFilter_Adds(t *testing.T) {
 	type fields struct {
 		height uint64
-		m      sync.Map
 	}
 	type args struct {
 		txIds []string
@@ -209,12 +198,11 @@ func TestTxFilter_Adds(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "test1",
-			fields:  fields{
+			name: "test1",
+			fields: fields{
 				height: 0,
-				m:      sync.Map{},
 			},
-			args:    args{
+			args: args{
 				txIds: []string{"1", "2", "3"},
 			},
 			wantErr: false,
@@ -224,7 +212,7 @@ func TestTxFilter_Adds(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			f := &TxFilter{
 				height: tt.fields.height,
-				m:      tt.fields.m,
+				m:      sync.Map{},
 			}
 			if err := f.Adds(tt.args.txIds); (err != nil) != tt.wantErr {
 				t.Errorf("Adds() error = %v, wantErr %v", err, tt.wantErr)
@@ -236,7 +224,6 @@ func TestTxFilter_Adds(t *testing.T) {
 func TestTxFilter_IsExists(t *testing.T) {
 	type fields struct {
 		height uint64
-		m      sync.Map
 	}
 	type args struct {
 		txId string
@@ -261,7 +248,7 @@ func TestTxFilter_IsExists(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			f := &TxFilter{
 				height: tt.fields.height,
-				m:      tt.fields.m,
+				m:      sync.Map{},
 			}
 			got, err := f.IsExists(tt.args.txId, tt.args.in1...)
 			if (err != nil) != tt.wantErr {
@@ -278,7 +265,6 @@ func TestTxFilter_IsExists(t *testing.T) {
 func TestTxFilter_Close(t *testing.T) {
 	type fields struct {
 		height uint64
-		m      sync.Map
 	}
 	tests := []struct {
 		name   string
@@ -288,7 +274,6 @@ func TestTxFilter_Close(t *testing.T) {
 			name: "test0",
 			fields: fields{
 				height: 0,
-				m:      sync.Map{},
 			},
 		},
 	}
@@ -296,7 +281,6 @@ func TestTxFilter_Close(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			f := &TxFilter{
 				height: tt.fields.height,
-				m:      tt.fields.m,
 			}
 			f.Close()
 		})

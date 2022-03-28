@@ -53,7 +53,7 @@ else
   ut_cover "module/rpcserver" 0 3.1
   ut_cover "module/snapshot" 47 7
   ut_cover "module/sync" 71 4.3
-#  ut_cover "module/txfilter" 40 0
+  ut_cover "module/txfilter" 40 0
   ut_cover "module/subscriber" 70 0.9
   ut_cover "tools/cmc" 10 2.3
 fi

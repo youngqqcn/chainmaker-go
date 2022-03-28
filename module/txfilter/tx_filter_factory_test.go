@@ -6,6 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 package txfilter
 
 import (
+	"reflect"
+	"strconv"
+	"testing"
+
 	"chainmaker.org/chainmaker-go/module/txfilter/birdnest"
 	"chainmaker.org/chainmaker-go/module/txfilter/defau1t"
 	mapimpl "chainmaker.org/chainmaker-go/module/txfilter/map"
@@ -16,9 +20,6 @@ import (
 	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/protocol/v2/mock"
 	"github.com/golang/mock/gomock"
-	"reflect"
-	"strconv"
-	"testing"
 )
 
 func Test_txFilterFactory_NewTxFilter(t *testing.T) {
@@ -54,7 +55,7 @@ func Test_txFilterFactory_NewTxFilter(t *testing.T) {
 				store: store,
 			},
 			want: func() protocol.TxFilter {
-				return defau1t.Init(store)
+				return defau1t.New(store)
 			}(),
 			wantErr: false,
 		},
@@ -69,7 +70,7 @@ func Test_txFilterFactory_NewTxFilter(t *testing.T) {
 				store: store,
 			},
 			want: func() protocol.TxFilter {
-				return defau1t.Init(store)
+				return defau1t.New(store)
 			}(),
 			wantErr: false,
 		},
@@ -84,7 +85,7 @@ func Test_txFilterFactory_NewTxFilter(t *testing.T) {
 				store: store,
 			},
 			want: func() protocol.TxFilter {
-				txFilter, err := birdnest.Init(defaultConf.Birdsnest, log, store)
+				txFilter, err := birdnest.New(defaultConf.Birdsnest, log, store)
 				if err != nil {
 					t.Log(err)
 					return nil
@@ -105,7 +106,7 @@ func Test_txFilterFactory_NewTxFilter(t *testing.T) {
 				store: store,
 			},
 			want: func() protocol.TxFilter {
-				txFilter := mapimpl.Init()
+				txFilter := mapimpl.New()
 				return txFilter
 			}(),
 			wantErr: false,
@@ -122,7 +123,7 @@ func Test_txFilterFactory_NewTxFilter(t *testing.T) {
 				store: store,
 			},
 			want: func() protocol.TxFilter {
-				txFilter, err := shardingbirdsnest.Init(defaultConf, log, store)
+				txFilter, err := shardingbirdsnest.New(defaultConf, log, store)
 				if err != nil {
 					t.Log(err)
 					return nil
@@ -143,7 +144,7 @@ func Test_txFilterFactory_NewTxFilter(t *testing.T) {
 				store: store,
 			},
 			want: func() protocol.TxFilter {
-				return defau1t.Init(store)
+				return defau1t.New(store)
 			}(),
 			wantErr: false,
 		},

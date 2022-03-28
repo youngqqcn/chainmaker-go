@@ -6,12 +6,13 @@ SPDX-License-Identifier: Apache-2.0
 package defau1t
 
 import (
+	"reflect"
+	"testing"
+
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/protocol/v2"
 	"chainmaker.org/chainmaker/protocol/v2/mock"
 	"github.com/golang/mock/gomock"
-	"reflect"
-	"testing"
 )
 
 func TestInit(t *testing.T) {
@@ -37,8 +38,8 @@ func TestInit(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Init(tt.args.store); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Init() = %v, want %v", got, tt.want)
+			if got := New(tt.args.store); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("New() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -61,8 +62,12 @@ func TestTxFilter_IsExistsAndReturnHeight(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "test0",
-			fields:  fields{},
+			name: "test0",
+			fields: fields{store: func() protocol.BlockchainStore {
+				store := mock.NewMockBlockchainStore(gomock.NewController(t))
+				store.EXPECT().TxExistsInFullDB(gomock.Any()).Return(false, uint64(0), nil).AnyTimes()
+				return store
+			}()},
 			args:    args{},
 			want:    false,
 			want1:   0,
@@ -103,9 +108,11 @@ func TestTxFilter_SetHeight(t *testing.T) {
 	}{
 		{
 			name: "test0",
-			fields: fields{
-
-			},
+			fields: fields{store: func() protocol.BlockchainStore {
+				store := mock.NewMockBlockchainStore(gomock.NewController(t))
+				store.EXPECT().TxExistsInFullDB(gomock.Any()).Return(false, uint64(0), nil).AnyTimes()
+				return store
+			}()},
 			args: args{
 				uint64(0),
 			},
@@ -131,9 +138,14 @@ func TestTxFilter_GetHeight(t *testing.T) {
 		want   uint64
 	}{
 		{
-			name:   "test0",
-			fields: fields{},
-			want:   0,
+			name: "test0",
+			fields: fields{store: func() protocol.BlockchainStore {
+				store := mock.NewMockBlockchainStore(gomock.NewController(t))
+				store.EXPECT().TxExistsInFullDB(gomock.Any()).Return(false, uint64(0), nil).AnyTimes()
+				store.EXPECT().GetLastBlock().Return(&common.Block{Header: &common.BlockHeader{BlockHeight: 0}}, nil).AnyTimes()
+				return store
+			}()},
+			want: 0,
 		},
 	}
 	for _, tt := range tests {
@@ -162,8 +174,8 @@ func TestTxFilter_Add(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "test0",
-			fields:  fields{
+			name: "test0",
+			fields: fields{
 				store: newMockBlockchainStore(t),
 			},
 			args:    args{},
@@ -196,8 +208,8 @@ func TestTxFilter_Adds(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "test0",
-			fields:  fields{
+			name: "test0",
+			fields: fields{
 				store: newMockBlockchainStore(t),
 			},
 			args:    args{},
@@ -274,7 +286,7 @@ func TestTxFilter_Close(t *testing.T) {
 		fields fields
 	}{
 		{
-			name:   "test0",
+			name: "test0",
 			fields: fields{
 				store: store,
 			},

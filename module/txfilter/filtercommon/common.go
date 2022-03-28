@@ -8,6 +8,7 @@ package filtercommon
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"chainmaker.org/chainmaker/localconf/v2"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
@@ -19,29 +20,35 @@ import (
 
 // ChaseBlockHeight Chase high block
 func ChaseBlockHeight(store protocol.BlockchainStore, filter protocol.TxFilter, log protocol.Logger) error {
-	block, err := store.GetLastBlock()
+	cost := time.Now()
+	lastBlock, err := store.GetLastBlock()
 	if err != nil {
+		log.Errorf("query last block from db fail, error: %v", err)
 		return err
 	}
-	log.Infof("init height:%v lastHeight:%v", filter.GetHeight(), block.Header.BlockHeight)
-	for height := filter.GetHeight() + 1; height <= block.Header.BlockHeight; height++ {
-		var blockI *common.Block
-		if height != block.Header.BlockHeight {
-			blockI, err = store.GetBlock(height)
+	log.Infof("chase block start,filter height: %v, block height: %v", filter.GetHeight(),
+		lastBlock.Header.BlockHeight)
+	for height := filter.GetHeight() + 1; height <= lastBlock.Header.BlockHeight; height++ {
+		var block *common.Block
+		if height != lastBlock.Header.BlockHeight {
+			block, err = store.GetBlock(height)
 			if err != nil {
+				log.Errorf("query block from db fail, height: %v, error: %v", height, err)
 				return err
 			}
 		} else {
-			blockI = block
+			block = lastBlock
 		}
-		ids := utils.GetTxIds(blockI.Txs)
-		err = filter.Adds(ids)
+		ids := utils.GetTxIds(block.Txs)
+		err = filter.AddsAndSetHeight(ids, block.Header.BlockHeight)
 		if err != nil {
-			log.Errorf("Init pursue height %v %v", blockI.Header.BlockHeight, len(ids), err)
+			log.Errorf("chase block add fail, height: %v, keys: %v, error: %v", block.Header.BlockHeight, len(ids), err)
 			return err
 		}
-		filter.SetHeight(blockI.Header.BlockHeight)
 	}
+	log.Infof("chase block finish, height: %d, block height: %d, cost: %d", filter.GetHeight(),
+		lastBlock.Header.BlockHeight, time.Since(cost))
+
 	return nil
 }
 
@@ -138,9 +145,7 @@ type TxFilterLogger struct {
 }
 
 func (t TxFilterLogger) Debugf(format string, args ...interface{}) {
-	t.log.DebugDynamic(func() string {
-		return LoggingFixLength(format, args...)
-	})
+	t.log.DebugDynamic(LoggingFixLengthFunc(format, args...))
 }
 
 func (t TxFilterLogger) Errorf(format string, args ...interface{}) {
@@ -155,6 +160,11 @@ func NewLogger(log protocol.Logger) *TxFilterLogger {
 	return &TxFilterLogger{log: log}
 }
 
+func LoggingFixLengthFunc(format string, args ...interface{}) func() string {
+	return func() string {
+		return LoggingFixLength(format, args...)
+	}
+}
 func LoggingFixLength(format string, args ...interface{}) string {
 	str := fmt.Sprintf(format, args...)
 	if len(str) > 1024 {
