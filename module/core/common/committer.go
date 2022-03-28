@@ -94,7 +94,9 @@ func (cb *CommitBlock) CommitBlock(
 	filterLasts = utils.CurrentTimeMillisSeconds()
 	err = cb.txFilter.Adds(utils.GetTxIds(block.Txs))
 	if err != nil {
-		return
+		// if add filter error, then panic
+		cb.log.Error(err)
+		panic(err)
 	}
 	cb.txFilter.SetHeight(block.Header.GetBlockHeight())
 	filterLasts = utils.CurrentTimeMillisSeconds() - filterLasts

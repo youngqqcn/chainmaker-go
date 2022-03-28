@@ -45,22 +45,10 @@ net:
     priv_key_file: ../config/wx-org1-solo/certs/node/consensus1/consensus1.tls.key
     cert_file: ../config/wx-org1-solo/certs/node/consensus1/consensus1.tls.crt
 
-# Transaction pool settings
-# Other txpool settings can be found in tx_Pool_config.go
 txpool:
-  # txpool type, can be single or batch.
-  # By default the txpool type is single.
-  pool_type: "batch"
-
-  # Max transaction count in txpool.
-  # If txpool is full, the following transactions will be discarded.
-  max_txpool_size: 50000
-
-  # Max config transaction count in config txpool.
-  max_config_txpool_size: 10
-
-  # Interval of creating a transaction batch, only for batch txpool, in millisecond.
-  batch_create_timeout: 200
+  max_txpool_size: 51200 # 普通交易池上限
+  max_config_txpool_size: 10 # config交易池的上限
+  full_notify_again_time: 30 # 交易池溢出后，再次通知的时间间隔(秒)
 
 rpc:
   provider: grpc
@@ -148,11 +136,11 @@ tx_filter:
       table_type: 1
 
 monitor:
-  enabled: true
+  enabled: false
   port: 14321
 
 pprof:
-  enabled: true
+  enabled: false
   port: 24321
 
 storage:
