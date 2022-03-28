@@ -26,8 +26,8 @@ chainmaker.org/chainmaker/consensus-utils/v2 v2.2.1-0.20220325083126-1cbf15e6653
 chainmaker.org/chainmaker/consensus-utils/v2 v2.2.1-0.20220325083126-1cbf15e66536/go.mod h1:s2cy5yZUg9usZqc7NYhRar2DfEUJ11yFGBe+dUyed1Y=
 chainmaker.org/chainmaker/libp2p-core v1.0.0 h1:0wUc81wt6VwbmhcEswcwZ96f6NWo6Dtbl4wM6Q2TN/U=
 chainmaker.org/chainmaker/libp2p-core v1.0.0/go.mod h1:o5hZnNkN7gMbfe34vRKlgAtndDw2OtLUAS9+bUSz4SU=
-chainmaker.org/chainmaker/libp2p-pubsub v1.1.0 h1:6SUwVWl6b3CnX8jpwos9V8SrWdSOO8NlBx9i8vZR1Ks=
-chainmaker.org/chainmaker/libp2p-pubsub v1.1.0/go.mod h1:6kv8oBUEaVRQFVZ457T6Gf5VuNJlp9Z7fDWxUJl81m4=
+chainmaker.org/chainmaker/libp2p-pubsub v1.1.1-0.20220325084840-1ccf8f961528 h1:c8ioMs7q7qinuN58+ev12d0BU27m0mkyTYiin3AMSoo=
+chainmaker.org/chainmaker/libp2p-pubsub v1.1.1-0.20220325084840-1ccf8f961528/go.mod h1:fQ12j5zCd3STV0JAs7J/vvrZW/7J6ZdFODUovvROxB4=
 chainmaker.org/chainmaker/localconf/v2 v2.1.1-0.20211216112331-2bee015483d0/go.mod h1:ylpW9ir14psujTtKb6qQW81aKhnhjzWW3n9XpjD9S0A=
 chainmaker.org/chainmaker/localconf/v2 v2.2.0 h1:fYw6zR4hWEwwiqxVDtRGRuv/J4W6S/Sl9VC3d1/sTSQ=
 chainmaker.org/chainmaker/localconf/v2 v2.2.0/go.mod h1:MDEtD3H9T05YNDepoA3vYSUQOoLyiIts/h07Z4u7880=
@@ -38,8 +38,8 @@ chainmaker.org/chainmaker/logger/v2 v2.2.0/go.mod h1:fux32ogSRS2qKD9m52uE5jW3ngp
 chainmaker.org/chainmaker/net-common v1.0.0/go.mod h1:uo2RKRBeEqQcqcSVQwM84jdAPAG8RkJBYS/QSbni3K0=
 chainmaker.org/chainmaker/net-common v1.1.0 h1:3jvtFtjOhJWpgXE+6a7kdoYxXrEl4hj8YsmlBOwIf0E=
 chainmaker.org/chainmaker/net-common v1.1.0/go.mod h1:s+xPHPQ0JCJaSC/Xctn0w+hy6jX/mISfBzFtwXS4A2g=
-chainmaker.org/chainmaker/net-libp2p v1.1.0 h1:B1jYkbf3j/G6ARbxiCccrm/L0UCuBy7A+7Vz78dh0sw=
-chainmaker.org/chainmaker/net-libp2p v1.1.0/go.mod h1:lCThpEczuYs23NeSzyAsynRdVniD0U71A27D0RcdZoo=
+chainmaker.org/chainmaker/net-libp2p v1.1.1-0.20220325102751-9922b84a8869 h1:9+lt6tajbCfVTe1tjFRXG2/648js4pRQkgLIq7denzI=
+chainmaker.org/chainmaker/net-libp2p v1.1.1-0.20220325102751-9922b84a8869/go.mod h1:J5YtzlzMrEvrWZex9PGgHDA7k9cVoaAP06LSRdaX5Oc=
 chainmaker.org/chainmaker/net-liquid v1.0.0 h1:xO+vbZWZ/27xOIK9oPF/Kr1qybicuNdap+nvzFGdbss=
 chainmaker.org/chainmaker/net-liquid v1.0.0/go.mod h1:dEsWA/Lbr/0hmsUBr6IFa9WgGv+fsvi+CL11zuijTHo=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.0/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
