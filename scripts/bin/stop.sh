@@ -10,15 +10,17 @@ if [ ! -z ${pid} ];then
     kill $pid
 fi
 
-enable_dockervm=`grep 'enable_dockervm:' ../config/{org_id}/chainmaker.yml | awk '{print $2}'`
-if [ ${enable_dockervm} == "true" ];then
-  docker_go_container_name=`grep 'dockervm_container_name:' ../config/{org_id}/chainmaker.yml | tail -n1 | awk '{print $2}'`
-  docker_container_lists=(`docker ps -a | grep ${docker_go_container_name} | awk '{print $1}'`)
-  for container_id in ${docker_container_lists[*]}
-  do
-    docker stop ${container_id}
-    docker rm ${container_id}
-  done
-fi
+# if enable docker vm service and use unix domain socket, stop the running container
+stop_docker_vm() {
+  config_file="../config/{org_id}/chainmaker.yml"
+  enable_docker_vm=`grep enable_dockervm $config_file | awk -F: '{gsub(/ /, "", $2);print $2}'`
+  enable_uds=`grep uds_open $config_file | awk -F: '{gsub(/ /, "", $2);print $2}'`
+  if [[ $enable_docker_vm = "true" && $enable_uds = "true" ]]
+  then
+      chain_id=`grep "chainId:" $config_file | grep -v "#" | awk -F: '{gsub(/ /, "", $2);print $2}'`
+      docker stop DOCKERVM-{org_id}-$chain_id
+  fi
+}
+stop_docker_vm
 
 echo "chainmaker is stopped"
