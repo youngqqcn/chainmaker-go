@@ -150,28 +150,23 @@ func (cb *CommitBlock) CommitBlock(
 		Block:     block,
 		RwsetList: rwSet,
 	}
-
-	if err = cb.MonitorCommit(blockInfo); err != nil {
-		return 0, 0, 0, 0, 0, 0, nil, err
-	}
+	go cb.MonitorCommit(blockInfo)
 	otherLasts = utils.CurrentTimeMillisSeconds() - startOtherTick
-
 	return
 }
 
-func (cb *CommitBlock) MonitorCommit(bi *commonpb.BlockInfo) error {
+func (cb *CommitBlock) MonitorCommit(bi *commonpb.BlockInfo) {
 	if !localconf.ChainMakerConfig.MonitorConfig.Enabled {
-		return nil
+		return
 	}
 	raw, err := proto.Marshal(bi)
 	if err != nil {
 		cb.log.Errorw("marshal BlockInfo failed", "err", err)
-		return err
+		return
 	}
 	(*cb.metricBlockSize).WithLabelValues(bi.Block.Header.ChainId).Observe(float64(len(raw)))
 	(*cb.metricBlockCounter).WithLabelValues(bi.Block.Header.ChainId).Inc()
 	(*cb.metricTxCounter).WithLabelValues(bi.Block.Header.ChainId).Add(float64(bi.Block.Header.TxCount))
-	return nil
 }
 
 func NotifyChainConf(block *commonpb.Block, chainConf protocol.ChainConf) (err error) {
