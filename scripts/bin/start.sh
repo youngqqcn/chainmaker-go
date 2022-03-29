@@ -17,7 +17,7 @@ start_docker_vm() {
       chain_id=`grep "chainId:" $config_file | grep -v "#" | awk -F: '{gsub(/ /, "", $2);print $2}'`
       if [ ! -e $mount_path ]
       then
-        mkir -p $mount_path/$chain_id
+        mkdir -p $mount_path/$chain_id
       fi
       docker run -itd --rm -e ENV_LOG_IN_CONSOLE=true -e ENV_LOG_LEVEL=DEBUG -e ENV_ENABLE_UDS=true -v $(pwd)/$mount_path/$chain_id:/mount --name DOCKERVM-{org_id}-$chain_id --privileged $image_name
       retval="$?"
