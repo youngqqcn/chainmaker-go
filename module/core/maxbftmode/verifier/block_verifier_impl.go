@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"sync"
 
+	chainConfConfig "chainmaker.org/chainmaker/pb-go/v2/config"
+
 	"chainmaker.org/chainmaker-go/module/consensus"
 	"chainmaker.org/chainmaker-go/module/core/common"
 	"chainmaker.org/chainmaker-go/module/core/provider/conf"
@@ -24,6 +26,8 @@ import (
 	"chainmaker.org/chainmaker/utils/v2"
 	"github.com/prometheus/client_golang/prometheus"
 )
+
+var ModuleNameCore = "Core"
 
 // BlockVerifierImpl implements BlockVerifier interface.
 // Verify block and transactions.
@@ -179,7 +183,7 @@ func (v *BlockVerifierImpl) VerifyBlock(block *commonpb.Block, mode protocol.Ver
 	}
 	lastPool := utils.CurrentTimeMillisSeconds() - startPoolTick
 
-	txRWSetMap, contractEventMap, timeLasts, err := v.validateBlock(newBlock, lastBlock)
+	txRWSetMap, contractEventMap, timeLasts, err := v.validateBlock(newBlock, lastBlock, mode)
 	if err != nil {
 		v.log.Warnf("verify failed [%d](%x),preBlockHash:%x, %s",
 			newBlock.Header.BlockHeight, newBlock.Header.BlockHash, newBlock.Header.PreBlockHash, err.Error())
@@ -280,7 +284,7 @@ func (v *BlockVerifierImpl) VerifyBlockWithRwSets(block *commonpb.Block,
 		return err
 	}
 	lastPool := utils.CurrentTimeMillisSeconds() - startPoolTick
-	contractEventMap, timeLasts, err := v.validateBlockWithRWSets(newBlock, lastBlock, txRWSetMap)
+	contractEventMap, timeLasts, err := v.validateBlockWithRWSets(newBlock, lastBlock, mode, txRWSetMap)
 	if err != nil {
 		v.log.Warnf("verify failed [%d](%x),preBlockHash:%x, %s",
 			newBlock.Header.BlockHeight, newBlock.Header.BlockHash, newBlock.Header.PreBlockHash, err.Error())
@@ -333,8 +337,8 @@ func (v *BlockVerifierImpl) VerifyBlockWithRwSets(block *commonpb.Block,
 	return nil
 }
 
-func (v *BlockVerifierImpl) validateBlock(block, lastBlock *commonpb.Block) (map[string]*commonpb.TxRWSet,
-	map[string][]*commonpb.ContractEvent, map[string]int64, error) {
+func (v *BlockVerifierImpl) validateBlock(block, lastBlock *commonpb.Block, mode protocol.VerifyMode) (
+	map[string]*commonpb.TxRWSet, map[string][]*commonpb.ContractEvent, map[string]int64, error) {
 	hashType := v.chainConf.ChainConfig().Crypto.Hash
 	timeLasts := make(map[string]int64)
 	var err error
@@ -356,10 +360,10 @@ func (v *BlockVerifierImpl) validateBlock(block, lastBlock *commonpb.Block) (map
 		return nil, nil, timeLasts, err
 	}
 
-	return v.verifierBlock.ValidateBlock(block, lastBlock, hashType, timeLasts)
+	return v.verifierBlock.ValidateBlock(block, lastBlock, hashType, timeLasts, mode)
 }
 
-func (v *BlockVerifierImpl) validateBlockWithRWSets(block, lastBlock *commonpb.Block,
+func (v *BlockVerifierImpl) validateBlockWithRWSets(block, lastBlock *commonpb.Block, mode protocol.VerifyMode,
 	txRWSetMap map[string]*commonpb.TxRWSet) (
 	map[string][]*commonpb.ContractEvent, map[string]int64, error) {
 	hashType := v.chainConf.ChainConfig().Crypto.Hash
@@ -383,7 +387,7 @@ func (v *BlockVerifierImpl) validateBlockWithRWSets(block, lastBlock *commonpb.B
 		return nil, timeLasts, err
 	}
 
-	return v.verifierBlock.ValidateBlockWithRWSets(block, lastBlock, hashType, timeLasts, txRWSetMap)
+	return v.verifierBlock.ValidateBlockWithRWSets(block, lastBlock, hashType, timeLasts, txRWSetMap, mode)
 }
 
 func (v *BlockVerifierImpl) checkPreBlock_MAXBFT(block *commonpb.Block, lastBlock *commonpb.Block, err error,
@@ -459,4 +463,18 @@ func (v *BlockVerifierImpl) cutBlocks(blocksToCut []*commonpb.Block, blockToKeep
 	if len(cutTxs) > 0 {
 		v.txPool.RetryAndRemoveTxs(cutTxs, nil)
 	}
+}
+
+func (v *BlockVerifierImpl) Module() string {
+	return ModuleNameCore
+}
+
+func (v *BlockVerifierImpl) Watch(chainConfig *chainConfConfig.ChainConfig) error {
+	v.chainConf.ChainConfig().Block = chainConfig.Block
+	protocol.ParametersValueMaxLength = chainConfig.Block.TxParameterSize * 1024 * 1024
+	if chainConfig.Block.TxParameterSize <= 0 {
+		protocol.ParametersValueMaxLength = protocol.DefaultParametersValueMaxSize * 1024 * 1024
+	}
+	v.log.Infof("update chainconf,blockverify[%v]", v.chainConf.ChainConfig().Block)
+	return nil
 }

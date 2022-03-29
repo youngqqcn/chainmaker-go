@@ -502,6 +502,7 @@ type VerifierBlockConf struct {
 	ProposalCache   protocol.ProposalCache // proposal cache
 	StoreHelper     conf.StoreHelper
 	TxScheduler     protocol.TxScheduler
+	TxFilter        protocol.TxFilter
 }
 
 type VerifierBlock struct {
@@ -516,6 +517,7 @@ type VerifierBlock struct {
 	blockchainStore protocol.BlockchainStore
 	proposalCache   protocol.ProposalCache // proposal cache
 	storeHelper     conf.StoreHelper
+	txFilter        protocol.TxFilter
 }
 
 func NewVerifierBlock(conf *VerifierBlockConf) *VerifierBlock {
@@ -531,6 +533,7 @@ func NewVerifierBlock(conf *VerifierBlockConf) *VerifierBlock {
 		proposalCache:   conf.ProposalCache,
 		storeHelper:     conf.StoreHelper,
 		txScheduler:     conf.TxScheduler,
+		txFilter:        conf.TxFilter,
 	}
 	var schedulerFactory scheduler.TxSchedulerFactory
 	verifyBlock.txScheduler = schedulerFactory.NewTxScheduler(
@@ -562,7 +565,7 @@ func (vb *VerifierBlock) FetchLastBlock(block *commonPb.Block) (*commonPb.Block,
 
 // validateBlock, validate block and transactions
 func (vb *VerifierBlock) ValidateBlock(
-	block, lastBlock *commonPb.Block, hashType string, timeLasts map[string]int64) (
+	block, lastBlock *commonPb.Block, hashType string, timeLasts map[string]int64, mode protocol.VerifyMode) (
 	map[string]*commonPb.TxRWSet, map[string][]*commonPb.ContractEvent, map[string]int64, error) {
 
 	if err := IsBlockHashValid(block, vb.chainConf.ChainConfig().Crypto.Hash); err != nil {
@@ -626,10 +629,10 @@ func (vb *VerifierBlock) ValidateBlock(
 		Log:         vb.log,
 		Ac:          vb.ac,
 		TxPool:      vb.txPool,
-		Store:       vb.blockchainStore,
+		TxFilter:    vb.txFilter,
 	}
 	verifiertx := NewVerifierTx(verifierTxConf)
-	txHashes, _, errTxs, err := verifiertx.verifierTxs(block)
+	txHashes, _, errTxs, err := verifiertx.verifierTxs(block, mode)
 	txLasts := utils.CurrentTimeMillisSeconds() - startTxTick
 	timeLasts[TxVerify] = txLasts
 	if err != nil {
@@ -667,8 +670,8 @@ func (vb *VerifierBlock) ValidateBlock(
 
 // validateBlock, validate block and transactions
 func (vb *VerifierBlock) ValidateBlockWithRWSets(
-	block, lastBlock *commonPb.Block, hashType string,
-	timeLasts map[string]int64, txRWSetMap map[string]*commonPb.TxRWSet) (
+	block, lastBlock *commonPb.Block, hashType string, timeLasts map[string]int64,
+	txRWSetMap map[string]*commonPb.TxRWSet, mode protocol.VerifyMode) (
 	map[string][]*commonPb.ContractEvent, map[string]int64, error) {
 	// 1.block verify
 	if err := IsBlockHashValid(block, vb.chainConf.ChainConfig().Crypto.Hash); err != nil {
@@ -733,10 +736,10 @@ func (vb *VerifierBlock) ValidateBlockWithRWSets(
 		Log:         vb.log,
 		Ac:          vb.ac,
 		TxPool:      vb.txPool,
-		Store:       vb.blockchainStore,
+		TxFilter:    vb.txFilter,
 	}
 	verifiertx := NewVerifierTx(verifierTxConf)
-	txHashes, _, errTxs, err := verifiertx.verifierTxs(block)
+	txHashes, _, errTxs, err := verifiertx.verifierTxs(block, mode)
 	vb.log.Warnf("verifierTxs txHashCount:%d, txCount:%d, %x", len(txHashes), len(block.Txs), block.Header.TxRoot)
 	txLasts := utils.CurrentTimeMillisSeconds() - startTxTick
 	timeLasts[TxVerify] = txLasts
@@ -824,6 +827,7 @@ type BlockCommitterConfig struct {
 	Subscriber      *subscriber.EventSubscriber
 	Verifier        protocol.BlockVerifier
 	StoreHelper     conf.StoreHelper
+	TxFilter        protocol.TxFilter
 }
 
 func NewBlockCommitter(config BlockCommitterConfig, log protocol.Logger) (protocol.BlockCommitter, error) {
@@ -896,6 +900,7 @@ func NewBlockCommitter(config BlockCommitterConfig, log protocol.Logger) (protoc
 		TxPool:                  blockchain.txPool,
 		LedgerCache:             blockchain.ledgerCache,
 		ChainConf:               blockchain.chainConf,
+		TxFilter:                config.TxFilter,
 		MsgBus:                  blockchain.msgBus,
 		MetricBlockCommitTime:   blockchain.metricBlockCommitTime,
 		MetricBlockIntervalTime: blockchain.metricBlockIntervalTime,
@@ -992,7 +997,7 @@ func (chain *BlockCommitterImpl) AddBlock(block *commonPb.Block) (err error) {
 	lastProposed.AdditionalData = block.AdditionalData
 
 	checkLasts := utils.CurrentTimeMillisSeconds() - startTick
-	dbLasts, snapshotLasts, confLasts, otherLasts, pubEvent, blockInfo, err := chain.commonCommit.CommitBlock(
+	dbLasts, snapshotLasts, confLasts, otherLasts, pubEvent, filterLasts, blockInfo, err := chain.commonCommit.CommitBlock(
 		lastProposed, rwSetMap, conEventMap)
 	if err != nil {
 		chain.log.Errorf("block common commit failed: %s, blockHeight: (%d)",
@@ -1020,9 +1025,9 @@ func (chain *BlockCommitterImpl) AddBlock(block *commonPb.Block) (err error) {
 	chain.blockInterval = curTime
 	chain.log.Infof(
 		"commit block [%d](count:%d,hash:%x)"+
-			"time used(check:%d,db:%d,ss:%d,conf:%d,pool:%d,pubConEvent:%d,other:%d,total:%d,interval:%d)",
+			"time used(check:%d,db:%d,ss:%d,conf:%d,pool:%d,pubConEvent:%d,filter:%d,other:%d,total:%d,interval:%d)",
 		height, lastProposed.Header.TxCount, lastProposed.Header.BlockHash,
-		checkLasts, dbLasts, snapshotLasts, confLasts, poolLasts, pubEvent, otherLasts, elapsed, interval)
+		checkLasts, dbLasts, snapshotLasts, confLasts, poolLasts, pubEvent, filterLasts, otherLasts, elapsed, interval)
 	if localconf.ChainMakerConfig.MonitorConfig.Enabled {
 		chain.metricBlockCommitTime.WithLabelValues(chain.chainId).Observe(float64(elapsed) / 1000)
 		chain.metricBlockIntervalTime.WithLabelValues(chain.chainId).Observe(float64(interval) / 1000)

@@ -38,13 +38,14 @@ var _ apiPb.RpcNodeServer = (*ApiService)(nil)
 
 // ApiService struct define
 type ApiService struct {
-	chainMakerServer      *blockchain.ChainMakerServer
-	log                   *logger.CMLogger
-	logBrief              *logger.CMLogger
-	subscriberRateLimiter *rate.Limiter
-	metricQueryCounter    *prometheus.CounterVec
-	metricInvokeCounter   *prometheus.CounterVec
-	ctx                   context.Context
+	chainMakerServer            *blockchain.ChainMakerServer
+	log                         *logger.CMLogger
+	logBrief                    *logger.CMLogger
+	subscriberRateLimiter       *rate.Limiter
+	metricQueryCounter          *prometheus.CounterVec
+	metricInvokeCounter         *prometheus.CounterVec
+	metricInvokeTxSizeHistogram *prometheus.HistogramVec
+	ctx                         context.Context
 }
 
 // NewApiService - new ApiService object
@@ -81,6 +82,10 @@ func NewApiService(ctx context.Context, chainMakerServer *blockchain.ChainMakerS
 			"query request counts metric", "chainId", "state")
 		apiService.metricInvokeCounter = monitor.NewCounterVec(monitor.SUBSYSTEM_RPCSERVER, "metric_invoke_request_counter",
 			"invoke request counts metric", "chainId", "state")
+		apiService.metricInvokeTxSizeHistogram = monitor.NewHistogramVec(
+			monitor.SUBSYSTEM_RPCSERVER, "metric_invoke_tx_size_histogram",
+			"invoke tx size histogram metric", prometheus.ExponentialBuckets(1024, 2, 12),
+			"chainId", "state")
 	}
 
 	return &apiService
@@ -375,6 +380,7 @@ func (s *ApiService) dealTransact(tx *commonPb.Transaction, source protocol.TxSo
 	err = s.chainMakerServer.AddTx(tx.Payload.ChainId, tx, source)
 
 	s.incInvokeCounter(tx.Payload.ChainId, err)
+	s.updateTxSizeHistogram(tx, err)
 
 	if err != nil {
 		s.log.Warnf("Add tx failed, %s, chainId:%s, txId:%s",
@@ -403,6 +409,16 @@ func (s *ApiService) incInvokeCounter(chainId string, err error) {
 			s.metricInvokeCounter.WithLabelValues(chainId, "true").Inc()
 		} else {
 			s.metricInvokeCounter.WithLabelValues(chainId, "false").Inc()
+		}
+	}
+}
+
+func (s *ApiService) updateTxSizeHistogram(tx *commonPb.Transaction, err error) {
+	if localconf.ChainMakerConfig.MonitorConfig.Enabled {
+		if err == nil {
+			s.metricInvokeTxSizeHistogram.WithLabelValues(tx.Payload.ChainId, "true").Observe(float64(tx.Size()))
+		} else {
+			s.metricInvokeTxSizeHistogram.WithLabelValues(tx.Payload.ChainId, "false").Observe(float64(tx.Size()))
 		}
 	}
 }

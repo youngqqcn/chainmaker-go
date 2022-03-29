@@ -190,6 +190,77 @@ rpc:
   max_send_msg_size: 10
   max_recv_msg_size: 10
 
+tx_filter:
+  # default(store) 0; bird's nest 1; map 2; 3 sharding bird's nest
+  type: 0
+  # sharding bird's nest config
+  # total keys = sharding.length * sharding.birds_nest.length * sharding.birds_nest.cuckoo.max_num_keys
+  sharding:
+    # sharding number
+    length: 5
+    # sharding task timeout in seconds
+    timeout: 3
+    snapshot:
+      type: 0
+      timed:
+        interval: 10
+      block_height:
+        interval: 10
+      # file path
+      path: ../data/{org_id}/tx_filter
+    # bird's nest config
+    birds_nest:
+      # bird's nest size
+      length: 10
+      rules:
+        # Absolute expiration time /second
+        absolute_expire_time: 30000
+      cuckoo:
+        # 0 Default; 1 TimestampKey
+        key_type: 1
+        # num of tags for each bucket, which is b in paper. tag is fingerprint, which is f in paper.
+        # 4 is recommended.
+        tags_per_bucket: 4
+        # num of bits for each item, which is length of tag(fingerprint)
+        bits_per_item: 9
+        # keys number
+        max_num_keys: 100
+        # 0 TableTypeSingle normal single table
+        # 1 TableTypePacked packed table, use semi-sort to save 1 bit per item
+        # 1 is recommended
+        table_type: 1
+  # bird's nest config
+  # total keys = birds_nest.length * birds_nest.cuckoo.max_num_keys
+  birds_nest:
+    # bird's nest size
+    length: 10
+    snapshot:
+      type: 0
+      timed:
+        interval: 10
+      block_height:
+        interval: 10
+      # file path
+      path: ../data/{org_id}/tx_filter
+    # 0 Default; 1 TimestampKey
+    rules:
+      # Absolute expiration time /second
+      absolute_expire_time: 30000
+    cuckoo:
+      # 0 Default; 1 TimestampKey
+      key_type: 1
+      # num of tags for each bucket, which is b in paper. tag is fingerprint, which is f in paper.
+      # 4 is recommended.
+      tags_per_bucket: 4
+      # num of bits for each item, which is length of tag(fingerprint)
+      bits_per_item: 9
+      # keys number
+      max_num_keys: 100
+      # 0 TableTypeSingle normal single table
+      # 1 TableTypePacked packed table, use semi-sort to save 1 bit per item
+      # 1 is recommended
+      table_type: 1
+
 # Monitor related settings
 monitor:
   # Monitor service switch, default is false.
