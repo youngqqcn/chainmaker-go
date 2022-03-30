@@ -71,7 +71,6 @@ generate:
 
 docker-build:
 	rm -rf build/ data/ log/ bin/
-	go mod tidy
 	docker build -t chainmaker -f ./DOCKER/Dockerfile .
 	docker tag chainmaker chainmaker:${VERSION}
 
