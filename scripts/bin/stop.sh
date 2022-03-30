@@ -15,11 +15,15 @@ stop_docker_vm() {
   config_file="../config/{org_id}/chainmaker.yml"
   enable_docker_vm=$(grep enable_dockervm $config_file | awk -F: '{gsub(/ /, "", $2);print $2}')
   enable_uds=$(grep uds_open $config_file | awk -F: '{gsub(/ /, "", $2);print $2}')
+  chain_id=$(grep "chainId:" $config_file | grep -v "#" | awk -F: '{gsub(/ /, "", $2);print $2}')
+  container_name=DOCKERVM-{org_id}-$chain_id
   if [[ $enable_docker_vm = "true" && $enable_uds = "true" ]]
   then
+    container_exists=$(docker ps -f name="$container_name" --format '{{.Names}}')
+    if [[ $container_exists ]]; then
       echo "stop docker vm container:"
-      chain_id=$(grep "chainId:" $config_file | grep -v "#" | awk -F: '{gsub(/ /, "", $2);print $2}')
-      docker stop DOCKERVM-{org_id}-$chain_id
+      docker stop "$container_name"
+    fi
   fi
 }
 stop_docker_vm
