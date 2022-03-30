@@ -20,8 +20,8 @@ chainmaker.org/chainmaker/consensus-raft/v2 v2.2.0 h1:7/hSH6Qxx8v2witzqbwhh//1Zy
 chainmaker.org/chainmaker/consensus-raft/v2 v2.2.0/go.mod h1:yyX6EpMLf+tnRStVnP2u9aHtmMZinYwPUSXfFX68RtM=
 chainmaker.org/chainmaker/consensus-solo/v2 v2.2.0 h1:PyfNFPnGB0vR9B4AwflKfnbQ68/MBoA1tu8OOcJdt6U=
 chainmaker.org/chainmaker/consensus-solo/v2 v2.2.0/go.mod h1:cUVRSA0r+bIZa6x1VNoufR1mrgNQT6VjNNo4cu1ZQg0=
-chainmaker.org/chainmaker/consensus-tbft/v2 v2.2.1-0.20220325085823-27b35b5349f2 h1:2UxlrS9wNMYt/M1An7VEA4+OwY/NgIs+IJdsEbNExCM=
-chainmaker.org/chainmaker/consensus-tbft/v2 v2.2.1-0.20220325085823-27b35b5349f2/go.mod h1:88weyWx2lVuuOaz3CS5vPLSrRWe9zoJwwwUlDSbkBTk=
+chainmaker.org/chainmaker/consensus-tbft/v2 v2.2.1-0.20220329123729-f3b262d7a64b h1:IfV5D576z2V31UGjpic4KET8Pz0UsoMaJeSKtTqaquo=
+chainmaker.org/chainmaker/consensus-tbft/v2 v2.2.1-0.20220329123729-f3b262d7a64b/go.mod h1:88weyWx2lVuuOaz3CS5vPLSrRWe9zoJwwwUlDSbkBTk=
 chainmaker.org/chainmaker/consensus-utils/v2 v2.2.0/go.mod h1:m4gpyPfhdDX4kk9fwVZJN98o/N2XU9kcYb9CHjELSt0=
 chainmaker.org/chainmaker/consensus-utils/v2 v2.2.1-0.20220325083126-1cbf15e66536 h1:K4Po48xZM8PucknNmI7gCHWT2sFenpkeoUtwbg5GfBQ=
 chainmaker.org/chainmaker/consensus-utils/v2 v2.2.1-0.20220325083126-1cbf15e66536/go.mod h1:s2cy5yZUg9usZqc7NYhRar2DfEUJ11yFGBe+dUyed1Y=
