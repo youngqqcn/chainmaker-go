@@ -17,6 +17,7 @@ import (
 	"chainmaker.org/chainmaker/protocol/v2"
 )
 
+// txFilterFactory Transaction filter factory
 type txFilterFactory struct {
 }
 
@@ -30,23 +31,24 @@ func Factory() *txFilterFactory {
 	return _instance
 }
 
+// NewTxFilter new transaction filter
 func (cf *txFilterFactory) NewTxFilter(conf *config.TxFilterConfig, log protocol.Logger,
 	store protocol.BlockchainStore) (protocol.TxFilter, error) {
 	if conf == nil {
-		log.Warn("txfilter conf is nil, use default: store")
-		return defau1t.Init(store), nil
+		log.Warn("txfilter conf is nil, use default type: store")
+		return defau1t.New(store), nil
 	}
 	switch conf.Type {
 	case config.TxFilterType_None:
-		return defau1t.Init(store), nil
+		return defau1t.New(store), nil
 	case config.TxFilterType_BirdsNest:
-		return birdnest.Init(conf.BirdsNest, log, store)
+		return birdnest.New(conf.BirdsNest, log, store)
 	case config.TxFilterType_Map:
-		return mapimpl.Init(), nil
+		return mapimpl.New(), nil
 	case config.TxFilterType_ShardingBirdsNest:
-		return shardingbirdsnest.Init(conf.ShardingBirdsNest, log, store)
+		return shardingbirdsnest.New(conf.ShardingBirdsNest, log, store)
 	default:
-		log.Warnf("txfilter type(%v) not support, use default: store", conf.Type)
-		return defau1t.Init(store), nil
+		log.Warnf("txfilter type: %v not support, use default type: store", conf.Type)
+		return defau1t.New(store), nil
 	}
 }

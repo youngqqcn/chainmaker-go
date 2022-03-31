@@ -8,6 +8,8 @@ package common
 import (
 	"fmt"
 
+	"chainmaker.org/chainmaker/pb-go/v2/config"
+
 	"chainmaker.org/chainmaker/common/v2/msgbus"
 	"chainmaker.org/chainmaker/localconf/v2"
 	commonpb "chainmaker.org/chainmaker/pb-go/v2/common"
@@ -92,13 +94,15 @@ func (cb *CommitBlock) CommitBlock(
 
 	// TxFilter adds
 	filterLasts = utils.CurrentTimeMillisSeconds()
-	err = cb.txFilter.Adds(utils.GetTxIds(block.Txs))
-	if err != nil {
-		// if add filter error, then panic
-		cb.log.Error(err)
-		panic(err)
+	// The default filter type does not run AddsAndSetHeight
+	if localconf.ChainMakerConfig.TxFilter.Type != int32(config.TxFilterType_None) {
+		err = cb.txFilter.AddsAndSetHeight(utils.GetTxIds(block.Txs), block.Header.GetBlockHeight())
+		if err != nil {
+			// if add filter error, then panic
+			cb.log.Error(err)
+			panic(err)
+		}
 	}
-	cb.txFilter.SetHeight(block.Header.GetBlockHeight())
 	filterLasts = utils.CurrentTimeMillisSeconds() - filterLasts
 
 	// clear snapshot

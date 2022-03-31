@@ -10,36 +10,54 @@ import (
 	"chainmaker.org/chainmaker/protocol/v2"
 )
 
+// TxFilter protocol.BlockchainStore transaction filter
 type TxFilter struct {
 	store protocol.BlockchainStore
 }
 
-func Init(store protocol.BlockchainStore) *TxFilter {
+// New transaction filter init
+func New(store protocol.BlockchainStore) *TxFilter {
 	return &TxFilter{store: store}
 }
 
-func (f TxFilter) IsExistsAndReturnHeight(_ string, _ ...common.RuleType) (bool, uint64, error) {
-	return false, 0, nil
+// GetHeight get height from transaction filter
+func (f TxFilter) GetHeight() uint64 {
+	block, err := f.store.GetLastBlock()
+	if err != nil {
+		return 0
+	}
+	return block.Header.BlockHeight
 }
 
+// SetHeight set height from transaction filter
 func (f TxFilter) SetHeight(_ uint64) {
 }
 
-func (f TxFilter) GetHeight() uint64 {
-	return 0
+// IsExistsAndReturnHeight is exists and return height
+func (f TxFilter) IsExistsAndReturnHeight(txId string, _ ...common.RuleType) (bool, uint64, error) {
+	return f.store.TxExistsInFullDB(txId)
 }
 
+// Add txId to transaction filter
 func (f TxFilter) Add(_ string) error {
 	return nil
 }
 
+// Adds batch Add txId
 func (f TxFilter) Adds(_ []string) error {
 	return nil
 }
 
+// AddsAndSetHeight batch add tx id and set height
+func (f TxFilter) AddsAndSetHeight(_ []string, _ uint64) error {
+	return nil
+}
+
+// IsExists Check whether TxId exists in the transaction filter
 func (f TxFilter) IsExists(txId string, _ ...common.RuleType) (bool, error) {
 	return f.store.TxExists(txId)
 }
 
+// Close transaction filter
 func (f TxFilter) Close() {
 }
