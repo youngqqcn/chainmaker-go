@@ -23,7 +23,7 @@ require (
 	chainmaker.org/chainmaker/txpool-batch/v2 v2.2.1-0.20220325131808-13f5bd73d515
 	chainmaker.org/chainmaker/txpool-single/v2 v2.2.1-0.20220325131747-54532d1f489a
 	chainmaker.org/chainmaker/utils/v2 v2.2.1-0.20220328025444-b9600cef31f7
-	chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20220311061132-294ec0097829
+	chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20220330072922-c0860d1e7c9a
 	chainmaker.org/chainmaker/vm-evm/v2 v2.2.0
 	chainmaker.org/chainmaker/vm-gasm/v2 v2.2.0
 	chainmaker.org/chainmaker/vm-native/v2 v2.2.0
@@ -48,11 +48,15 @@ require (
 	github.com/holiman/uint256 v1.2.0
 	github.com/hpcloud/tail v1.0.0
 	github.com/linvon/cuckoo-filter v0.4.0
+	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
 	github.com/mitchellh/mapstructure v1.4.2
 	github.com/mr-tron/base58 v1.2.0
 	github.com/panjf2000/ants/v2 v2.4.7
+	github.com/pelletier/go-toml v1.8.1 // indirect
 	github.com/prometheus/client_golang v1.11.0
 	github.com/rcrowley/go-metrics v0.0.0-20190826022208-cac0b30c2563
+	github.com/sirupsen/logrus v1.8.1 // indirect
+	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.10.1

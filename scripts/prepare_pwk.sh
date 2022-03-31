@@ -130,6 +130,7 @@ function generate_config() {
     MONITOR_PORT=14321
     PPROF_PORT=24321
     TRUSTED_PORT=13301
+    DOCKER_VM_PORT=22351
     DOCKER_VM_CONTAINER_NAME_PREFIX="chainmaker-vm-docker-go-container"
     ENABLE_DOCKERVM="false"
 
@@ -193,7 +194,7 @@ function generate_config() {
         xsed "s%{pprof_port}%$(($PPROF_PORT+$i-1))%g" node$i/chainmaker.yml
         xsed "s%{trusted_port}%$(($TRUSTED_PORT+$i-1))%g" node$i/chainmaker.yml
         xsed "s%{enable_dockervm}%$ENABLE_DOCKERVM%g" node$i/chainmaker.yml
-        xsed "s%{dockervm_container_name}%"${DOCKER_VM_CONTAINER_NAME_PREFIX}$i"%g" node$i/chainmaker.yml
+        xsed "s%{docker_vm_port}%"$(($DOCKER_VM_PORT+$i-1))"%g" node$i/chainmaker.yml
 
         system=$(uname)
 
