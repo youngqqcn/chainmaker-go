@@ -335,8 +335,15 @@ storage:
     redis_password: abcpass  #redis password
     tx_capacity: 1000000000   #support max transaction capacity
     fp_rate: 0.000000001      #false postive rate
-  # RWC config               default 1000000
-  rolling_window_cache_capacity: 55000 # greater than max_txpool_size*1.1
+
+  # RWC config
+  enable_rwc: true   #default false
+
+  # suggest
+  # if block_tx_capacity < 10000,
+  # set rolling_window_cache_capacity greater than block_tx_capacity*1.1 and less than block_tx_capacity*2
+  # if block_tx_capacity > 10000,  set rolling_window_cache_capacity 20000
+  rolling_window_cache_capacity: 200
 
   # Symmetric encryption key:16 bytes key
   # If pkcs11 is enabled, it is the keyID
