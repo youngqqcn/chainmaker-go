@@ -40,12 +40,12 @@ chainmaker.org/chainmaker/logger/v2 v2.2.1-0.20220325095821-5810a4273801/go.mod 
 chainmaker.org/chainmaker/lws v0.0.0-20220330115225-c69ad75c8a23 h1:/2l9Hyg028+QcaU99MzQj9oAvC6O/iV9e6edvdCaPW8=
 chainmaker.org/chainmaker/lws v0.0.0-20220330115225-c69ad75c8a23/go.mod h1:800sINwctofxTkC2le9ZcROQug28Or/B4/I/130KDE4=
 chainmaker.org/chainmaker/net-common v1.1.0/go.mod h1:s+xPHPQ0JCJaSC/Xctn0w+hy6jX/mISfBzFtwXS4A2g=
-chainmaker.org/chainmaker/net-common v1.1.1-0.20220406045658-46d552833f79 h1:sjQ3ORqn6JbuiJz3zhKBfnTLSgLIH49JbmM0WGeEhIM=
-chainmaker.org/chainmaker/net-common v1.1.1-0.20220406045658-46d552833f79/go.mod h1:sBdxF1O8Z6eUtFD63kafMmOjtiZ4ohZhwEMSchNodlI=
+chainmaker.org/chainmaker/net-common v1.1.1-0.20220406070416-647f0fe32eba h1:IWvus84w7f+t4MIjrHcbnhOr8z5+m7+v2TzqB6R+NHk=
+chainmaker.org/chainmaker/net-common v1.1.1-0.20220406070416-647f0fe32eba/go.mod h1:YuHTzMXoYlIeQ8B97fUxWLYiNhOxu1SvLwgX4PLNJgw=
 chainmaker.org/chainmaker/net-libp2p v1.1.1-0.20220325102751-9922b84a8869 h1:9+lt6tajbCfVTe1tjFRXG2/648js4pRQkgLIq7denzI=
 chainmaker.org/chainmaker/net-libp2p v1.1.1-0.20220325102751-9922b84a8869/go.mod h1:J5YtzlzMrEvrWZex9PGgHDA7k9cVoaAP06LSRdaX5Oc=
-chainmaker.org/chainmaker/net-liquid v1.0.2-0.20220406045938-8391ea14f9ff h1:3GnT8alvoJTHQJp3PQZ5I0bjU7aGyTcuVFe727IY7uo=
-chainmaker.org/chainmaker/net-liquid v1.0.2-0.20220406045938-8391ea14f9ff/go.mod h1:7I4SbehL400OBnhulvYsHeQJpqVYR7yWBAaXAlYUOBg=
+chainmaker.org/chainmaker/net-liquid v1.0.2-0.20220406070644-ebf371efea9f h1:hNmJl7GG1OfuVCWAupbf/APoNdS6GDTmfpf+PcO/Je0=
+chainmaker.org/chainmaker/net-liquid v1.0.2-0.20220406070644-ebf371efea9f/go.mod h1:idaQazbCBaZz+V7Y7E1W9KTV0iU9LumfCdCMoHju/S0=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211214073209-1288f39035e8/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20211215062821-d83f1382c35e/go.mod h1:gDZodc1Kp6snzGXugS/REqfCqNNizhniQmjeOKUVf64=
 chainmaker.org/chainmaker/pb-go/v2 v2.1.1-0.20220125074156-6f9f1b52f915/go.mod h1:b5fg5e93xCjSHU1b5yk/mnslab+z7N08kMkNVDoSpcI=
@@ -1517,8 +1517,8 @@ github.com/xiaotianfork/qtls-go1-17 v0.1.18/go.mod h1:nZrb/z9NklEO8cGUkv70RoQNB1
 github.com/xiaotianfork/qtls-go1-18 v0.1.18 h1:GS91J3TKvjwEPjt2OdKSzypqxTrBil0D043FZCvp5K0=
 github.com/xiaotianfork/qtls-go1-18 v0.1.18/go.mod h1:ARuzK+KpqWJOjRL6IE3zIrNGkVqR51y+DKiOz1TtfNs=
 github.com/xiaotianfork/quic-go v0.21.24/go.mod h1:NX85Pdca00tRwjz18nKIispZwY9vv3rpNHzQls4qvAQ=
-github.com/xiaotianfork/quic-go v0.26.0-qc h1:TJsKk94zMSOx31oOJi9ETqMWNGsbL+yBsraRLvOVjcA=
-github.com/xiaotianfork/quic-go v0.26.0-qc/go.mod h1:ekvQ+77ArqZ7LSOgIjLB4ESUJROSpLarajACJdSzihQ=
+github.com/xiaotianfork/quic-go v0.26.0-alpha.0.20220406065717-33f611980cb8 h1:kZqpx+JjfFFo6LrfhAtkVY6fYBYQatK6fSe3rfcWViw=
+github.com/xiaotianfork/quic-go v0.26.0-alpha.0.20220406065717-33f611980cb8/go.mod h1:4fjcb9Zjrtsf2zMizZFswLDugouL3KmzOy/fWUa/z70=
 github.com/xlab/treeprint v0.0.0-20180616005107-d6fb6747feb6/go.mod h1:ce1O1j6UtZfjr22oyGxGLbauSBp2YVXpARAosm7dHBg=
 github.com/yiyanwannian/badger/v3 v3.2111.29 h1:uYBWPvYZ6Ic4MoFgoYuFhudO89YJrmMPHaZ8qjropY4=
 github.com/yiyanwannian/badger/v3 v3.2111.29/go.mod h1:ZvCpTxabNO5gxej+HFnHWGzVRkfhCciTDZ3gco4C82s=
