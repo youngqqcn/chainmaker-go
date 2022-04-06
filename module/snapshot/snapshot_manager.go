@@ -35,7 +35,7 @@ func (m *ManagerImpl) NewSnapshot(prevBlock *commonPb.Block, block *commonPb.Blo
 	m.delegate.lock.Lock()
 	defer m.delegate.lock.Unlock()
 	blockHeight := block.Header.BlockHeight
-	snapshotImpl := m.delegate.makeSnapshotImpl(block, blockHeight)
+	snapshotImpl := m.delegate.makeSnapshotImpl(block)
 
 	// 计算前序指纹, 和当前指纹
 	prevFingerPrint := utils.CalcBlockFingerPrintWithoutTx(prevBlock)
@@ -94,7 +94,7 @@ func (m *ManagerImpl) NotifyBlockCommitted(block *commonPb.Block) error {
 
 		if block.Header.BlockHeight-snapshot.GetBlockHeight() > 8 {
 			delete(m.snapshots, finger)
-			m.log.Infof("delete snapshot %v at height %d while gc", deleteFp, snapshot.blockHeight)
+			m.log.Infof("delete snapshot %v at height %d while gc", finger, snapshot.blockHeight)
 			snapshot.SetPreSnapshot(nil)
 		}
 	}
