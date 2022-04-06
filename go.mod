@@ -13,9 +13,9 @@ require (
 	chainmaker.org/chainmaker/consensus-utils/v2 v2.2.1-0.20220325083126-1cbf15e66536
 	chainmaker.org/chainmaker/localconf/v2 v2.2.1-0.20220325094831-e2f9ba5f86e7
 	chainmaker.org/chainmaker/logger/v2 v2.2.1-0.20220325095821-5810a4273801
-	chainmaker.org/chainmaker/net-common v1.1.0
-	chainmaker.org/chainmaker/net-libp2p v1.1.1-0.20220325102751-9922b84a8869
-	chainmaker.org/chainmaker/net-liquid v1.0.0
+	chainmaker.org/chainmaker/net-common v1.1.1-0.20220406070416-647f0fe32eba
+	chainmaker.org/chainmaker/net-libp2p v1.1.1-0.20220406075858-e48e6aa44e91
+	chainmaker.org/chainmaker/net-liquid v1.0.2-0.20220406070644-ebf371efea9f
 	chainmaker.org/chainmaker/pb-go/v2 v2.2.1-0.20220330092754-6aa7b085e265
 	chainmaker.org/chainmaker/protocol/v2 v2.2.1-0.20220402030612-3905820d8b6f
 	chainmaker.org/chainmaker/sdk-go/v2 v2.2.1-0.20220325141922-16692061d611
