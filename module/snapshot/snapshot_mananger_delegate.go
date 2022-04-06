@@ -49,7 +49,7 @@ func (m *ManagerDelegate) calcSnapshotFingerPrintWithoutTx(snapshot *SnapshotImp
 	return utils.CalcFingerPrint(chainId, blockHeight, blockTimestamp, blockProposerBytes, preBlockHash,
 		nil, nil, nil)
 }
-func (m *ManagerDelegate) makeSnapshotImpl(block *commonPb.Block, blockHeight uint64) *SnapshotImpl {
+func (m *ManagerDelegate) makeSnapshotImpl(block *commonPb.Block) *SnapshotImpl {
 	// If the corresponding Snapshot does not exist, create one
 	txCount := len(block.Txs) // as map init size
 	snapshotImpl := &SnapshotImpl{
@@ -61,6 +61,7 @@ func (m *ManagerDelegate) makeSnapshotImpl(block *commonPb.Block, blockHeight ui
 
 		chainId:        block.Header.ChainId,
 		blockHeight:    block.Header.BlockHeight,
+		blockVersion:   block.Header.BlockVersion,
 		blockTimestamp: block.Header.BlockTimestamp,
 		blockProposer:  block.Header.Proposer,
 		preBlockHash:   block.Header.PreBlockHash,
