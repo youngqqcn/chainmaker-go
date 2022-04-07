@@ -194,11 +194,13 @@ vm:
   dockervm_log_path: ../log/org1/dockervm
   log_in_console: true
   log_level: INFO
-  uds_open: true                             # default is unix domain socket connection
+  uds_open: false                             # default is unix domain socket connection
   user_num: 100
   time_limit: 2
   max_concurrency: 50
   max_send_msg_size: 10
   max_recv_msg_size: 10
+  docker_vm_host: 127.0.0.1
+  docker_vm_port: 22359
 
 
