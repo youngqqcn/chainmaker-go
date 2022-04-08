@@ -371,15 +371,14 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 	for _, keyForI := range writeTableItemForI {
 		writeKey := string(keyForI.Key)
 		readKeyTxs := readKeyDict[writeKey]
-		if len(readKeyTxs) == 0 {
-			continue
-		}
-		// we should check all readKeyTxs because read keys has no conflict
-		j := int(readPos[i][writeKey]) - 1
-		for ; j >= 0; j-- {
-			if !allReachForI.Has(int(readKeyTxs[j])) {
-				directReachForI.Set(int(readKeyTxs[j]))
-				allReachForI.Or(reachMap[readKeyTxs[j]])
+		if len(readKeyTxs) >= 0 {
+			// we should check all readKeyTxs because read keys has no conflict
+			j := int(readPos[i][writeKey]) - 1
+			for ; j >= 0; j-- {
+				if !allReachForI.Has(int(readKeyTxs[j])) {
+					directReachForI.Set(int(readKeyTxs[j]))
+					allReachForI.Or(reachMap[readKeyTxs[j]])
+				}
 			}
 		}
 		writeKeyTxs := writeKeyDict[writeKey]
@@ -387,7 +386,7 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 			continue
 		}
 		// just check 1 write key before the tx because write keys all are conflict
-		j = int(writePos[i][writeKey]) - 1
+		j := int(writePos[i][writeKey]) - 1
 		if j >= 0 && !allReachForI.Has(int(writeKeyTxs[j])) {
 			directReachForI.Set(int(writeKeyTxs[j]))
 			allReachForI.Or(reachMap[writeKeyTxs[j]])
