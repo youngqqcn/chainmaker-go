@@ -207,17 +207,25 @@ tx_filter:
     # sharding task timeout in seconds
     timeout: 3
     snapshot:
+      # serialize type
+      # 0 Serialization by height interval
+      # 1 Serialization by time interval
       type: 0
       timed:
+        # interval /Second
         interval: 10
       block_height:
+        # interval height interval
         interval: 10
+      # Serialization interval in seconds
+      serialize_interval: 10
       # file path
       path: ../data/{org_id}/tx_filter
     # bird's nest config
     birds_nest:
       # bird's nest size
       length: 10
+      # Transaction filter rules
       rules:
         # Absolute expiration time /second
         absolute_expire_time: 30000
@@ -225,6 +233,7 @@ tx_filter:
         # 0 Default; 1 TimestampKey
         key_type: 1
         # num of tags for each bucket, which is b in paper. tag is fingerprint, which is f in paper.
+        # If you are using a semi-sorted bucket, the default is 4
         # 4 is recommended.
         tags_per_bucket: 4
         # num of bits for each item, which is length of tag(fingerprint)
@@ -241,14 +250,21 @@ tx_filter:
     # bird's nest size
     length: 10
     snapshot:
+      # serialize type
+      # 0 Serialization by height interval
+      # 1 Serialization by time interval
       type: 0
       timed:
+        # interval /Second
         interval: 10
       block_height:
+        # interval height interval
         interval: 10
+      # Serialization interval in seconds
+      serialize_interval: 10
       # file path
       path: ../data/{org_id}/tx_filter
-    # 0 Default; 1 TimestampKey
+    # Transaction filter rules
     rules:
       # Absolute expiration time /second
       absolute_expire_time: 30000
@@ -256,6 +272,7 @@ tx_filter:
       # 0 Default; 1 TimestampKey
       key_type: 1
       # num of tags for each bucket, which is b in paper. tag is fingerprint, which is f in paper.
+      # If you are using a semi-sorted bucket, the default is 4
       # 4 is recommended.
       tags_per_bucket: 4
       # num of bits for each item, which is length of tag(fingerprint)

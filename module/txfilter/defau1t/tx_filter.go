@@ -15,6 +15,10 @@ type TxFilter struct {
 	store protocol.BlockchainStore
 }
 
+func (f TxFilter) ValidateRule(_ string, _ ...common.RuleType) error {
+	return nil
+}
+
 // New transaction filter init
 func New(store protocol.BlockchainStore) *TxFilter {
 	return &TxFilter{store: store}

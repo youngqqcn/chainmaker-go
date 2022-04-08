@@ -76,6 +76,7 @@ func NewCoreEngine(cf *conf.CoreEngineConfig) (*CoreEngine, error) {
 		AC:              cf.AC,
 		BlockchainStore: cf.BlockchainStore,
 		StoreHelper:     cf.StoreHelper,
+		TxFilter:        cf.TxFilter,
 	}
 	core.blockProposer, err = proposer.NewBlockProposer(proposerConfig, cf.Log)
 	if err != nil {

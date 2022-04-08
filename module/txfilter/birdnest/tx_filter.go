@@ -22,19 +22,33 @@ type TxFilter struct {
 	exitC chan struct{}
 }
 
+func (f *TxFilter) ValidateRule(txId string, ruleType ...commonPb.RuleType) error {
+	key, err := bn.ToTimestampKey(txId)
+	if err != nil {
+		return nil
+	}
+	err = f.bn.ValidateRule(key, ruleType...)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
 // New transaction filter init
 func New(config *commonPb.BirdsNestConfig, log protocol.Logger, store protocol.BlockchainStore) (
 	protocol.TxFilter, error) {
 	initLasts := time.Now()
 	exitC := make(chan struct{})
-	birdnest, err := bn.NewBirdsNest(config, exitC, bn.LruStrategy, filtercommon.NewLogger(log))
+	birdsNest, err := bn.NewBirdsNest(config, exitC, bn.LruStrategy, filtercommon.NewLogger(log))
 	if err != nil {
 		log.Errorf("new filter fail, error: %v", err)
-		return nil, err
+		if err != bn.ErrCannotModifyTheNestConfiguration {
+			return nil, err
+		}
 	}
 	txFilter := &TxFilter{
 		log:   log,
-		bn:    birdnest,
+		bn:    birdsNest,
 		exitC: exitC,
 	}
 	err = filtercommon.ChaseBlockHeight(store, txFilter, log)
@@ -43,7 +57,7 @@ func New(config *commonPb.BirdsNestConfig, log protocol.Logger, store protocol.B
 	}
 	log.Infof("bird's nest filter init success, size: %v, max keys: %v, cost: %v",
 		config.Length, config.Cuckoo.MaxNumKeys, time.Since(initLasts))
-	birdnest.Start()
+	birdsNest.Start()
 	return txFilter, nil
 }
 
