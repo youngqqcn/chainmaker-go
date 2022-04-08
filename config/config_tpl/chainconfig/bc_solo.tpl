@@ -48,6 +48,7 @@ vm:
     - "gasm"
     - "evm"
     - "dockergo"
+    - "wxvm"
 
 # Block proposing related settings
 block:
