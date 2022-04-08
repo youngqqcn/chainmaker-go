@@ -371,7 +371,7 @@ func (s *SnapshotImpl) buildReachMap(i uint32, readKeyDict, writeKeyDict map[str
 	for _, keyForI := range writeTableItemForI {
 		writeKey := string(keyForI.Key)
 		readKeyTxs := readKeyDict[writeKey]
-		if len(readKeyTxs) >= 0 {
+		if len(readKeyTxs) > 0 {
 			// we should check all readKeyTxs because read keys has no conflict
 			j := int(readPos[i][writeKey]) - 1
 			for ; j >= 0; j-- {
