@@ -367,6 +367,7 @@ storage:
   # If pkcs11 is enabled, it is the keyID
   # encrypt_key: "1234567890123456"
   write_block_type: 0  # 0 common write，1 quick write
+  disable_state_cache: false # default false
   state_cache_config:
     life_window: 3000000000000   #key/value ttl time, ns
     clean_window: 1000000000
