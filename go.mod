@@ -19,7 +19,7 @@ require (
 	chainmaker.org/chainmaker/pb-go/v2 v2.2.1-0.20220330092754-6aa7b085e265
 	chainmaker.org/chainmaker/protocol/v2 v2.2.1-0.20220402030612-3905820d8b6f
 	chainmaker.org/chainmaker/sdk-go/v2 v2.2.1-0.20220325141922-16692061d611
-	chainmaker.org/chainmaker/store/v2 v2.2.1-0.20220402102346-2ba9c5d31f46
+	chainmaker.org/chainmaker/store/v2 v2.2.1-0.20220408063256-bb9435b109a1
 	chainmaker.org/chainmaker/txpool-batch/v2 v2.2.1-0.20220331121924-ad7ee318f937
 	chainmaker.org/chainmaker/txpool-single/v2 v2.2.1-0.20220331121941-586a246b1303
 	chainmaker.org/chainmaker/utils/v2 v2.2.1-0.20220328025444-b9600cef31f7
@@ -56,7 +56,6 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	github.com/rcrowley/go-metrics v0.0.0-20190826022208-cac0b30c2563
 	github.com/sirupsen/logrus v1.8.1 // indirect
-	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.10.1

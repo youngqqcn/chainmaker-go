@@ -355,6 +355,7 @@ storage:
   # If pkcs11 is enabled, it is the keyID
   # encrypt_key: "1234567890123456"
   write_block_type: 0  # 0普通写模式，1快速写模式
+  disable_state_cache: false # default false
   state_cache_config:
     life_window: 3000000000000   #key/value ttl 时间，单位 ns
     clean_window: 1000000000
