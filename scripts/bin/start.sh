@@ -31,7 +31,7 @@ start_docker_vm() {
 
   echo "start docker vm service container"
   docker run -itd --rm \
-    -e ENV_LOG_IN_CONSOLE=true -e ENV_LOG_LEVEL=INFO -e ENV_ENABLE_UDS=true \
+    -e ENV_LOG_IN_CONSOLE=false -e ENV_LOG_LEVEL=INFO -e ENV_ENABLE_UDS=true \
     -v "$mount_path"/"$chain_id":/mount \
     -v "$log_path"/"$chain_id":/log \
     --name DOCKERVM-{org_id}-"$chain_id" \
@@ -44,7 +44,7 @@ start_docker_vm() {
     docker stop DOCKERVM-{org_id}-$chain_id
     docker rm DOCKERVM-{org_id}-$chain_id
     docker run -itd --rm \
-      -e ENV_LOG_IN_CONSOLE=true -e ENV_LOG_LEVEL=INFO -e ENV_ENABLE_UDS=true \
+      -e ENV_LOG_IN_CONSOLE=false -e ENV_LOG_LEVEL=INFO -e ENV_ENABLE_UDS=true \
       -v "$mount_path"/"$chain_id":/mount \
       -v "$log_path"/"$chain_id":/log \
       --name DOCKERVM-{org_id}-"$chain_id" \
