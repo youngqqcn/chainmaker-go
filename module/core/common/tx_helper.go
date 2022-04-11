@@ -67,7 +67,7 @@ func ValidateTx(txsRet map[string]*commonpb.Transaction, tx *commonpb.Transactio
 	}
 	stat.DBLasts += utils.CurrentTimeMillisSeconds() - startDBTicker
 	if err != nil || isExist {
-		err = fmt.Errorf("tx duplicate in DB (tx:%s)", tx.Payload.TxId)
+		err = fmt.Errorf("tx duplicate in DB (tx:%s) error: %v", tx.Payload.TxId, err)
 		return err
 	}
 	stat.SigCount++
@@ -314,4 +314,50 @@ func (vt *VerifierTx) verifyTx(txs []*commonpb.Transaction, txsRet map[string]*c
 		stat.OthersLasts += utils.CurrentTimeMillisSeconds() - startOthersTicker
 	}
 	return txHashes, newAddTxs, nil
+}
+
+// ValidateTxRules validate Transactions and return remain Transactions and Transactions that
+// need to be removed
+func ValidateTxRules(filter protocol.TxFilter, txs []*commonpb.Transaction) (
+	removeTxs []*commonpb.Transaction, remainTxs []*commonpb.Transaction) {
+	txIds := utils.GetTxIds(txs)
+	// validate txFilter rules
+	errorIdIndexes := validateTxIds(filter, txIds)
+	// quick response None at all
+	if len(errorIdIndexes) == 0 {
+		return removeTxs, txs
+	}
+	// quick response None of the transactions were in compliance with the rules
+	if len(errorIdIndexes) == len(txs) {
+		return txs, []*commonpb.Transaction{}
+	}
+	remainTxs = make([]*commonpb.Transaction, 0, len(errorIdIndexes))
+	removeTxs = make([]*commonpb.Transaction, 0, len(txs)-len(errorIdIndexes))
+	for i, tx := range txs {
+		if IntegersContains(errorIdIndexes, i) {
+			removeTxs = append(removeTxs, tx)
+		} else {
+			remainTxs = append(remainTxs, tx)
+		}
+	}
+	return removeTxs, remainTxs
+}
+
+func validateTxIds(filter protocol.TxFilter, ids []string) (errorIdIndexes []int) {
+	for i, id := range ids {
+		err := filter.ValidateRule(id, commonpb.RuleType_AbsoluteExpireTime)
+		if err != nil {
+			errorIdIndexes = append(errorIdIndexes, i)
+		}
+	}
+	return
+}
+
+func IntegersContains(array []int, val int) bool {
+	for i := 0; i < len(array); i++ {
+		if array[i] == val {
+			return true
+		}
+	}
+	return false
 }

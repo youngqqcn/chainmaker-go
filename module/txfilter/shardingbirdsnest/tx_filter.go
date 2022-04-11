@@ -30,6 +30,18 @@ type TxFilter struct {
 	exitC chan struct{}
 }
 
+func (f *TxFilter) ValidateRule(txId string, ruleType ...common.RuleType) error {
+	key, err := bn.ToTimestampKey(txId)
+	if err != nil {
+		return nil
+	}
+	err = f.bn.ValidateRule(key, ruleType...)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // New transaction filter init
 func New(config *common.ShardingBirdsNestConfig, log protocol.Logger, store protocol.BlockchainStore) (
 	protocol.TxFilter, error) {
@@ -38,8 +50,10 @@ func New(config *common.ShardingBirdsNestConfig, log protocol.Logger, store prot
 	shardingBirdsNest, err := sbn.NewShardingBirdsNest(config, exitC, bn.LruStrategy, sbn.NewModuloSA(int(config.Length)),
 		filtercommon.NewLogger(log))
 	if err != nil {
-		log.Errorf("new sharding bird's nest fail, error: %v", err)
-		return nil, err
+		log.Errorf("new filter fail, error: %v", err)
+		if err != bn.ErrCannotModifyTheNestConfiguration {
+			return nil, err
+		}
 	}
 	txFilter := &TxFilter{
 		log:   log,

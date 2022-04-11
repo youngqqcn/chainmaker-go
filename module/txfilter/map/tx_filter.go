@@ -17,6 +17,10 @@ type TxFilter struct {
 	m      sync.Map
 }
 
+func (f *TxFilter) ValidateRule(_ string, _ ...common.RuleType) error {
+	return nil
+}
+
 // New transaction filter init
 func New() *TxFilter {
 	return &TxFilter{m: sync.Map{}}
