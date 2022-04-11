@@ -28,7 +28,7 @@ require (
 	chainmaker.org/chainmaker/vm-gasm/v2 v2.2.1-0.20220406070036-a26208105428
 	chainmaker.org/chainmaker/vm-native/v2 v2.2.0
 	chainmaker.org/chainmaker/vm-wasmer/v2 v2.2.1-0.20220406065233-c3010bf3dfd3
-	chainmaker.org/chainmaker/vm-wxvm/v2 v2.2.0
+	chainmaker.org/chainmaker/vm-wxvm/v2 v2.2.1-0.20220411033255-9fbd24b81561
 	chainmaker.org/chainmaker/vm/v2 v2.2.0
 	code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5
 	github.com/Rican7/retry v0.1.0

@@ -26,6 +26,7 @@ vm:
     - "gasm"
     - "evm"
     - "dockergo"
+    - "wxvm"
 
 # 交易、区块相关配置
 block:
