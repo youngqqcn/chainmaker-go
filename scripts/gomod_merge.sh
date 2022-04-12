@@ -9,7 +9,7 @@
 #set -x
 # 将BRANCH_NEW的数据合并到BRANCH
 BRANCH=develop
-BRANCH_NEW=v2.2.0_alpha_qc
+BRANCH_NEW=v2.2.0
 PRE_LOG="【log】 "
 
 projects=("pb-go"
