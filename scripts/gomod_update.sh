@@ -34,7 +34,7 @@ go get chainmaker.org/chainmaker/sdk-go/v2@${V221}
 go get chainmaker.org/chainmaker/store/v2@${V221}
 go get chainmaker.org/chainmaker/txpool-batch/v2@${V221}
 go get chainmaker.org/chainmaker/txpool-single/v2@${V221}
-go get chainmaker.org/chainmaker/utils/v2@${BRANCH}
+go get chainmaker.org/chainmaker/utils/v2@${V221}
 go get chainmaker.org/chainmaker/vm-docker-go/v2@${V221}
 go get chainmaker.org/chainmaker/vm-evm/v2@${BRANCH}
 go get chainmaker.org/chainmaker/vm-gasm/v2@${BRANCH}
