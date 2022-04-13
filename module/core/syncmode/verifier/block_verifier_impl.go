@@ -346,6 +346,11 @@ func (v *BlockVerifierImpl) Module() string {
 
 func (v *BlockVerifierImpl) Watch(chainConfig *chainConfConfig.ChainConfig) error {
 	v.chainConf.ChainConfig().Block = chainConfig.Block
+	protocol.ParametersValueMaxLength = chainConfig.Block.TxParameterSize * 1024 * 1024
+	if chainConfig.Block.TxParameterSize <= 0 {
+		protocol.ParametersValueMaxLength = protocol.DefaultParametersValueMaxSize * 1024 * 1024
+	}
+
 	v.log.Infof("update chainconf,blockverify[%v]", v.chainConf.ChainConfig().Block)
 	return nil
 }

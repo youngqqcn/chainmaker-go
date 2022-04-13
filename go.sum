@@ -1,6 +1,7 @@
 bazil.org/fuse v0.0.0-20160811212531-371fbbdaa898/go.mod h1:Xbm+BRKSBEpa4q4hTSxohYNQpsxXPbPry4JJWOB3LB8=
-chainmaker.org/chainmaker/chainconf/v2 v2.2.0 h1:bLHwUc3lYROVplqUk9KVQpD2AikAec2fDQdDYGK3ceI=
 chainmaker.org/chainmaker/chainconf/v2 v2.2.0/go.mod h1:jsvECxm/eklOpSCmn8ugktEfZWrrxcHM65W0EPE338s=
+chainmaker.org/chainmaker/chainconf/v2 v2.2.1-0.20220316065957-26b566a12cc6 h1:MfcDb11Z9NIOFvHggvBSawoXmwVdzB4exCm3wk3cYvs=
+chainmaker.org/chainmaker/chainconf/v2 v2.2.1-0.20220316065957-26b566a12cc6/go.mod h1:jsvECxm/eklOpSCmn8ugktEfZWrrxcHM65W0EPE338s=
 chainmaker.org/chainmaker/common/v2 v2.2.0 h1:0uD2pz2Gf1q6TPkM17PnXQ6Jfqrf6iBb4evIk1pikxk=
 chainmaker.org/chainmaker/common/v2 v2.2.0/go.mod h1:NCQFjdcfzhgOM6r4hRjYxelSrrS4fdUsfAHLtTdq23w=
 chainmaker.org/chainmaker/consensus-dpos/v2 v2.2.0 h1:6c/7n56KzK+RjSVDSoJG1faU11zM2x9uzMQ6JTHh9kw=
