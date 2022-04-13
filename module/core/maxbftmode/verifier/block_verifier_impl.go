@@ -9,7 +9,8 @@ package verifier
 import (
 	"encoding/hex"
 	"fmt"
-	"sync"
+
+	chainConfConfig "chainmaker.org/chainmaker/pb-go/v2/config"
 
 	"chainmaker.org/chainmaker-go/module/consensus"
 	"chainmaker.org/chainmaker-go/module/core/common"
@@ -28,6 +29,9 @@ import (
 // BlockVerifierImpl implements BlockVerifier interface.
 // Verify block and transactions.
 //nolint: structcheck,unused
+
+var ModuleNameCore = "Core"
+
 type BlockVerifierImpl struct {
 	chainId         string                   // chain id, to identity this chain
 	msgBus          msgbus.MessageBus        // message bus
@@ -42,7 +46,6 @@ type BlockVerifierImpl struct {
 	ac             protocol.AccessControlProvider // access control manager
 	log            protocol.Logger                // logger
 	txPool         protocol.TxPool                // tx pool to check if tx is duplicate
-	mu             sync.Mutex                     // to avoid concurrent map modify
 	verifierBlock  *common.VerifierBlock
 	storeHelper    conf.StoreHelper
 
@@ -330,6 +333,20 @@ func (v *BlockVerifierImpl) VerifyBlockWithRwSets(block *commonpb.Block,
 	if localconf.ChainMakerConfig.MonitorConfig.Enabled {
 		v.metricBlockVerifyTime.WithLabelValues(v.chainId).Observe(float64(elapsed) / 1000)
 	}
+	return nil
+}
+
+func (v *BlockVerifierImpl) Module() string {
+	return ModuleNameCore
+}
+
+func (v *BlockVerifierImpl) Watch(chainConfig *chainConfConfig.ChainConfig) error {
+	v.chainConf.ChainConfig().Block = chainConfig.Block
+	protocol.ParametersValueMaxLength = chainConfig.Block.TxParameterSize * 1024 * 1024
+	if chainConfig.Block.TxParameterSize <= 0 {
+		protocol.ParametersValueMaxLength = protocol.DefaultParametersValueMaxSize * 1024 * 1024
+	}
+	v.log.Infof("update chainconf,blockverify[%v]", v.chainConf.ChainConfig().Block)
 	return nil
 }
 
