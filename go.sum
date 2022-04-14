@@ -67,8 +67,9 @@ chainmaker.org/chainmaker/vm-wasmer/v2 v2.2.1-0.20220406065233-c3010bf3dfd3 h1:D
 chainmaker.org/chainmaker/vm-wasmer/v2 v2.2.1-0.20220406065233-c3010bf3dfd3/go.mod h1:xK1owhKkrirr7KQYuEvQk3nfqiXEOdGD9MAwZrsXsmk=
 chainmaker.org/chainmaker/vm-wxvm/v2 v2.2.1-0.20220411033255-9fbd24b81561 h1:Mjknd1oX0ckIgQl4l1sZISOEkpZ5wAcyNRHMp5bwivQ=
 chainmaker.org/chainmaker/vm-wxvm/v2 v2.2.1-0.20220411033255-9fbd24b81561/go.mod h1:Mqh2BBMHQ/tqf06uzEj5y7v13sYv7D1k0mdJwcJ4+ik=
-chainmaker.org/chainmaker/vm/v2 v2.2.0 h1:d3aIctuD8PjCb2+8Pxbo1k1WttSpN4Uox/ob5ESwP7k=
 chainmaker.org/chainmaker/vm/v2 v2.2.0/go.mod h1:Nw0qPyC92CfgCEBFZcIbefeFPIGjYjqCuuNVCaBlOTU=
+chainmaker.org/chainmaker/vm/v2 v2.2.1-0.20220413115401-a9b537065fae h1:3YV1b9l+AEW7unuzFaMz7DZSE5t5xW5pkwop8Hf21hA=
+chainmaker.org/chainmaker/vm/v2 v2.2.1-0.20220413115401-a9b537065fae/go.mod h1:Nw0qPyC92CfgCEBFZcIbefeFPIGjYjqCuuNVCaBlOTU=
 cloud.google.com/go v0.31.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.37.0/go.mod h1:TS1dMSSfndXH133OKGwekG838Om/cQT0BUHV3HcBgoo=
