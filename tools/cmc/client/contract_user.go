@@ -373,12 +373,22 @@ func createUserContract() error {
 }
 
 func invokeUserContract() error {
-	client, err := util.CreateChainClient(sdkConfPath, chainId, orgId, userTlsCrtFilePath, userTlsKeyFilePath,
-		userSignCrtFilePath, userSignKeyFilePath)
+	cc, err := sdk.NewChainClient(
+		sdk.WithConfPath(sdkConfPath),
+		sdk.WithChainClientChainId(chainId),
+		sdk.WithChainClientOrgId(orgId),
+		sdk.WithUserCrtFilePath(userTlsCrtFilePath),
+		sdk.WithUserKeyFilePath(userTlsKeyFilePath),
+		sdk.WithUserSignCrtFilePath(userSignCrtFilePath),
+		sdk.WithUserSignKeyFilePath(userSignKeyFilePath),
+	)
 	if err != nil {
 		return err
 	}
-	defer client.Stop()
+	defer cc.Stop()
+	if err := util.DealChainClientCertHash(cc, enableCertHash); err != nil {
+		return err
+	}
 
 	var kvs []*common.KeyValuePair
 	var evmMethod *ethabi.Method
@@ -435,7 +445,7 @@ func invokeUserContract() error {
 		limit = &common.Limit{GasLimit: gasLimit}
 	}
 
-	Dispatch(client, contractName, method, kvs, evmMethod, limit)
+	Dispatch(cc, contractName, method, kvs, evmMethod, limit)
 	return nil
 }
 
