@@ -194,8 +194,8 @@ vm:
   log_in_console: false
   log_level: INFO
   uds_open: false                             # default is unix domain socket connection
-  max_send_msg_size: 10
-  max_recv_msg_size: 10
+  max_send_msg_size: 20
+  max_recv_msg_size: 20
   docker_vm_host: 127.0.0.1
   docker_vm_port: 22359
   max_connection: 1

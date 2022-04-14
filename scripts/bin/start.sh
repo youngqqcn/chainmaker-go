@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # Copyright (C) BABEC. All rights reserved.
 # Copyright (C) THL A29 Limited, a Tencent company. All rights reserved.
@@ -25,29 +26,28 @@ start_docker_vm() {
     log_path=$(pwd)/$log_path
   fi
 
-  chain_id=$(grep "chainId:" $config_file | grep -v "#" | awk -F: '{gsub(/ /, "", $2);print $2}')
-  mkdir -p "$mount_path"/"$chain_id"
-  mkdir -p "$log_path"/"$chain_id"
+  mkdir -p "$mount_path"
+  mkdir -p "$log_path"
 
   echo "start docker vm service container"
   docker run -itd --rm \
     -e ENV_LOG_IN_CONSOLE=false -e ENV_LOG_LEVEL=INFO -e ENV_ENABLE_UDS=true \
-    -v "$mount_path"/"$chain_id":/mount \
-    -v "$log_path"/"$chain_id":/log \
-    --name DOCKERVM-{org_id}-"$chain_id" \
+    -v "$mount_path":/mount \
+    -v "$log_path":/log \
+    --name DOCKERVM-{org_id} \
     --privileged $image_name
 
   retval="$?"
   if [ $retval -ne 0 ]
   then
     echo "trying to remove existing container"
-    docker stop DOCKERVM-{org_id}-$chain_id
-    docker rm DOCKERVM-{org_id}-$chain_id
+    docker stop DOCKERVM-{org_id}
+    docker rm DOCKERVM-{org_id}
     docker run -itd --rm \
       -e ENV_LOG_IN_CONSOLE=false -e ENV_LOG_LEVEL=INFO -e ENV_ENABLE_UDS=true \
-      -v "$mount_path"/"$chain_id":/mount \
-      -v "$log_path"/"$chain_id":/log \
-      --name DOCKERVM-{org_id}-"$chain_id" \
+      -v "$mount_path":/mount \
+      -v "$log_path":/log \
+      --name DOCKERVM-{org_id} \
       --privileged $image_name
   fi
 
