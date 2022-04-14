@@ -198,6 +198,7 @@ rpc:
 
 tx_filter:
   # default(store) 0; bird's nest 1; map 2; 3 sharding bird's nest
+  # 3 is recommended.
   type: 0
   # sharding bird's nest config
   # total keys = sharding.length * sharding.birds_nest.length * sharding.birds_nest.cuckoo.max_num_keys
@@ -212,10 +213,10 @@ tx_filter:
       # 1 Serialization by time interval
       type: 0
       timed:
-        # interval /Second
+        # Time interval in seconds
         interval: 10
       block_height:
-        # interval height interval
+        # Block height interval
         interval: 10
       # Serialization interval in seconds
       serialize_interval: 10
@@ -228,22 +229,29 @@ tx_filter:
       # Transaction filter rules
       rules:
         # Absolute expiration time /second
-        absolute_expire_time: 30000
+        # Based on the number of transactions per day, for example, the current total capacity of blockchain transaction
+        # filters is 100 million, and there are 10 million transaction requests per day.
+        #
+        # total keys = sharding.length * sharding.birds_nest.length * sharding.birds_nest.cuckoo.max_num_keys
+        #
+        # absolute expire time = total keys / number of requests per day
+        absolute_expire_time: 172800
       cuckoo:
-        # 0 Default; 1 TimestampKey
+        # 0 NormalKey; 1 TimestampKey
         key_type: 1
         # num of tags for each bucket, which is b in paper. tag is fingerprint, which is f in paper.
         # If you are using a semi-sorted bucket, the default is 4
-        # 4 is recommended.
-        tags_per_bucket: 4
+        # 2 is recommended.
+        tags_per_bucket: 2
         # num of bits for each item, which is length of tag(fingerprint)
-        bits_per_item: 9
+        # 11 is recommended.
+        bits_per_item: 11
         # keys number
-        max_num_keys: 100
+        max_num_keys: 2000000
         # 0 TableTypeSingle normal single table
         # 1 TableTypePacked packed table, use semi-sort to save 1 bit per item
-        # 1 is recommended
-        table_type: 1
+        # 0 is recommended
+        table_type: 0
   # bird's nest config
   # total keys = birds_nest.length * birds_nest.cuckoo.max_num_keys
   birds_nest:
@@ -255,10 +263,10 @@ tx_filter:
       # 1 Serialization by time interval
       type: 0
       timed:
-        # interval /Second
+        # Time interval in seconds
         interval: 10
       block_height:
-        # interval height interval
+        # Block height interval
         interval: 10
       # Serialization interval in seconds
       serialize_interval: 10
@@ -267,22 +275,29 @@ tx_filter:
     # Transaction filter rules
     rules:
       # Absolute expiration time /second
-      absolute_expire_time: 30000
+      # Based on the number of transactions per day, for example, the current total capacity of blockchain transaction
+      # filters is 100 million, and there are 10 million transaction requests per day.
+      #
+      # total keys = sharding.length * sharding.birds_nest.length * sharding.birds_nest.cuckoo.max_num_keys
+      #
+      # absolute expire time = total keys / number of requests per day
+      absolute_expire_time: 172800
     cuckoo:
-      # 0 Default; 1 TimestampKey
+      # 0 NormalKey; 1 TimestampKey
       key_type: 1
       # num of tags for each bucket, which is b in paper. tag is fingerprint, which is f in paper.
       # If you are using a semi-sorted bucket, the default is 4
-      # 4 is recommended.
-      tags_per_bucket: 4
+      # 2 is recommended.
+      tags_per_bucket: 2
       # num of bits for each item, which is length of tag(fingerprint)
-      bits_per_item: 9
+      # 11 is recommended.
+      bits_per_item: 11
       # keys number
-      max_num_keys: 100
+      max_num_keys: 2000000
       # 0 TableTypeSingle normal single table
       # 1 TableTypePacked packed table, use semi-sort to save 1 bit per item
-      # 1 is recommended
-      table_type: 1
+      # 0 is recommended
+      table_type: 0
 
 # Monitor related settings
 monitor:
