@@ -59,6 +59,9 @@ block:
   # Max transaction count in a block.
   block_tx_capacity: 100
 
+  # Max block size, in MB
+  block_size: 10
+
   # The interval of block proposing attempts
   block_interval: 2000
 
