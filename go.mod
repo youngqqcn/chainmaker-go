@@ -23,7 +23,7 @@ require (
 	chainmaker.org/chainmaker/txpool-batch/v2 v2.2.1-0.20220412134919-c706e3d643ae
 	chainmaker.org/chainmaker/txpool-single/v2 v2.2.1-0.20220412134442-a6ce0410eb52
 	chainmaker.org/chainmaker/utils/v2 v2.2.1-0.20220412131954-cae6ddaf7e38
-	chainmaker.org/chainmaker/vm-docker-go/v2 v2.2.1-0.20220414084249-c533f69bfbc3
+	chainmaker.org/chainmaker/vm-docker-go/v2 v2.2.1-0.20220414141540-3d3153a07c49
 	chainmaker.org/chainmaker/vm-evm/v2 v2.2.0
 	chainmaker.org/chainmaker/vm-gasm/v2 v2.2.1-0.20220406070036-a26208105428
 	chainmaker.org/chainmaker/vm-native/v2 v2.2.0
