@@ -9,6 +9,7 @@
 pid=`ps -ef | grep chainmaker | grep "\-c ../config/{org_id}/chainmaker.yml" | grep -v grep |  awk  '{print $2}'`
 if [ ! -z ${pid} ];then
     kill $pid
+    echo "chainmaker is stopping..."
 fi
 
 # if enable docker vm service and use unix domain socket, stop the running container
@@ -28,4 +29,7 @@ stop_docker_vm() {
 }
 stop_docker_vm
 
+if [ ! -z ${pid} ];then
+    lsof -p $pid +r 1 &>/dev/null
+fi
 echo "chainmaker is stopped"
