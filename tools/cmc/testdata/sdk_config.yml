@@ -17,7 +17,7 @@ chain_client:
   retry_interval: 500
   # 当前签名证书的别名。当设置此配置项时，chain client 对象将自动检查链上是否已添加此别名，如果没有则自动上链此证书别名，
   # 并且后续所有交易都会使用别名，别名可降低交易体大小。若为空则不启用。
-  alias: my_cert_alias
+#  alias: my_cert_alias
 
   nodes:
     - # 节点地址，格式为：IP:端口:连接数
