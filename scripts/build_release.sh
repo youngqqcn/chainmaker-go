@@ -72,6 +72,8 @@ function package() {
         cp $CURRENT_PATH/bin/start.sh     $chainmaker_file/bin
         cp $CURRENT_PATH/bin/stop.sh      $chainmaker_file/bin
         cp $CURRENT_PATH/bin/restart.sh   $chainmaker_file/bin
+        cp $CURRENT_PATH/bin/docker-vm-standalone-start.sh   $chainmaker_file/bin
+        cp $CURRENT_PATH/bin/docker-vm-standalone-stop.sh   $chainmaker_file/bin
         cp $CURRENT_PATH/service/*        $chainmaker_file/bin
         if [ "${system}" = "Linux" ]; then
           cp -r $PROJECT_PATH/main/libwasmer_runtime_c_api.so     $chainmaker_file/lib/libwasmer.so
