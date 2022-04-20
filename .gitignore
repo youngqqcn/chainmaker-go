@@ -10,7 +10,7 @@ module/store/store
 **/*.exe
 **/*.log
 release
-bin
+/bin
 *.log.*
 /config-sql/
 **/crypto-config/
