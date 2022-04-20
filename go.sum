@@ -72,6 +72,8 @@ chainmaker.org/chainmaker/vm-wxvm/v2 v2.2.1-0.20220419133440-aebe765d68a9/go.mod
 chainmaker.org/chainmaker/vm/v2 v2.2.0/go.mod h1:Nw0qPyC92CfgCEBFZcIbefeFPIGjYjqCuuNVCaBlOTU=
 chainmaker.org/chainmaker/vm/v2 v2.2.1-0.20220419134121-0cec3d4951b4 h1:NGvMGQ0ZHAIzqPyBDSIAus8msFdBXTyYvIWoNv4k7Dg=
 chainmaker.org/chainmaker/vm/v2 v2.2.1-0.20220419134121-0cec3d4951b4/go.mod h1:Nw0qPyC92CfgCEBFZcIbefeFPIGjYjqCuuNVCaBlOTU=
+chainmaker.org/chainmaker/vm/v2 v2.2.1-0.20220420083210-be2226ec1453 h1:0f3/RcmVeeL7TcFvrRu8bsN/EwUhbzDjK9mrOVBIkj0=
+chainmaker.org/chainmaker/vm/v2 v2.2.1-0.20220420083210-be2226ec1453/go.mod h1:Nw0qPyC92CfgCEBFZcIbefeFPIGjYjqCuuNVCaBlOTU=
 cloud.google.com/go v0.31.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.37.0/go.mod h1:TS1dMSSfndXH133OKGwekG838Om/cQT0BUHV3HcBgoo=
