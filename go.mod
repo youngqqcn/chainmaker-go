@@ -29,7 +29,7 @@ require (
 	chainmaker.org/chainmaker/vm-native/v2 v2.2.1-0.20220419133707-36c34920029d
 	chainmaker.org/chainmaker/vm-wasmer/v2 v2.2.1-0.20220420035812-45637c3dcd41
 	chainmaker.org/chainmaker/vm-wxvm/v2 v2.2.1-0.20220419133440-aebe765d68a9
-	chainmaker.org/chainmaker/vm/v2 v2.2.1-0.20220420083210-be2226ec1453
+	chainmaker.org/chainmaker/vm/v2 v2.2.1-0.20220420085919-61f9fee2428d
 	code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5
 	github.com/Rican7/retry v0.1.0
 	github.com/Workiva/go-datastructures v1.0.53
