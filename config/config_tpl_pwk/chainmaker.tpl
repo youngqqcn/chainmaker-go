@@ -196,6 +196,7 @@ rpc:
   max_send_msg_size: 10
   max_recv_msg_size: 10
 
+# Transaction filter settings
 tx_filter:
   # default(store) 0; bird's nest 1; map 2; 3 sharding bird's nest
   # 3 is recommended.
@@ -203,7 +204,7 @@ tx_filter:
   # sharding bird's nest config
   # total keys = sharding.length * sharding.birds_nest.length * sharding.birds_nest.cuckoo.max_num_keys
   sharding:
-    # sharding number
+    # sharding size
     length: 5
     # sharding task timeout in seconds
     timeout: 3
@@ -212,14 +213,12 @@ tx_filter:
       # 0 Serialization by height interval
       # 1 Serialization by time interval
       type: 0
-      timed:
-        # Time interval in seconds
-        interval: 10
       block_height:
         # Block height interval
         interval: 10
-      # Serialization interval in seconds
-      serialize_interval: 10
+      timed:
+        # Time interval in seconds
+        interval: 10
       # file path
       path: ../data/{org_id}/tx_filter
     # bird's nest config
@@ -237,8 +236,6 @@ tx_filter:
         # absolute expire time = total keys / number of requests per day
         absolute_expire_time: 172800
       cuckoo:
-        # 0 NormalKey; 1 TimestampKey
-        key_type: 1
         # num of tags for each bucket, which is b in paper. tag is fingerprint, which is f in paper.
         # If you are using a semi-sorted bucket, the default is 4
         # 2 is recommended.
@@ -262,14 +259,12 @@ tx_filter:
       # 0 Serialization by height interval
       # 1 Serialization by time interval
       type: 0
-      timed:
-        # Time interval in seconds
-        interval: 10
       block_height:
         # Block height interval
         interval: 10
-      # Serialization interval in seconds
-      serialize_interval: 10
+      timed:
+        # Time interval in seconds
+        interval: 10
       # file path
       path: ../data/{org_id}/tx_filter
     # Transaction filter rules
@@ -283,8 +278,6 @@ tx_filter:
       # absolute expire time = total keys / number of requests per day
       absolute_expire_time: 172800
     cuckoo:
-      # 0 NormalKey; 1 TimestampKey
-      key_type: 1
       # num of tags for each bucket, which is b in paper. tag is fingerprint, which is f in paper.
       # If you are using a semi-sorted bucket, the default is 4
       # 2 is recommended.
