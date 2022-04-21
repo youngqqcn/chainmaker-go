@@ -12,21 +12,22 @@ CONTAINER_NAME=chainmaker-docker-vm
 IMAGE_NAME="chainmakerofficial/chainmaker-vm-docker-go:v2.2.1"
 
 
-read -r -p "input log path(must be absolute path): " tmp
+read -r -p "input log path(must be absolute path, default:'./log'): " tmp
 if  [ -n "$tmp" ] ;then
-  if  [ ! -d "$tmp" ];then
-    read -r -p "log path does not exist, create it or not(y|n): " need_create
-    if [ "$need_create" == "yes" ] || [ "$need_create" == "y" ]; then
-      mkdir -p "$tmp"
-      if [ $? -ne 0 ]; then
-        echo "create log path failed. exit"
-        exit 1
-      fi
-    else
+  LOG_PATH=$tmp
+fi
+
+if  [ ! -d "$LOG_PATH" ];then
+  read -r -p "log path does not exist, create it or not(y|n): " need_create
+  if [ "$need_create" == "yes" ] || [ "$need_create" == "y" ]; then
+    mkdir -p "$LOG_PATH"
+    if [ $? -ne 0 ]; then
+      echo "create log path failed. exit"
       exit 1
     fi
+  else
+    exit 1
   fi
-  LOG_PATH=$tmp
 fi
 
 read -r -p "input log level(DEBUG|INFO(default)|WARN|ERROR): " tmp
