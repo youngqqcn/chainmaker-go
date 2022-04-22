@@ -157,6 +157,9 @@ func (f *TxFilter) AddsAndSetHeight(txIds []string, height uint64) error {
 	start := time.Now()
 	timestampKeys, _ := bn.ToTimestampKeysAndNormalKeys(txIds)
 	if len(timestampKeys) <= 0 {
+		f.SetHeight(height)
+		f.log.DebugDynamic(filtercommon.LoggingFixLengthFunc("adds and set height, no timestamp keys height: %d",
+			height))
 		return nil
 	}
 	err := f.bn.AddsAndSetHeight(timestampKeys, height)
