@@ -54,8 +54,9 @@ chainmaker.org/chainmaker/txpool-batch/v2 v2.2.1-0.20220412134919-c706e3d643ae/g
 chainmaker.org/chainmaker/txpool-single/v2 v2.2.1-0.20220412134442-a6ce0410eb52 h1:b/3ik4E97c0gRTKefxKZPNkpWqXnMsZ3GjgRSCez+iQ=
 chainmaker.org/chainmaker/txpool-single/v2 v2.2.1-0.20220412134442-a6ce0410eb52/go.mod h1:95sJ3FRy1cjO6VgVp7RBr68z0QIwP9anJwpbyI7CoPI=
 chainmaker.org/chainmaker/utils/v2 v2.2.0/go.mod h1:33RLgBsOf0YSY4/AO/QlCqZbe+FvkDpQzARjPfyH7to=
-chainmaker.org/chainmaker/utils/v2 v2.2.1-0.20220412131954-cae6ddaf7e38 h1:J6xL4shv65uC394BTdlJbT6fAUAqbi6UluhSd/i3kP0=
 chainmaker.org/chainmaker/utils/v2 v2.2.1-0.20220412131954-cae6ddaf7e38/go.mod h1:33RLgBsOf0YSY4/AO/QlCqZbe+FvkDpQzARjPfyH7to=
+chainmaker.org/chainmaker/utils/v2 v2.2.1-0.20220424095434-5dfac15315c0 h1:EcBQotiKNrTdXbIIkETTtO0S8wdjy2l/ryDJRqBI3rg=
+chainmaker.org/chainmaker/utils/v2 v2.2.1-0.20220424095434-5dfac15315c0/go.mod h1:33RLgBsOf0YSY4/AO/QlCqZbe+FvkDpQzARjPfyH7to=
 chainmaker.org/chainmaker/vm-docker-go/v2 v2.2.1-0.20220420120519-675e9e563efa h1:QdbxOGF/+KnWavQY2yCvXRA+i2xeFm/Bv3/Sb6tgKgA=
 chainmaker.org/chainmaker/vm-docker-go/v2 v2.2.1-0.20220420120519-675e9e563efa/go.mod h1:vEUe9bSaVilCk+w88dg5md5UDzIQrpSkNP4FH3BoCss=
 chainmaker.org/chainmaker/vm-evm/v2 v2.2.0 h1:/yCl6Ky0qF1to/CSz4HWRCTUtKdXgmNXXpRPj97fRm4=
@@ -65,8 +66,6 @@ chainmaker.org/chainmaker/vm-gasm/v2 v2.2.1-0.20220420071628-d821471a5697/go.mod
 chainmaker.org/chainmaker/vm-native/v2 v2.2.0/go.mod h1:tTWzhpHDu2GgI9HaDMkt/DMtPSqFM3btG9TyGwUPE8A=
 chainmaker.org/chainmaker/vm-native/v2 v2.2.1-0.20220419133707-36c34920029d h1:eCSCb89rINchQQIgjGIvovF7TpbtP9SV6V+ZS7s3aYI=
 chainmaker.org/chainmaker/vm-native/v2 v2.2.1-0.20220419133707-36c34920029d/go.mod h1:tTWzhpHDu2GgI9HaDMkt/DMtPSqFM3btG9TyGwUPE8A=
-chainmaker.org/chainmaker/vm-wasmer/v2 v2.2.1-0.20220420035812-45637c3dcd41 h1:9j2BBsbrhcVNQbqSLUnFZ3aVk4igGPRpB0ZFX+cxtXU=
-chainmaker.org/chainmaker/vm-wasmer/v2 v2.2.1-0.20220420035812-45637c3dcd41/go.mod h1:xK1owhKkrirr7KQYuEvQk3nfqiXEOdGD9MAwZrsXsmk=
 chainmaker.org/chainmaker/vm-wasmer/v2 v2.2.1-0.20220422072132-005dc71d208e h1:QDvGaNj1ZgBODiUHz8ZSDbYYnw2w9xLUK5loSCFrG9Y=
 chainmaker.org/chainmaker/vm-wasmer/v2 v2.2.1-0.20220422072132-005dc71d208e/go.mod h1:xK1owhKkrirr7KQYuEvQk3nfqiXEOdGD9MAwZrsXsmk=
 chainmaker.org/chainmaker/vm-wxvm/v2 v2.2.1-0.20220419133440-aebe765d68a9 h1:FzUulx4YN2SCb1h6vPCHlyCg8cMl8FuPkenCOVa1JrM=
