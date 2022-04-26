@@ -45,6 +45,10 @@ func (f *TxFilter) ValidateRule(txId string, ruleType ...common.RuleType) error 
 // New transaction filter init
 func New(config *common.ShardingBirdsNestConfig, log protocol.Logger, store protocol.BlockchainStore) (
 	protocol.TxFilter, error) {
+	// Because it is compatible with Normal type, the transaction ID cannot be converted to time transaction ID, so the
+	// database can be queried directly. Therefore, the transaction ID type is fixed as TimestampKey
+	config.Birdsnest.Cuckoo.KeyType = common.KeyType_KTTimestampKey
+
 	initLasts := time.Now()
 	exitC := make(chan struct{})
 	shardingBirdsNest, err := sbn.NewShardingBirdsNest(config, exitC, bn.LruStrategy, sbn.NewModuloSA(int(config.Length)),
@@ -153,6 +157,9 @@ func (f *TxFilter) AddsAndSetHeight(txIds []string, height uint64) error {
 	start := time.Now()
 	timestampKeys, _ := bn.ToTimestampKeysAndNormalKeys(txIds)
 	if len(timestampKeys) <= 0 {
+		f.SetHeight(height)
+		f.log.DebugDynamic(filtercommon.LoggingFixLengthFunc("adds and set height, no timestamp keys height: %d",
+			height))
 		return nil
 	}
 	err := f.bn.AddsAndSetHeight(timestampKeys, height)

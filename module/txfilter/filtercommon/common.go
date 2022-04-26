@@ -45,6 +45,7 @@ func ChaseBlockHeight(store protocol.BlockchainStore, filter protocol.TxFilter, 
 			log.Errorf("chase block add fail, height: %v, keys: %v, error: %v", block.Header.BlockHeight, len(ids), err)
 			return err
 		}
+		log.Infof("chasing block, height: %d", block.Header.BlockHeight)
 	}
 	log.Infof("chase block finish, height: %d, block height: %d, cost: %d", filter.GetHeight(),
 		lastBlock.Header.BlockHeight, time.Since(cost))
