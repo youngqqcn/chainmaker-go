@@ -100,6 +100,8 @@ chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20220422102152-abd9db1336fe h
 chainmaker.org/chainmaker/vm-docker-go/v2 v2.1.1-0.20220422102152-abd9db1336fe/go.mod h1:Af//+3qcr7vvTtLk9EXayFqlifuDDFoG1TmDU0bxQA0=
 chainmaker.org/chainmaker/vm-evm/v2 v2.2.0 h1:/yCl6Ky0qF1to/CSz4HWRCTUtKdXgmNXXpRPj97fRm4=
 chainmaker.org/chainmaker/vm-evm/v2 v2.2.0/go.mod h1:+XcKelJLKHc1H1kX10M8Y8xIkN3VjowgSinqQMVZvFs=
+chainmaker.org/chainmaker/vm-evm/v2 v2.2.1-0.20220426025312-9604ed1ea5a3 h1:RH3CHFLB0W1AT6X6sYisubUVTf3H9KsPwAS7eY3+x84=
+chainmaker.org/chainmaker/vm-evm/v2 v2.2.1-0.20220426025312-9604ed1ea5a3/go.mod h1:+XcKelJLKHc1H1kX10M8Y8xIkN3VjowgSinqQMVZvFs=
 chainmaker.org/chainmaker/vm-gasm/v2 v2.2.1-0.20220406070125-35578d2320b1 h1:NDkDhBa8su5RMmqzKuRIcyc3Ly52DfTXiICGjfJxC/I=
 chainmaker.org/chainmaker/vm-gasm/v2 v2.2.1-0.20220406070125-35578d2320b1/go.mod h1:xSITyc3HuGOSboFfkvuTfrMxeC/erT+BbBH/gM/rAS0=
 chainmaker.org/chainmaker/vm-native/v2 v2.2.0 h1:h9ChgVqRFqEg5wRtdAhXFQf2jL0AJQeiLIMuaochmxk=
