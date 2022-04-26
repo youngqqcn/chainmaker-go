@@ -76,7 +76,7 @@ func createUserContractCMD() *cobra.Command {
 	attachFlags(cmd, []string{
 		flagUserTlsKeyFilePath, flagUserTlsCrtFilePath, flagUserSignKeyFilePath, flagUserSignCrtFilePath,
 		flagSdkConfPath, flagContractName, flagVersion, flagByteCodePath, flagOrgId, flagChainId, flagSendTimes,
-		flagRuntimeType, flagTimeout, flagParams, flagSyncResult, flagEnableCertHash,
+		flagRuntimeType, flagTimeout, flagParams, flagSyncResult, flagEnableCertHash, flagAbiFilePath,
 		flagAdminKeyFilePaths, flagAdminCrtFilePaths, flagAdminOrgIds, flagGasLimit,
 	})
 
@@ -304,7 +304,33 @@ func createUserContract() error {
 			}
 			kvs = util.ConvertParameters(kvsMap)
 		}
-	} else {
+	} else { // EVM contract deploy
+		if abiFilePath == "" {
+			return errors.New("required abi file path when deploy EVM contract")
+		}
+		abiBytes, err := ioutil.ReadFile(abiFilePath)
+		if err != nil {
+			return err
+		}
+
+		contractAbi, err := ethabi.JSON(bytes.NewReader(abiBytes))
+		if err != nil {
+			return err
+		}
+
+		inputData, err := util.Pack(&contractAbi.Constructor, params)
+		if err != nil {
+			return err
+		}
+
+		inputDataHexStr := hex.EncodeToString(inputData)
+		kvs = []*common.KeyValuePair{
+			{
+				Key:   "data",
+				Value: []byte(inputDataHexStr),
+			},
+		}
+
 		byteCode, err := ioutil.ReadFile(byteCodePath)
 		if err != nil {
 			return err
