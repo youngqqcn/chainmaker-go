@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
+	"sync"
 	"time"
 
 	"chainmaker.org/chainmaker-go/module/txfilter/filtercommon"
@@ -28,6 +29,7 @@ type TxFilter struct {
 	bn    *sbn.ShardingBirdsNest
 	store protocol.BlockchainStore
 	exitC chan struct{}
+	l     sync.RWMutex
 }
 
 func (f *TxFilter) ValidateRule(txId string, ruleType ...common.RuleType) error {
@@ -93,7 +95,6 @@ func (f *TxFilter) IsExistsAndReturnHeight(txId string, ruleType ...common.RuleT
 	isExists, err := f.IsExists(txId, ruleType...)
 	if err != nil {
 		return false, 0, err
-
 	}
 	return isExists, f.GetHeight(), nil
 }
@@ -105,7 +106,9 @@ func (f *TxFilter) Add(txId string) error {
 	if err != nil {
 		return nil
 	}
+	f.l.Lock()
 	err = f.bn.Add(key)
+	f.l.Unlock()
 	if err != nil {
 		f.log.Errorf("filter add fail, txid: %v error: %v", txId, err)
 		return err
@@ -121,7 +124,9 @@ func (f *TxFilter) Adds(txIds []string) error {
 	if len(timestampKeys) <= 0 {
 		return nil
 	}
+	f.l.Lock()
 	err := f.bn.Adds(timestampKeys)
+	f.l.Unlock()
 	if err != nil {
 		f.log.Errorf("filter adds fail, ids: %v, error: %v", len(txIds), err)
 		return err
@@ -162,7 +167,9 @@ func (f *TxFilter) AddsAndSetHeight(txIds []string, height uint64) error {
 			height))
 		return nil
 	}
+	f.l.Lock()
 	err := f.bn.AddsAndSetHeight(timestampKeys, height)
+	f.l.Unlock()
 	if err != nil {
 		return err
 	}
@@ -183,6 +190,8 @@ func (f *TxFilter) IsExists(txId string, ruleType ...common.RuleType) (bool, err
 		}
 		return exists, err
 	}
+	f.l.RLock()
+	defer f.l.RUnlock()
 	contains, err := f.bn.Contains(key, ruleType...)
 	if err != nil {
 		f.log.Errorf("filter check exists, query from filter fail, txid: %v, error:%v", txId, err)
