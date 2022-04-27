@@ -16,6 +16,24 @@ config_file="../config/{org_id}/chainmaker.yml"
 start_docker_vm() {
   image_name="chainmakerofficial/chainmaker-vm-docker-go:v2.2.1"
 
+  container_name=DOCKERVM-{org_id}
+  #check container exists
+  exist=$(docker ps -f name="$container_name" --format '{{.Names}}')
+  if [ "$exist" ]; then
+    echo "docker vm service container is already RUNNING, please stop it first."
+    exit 1
+  fi
+
+  exist=$(docker ps -a -f name="$container_name" --format '{{.Names}}')
+  if [ "$exist" ]; then
+    read -r -p "docker vm service container is STOPPED, remove it or not. default: yes (y|n): " need_rm
+    if [ "$need_rm" == "no" ] || [ "$need_rm" == "n" ]; then
+      exit 0
+    else
+      docker rm $container_name
+    fi
+  fi
+
   # concat mount_path and log_path for container to mount
   mount_path=$(grep dockervm_mount_path $config_file | awk -F: '{gsub(/ /, "", $2);print $2}')
   log_path=$(grep dockervm_log_path $config_file | awk -F: '{gsub(/ /, "", $2);print $2}')
@@ -29,26 +47,29 @@ start_docker_vm() {
   mkdir -p "$mount_path"
   mkdir -p "$log_path"
 
+  # env params:
+  # ENV_ENABLE_UDS=false
+  # ENV_USER_NUM=100
+  # ENV_TX_TIME_LIMIT=2
+  # ENV_LOG_LEVEL=INFO
+  # ENV_LOG_IN_CONSOLE=false
+  # ENV_MAX_CONCURRENCY=50
+  # ENV_VM_SERVICE_PORT=22359
+  # ENV_ENABLE_PPROF=
+  # ENV_PPROF_PORT=
   echo "start docker vm service container"
-  docker run -itd --rm \
+  docker run -itd \
     -e ENV_LOG_IN_CONSOLE=false -e ENV_LOG_LEVEL=INFO -e ENV_ENABLE_UDS=true \
+    -e ENV_USER_NUM=5000 -e ENV_MAX_CONCURRENCY=1500 -e ENV_TX_TIME_LIMIT=8 \
     -v "$mount_path":/mount \
     -v "$log_path":/log \
     --name DOCKERVM-{org_id} \
     --privileged $image_name
 
   retval="$?"
-  if [ $retval -ne 0 ]
-  then
-    echo "trying to remove existing container"
-    docker stop DOCKERVM-{org_id}
-    docker rm DOCKERVM-{org_id}
-    docker run -itd --rm \
-      -e ENV_LOG_IN_CONSOLE=false -e ENV_LOG_LEVEL=INFO -e ENV_ENABLE_UDS=true \
-      -v "$mount_path":/mount \
-      -v "$log_path":/log \
-      --name DOCKERVM-{org_id} \
-      --privileged $image_name
+  if [ $retval -ne 0 ]; then
+    echo "Fail to run docker vm."
+    exit 1
   fi
 
   echo "waiting for docker vm container to warm up..."
