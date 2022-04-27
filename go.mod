@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	chainmaker.org/chainmaker/chainconf/v2 v2.2.1-0.20220325075945-eaeb2da74121
-	chainmaker.org/chainmaker/common/v2 v2.2.1-0.20220409112150-0efe8a6b089e
+	chainmaker.org/chainmaker/common/v2 v2.2.1-0.20220419120639-3f11d401538b
 	chainmaker.org/chainmaker/consensus-dpos/v2 v2.2.0
 	chainmaker.org/chainmaker/consensus-maxbft/v2 v2.2.0
 	chainmaker.org/chainmaker/consensus-raft/v2 v2.2.0
@@ -19,7 +19,7 @@ require (
 	chainmaker.org/chainmaker/pb-go/v2 v2.2.1-0.20220330115503-be7240795241
 	chainmaker.org/chainmaker/protocol/v2 v2.2.1-0.20220421030537-42aae0983633
 	chainmaker.org/chainmaker/sdk-go/v2 v2.2.1-0.20220325141922-16692061d611
-	chainmaker.org/chainmaker/store/v2 v2.2.1-0.20220415033929-17d6c3ce04af
+	chainmaker.org/chainmaker/store/v2 v2.2.1-0.20220427123905-d0f00e5b070f
 	chainmaker.org/chainmaker/txpool-batch/v2 v2.2.1-0.20220412135945-39a4de9a04de
 	chainmaker.org/chainmaker/txpool-single/v2 v2.2.1-0.20220412135916-c2ea5f41b52b
 	chainmaker.org/chainmaker/utils/v2 v2.2.1-0.20220424103131-1a84fbfe79a4
@@ -56,6 +56,7 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	github.com/rcrowley/go-metrics v0.0.0-20190826022208-cac0b30c2563
 	github.com/sirupsen/logrus v1.8.1 // indirect
+	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.10.1
