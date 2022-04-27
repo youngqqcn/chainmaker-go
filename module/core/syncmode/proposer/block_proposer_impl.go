@@ -389,8 +389,8 @@ func (bp *BlockProposerImpl) proposing(height uint64, preHash []byte) *commonpb.
 	bp.msgBus.Publish(msgbus.ProposedBlock, &consensuspb.ProposalBlock{Block: newBlock, TxsRwSet: rwSetMap})
 	//bp.log.Debugf("finalized block \n%s", utils.FormatBlock(block))
 	elapsed := utils.CurrentTimeMillisSeconds() - startTick
-	bp.log.Infof("proposer success [%d](txs:%d), fetch(times:%v,fetch:%v,filter:%v,total:%d), time used(begin "+
-		"DB transaction:%v, new snapshort:%v, vm:%v, finalize block:%v,total:%d)",
+	bp.log.Infof("proposer success [%d](txs:%d), fetch(times:%v,fetch:%v,filter:%v,total:%d), time used("+
+		"beginDbTransaction:%v, newSnapshot:%v, vm:%v, finalizeBlock:%v,total:%d)",
 		block.Header.BlockHeight, block.Header.TxCount,
 		totalTimes, fetchLasts, filterValidateLasts, fetchTotalLasts,
 		timeLasts[0], timeLasts[1], timeLasts[2], timeLasts[3], elapsed)
