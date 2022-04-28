@@ -17,7 +17,6 @@ start_docker_vm() {
   image_name="chainmakerofficial/chainmaker-vm-docker-go:v2.2.1"
 
   container_name=DOCKERVM-{org_id}
-
   echo "start docker vm service container: $container_name"
   #check container exists
   exist=$(docker ps -f name="$container_name" --format '{{.Names}}')
