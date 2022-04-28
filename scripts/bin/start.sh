@@ -17,16 +17,19 @@ start_docker_vm() {
   image_name="chainmakerofficial/chainmaker-vm-docker-go:v2.2.1"
 
   container_name=DOCKERVM-{org_id}
+
+  echo "start docker vm service container: $container_name"
   #check container exists
   exist=$(docker ps -f name="$container_name" --format '{{.Names}}')
   if [ "$exist" ]; then
-    echo "docker vm service container is already RUNNING, please stop it first."
+    echo "$container_name already RUNNING, please stop it first."
     exit 1
   fi
 
   exist=$(docker ps -a -f name="$container_name" --format '{{.Names}}')
   if [ "$exist" ]; then
-    read -r -p "docker vm service container is STOPPED, remove it or not. default: yes (y|n): " need_rm
+    echo "$container_name already exists(STOPPED)"
+    read -r -p "remove it and start a new container, default: yes (y|n): " need_rm
     if [ "$need_rm" == "no" ] || [ "$need_rm" == "n" ]; then
       exit 0
     else
@@ -37,6 +40,8 @@ start_docker_vm() {
   # concat mount_path and log_path for container to mount
   mount_path=$(grep dockervm_mount_path $config_file | awk -F: '{gsub(/ /, "", $2);print $2}')
   log_path=$(grep dockervm_log_path $config_file | awk -F: '{gsub(/ /, "", $2);print $2}')
+  log_level=$(grep log_level $config_file | awk -F: '{gsub(/ /, "", $2);print $2}')
+  log_in_console=$(grep log_in_console $config_file | awk -F: '{gsub(/ /, "", $2);print $2}')
   if [[ "${mount_path:0:1}" != "/" ]];then
     mount_path=$(pwd)/$mount_path
   fi
@@ -59,7 +64,7 @@ start_docker_vm() {
   # ENV_PPROF_PORT=
   echo "start docker vm service container"
   docker run -itd \
-    -e ENV_LOG_IN_CONSOLE=false -e ENV_LOG_LEVEL=INFO -e ENV_ENABLE_UDS=true \
+    -e ENV_LOG_IN_CONSOLE="$log_in_console" -e ENV_LOG_LEVEL="$log_level" -e ENV_ENABLE_UDS=true \
     -e ENV_USER_NUM=5000 -e ENV_MAX_CONCURRENCY=1500 -e ENV_TX_TIME_LIMIT=8 \
     -v "$mount_path":/mount \
     -v "$log_path":/log \

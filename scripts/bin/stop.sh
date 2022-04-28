@@ -22,7 +22,7 @@ stop_docker_vm() {
   then
     container_exists=$(docker ps -f name="$container_name" --format '{{.Names}}')
     if [[ $container_exists ]]; then
-      echo "stop docker vm container:"
+      echo "stop docker vm container: $container_name"
       docker stop "$container_name"
     fi
   fi
