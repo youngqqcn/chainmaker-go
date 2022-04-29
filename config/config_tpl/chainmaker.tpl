@@ -478,7 +478,7 @@ storage:
 vm:
   # Enable docker go virtual machine
   enable_dockervm: {enable_dockervm}
-  # Mount point in chain maker
+  # Mount point in chainmaker
   dockervm_mount_path: ../data/{org_id}/docker-go
   # Specify log file path
   dockervm_log_path: ../log/{org_id}/docker-go
