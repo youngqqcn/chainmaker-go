@@ -39,3 +39,6 @@ tools/cmc/testdata/crypto-config-middle-cert/
 tools/cmc/testdata/crypto-config-pk/
 
 test*.txt
+
+module/txfilter/shardingbirdsnest/data/
+module/txfilter/test0/
