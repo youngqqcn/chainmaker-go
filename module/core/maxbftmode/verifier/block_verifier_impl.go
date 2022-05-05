@@ -9,7 +9,6 @@ package verifier
 import (
 	"encoding/hex"
 	"fmt"
-	"sync"
 
 	chainConfConfig "chainmaker.org/chainmaker/pb-go/v2/config"
 
@@ -27,11 +26,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-var ModuleNameCore = "Core"
-
 // BlockVerifierImpl implements BlockVerifier interface.
 // Verify block and transactions.
 //nolint: structcheck,unused
+
+var ModuleNameCore = "Core"
+
 type BlockVerifierImpl struct {
 	chainId         string                   // chain id, to identity this chain
 	msgBus          msgbus.MessageBus        // message bus
@@ -46,7 +46,6 @@ type BlockVerifierImpl struct {
 	ac             protocol.AccessControlProvider // access control manager
 	log            protocol.Logger                // logger
 	txPool         protocol.TxPool                // tx pool to check if tx is duplicate
-	mu             sync.Mutex                     // to avoid concurrent map modify
 	verifierBlock  *common.VerifierBlock
 	storeHelper    conf.StoreHelper
 
@@ -337,6 +336,20 @@ func (v *BlockVerifierImpl) VerifyBlockWithRwSets(block *commonpb.Block,
 	return nil
 }
 
+func (v *BlockVerifierImpl) Module() string {
+	return ModuleNameCore
+}
+
+func (v *BlockVerifierImpl) Watch(chainConfig *chainConfConfig.ChainConfig) error {
+	v.chainConf.ChainConfig().Block = chainConfig.Block
+	protocol.ParametersValueMaxLength = chainConfig.Block.TxParameterSize * 1024 * 1024
+	if chainConfig.Block.TxParameterSize <= 0 {
+		protocol.ParametersValueMaxLength = protocol.DefaultParametersValueMaxSize * 1024 * 1024
+	}
+	v.log.Infof("update chainconf,blockverify[%v]", v.chainConf.ChainConfig().Block)
+	return nil
+}
+
 func (v *BlockVerifierImpl) validateBlock(block, lastBlock *commonpb.Block, mode protocol.VerifyMode) (
 	map[string]*commonpb.TxRWSet, map[string][]*commonpb.ContractEvent, map[string]int64, error) {
 	hashType := v.chainConf.ChainConfig().Crypto.Hash
@@ -463,18 +476,4 @@ func (v *BlockVerifierImpl) cutBlocks(blocksToCut []*commonpb.Block, blockToKeep
 	if len(cutTxs) > 0 {
 		v.txPool.RetryAndRemoveTxs(cutTxs, nil)
 	}
-}
-
-func (v *BlockVerifierImpl) Module() string {
-	return ModuleNameCore
-}
-
-func (v *BlockVerifierImpl) Watch(chainConfig *chainConfConfig.ChainConfig) error {
-	v.chainConf.ChainConfig().Block = chainConfig.Block
-	protocol.ParametersValueMaxLength = chainConfig.Block.TxParameterSize * 1024 * 1024
-	if chainConfig.Block.TxParameterSize <= 0 {
-		protocol.ParametersValueMaxLength = protocol.DefaultParametersValueMaxSize * 1024 * 1024
-	}
-	v.log.Infof("update chainconf,blockverify[%v]", v.chainConf.ChainConfig().Block)
-	return nil
 }

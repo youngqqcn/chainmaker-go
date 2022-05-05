@@ -22,12 +22,12 @@ go get chainmaker.org/chainmaker/consensus-dpos/v2@${BRANCH}
 go get chainmaker.org/chainmaker/consensus-raft/v2@${BRANCH}
 go get chainmaker.org/chainmaker/consensus-solo/v2@${BRANCH}
 go get chainmaker.org/chainmaker/consensus-tbft/v2@${V221}
-go get chainmaker.org/chainmaker/consensus-utils/v2@${BRANCH}
-go get chainmaker.org/chainmaker/localconf/v2@${BRANCH}
-go get chainmaker.org/chainmaker/logger/v2@${BRANCH}
-go get chainmaker.org/chainmaker/net-common@${NET_VERSION}
-go get chainmaker.org/chainmaker/net-libp2p@v1.1.1_qc
-go get chainmaker.org/chainmaker/net-liquid@v1.0.0
+go get chainmaker.org/chainmaker/consensus-utils/v2@${V221}
+go get chainmaker.org/chainmaker/localconf/v2@${V221}
+go get chainmaker.org/chainmaker/logger/v2@${V221}
+go get chainmaker.org/chainmaker/net-common@v1.1.1
+go get chainmaker.org/chainmaker/net-libp2p@v1.1.1
+go get chainmaker.org/chainmaker/net-liquid@v1.0.2
 go get chainmaker.org/chainmaker/pb-go/v2@${V221}
 go get chainmaker.org/chainmaker/protocol/v2@${V221}
 go get chainmaker.org/chainmaker/sdk-go/v2@${V221}
@@ -38,10 +38,10 @@ go get chainmaker.org/chainmaker/utils/v2@${V221}
 go get chainmaker.org/chainmaker/vm-docker-go/v2@${V221}
 go get chainmaker.org/chainmaker/vm-evm/v2@${BRANCH}
 go get chainmaker.org/chainmaker/vm-gasm/v2@${BRANCH}
-go get chainmaker.org/chainmaker/vm-native/v2@${BRANCH}
+go get chainmaker.org/chainmaker/vm-native/v2@${V221}
 go get chainmaker.org/chainmaker/vm-wasmer/v2@${BRANCH}
 go get chainmaker.org/chainmaker/vm-wxvm/v2@${BRANCH}
-go get chainmaker.org/chainmaker/vm/v2@${BRANCH}
+go get chainmaker.org/chainmaker/vm/v2@${V221}
 
 go mod tidy
 
