@@ -63,6 +63,7 @@ type BlockVerifierConfig struct {
 	ChainConf       protocol.ChainConf
 	AC              protocol.AccessControlProvider
 	TxPool          protocol.TxPool
+	TxFilter        protocol.TxFilter
 	VmMgr           protocol.VmManager
 	StoreHelper     conf.StoreHelper
 }
@@ -98,6 +99,7 @@ func NewBlockVerifier(config BlockVerifierConfig, log protocol.Logger) (protocol
 		VmMgr:           config.VmMgr,
 		StoreHelper:     config.StoreHelper,
 		TxScheduler:     config.TxScheduler,
+		TxFilter:        config.TxFilter,
 	}
 	v.verifierBlock = common.NewVerifierBlock(conf)
 
