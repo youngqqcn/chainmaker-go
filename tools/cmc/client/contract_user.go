@@ -725,11 +725,6 @@ func freezeOrUnfreezeOrRevokeUserContract(which int) error {
 		whichOperation string
 	)
 
-	if !ethcmn.IsHexAddress(contractName) {
-		contractName = util.CalcEvmContractName(contractName)
-	}
-	fmt.Printf("EVM contract name in hex: %s\n", contractName)
-
 	switch which {
 	case 1:
 		payload, err = client.CreateContractFreezePayload(contractName)
