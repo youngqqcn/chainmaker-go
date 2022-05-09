@@ -362,6 +362,7 @@ func (acs *accessControlService) createDefaultResourcePolicy(localOrgId string) 
 		syscontract.ChainConfigFunction_PERMISSION_DELETE.String(), policyConfig)
 	acs.resourceNamePolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
 		syscontract.ChainConfigFunction_ALTER_ADDR_TYPE.String(), policyConfig)
+	// add majority permission for gas enable/disable config under cert mode
 	acs.resourceNamePolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
 		syscontract.ChainConfigFunction_ENABLE_OR_DISABLE_GAS.String(), policyConfig)
 
@@ -534,6 +535,7 @@ func (acs *accessControlService) createDefaultResourcePolicyForPK(localOrgId str
 		syscontract.ChainConfigFunction_PERMISSION_DELETE.String(), policyConfig)
 	acs.resourceNamePolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
 		syscontract.ChainConfigFunction_ALTER_ADDR_TYPE.String(), policyConfig)
+	// add majority permission for gas enable/disable config under pwk mode
 	acs.resourceNamePolicyMap.Store(syscontract.SystemContract_CHAIN_CONFIG.String()+"-"+
 		syscontract.ChainConfigFunction_ENABLE_OR_DISABLE_GAS.String(), policyConfig)
 
