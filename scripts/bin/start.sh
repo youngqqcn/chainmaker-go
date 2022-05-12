@@ -31,7 +31,7 @@ start_docker_vm() {
   if [ "$exist" ]; then
     echo "$container_name already exists(STOPPED)"
     if [[ "$FORCE_CLEAN" == "-f" ]] || [ "$FORCE_CLEAN" == "force" ] || [ "$FORCE_CLEAN" == "-y" ]; then
-      echo "remove it"
+      echo "remove it:"
       docker rm $container_name
     else
       read -r -p "remove it and start a new container, default: yes (y|n): " need_rm
