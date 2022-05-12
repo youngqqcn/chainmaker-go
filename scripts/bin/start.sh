@@ -69,7 +69,7 @@ start_docker_vm() {
   # ENV_VM_SERVICE_PORT=22359
   # ENV_ENABLE_PPROF=
   # ENV_PPROF_PORT=
-  echo "start docker vm service container"
+  echo "start docker vm service container:"
   docker run -itd \
     -e ENV_LOG_IN_CONSOLE="$log_in_console" -e ENV_LOG_LEVEL="$log_level" -e ENV_ENABLE_UDS=true \
     -e ENV_USER_NUM=1000 -e ENV_MAX_CONCURRENCY=100 -e ENV_TX_TIME_LIMIT=8 \
