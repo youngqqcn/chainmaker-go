@@ -11,6 +11,7 @@ export PATH=$(dirname $PWD)/lib:$PATH
 export WASMER_BACKTRACE=1
 config_file="../config/{org_id}/chainmaker.yml"
 
+# if clean existed container(can be -y/-f/force)
 FORCE_CLEAN=$1
 
 # if enable docker vm service and use unix domain socket, run a vm docker container
