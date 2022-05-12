@@ -9,6 +9,7 @@
 export LD_LIBRARY_PATH=$(dirname $PWD)/lib:$LD_LIBRARY_PATH
 export PATH=$(dirname $PWD)/lib:$PATH
 export WASMER_BACKTRACE=1
+
 config_file="../config/{org_id}/chainmaker.yml"
 
 # if clean existed container(can be -y/-f/force)
