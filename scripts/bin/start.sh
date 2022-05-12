@@ -11,6 +11,7 @@ export PATH=$(dirname $PWD)/lib:$PATH
 export WASMER_BACKTRACE=1
 config_file="../config/{org_id}/chainmaker.yml"
 
+FORCE_CLEAN=$1
 
 # if enable docker vm service and use unix domain socket, run a vm docker container
 start_docker_vm() {
@@ -28,11 +29,16 @@ start_docker_vm() {
   exist=$(docker ps -a -f name="$container_name" --format '{{.Names}}')
   if [ "$exist" ]; then
     echo "$container_name already exists(STOPPED)"
-    read -r -p "remove it and start a new container, default: yes (y|n): " need_rm
-    if [ "$need_rm" == "no" ] || [ "$need_rm" == "n" ]; then
-      exit 0
-    else
+    if [[ "$FORCE_CLEAN" == "-f" ]] || [ "$FORCE_CLEAN" == "force" ] || [ "$FORCE_CLEAN" == "-y" ]; then
+      echo "remove it"
       docker rm $container_name
+    else
+      read -r -p "remove it and start a new container, default: yes (y|n): " need_rm
+      if [ "$need_rm" == "no" ] || [ "$need_rm" == "n" ]; then
+        exit 0
+      else
+        docker rm $container_name
+      fi
     fi
   fi
 

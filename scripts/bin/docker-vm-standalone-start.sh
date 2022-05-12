@@ -6,10 +6,30 @@
 #
 
 LOG_PATH=$(pwd)/log
+MOUNT_PATH=$(pwd)/docker-go
 LOG_LEVEL=INFO
 EXPOSE_PORT=22351
 CONTAINER_NAME=chainmaker-docker-vm
 IMAGE_NAME="chainmakerofficial/chainmaker-vm-docker-go:v2.2.1"
+
+
+read -r -p "input path to cache contract files(must be absolute path, default:'./docker-go'): " tmp
+if  [ -n "$tmp" ] ;then
+  MOUNT_PATH=$tmp
+fi
+
+if  [ ! -d "$MOUNT_PATH" ];then
+  read -r -p "contracts path does not exist, create it or not(y|n): " need_create
+  if [ "$need_create" == "yes" ] || [ "$need_create" == "y" ]; then
+    mkdir -p "$MOUNT_PATH"
+    if [ $? -ne 0 ]; then
+      echo "create contracts path failed. exit"
+      exit 1
+    fi
+  else
+    exit 1
+  fi
+fi
 
 
 read -r -p "input log path(must be absolute path, default:'./log'): " tmp
