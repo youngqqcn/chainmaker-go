@@ -6,4 +6,4 @@
 #
 
 ./stop.sh
-./start.sh
+./start.sh -f

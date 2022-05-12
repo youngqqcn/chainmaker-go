@@ -9,8 +9,11 @@
 export LD_LIBRARY_PATH=$(dirname $PWD)/lib:$LD_LIBRARY_PATH
 export PATH=$(dirname $PWD)/lib:$PATH
 export WASMER_BACKTRACE=1
+
 config_file="../config/{org_id}/chainmaker.yml"
 
+# if clean existed container(can be -y/-f/force)
+FORCE_CLEAN=$1
 
 # if enable docker vm service and use unix domain socket, run a vm docker container
 start_docker_vm() {
@@ -28,11 +31,16 @@ start_docker_vm() {
   exist=$(docker ps -a -f name="$container_name" --format '{{.Names}}')
   if [ "$exist" ]; then
     echo "$container_name already exists(STOPPED)"
-    read -r -p "remove it and start a new container, default: yes (y|n): " need_rm
-    if [ "$need_rm" == "no" ] || [ "$need_rm" == "n" ]; then
-      exit 0
-    else
+    if [[ "$FORCE_CLEAN" == "-f" ]] || [ "$FORCE_CLEAN" == "force" ] || [ "$FORCE_CLEAN" == "-y" ]; then
+      echo "remove it:"
       docker rm $container_name
+    else
+      read -r -p "remove it and start a new container, default: yes (y|n): " need_rm
+      if [ "$need_rm" == "no" ] || [ "$need_rm" == "n" ]; then
+        exit 0
+      else
+        docker rm $container_name
+      fi
     fi
   fi
 
@@ -61,7 +69,7 @@ start_docker_vm() {
   # ENV_VM_SERVICE_PORT=22359
   # ENV_ENABLE_PPROF=
   # ENV_PPROF_PORT=
-  echo "start docker vm service container"
+  echo "start docker vm service container:"
   docker run -itd \
     -e ENV_LOG_IN_CONSOLE="$log_in_console" -e ENV_LOG_LEVEL="$log_level" -e ENV_ENABLE_UDS=true \
     -e ENV_USER_NUM=1000 -e ENV_MAX_CONCURRENCY=100 -e ENV_TX_TIME_LIMIT=8 \
