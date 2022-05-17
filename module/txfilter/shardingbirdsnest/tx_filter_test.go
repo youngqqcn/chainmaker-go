@@ -1,5 +1,7 @@
 /*
-   Created by guoxin in 2022/3/27 1:57 PM
+Copyright (C) BABEC. All rights reserved.
+
+SPDX-License-Identifier: Apache-2.0
 */
 package shardingbirdsnest
 
