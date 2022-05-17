@@ -101,4 +101,17 @@ debug:
   is_cli_open: true
   is_http_open: false
 
+vm:
+  enable_dockervm: false
+  dockervm_mount_path: ../data/org5/docker-go     # mount point in chain maker
+  dockervm_log_path: ../log/org5/dockervm
+  log_in_console: false
+  log_level: INFO
+  uds_open: false                             # default is unix domain socket connection
+  max_send_msg_size: 10
+  max_recv_msg_size: 10
+  docker_vm_host: 127.0.0.1
+  docker_vm_port: 22359
+  max_connection: 1
+
 

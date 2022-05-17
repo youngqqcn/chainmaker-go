@@ -25,6 +25,7 @@ const (
 type Provider func(
 	nodeId string,
 	chainId string,
+	txFilter protocol.TxFilter,
 	blockStore protocol.BlockchainStore,
 	msgBus msgbus.MessageBus,
 	conf protocol.ChainConf,

@@ -1,4 +1,23 @@
+/*
+Copyright (C) BABEC. All rights reserved.
+
+SPDX-License-Identifier: Apache-2.0
+*/
+
 package common
+
+import (
+	"reflect"
+	"testing"
+
+	bn "chainmaker.org/chainmaker/common/v2/birdsnest"
+	"chainmaker.org/chainmaker/pb-go/v2/common"
+
+	"chainmaker.org/chainmaker/protocol/v2"
+	"chainmaker.org/chainmaker/protocol/v2/mock"
+	"chainmaker.org/chainmaker/utils/v2"
+	"github.com/golang/mock/gomock"
+)
 
 //
 //import (
@@ -104,3 +123,70 @@ package common
 //	}
 //	return NewVerifierTx(verifyTxConf), block
 //}
+
+func TestValidateTxRules(t *testing.T) {
+	var txs []*common.Transaction
+	for i := 0; i < 100; i++ {
+		txs = append(txs, &common.Transaction{
+			Payload: &common.Payload{
+				TxId: utils.GetTimestampTxId(),
+			},
+		})
+	}
+	type args struct {
+		filter protocol.TxFilter
+		txs    []*common.Transaction
+	}
+	tests := []struct {
+		name          string
+		args          args
+		wantRemoveTxs []*common.Transaction
+		wantRemainTxs []*common.Transaction
+	}{
+		{
+			name: "正常流",
+			args: args{
+				filter: func() protocol.TxFilter {
+					filter := mock.NewMockTxFilter(gomock.NewController(t))
+					filter.EXPECT().ValidateRule(gomock.Any(), gomock.Any()).AnyTimes().DoAndReturn(func(txId string, ruleType ...common.RuleType) error {
+						if []byte(txId)[63]%2 == 1 {
+							return nil
+						}
+						return bn.ErrKeyTimeIsNotInTheFilterRange
+					})
+					return filter
+				}(),
+				txs: txs,
+			},
+			wantRemoveTxs: func() []*common.Transaction {
+				var arr []*common.Transaction
+				for _, tx := range txs {
+					if []byte(tx.Payload.TxId)[63]%2 == 0 {
+						arr = append(arr, tx)
+					}
+				}
+				return arr
+			}(),
+			wantRemainTxs: func() []*common.Transaction {
+				var arr []*common.Transaction
+				for _, tx := range txs {
+					if []byte(tx.Payload.TxId)[63]%2 == 1 {
+						arr = append(arr, tx)
+					}
+				}
+				return arr
+			}(),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotRemoveTxs, gotRemainTxs := ValidateTxRules(tt.args.filter, tt.args.txs)
+			if !reflect.DeepEqual(gotRemoveTxs, tt.wantRemoveTxs) {
+				t.Errorf("ValidateTxRules() gotRemoveTxs = %v, want %v", gotRemoveTxs, tt.wantRemoveTxs)
+			}
+			if !reflect.DeepEqual(gotRemainTxs, tt.wantRemainTxs) {
+				t.Errorf("ValidateTxRules() gotRemainTxs = %v, want %v", gotRemainTxs, tt.wantRemainTxs)
+			}
+		})
+	}
+}

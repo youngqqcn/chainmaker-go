@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # Copyright (C) BABEC. All rights reserved.
 # Copyright (C) THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,17 +9,27 @@
 pid=`ps -ef | grep chainmaker | grep "\-c ../config/{org_id}/chainmaker.yml" | grep -v grep |  awk  '{print $2}'`
 if [ ! -z ${pid} ];then
     kill $pid
+    echo "chainmaker is stopping..."
 fi
 
-enable_dockervm=`grep 'enable_dockervm:' ../config/{org_id}/chainmaker.yml | awk '{print $2}'`
-if [ ${enable_dockervm} == "true" ];then
-  docker_go_container_name=`grep 'dockervm_container_name:' ../config/{org_id}/chainmaker.yml | tail -n1 | awk '{print $2}'`
-  docker_container_lists=(`docker ps -a | grep ${docker_go_container_name} | awk '{print $1}'`)
-  for container_id in ${docker_container_lists[*]}
-  do
-    docker stop ${container_id}
-    docker rm ${container_id}
-  done
-fi
+# if enable docker vm service and use unix domain socket, stop the running container
+stop_docker_vm() {
+  config_file="../config/{org_id}/chainmaker.yml"
+  enable_docker_vm=$(grep enable_dockervm $config_file | awk -F: '{gsub(/ /, "", $2);print $2}')
+  enable_uds=$(grep uds_open $config_file | awk -F: '{gsub(/ /, "", $2);print $2}')
+  container_name=DOCKERVM-{org_id}
+  if [[ $enable_docker_vm = "true" && $enable_uds = "true" ]]
+  then
+    container_exists=$(docker ps -f name="$container_name" --format '{{.Names}}')
+    if [[ $container_exists ]]; then
+      echo "stop docker vm container: $container_name"
+      docker stop "$container_name"
+    fi
+  fi
+}
+stop_docker_vm
 
+if [ ! -z ${pid} ];then
+    lsof -p $pid +r 1 &>/dev/null
+fi
 echo "chainmaker is stopped"

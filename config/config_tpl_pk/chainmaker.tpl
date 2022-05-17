@@ -190,6 +190,102 @@ rpc:
   max_send_msg_size: 10
   max_recv_msg_size: 10
 
+# Transaction filter settings
+tx_filter:
+  # default(store) 0; bird's nest 1; map 2; 3 sharding bird's nest
+  # 3 is recommended.
+  type: 0
+  # sharding bird's nest config
+  # total keys = sharding.length * sharding.birds_nest.length * sharding.birds_nest.cuckoo.max_num_keys
+  sharding:
+    # sharding size
+    length: 5
+    # sharding task timeout in seconds
+    timeout: 3
+    snapshot:
+      # serialize type
+      # 0 Serialization by height interval
+      # 1 Serialization by time interval
+      type: 0
+      block_height:
+        # Block height interval
+        interval: 10
+      timed:
+        # Time interval in seconds
+        interval: 10
+      # file path
+      path: ../data/{org_id}/tx_filter
+    # bird's nest config
+    birds_nest:
+      # bird's nest size
+      length: 10
+      # Transaction filter rules
+      rules:
+        # Absolute expiration time /second
+        # Based on the number of transactions per day, for example, the current total capacity of blockchain transaction
+        # filters is 100 million, and there are 10 million transaction requests per day.
+        #
+        # total keys = sharding.length * sharding.birds_nest.length * sharding.birds_nest.cuckoo.max_num_keys
+        #
+        # absolute expire time = total keys / number of requests per day
+        absolute_expire_time: 172800
+      cuckoo:
+        # num of tags for each bucket, which is b in paper. tag is fingerprint, which is f in paper.
+        # If you are using a semi-sorted bucket, the default is 4
+        # 2 is recommended.
+        tags_per_bucket: 2
+        # num of bits for each item, which is length of tag(fingerprint)
+        # 11 is recommended.
+        bits_per_item: 11
+        # keys number
+        max_num_keys: 2000000
+        # 0 TableTypeSingle normal single table
+        # 1 TableTypePacked packed table, use semi-sort to save 1 bit per item
+        # 0 is recommended
+        table_type: 0
+  # bird's nest config
+  # total keys = birds_nest.length * birds_nest.cuckoo.max_num_keys
+  birds_nest:
+    # bird's nest size
+    length: 10
+    snapshot:
+      # serialize type
+      # 0 Serialization by height interval
+      # 1 Serialization by time interval
+      type: 0
+      block_height:
+        # Block height interval
+        interval: 10
+      timed:
+        # Time interval in seconds
+        interval: 10
+      # file path
+      path: ../data/{org_id}/tx_filter
+    # Transaction filter rules
+    rules:
+      # Absolute expiration time /second
+      # Based on the number of transactions per day, for example, the current total capacity of blockchain transaction
+      # filters is 100 million, and there are 10 million transaction requests per day.
+      #
+      # total keys = sharding.length * sharding.birds_nest.length * sharding.birds_nest.cuckoo.max_num_keys
+      #
+      # absolute expire time = total keys / number of requests per day
+      absolute_expire_time: 172800
+    cuckoo:
+      # num of tags for each bucket, which is b in paper. tag is fingerprint, which is f in paper.
+      # If you are using a semi-sorted bucket, the default is 4
+      # 2 is recommended.
+      tags_per_bucket: 2
+      # num of bits for each item, which is length of tag(fingerprint)
+      # 11 is recommended.
+      bits_per_item: 11
+      # keys number
+      max_num_keys: 2000000
+      # 0 TableTypeSingle normal single table
+      # 1 TableTypePacked packed table, use semi-sort to save 1 bit per item
+      # 0 is recommended
+      table_type: 0
+
 # Monitor related settings
 monitor:
   # Monitor service switch, default is false.
@@ -257,10 +353,28 @@ storage:
   # file size of .fdb, MB, default: 20
   logdb_segment_size: 128
 
+  # bigfilter config
+  enable_bigfilter: false    #default false
+  bigfilter_config:
+    redis_hosts_port: "127.0.0.1:6300,127.0.0.1:6301"   #redis host:port
+    redis_password: abcpass  #redis password
+    tx_capacity: 1000000000   #support max transaction capacity
+    fp_rate: 0.000000001      #false postive rate
+
+  # RWC config
+  enable_rwc: true   #default false
+
+  # suggest
+  # if block_tx_capacity < 10000,
+  # set rolling_window_cache_capacity greater than block_tx_capacity*1.1 and less than block_tx_capacity*2
+  # if block_tx_capacity > 10000,  set rolling_window_cache_capacity 20000
+  rolling_window_cache_capacity: 200
+
   # Symmetric encryption key:16 bytes key
   # If pkcs11 is enabled, it is the keyID
   # encrypt_key: "1234567890123456"
   write_block_type: 0  # 0普通写模式，1快速写模式
+  disable_state_cache: false # default false
   state_cache_config:
     life_window: 3000000000000   #key/value ttl 时间，单位 ns
     clean_window: 1000000000
@@ -346,8 +460,6 @@ storage:
 vm:
   # Enable docker go virtual machine
   enable_dockervm: {enable_dockervm}
-  # Docker go virtual machine container name
-  dockervm_container_name: {dockervm_container_name}
   # Mount point in chain maker
   dockervm_mount_path: ../data/{org_id}/docker-go
   # Specify log file path
@@ -358,13 +470,13 @@ vm:
   log_level: INFO
   # Unix domain socket open, used for chainmaker and docker manager communication
   uds_open: true
-  # Number of user Ids
-  user_num: 1000
-  # Timeout per transaction, Unit: second
-  time_limit: 8
-  # Max process for contract
-  max_concurrency: 500
+  # docker vm contract service host, default 127.0.0.1
+  docker_vm_host: 127.0.0.1
+  # docker vm contract service port, default 22351
+  docker_vm_port: {docker_vm_port}
   # Grpc max send message size, Default size is 4, Unit: MB
-  max_send_msg_size: 10
+  max_send_msg_size: 20
   # Grpc max receive message size, Default size is 4, Unit: MB
-  max_recv_msg_size: 10
+  max_recv_msg_size: 20
+  # max number of connection created to connect docker vm service
+  max_connection: 5

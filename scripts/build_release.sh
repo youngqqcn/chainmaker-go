@@ -15,7 +15,7 @@ RELEASE_PATH=${PROJECT_PATH}/build/release
 BACKUP_PATH=${PROJECT_PATH}/build/backup
 BUILD_CRYPTO_CONFIG_PATH=${BUILD_PATH}/crypto-config
 BUILD_CONFIG_PATH=${BUILD_PATH}/config
-VERSION=v2.2.0
+VERSION=v2.2.1
 DATETIME=$(date "+%Y%m%d%H%M%S")
 PLATFORM=$(uname -m)
 system=$(uname)
@@ -72,6 +72,8 @@ function package() {
         cp $CURRENT_PATH/bin/start.sh     $chainmaker_file/bin
         cp $CURRENT_PATH/bin/stop.sh      $chainmaker_file/bin
         cp $CURRENT_PATH/bin/restart.sh   $chainmaker_file/bin
+        cp $CURRENT_PATH/bin/docker-vm-standalone-start.sh   $chainmaker_file/bin
+        cp $CURRENT_PATH/bin/docker-vm-standalone-stop.sh   $chainmaker_file/bin
         cp $CURRENT_PATH/service/*        $chainmaker_file/bin
         if [ "${system}" = "Linux" ]; then
           cp -r $PROJECT_PATH/main/libwasmer_runtime_c_api.so     $chainmaker_file/lib/libwasmer.so

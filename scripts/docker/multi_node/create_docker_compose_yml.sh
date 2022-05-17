@@ -4,7 +4,7 @@ RPC_PORT=$2
 NODE_COUNT=$3
 CONFIG_DIR=$4
 SERVER_COUNT=$5
-IMAGE="chainmakerofficial/chainmaker:v2.2.0"
+IMAGE="chainmakerofficial/chainmaker:v2.2.1"
 
 CURRENT_PATH=$(pwd)
 CONFIG_FILE="docker-compose"
