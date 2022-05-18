@@ -13,8 +13,8 @@ chainmaker.org/chainmaker/consensus-raft/v2 v2.2.0 h1:7/hSH6Qxx8v2witzqbwhh//1Zy
 chainmaker.org/chainmaker/consensus-raft/v2 v2.2.0/go.mod h1:yyX6EpMLf+tnRStVnP2u9aHtmMZinYwPUSXfFX68RtM=
 chainmaker.org/chainmaker/consensus-solo/v2 v2.2.0 h1:PyfNFPnGB0vR9B4AwflKfnbQ68/MBoA1tu8OOcJdt6U=
 chainmaker.org/chainmaker/consensus-solo/v2 v2.2.0/go.mod h1:cUVRSA0r+bIZa6x1VNoufR1mrgNQT6VjNNo4cu1ZQg0=
-chainmaker.org/chainmaker/consensus-tbft/v2 v2.2.1 h1:AxIA0ZnZMdoQ6KOdhcioPxPG0MmWdsdl3JxLIi0f3vM=
-chainmaker.org/chainmaker/consensus-tbft/v2 v2.2.1/go.mod h1:SgWwmFxQaKDmQ2Vu5Kim0bbEiiu/pHO9mt1EXNQ8EFs=
+chainmaker.org/chainmaker/consensus-tbft/v2 v2.2.1 h1:VIP46BrayTqQeI/UtjM1UcWnibxew5TbxK0kOT7XP+0=
+chainmaker.org/chainmaker/consensus-tbft/v2 v2.2.1/go.mod h1:CdydW95iOHOvIMzqal8X2F6TI/kCxW3RQW29vomvGJs=
 chainmaker.org/chainmaker/consensus-utils/v2 v2.2.0/go.mod h1:m4gpyPfhdDX4kk9fwVZJN98o/N2XU9kcYb9CHjELSt0=
 chainmaker.org/chainmaker/consensus-utils/v2 v2.2.1 h1:AFV1htdOaSNl1DIFH0OCNg0Y3Ga6icCo1wxkpgD7Hm8=
 chainmaker.org/chainmaker/consensus-utils/v2 v2.2.1/go.mod h1:p/evb+E2eE1yMHAHuU8IP2+asSMsKRSmmWGhhm6MFVo=
@@ -28,8 +28,8 @@ chainmaker.org/chainmaker/localconf/v2 v2.2.1/go.mod h1:j0X1gJkeZy0X9djepkKKSafR
 chainmaker.org/chainmaker/logger/v2 v2.2.0/go.mod h1:fux32ogSRS2qKD9m52uE5jW3ngpgyV02Yd4Zed8/n38=
 chainmaker.org/chainmaker/logger/v2 v2.2.1 h1:FDmnqUyg1OhJBCLvPJ2I1k1ww30hOEQm+YL1n0zGAGg=
 chainmaker.org/chainmaker/logger/v2 v2.2.1/go.mod h1:S3pJIY3aOVTyNC2//EIgT+nGF9mfB71R2E1b5NYp+VQ=
-chainmaker.org/chainmaker/lws v1.0.0 h1:5K16mJ1LRXDxiP1c5u5hQ5SkCm1hOM73ewqeZDCpVQ4=
-chainmaker.org/chainmaker/lws v1.0.0/go.mod h1:H4kO5vkCy50+67S2Jv6NXH4DYFOW0W5QEnvyQa+H86E=
+chainmaker.org/chainmaker/lws v0.0.0-20220330115225-c69ad75c8a23 h1:/2l9Hyg028+QcaU99MzQj9oAvC6O/iV9e6edvdCaPW8=
+chainmaker.org/chainmaker/lws v0.0.0-20220330115225-c69ad75c8a23/go.mod h1:800sINwctofxTkC2le9ZcROQug28Or/B4/I/130KDE4=
 chainmaker.org/chainmaker/net-common v1.1.1 h1:RgpKbUGjYYOay2L9sOuERF8kegO7I1qoT0pfTzLXIqE=
 chainmaker.org/chainmaker/net-common v1.1.1/go.mod h1:Y5CPhBtTBv22ya9mQfGt2YU05OKGf+hK9rtVqe8fPP0=
 chainmaker.org/chainmaker/net-libp2p v1.1.2 h1:sCEwfvIf+kUGimcfsg1yyOrZcYWyOdOQjwJ7WN1hiQc=
