@@ -42,3 +42,4 @@ test*.txt
 
 module/txfilter/shardingbirdsnest/data/
 module/txfilter/test0/
+tools/chainmaker-cryptogen

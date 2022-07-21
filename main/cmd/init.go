@@ -26,6 +26,7 @@ var rebuildChainId string
 func initLocalConfig(cmd *cobra.Command) {
 	if err := localconf.InitLocalConfig(cmd); err != nil {
 		fmt.Println(err)
+		fmt.Println("======1======")
 		os.Exit(0)
 	}
 }

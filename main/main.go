@@ -24,5 +24,6 @@ func main() {
 	err := mainCmd.Execute()
 	if err != nil {
 		fmt.Println(err)
+		fmt.Println("=========555========")
 	}
 }
